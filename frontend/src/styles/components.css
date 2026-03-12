@@ -1,0 +1,257 @@
+/* Score Ring */
+.score-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-ring svg {
+  transform: rotate(-90deg);
+}
+
+.score-ring .score-track {
+  fill: none;
+  stroke: #1E2030;
+  stroke-width: 6;
+}
+
+.score-ring .score-fill {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease-out;
+}
+
+.score-ring .score-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+}
+
+/* Severity Badges */
+.severity-critical {
+  background: rgba(255, 59, 92, 0.12);
+  color: #FF3B5C;
+  border: 1px solid rgba(255, 59, 92, 0.25);
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.severity-high {
+  background: rgba(255, 135, 59, 0.12);
+  color: #FF873B;
+  border: 1px solid rgba(255, 135, 59, 0.25);
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.severity-medium {
+  background: rgba(255, 176, 32, 0.12);
+  color: #FFB020;
+  border: 1px solid rgba(255, 176, 32, 0.25);
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.severity-low {
+  background: rgba(0, 196, 140, 0.12);
+  color: #00C48C;
+  border: 1px solid rgba(0, 196, 140, 0.25);
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.severity-info {
+  background: rgba(0, 229, 255, 0.12);
+  color: #00E5FF;
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Confidence Meter */
+.confidence-meter {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+}
+
+.confidence-meter .bar {
+  width: 4px;
+  border-radius: 1px;
+  background: #1E2030;
+  transition: background 0.3s;
+}
+
+.confidence-meter .bar.filled {
+  background: #00E5FF;
+}
+
+/* Copyable Field */
+.copyable-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(22, 24, 34, 0.8);
+  border: 1px solid #1E2030;
+  border-radius: 0.375rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  color: #E8EAED;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyable-field:hover {
+  border-color: rgba(122, 68, 228, 0.3);
+  background: rgba(22, 24, 34, 1);
+}
+
+.copyable-field .copy-icon {
+  color: #5A6173;
+  transition: color 0.2s;
+}
+
+.copyable-field:hover .copy-icon {
+  color: #9AA0AD;
+}
+
+/* Feed Status */
+.feed-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+}
+
+.feed-status .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.feed-status.active .dot { background: #00C48C; }
+.feed-status.paused .dot { background: #FFB020; }
+.feed-status.error .dot { background: #FF3B5C; }
+.feed-status.inactive .dot { background: #5A6173; }
+
+/* Premium Badge */
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1px 8px;
+  background: linear-gradient(135deg, rgba(122, 68, 228, 0.15), rgba(0, 229, 255, 0.15));
+  border: 1px solid rgba(122, 68, 228, 0.3);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #9B6BF7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Progress Bar */
+.progress-bar {
+  height: 4px;
+  background: #1E2030;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar .progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7A44E4, #00E5FF);
+  transition: width 0.5s ease-out;
+}
+
+/* Toggle Switch */
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background: #1E2030;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle.active {
+  background: #7A44E4;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggle.active::after {
+  transform: translateX(18px);
+}
+
+/* Drawer */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -480px;
+  width: 480px;
+  height: 100vh;
+  z-index: 60;
+  transition: right 0.3s ease-out;
+}
+
+.drawer.open {
+  right: 0;
+}
+
+/* Map marker pulse */
+.map-marker {
+  width: 10px;
+  height: 10px;
+  background: #FF3B5C;
+  border-radius: 50%;
+  position: relative;
+}
+
+.map-marker::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 59, 92, 0.4);
+  animation: threatPulse 2s ease-in-out infinite;
+}

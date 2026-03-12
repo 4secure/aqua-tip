@@ -1,0 +1,85 @@
+/* Glassmorphism Cards & Surfaces */
+
+.glass-card {
+  background: rgba(15, 17, 23, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(30, 32, 48, 0.8);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(122, 68, 228, 0.3);
+  box-shadow: 0 0 20px rgba(122, 68, 228, 0.05);
+}
+
+.glass-card-static {
+  background: rgba(15, 17, 23, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(30, 32, 48, 0.8);
+  border-radius: 1rem;
+}
+
+.glass-surface {
+  background: rgba(22, 24, 34, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 32, 48, 0.5);
+  border-radius: 0.75rem;
+}
+
+.glass-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 17, 23, 0.9) 0%,
+    rgba(22, 24, 34, 0.7) 100%
+  );
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(30, 32, 48, 0.8);
+}
+
+/* Gradient border cards */
+.gradient-border {
+  position: relative;
+  background: #0F1117;
+  border-radius: 1rem;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 1rem;
+  padding: 1px;
+  background: linear-gradient(135deg, #7A44E4, #00E5FF);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Subtle glow effects */
+.glow-violet {
+  box-shadow: 0 0 30px rgba(122, 68, 228, 0.15),
+              0 0 60px rgba(122, 68, 228, 0.05);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.15),
+              0 0 60px rgba(0, 229, 255, 0.05);
+}
+
+.glow-red {
+  box-shadow: 0 0 30px rgba(255, 59, 92, 0.15),
+              0 0 60px rgba(255, 59, 92, 0.05);
+}
+
+/* Overlay backdrop */
+.overlay-backdrop {
+  background: rgba(10, 11, 16, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

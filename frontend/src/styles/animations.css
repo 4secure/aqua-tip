@@ -1,0 +1,149 @@
+/* Pulse & Glow Animations */
+
+@keyframes threatPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.threat-pulse {
+  position: relative;
+}
+
+.threat-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: threatPulse 2s ease-in-out infinite;
+}
+
+/* Skeleton loading */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #161822 25%,
+    #1E2030 50%,
+    #161822 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+.skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-text-sm {
+  height: 0.75rem;
+  margin-bottom: 0.375rem;
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+/* Live dot */
+@keyframes liveDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: liveDot 1.5s ease-in-out infinite;
+}
+
+.live-dot-green {
+  background: #00C48C;
+  box-shadow: 0 0 8px rgba(0, 196, 140, 0.5);
+}
+
+.live-dot-red {
+  background: #FF3B5C;
+  box-shadow: 0 0 8px rgba(255, 59, 92, 0.5);
+}
+
+.live-dot-amber {
+  background: #FFB020;
+  box-shadow: 0 0 8px rgba(255, 176, 32, 0.5);
+}
+
+/* Count-up animation */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.count-up {
+  animation: countUp 0.5s ease-out forwards;
+}
+
+/* Grid background */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(122, 68, 228, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 68, 228, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Animated gradient line */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient-line {
+  height: 2px;
+  background: linear-gradient(90deg, #7A44E4, #00E5FF, #7A44E4);
+  background-size: 200% auto;
+  animation: gradientMove 3s linear infinite;
+}
+
+/* Stagger children animation */
+.stagger-in > * {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: countUp 0.4s ease-out forwards;
+}
+
+.stagger-in > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-in > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-in > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-in > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-in > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-in > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-in > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-in > *:nth-child(8) { animation-delay: 0.4s; }
