@@ -18,8 +18,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **AUTH-01**: User can sign up with email and password (bcrypt hashed)
 - [x] **AUTH-02**: User can log in with email and password
-- [ ] **AUTH-03**: User can sign in with Google OAuth via Socialite
-- [ ] **AUTH-04**: User can sign in with GitHub OAuth via Socialite
+- [x] **AUTH-03**: User can sign in with Google OAuth via Socialite
+- [x] **AUTH-04**: User can sign in with GitHub OAuth via Socialite
 - [x] **AUTH-05**: User receives email verification link after signup and must verify before accessing protected routes
 - [x] **AUTH-06**: User session persists across browser refresh (cookie-based, 7-day expiry)
 - [x] **AUTH-07**: User can log out and session is destroyed server-side
@@ -89,8 +89,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-04 | Phase 1 | Complete |
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
-| AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Complete |
+| AUTH-04 | Phase 2 | Complete |
 | AUTH-05 | Phase 2 | Complete |
 | AUTH-06 | Phase 1 | Complete |
 | AUTH-07 | Phase 1 | Complete |
