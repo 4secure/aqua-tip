@@ -20,11 +20,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AUTH-02**: User can log in with email and password
 - [ ] **AUTH-03**: User can sign in with Google OAuth via Socialite
 - [ ] **AUTH-04**: User can sign in with GitHub OAuth via Socialite
-- [ ] **AUTH-05**: User receives email verification link after signup and must verify before accessing protected routes
+- [x] **AUTH-05**: User receives email verification link after signup and must verify before accessing protected routes
 - [x] **AUTH-06**: User session persists across browser refresh (cookie-based, 7-day expiry)
 - [x] **AUTH-07**: User can log out and session is destroyed server-side
 - [x] **AUTH-08**: Password strength enforced: minimum 8 characters, mixed case + number
-- [ ] **AUTH-09**: User can reset password via email link
+- [x] **AUTH-09**: User can reset password via email link
 
 ### Rate Limiting
 
@@ -91,11 +91,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 2 | Pending |
 | AUTH-04 | Phase 2 | Pending |
-| AUTH-05 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Complete |
 | AUTH-06 | Phase 1 | Complete |
 | AUTH-07 | Phase 1 | Complete |
 | AUTH-08 | Phase 1 | Complete |
-| AUTH-09 | Phase 2 | Pending |
+| AUTH-09 | Phase 2 | Complete |
 | RATE-01 | Phase 3 | Pending |
 | RATE-02 | Phase 3 | Pending |
 | RATE-03 | Phase 3 | Pending |
@@ -117,4 +117,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-12 after 01-01-PLAN.md completion*
+*Last updated: 2026-03-12 after 02-01-PLAN.md completion*

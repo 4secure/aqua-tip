@@ -48,7 +48,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Email verification + password reset controllers, form requests, SPA URL customization, verified middleware enforcement
+- [x] 02-01-PLAN.md — Email verification + password reset controllers, form requests, SPA URL customization, verified middleware enforcement
 - [ ] 02-02-PLAN.md — Comprehensive Pest tests for OAuth, email verification, and password reset flows
 
 ### Phase 3: Rate Limiting Backend
@@ -103,7 +103,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Laravel Foundation + Core Auth | 2/2 | Complete | 2026-03-12 |
-| 2. OAuth + Email Verification | 0/2 | Not started | - |
+| 2. OAuth + Email Verification | 1/2 | In progress | - |
 | 3. Rate Limiting Backend | 0/1 | Not started | - |
 | 4. Frontend Auth Integration | 0/3 | Not started | - |
 | 5. Rate Limit UI + IOC Search Wiring | 0/1 | Not started | - |
