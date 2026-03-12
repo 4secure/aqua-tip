@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,6 +22,8 @@ class RegisterController extends Controller
             'email' => $request->email,
             'password' => $request->password,
         ]);
+
+        event(new Registered($user));
 
         Auth::login($user);
 
