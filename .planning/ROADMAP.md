@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Laravel Foundation + Core Auth** - Laravel 12 backend with Sanctum SPA auth, email/password registration and login
 - [ ] **Phase 2: OAuth + Email Verification** - Google and GitHub OAuth via Socialite, email verification flow, password reset
 - [ ] **Phase 3: Rate Limiting Backend** - Dual-key rate limiting on IOC search endpoint (IP for guests, user ID for authenticated)
-- [ ] **Phase 4: Frontend Auth Integration** - Auth context, login/signup pages, route protection, themed auth UI
+- [x] **Phase 4: Frontend Auth Integration** - Auth context, login/signup pages, route protection, themed auth UI (completed 2026-03-13)
 - [ ] **Phase 5: Rate Limit UI + IOC Search Wiring** - IOC search connected to backend, rate limit feedback and upgrade CTAs
 
 ## Phase Details
@@ -106,5 +106,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Laravel Foundation + Core Auth | 2/2 | Complete | 2026-03-12 |
 | 2. OAuth + Email Verification | 1/2 | In progress | - |
 | 3. Rate Limiting Backend | 0/2 | Not started | - |
-| 4. Frontend Auth Integration | 1/3 | In Progress|  |
+| 4. Frontend Auth Integration | 3/3 | Complete   | 2026-03-13 |
 | 5. Rate Limit UI + IOC Search Wiring | 0/1 | Not started | - |
