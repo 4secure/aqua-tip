@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: OAuth + Email Verification** - Google and GitHub OAuth via Socialite, email verification flow, password reset
 - [ ] **Phase 3: Rate Limiting Backend** - Dual-key rate limiting on IOC search endpoint (IP for guests, user ID for authenticated)
 - [x] **Phase 4: Frontend Auth Integration** - Auth context, login/signup pages, route protection, themed auth UI (completed 2026-03-13)
-- [ ] **Phase 04.1: Layout Redesign** - Sidebar, Topbar, and AppLayout overhaul with collapsible sidebar, auth-aware nav, mobile responsive (INSERTED)
+- [x] **Phase 04.1: Layout Redesign** - Sidebar, Topbar, and AppLayout overhaul with collapsible sidebar, auth-aware nav, mobile responsive (INSERTED) (completed 2026-03-13)
 - [ ] **Phase 5: Rate Limit UI + IOC Search Wiring** - IOC search connected to backend, rate limit feedback and upgrade CTAs
 
 ## Phase Details
