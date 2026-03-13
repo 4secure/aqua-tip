@@ -49,4 +49,9 @@ return [
         'redirect' => env('APP_URL') . '/api/auth/google/callback',
     ],
 
+    'dark_web' => [
+        'api_key' => env('DARK_WEB_API_KEY'),
+        'base_url' => env('DARK_WEB_API_URL', 'https://leakcheck.io/api/v2'),
+    ],
+
 ];

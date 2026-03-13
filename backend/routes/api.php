@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Auth\VerifyEmailCodeController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Credit\CreditStatusController;
+use App\Http\Controllers\DarkWeb\SearchController as DarkWebSearchController;
 use App\Http\Controllers\Ioc\SearchController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/onboarding', OnboardingController::class);
     Route::get('/user', UserController::class);
     Route::post('/logout', LogoutController::class);
+
+    // Dark web search (authenticated + credit-gated)
+    Route::post('/dark-web/search', DarkWebSearchController::class)->middleware('deduct-credit');
 });
 
 // IOC search (guests + authenticated users, credit-gated)
