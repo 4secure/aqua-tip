@@ -23,17 +23,17 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 ### v1.1 PostgreSQL Migration & Railway Deployment
 
-- [ ] Phase 6: PostgreSQL Migration
+- [x] Phase 6: PostgreSQL Migration (completed 2026-03-13)
 - [ ] Phase 7: Railway Production Deployment
 
 #### Phase 6: PostgreSQL Migration
 **Goal:** Replace MySQL with PostgreSQL — all migrations, configs, and tests working on PostgreSQL locally.
 **Requirements:** DB-01, DB-02, DB-03, DB-04
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 06-01-PLAN.md — Switch config to PostgreSQL and remove MySQL-specific migration syntax
-- [ ] 06-02-PLAN.md — Create PostgreSQL database, run migrations, validate tests and local dev
+- [x] 06-01-PLAN.md — Switch config to PostgreSQL and remove MySQL-specific migration syntax
+- [x] 06-02-PLAN.md — Create PostgreSQL database, run migrations, validate tests and local dev
 
 **Success criteria:**
 1. `DB_CONNECTION=pgsql` in `.env` with PostgreSQL driver configured
@@ -61,5 +61,5 @@ Plans:
 | 4. Frontend Auth Integration | v1.0 | 3/3 | Complete | 2026-03-13 |
 | 4.1. Layout Redesign | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 5. Dark Web Search | v1.0 | 2/2 | Complete | 2026-03-13 |
-| 6. PostgreSQL Migration | v1.1 | 0/2 | Planned | — |
+| 6. PostgreSQL Migration | v1.1 | 2/2 | Complete | 2026-03-14 |
 | 7. Railway Production Deployment | v1.1 | 0/0 | Pending | — |

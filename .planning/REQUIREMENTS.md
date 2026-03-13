@@ -11,8 +11,8 @@ Requirements for PostgreSQL migration and Railway deployment.
 
 - [x] **DB-01**: All MySQL-specific syntax in migrations replaced with PostgreSQL-compatible equivalents
 - [x] **DB-02**: Laravel `DB_CONNECTION` switched to `pgsql` with PostgreSQL driver configured
-- [ ] **DB-03**: All 44+ existing Pest tests pass against PostgreSQL
-- [ ] **DB-04**: Local development works with PostgreSQL
+- [x] **DB-03**: All 44+ existing Pest tests pass against PostgreSQL
+- [x] **DB-04**: Local development works with PostgreSQL
 
 ### Deployment
 
@@ -49,8 +49,8 @@ Deferred to future milestones.
 |-------------|-------|--------|
 | DB-01 | Phase 6 | Complete |
 | DB-02 | Phase 6 | Complete |
-| DB-03 | Phase 6 | Pending |
-| DB-04 | Phase 6 | Pending |
+| DB-03 | Phase 6 | Complete |
+| DB-04 | Phase 6 | Complete |
 | DEPLOY-01 | Phase 7 | Pending |
 | DEPLOY-02 | Phase 7 | Pending |
 | DEPLOY-03 | Phase 7 | Pending |
