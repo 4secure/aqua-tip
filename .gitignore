@@ -22,3 +22,7 @@ Thumbs.db
 
 # Playwright MCP
 .playwright-mcp/
+
+# Local only
+.planning/
+.claude/
