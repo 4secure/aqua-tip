@@ -72,12 +72,12 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
         <div className="h-[60px] flex items-center gap-3 px-5 border-b border-border/50 shrink-0">
           <img
             src="/logo.png"
-            alt="AquaSecure"
+            alt="Aqua-Tip"
             className="w-8 h-8 rounded-lg object-contain shrink-0"
           />
           {showLabels && (
             <div className="min-w-0">
-              <div className="font-display font-bold text-base text-text-primary tracking-tight">AquaSecure</div>
+              <div className="font-display font-bold text-base text-text-primary tracking-tight">Aqua-Tip</div>
               <div className="text-[10px] text-text-muted tracking-wider uppercase">Threat Intel Platform</div>
             </div>
           )}
@@ -93,7 +93,7 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
                 return (
                   <button
                     key={item.href}
-                    onClick={() => navigate('/login')}
+                    onClick={() => navigate('/login', { state: { success: 'Log in to access all features' } })}
                     className="flex items-center gap-3 px-4 py-2 text-sm rounded-lg mx-2 transition-all duration-200 text-text-muted/50 opacity-40 hover:opacity-60 w-[calc(100%-16px)]"
                   >
                     <span className="w-5 h-5 flex items-center justify-center shrink-0">
@@ -158,18 +158,27 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
               </button>
 
               {settingsOpen && showLabels && (
-                <NavLink
-                  to="/settings"
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 pl-12 pr-4 py-2 text-sm rounded-lg mx-2 transition-all duration-200 ${
-                      isActive
-                        ? 'bg-violet/10 text-violet-light border border-violet/20'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
-                    }`
-                  }
-                >
-                  Profile Management
-                </NavLink>
+                <>
+                  <NavLink
+                    to="/settings"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 pl-12 pr-4 py-2 text-sm rounded-lg mx-2 transition-all duration-200 ${
+                        isActive
+                          ? 'bg-violet/10 text-violet-light border border-violet/20'
+                          : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
+                      }`
+                    }
+                  >
+                    Profile Management
+                  </NavLink>
+                  <button
+                    onClick={() => { logout(); navigate('/'); }}
+                    className="flex items-center gap-3 pl-12 pr-4 py-2 text-sm rounded-lg mx-2 transition-all duration-200 text-text-secondary hover:text-red hover:bg-surface-2 w-[calc(100%-16px)]"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </>
               )}
             </div>
           )}

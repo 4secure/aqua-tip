@@ -24,19 +24,11 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
-            <>
-              <Link
-                to="/dashboard"
-                className="font-display text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-              >
-                Dashboard
-              </Link>
-              <Link to="/dashboard">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet to-cyan flex items-center justify-center text-xs font-bold text-white">
-                  {userInitials}
-                </div>
-              </Link>
-            </>
+            <Link to="/ip-search">
+              <GradientButton size="sm">
+                Threat Lookup <ArrowRight className="w-3.5 h-3.5" />
+              </GradientButton>
+            </Link>
           ) : (
             <>
               <Link
