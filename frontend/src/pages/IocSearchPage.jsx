@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { IOC_RELATIONS, IP_REPORT } from '../data/mock-data';
 import { Icon } from '../data/icons';
+import { CreditBadge } from '../components/shared/CreditBadge';
+import { fetchCredits } from '../api/dark-web';
 
 function D3Graph() {
   const containerRef = useRef(null);
@@ -80,6 +82,13 @@ const TABS = ['summary', 'relations', 'sandbox', 'osint', 'raw'];
 
 export default function IocSearchPage() {
   const [activeTab, setActiveTab] = useState('summary');
+  const [credits, setCredits] = useState({ remaining: 0, limit: 0 });
+
+  useEffect(() => {
+    fetchCredits()
+      .then((data) => setCredits(data))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -105,6 +114,7 @@ export default function IocSearchPage() {
             </div>
           </div>
           <button className="btn-primary px-8">Search</button>
+          <CreditBadge remaining={credits.remaining} limit={credits.limit} />
         </div>
       </div>
 
