@@ -48,7 +48,7 @@
   }
 
   .main-content {
-    @apply flex-1 ml-[260px] pt-[60px] p-6;
+    @apply flex-1 pt-[60px] p-6 transition-all duration-300;
   }
 
   .section-title {

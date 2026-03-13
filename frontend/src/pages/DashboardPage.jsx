@@ -171,7 +171,7 @@ export default function DashboardPage() {
         <h3 className="section-title">Quick Actions</h3>
         <div className="flex gap-3">
           <Link to="/cti" className="btn-primary flex items-center gap-2"><Icon name="search" />IP Lookup</Link>
-          <Link to="/ioc-search" className="btn-secondary flex items-center gap-2"><Icon name="fingerprint" />IOC Search</Link>
+          <Link to="/ip-search" className="btn-secondary flex items-center gap-2"><Icon name="fingerprint" />IP Search</Link>
           <Link to="/vuln-scanner" className="btn-secondary flex items-center gap-2"><Icon name="shield" />Scan Target</Link>
           <Link to="/feeds" className="btn-secondary flex items-center gap-2"><Icon name="rss" />Manage Feeds</Link>
           <Link to="/threat-map" className="btn-secondary flex items-center gap-2"><Icon name="globe" />Threat Map</Link>
