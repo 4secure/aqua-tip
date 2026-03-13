@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-13T01:34:08.592Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-13T01:58:47.331Z"
 last_activity: 2026-03-12 -- Completed 02-02-PLAN.md
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
   percent: 40
 ---
 
@@ -51,6 +51,7 @@ Progress: [████░░░░░░] 40%
 - Trend: improving
 
 *Updated after each plan completion*
+| Phase 03 P01 | 7min | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ Recent decisions affecting current work:
 - No auto-login after password reset (user decision)
 - OAuth users blocked from password reset with provider-specific error message
 - Added email_verified_at to User fillable array (was silently dropped during OAuth user creation)
+- [Phase 03]: Race-safe credit deduction via atomic UPDATE WHERE remaining > 0
+- [Phase 03]: Lazy midnight-UTC reset on access instead of scheduled reset for all rows
+- [Phase 03]: Guest credits keyed by IP with user_id=null; auth credits by user_id unique constraint
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T01:34:08.589Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-rate-limiting-backend/03-CONTEXT.md
+Last session: 2026-03-13T01:58:47.328Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None

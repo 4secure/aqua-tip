@@ -28,9 +28,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Rate Limiting
 
-- [ ] **RATE-01**: Guest users (not signed in) limited to 1 IOC lookup per day, keyed by IP address
-- [ ] **RATE-02**: Signed-in users limited to 10 IOC lookups per day, keyed by user ID
-- [ ] **RATE-03**: Rate limit counters reset at midnight UTC
+- [x] **RATE-01**: Guest users (not signed in) limited to 1 IOC lookup per day, keyed by IP address
+- [x] **RATE-02**: Signed-in users limited to 10 IOC lookups per day, keyed by user ID
+- [x] **RATE-03**: Rate limit counters reset at midnight UTC
 - [ ] **RATE-04**: When guest hits rate limit, show "Sign in for more lookups" upgrade CTA
 - [ ] **RATE-05**: When signed-in user hits rate limit, show "Daily limit reached" message
 
@@ -96,9 +96,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-07 | Phase 1 | Complete |
 | AUTH-08 | Phase 1 | Complete |
 | AUTH-09 | Phase 2 | Complete |
-| RATE-01 | Phase 3 | Pending |
-| RATE-02 | Phase 3 | Pending |
-| RATE-03 | Phase 3 | Pending |
+| RATE-01 | Phase 3 | Complete |
+| RATE-02 | Phase 3 | Complete |
+| RATE-03 | Phase 3 | Complete |
 | RATE-04 | Phase 5 | Pending |
 | RATE-05 | Phase 5 | Pending |
 | FEND-01 | Phase 4 | Pending |
