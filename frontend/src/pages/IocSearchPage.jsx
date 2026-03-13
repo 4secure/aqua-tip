@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { LogIn, Clock } from 'lucide-react';
 import { IOC_RELATIONS, IP_REPORT } from '../data/mock-data';
 import { Icon } from '../data/icons';
 import { CreditBadge } from '../components/shared/CreditBadge';
 import { fetchCredits } from '../api/dark-web';
+import { useAuth } from '../contexts/AuthContext';
 
 function D3Graph() {
   const containerRef = useRef(null);
@@ -82,13 +85,16 @@ const TABS = ['summary', 'relations', 'sandbox', 'osint', 'raw'];
 
 export default function IocSearchPage() {
   const [activeTab, setActiveTab] = useState('summary');
-  const [credits, setCredits] = useState({ remaining: 0, limit: 0 });
+  const [credits, setCredits] = useState({ remaining: 0, limit: 0, is_guest: false, resets_at: null });
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     fetchCredits()
       .then((data) => setCredits(data))
       .catch(() => {});
   }, []);
+
+  const isExhausted = credits.remaining === 0 && credits.limit > 0;
 
   return (
     <div className="space-y-6">
@@ -113,9 +119,28 @@ export default function IocSearchPage() {
               <span className="chip-red">IP Detected</span>
             </div>
           </div>
-          <button className="btn-primary px-8">Search</button>
+          <button className="btn-primary px-8" disabled={isExhausted}>Search</button>
           <CreditBadge remaining={credits.remaining} limit={credits.limit} />
         </div>
+        {isExhausted && !isAuthenticated && (
+          <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-violet/10 border border-violet/20">
+            <LogIn size={16} className="text-violet shrink-0" />
+            <span className="text-sm font-mono text-text-secondary">
+              You've used your free lookup.{' '}
+              <Link to="/login" className="text-violet hover:text-violet-light underline underline-offset-2">
+                Sign in for more lookups
+              </Link>
+            </span>
+          </div>
+        )}
+        {isExhausted && isAuthenticated && (
+          <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-amber/10 border border-amber/20">
+            <Clock size={16} className="text-amber shrink-0" />
+            <span className="text-sm font-mono text-text-secondary">
+              Daily limit reached. Your credits reset at 00:00 UTC.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Results Summary */}

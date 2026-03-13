@@ -18,6 +18,7 @@ class CreditStatusController extends Controller
             'remaining' => $credit->remaining,
             'limit' => $credit->limit,
             'resets_at' => now('UTC')->addDay()->startOfDay()->toIso8601String(),
+            'is_guest' => $request->user() === null,
         ]);
     }
 
