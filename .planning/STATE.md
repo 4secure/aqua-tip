@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 04.1-02-PLAN.md Tasks 1-2, awaiting human-verify checkpoint
-last_updated: "2026-03-13T16:07:01.927Z"
-last_activity: 2026-03-13 -- Completed 04.1-02-PLAN.md (Tasks 1-2, Task 3 awaiting human-verify)
+status: phase_complete
+stopped_at: Completed 04.1-02-PLAN.md (all tasks, checkpoint approved)
+last_updated: "2026-03-13T16:17:55.029Z"
+last_activity: 2026-03-13 -- Completed 04.1-02-PLAN.md (all tasks, checkpoint approved)
 progress:
   total_phases: 6
   completed_phases: 5
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 ## Current Position
 
 Phase: 4.1 of 5 (Layout Redesign - Sidebar, Topbar, AppLayout Overhaul)
-Plan: 2 of 2 in current phase (awaiting checkpoint verification)
-Status: In progress
-Last activity: 2026-03-13 -- Completed 04.1-02-PLAN.md (Tasks 1-2, Task 3 awaiting human-verify)
+Plan: 2 of 2 in current phase (complete)
+Status: Phase complete
+Last activity: 2026-03-13 -- Completed 04.1-02-PLAN.md (all tasks, checkpoint approved)
 
 Progress: [██████████] 100%
 
@@ -57,7 +57,7 @@ Progress: [██████████] 100%
 | Phase 04 P02 | 3min | 2 tasks | 13 files |
 | Phase 04 P03 | 15min | 3 tasks | 9 files |
 | Phase 04.1 P01 | 2min | 2 tasks | 8 files |
-| Phase 04.1 P02 | 3min | 2 tasks | 6 files |
+| Phase 04.1 P02 | 6min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -94,6 +94,10 @@ Recent decisions affecting current work:
 - [Phase 04.1]: Alias import IpSearchPage from IocSearchPage.jsx (file rename deferred)
 - [Phase 04.1]: New placeholder pages use lazy imports for code splitting
 - [Phase 04.1]: Glassmorphism sidebar via inline rgba+backdrop-blur for precise opacity control
+- [Phase 04.1]: Sidebar branding renamed from AquaSecure to Aqua-Tip
+- [Phase 04.1]: Logout added to Settings submenu for redundant access alongside topbar dropdown
+- [Phase 04.1]: Locked nav items pass message via navigation state to /login
+- [Phase 04.1]: LandingPage authenticated state shows Threat Lookup button
 
 ### Roadmap Evolution
 
@@ -111,6 +115,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T16:07:01.923Z
-Stopped at: Completed 04.1-02-PLAN.md Tasks 1-2, awaiting human-verify checkpoint
+Last session: 2026-03-13T16:18:00.000Z
+Stopped at: Completed 04.1-02-PLAN.md (all tasks, phase 04.1 complete)
 Resume file: None
