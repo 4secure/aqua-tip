@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { GradientButton } from '../components/ui/GradientButton';
 import ParticleBackground from '../components/ui/ParticleBackground';
 import SocialAuthButtons from '../components/auth/SocialAuthButtons';
@@ -10,12 +10,8 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
 
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-  });
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -31,17 +27,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setErrors({});
     setGeneralError('');
-
-    if (form.password !== form.password_confirmation) {
-      setErrors({ password_confirmation: ['Passwords do not match.'] });
-      return;
-    }
-
     setSubmitting(true);
 
     try {
-      await register(form);
-      navigate('/dashboard', { replace: true });
+      await register({ email: form.email, password: form.password });
+      navigate('/verify-email', { replace: true });
     } catch (err) {
       if (err.errors) {
         setErrors(err.errors);
@@ -90,26 +80,6 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Name</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="Your full name"
-                  required
-                />
-              </div>
-              {errors.name && (
-                <p className="mt-1 text-xs text-red font-mono">{errors.name[0]}</p>
-              )}
-            </div>
-
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1.5">Email</label>
@@ -158,28 +128,24 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password_confirmation"
-                  value={form.password_confirmation}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="Confirm your password"
-                  required
-                />
-              </div>
-              {errors.password_confirmation && (
-                <p className="mt-1 text-xs text-red font-mono">{errors.password_confirmation[0]}</p>
-              )}
-            </div>
+            {/* Legal Checkbox */}
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded border-border bg-surface-2 text-violet focus:ring-violet"
+              />
+              <span className="text-xs text-text-secondary font-mono">
+                I agree to the{' '}
+                <Link to="/eula" target="_blank" className="text-violet-light hover:text-violet">EULA</Link>
+                {' '}and acknowledge the{' '}
+                <Link to="/privacy-policy" target="_blank" className="text-violet-light hover:text-violet">Privacy Policy</Link>
+              </span>
+            </label>
 
             {/* Submit */}
-            <GradientButton type="submit" disabled={submitting} className="w-full">
+            <GradientButton type="submit" disabled={!agreedToTerms || submitting} className="w-full">
               {submitting ? 'Creating account...' : 'Create Account'}
             </GradientButton>
           </form>

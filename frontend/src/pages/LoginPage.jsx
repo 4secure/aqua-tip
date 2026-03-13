@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { GradientButton } from '../components/ui/GradientButton';
 import ParticleBackground from '../components/ui/ParticleBackground';
@@ -8,12 +8,14 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
+  const [successMessage, setSuccessMessage] = useState(location.state?.success || '');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -35,10 +37,16 @@ export default function LoginPage() {
     e.preventDefault();
     setErrors({});
     setGeneralError('');
+    setSuccessMessage('');
     setSubmitting(true);
 
     try {
       await login(form);
+
+      // Smart redirect based on user verification/onboarding status
+      // After login, AuthContext has the user -- but we need fresh data
+      // The login function in AuthContext already fetches user data
+      // ProtectedRoute will handle redirects to /verify-email or /get-started
       navigate('/dashboard', { replace: true });
     } catch (err) {
       if (err.errors) {
@@ -69,6 +77,13 @@ export default function LoginPage() {
             <h1 className="font-display text-2xl font-bold text-text-primary">Welcome back</h1>
             <p className="font-mono text-sm text-text-secondary mt-1">Sign in to your account</p>
           </div>
+
+          {/* Success banner */}
+          {successMessage && (
+            <div className="mb-4 px-4 py-3 bg-green/10 border border-green/20 rounded-lg text-green text-sm font-mono">
+              {successMessage}
+            </div>
+          )}
 
           {/* General error */}
           {generalError && (
@@ -133,6 +148,13 @@ export default function LoginPage() {
               {errors.password && (
                 <p className="mt-1 text-xs text-red font-mono">{errors.password[0]}</p>
               )}
+            </div>
+
+            {/* Forgot password link */}
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-xs text-violet-light hover:text-violet transition-colors font-mono">
+                Forgot password?
+              </Link>
             </div>
 
             {/* Submit */}

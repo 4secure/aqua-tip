@@ -1,16 +1,35 @@
+import { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import { NAV_ITEMS } from '../../data/mock-data';
-import { Icon, ICONS } from '../../data/icons';
+import { Icon } from '../../data/icons';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Sidebar() {
   const { user, userInitials, logout } = useAuth();
   const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   async function handleLogout() {
+    setDropdownOpen(false);
     await logout();
     navigate('/');
+  }
+
+  function handleSettingsClick() {
+    setDropdownOpen(false);
+    navigate('/settings');
   }
 
   return (
@@ -68,18 +87,48 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet to-cyan flex items-center justify-center text-xs font-bold text-white">{userInitials}</div>
-          <div className="flex-1 min-w-0">
+      {/* Footer with avatar dropdown */}
+      <div className="p-4 border-t border-border relative" ref={dropdownRef}>
+        {/* Dropdown menu */}
+        {dropdownOpen && (
+          <div className="absolute bottom-full left-4 right-4 mb-2 bg-surface-2 border border-border rounded-lg shadow-lg overflow-hidden">
+            <button
+              onClick={handleSettingsClick}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface hover:text-text-primary transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="font-mono">Account Settings</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface hover:text-red transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="font-mono">Logout</span>
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={() => setDropdownOpen((v) => !v)}
+          className="w-full flex items-center gap-3 rounded-lg hover:bg-surface-2 transition-colors p-1 -m-1"
+        >
+          {user?.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt={user.name || 'User'}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet to-cyan flex items-center justify-center text-xs font-bold text-white">
+              {userInitials}
+            </div>
+          )}
+          <div className="flex-1 min-w-0 text-left">
             <div className="text-sm font-medium text-text-primary truncate">{user?.name}</div>
             <div className="text-xs text-text-muted truncate">{user?.email}</div>
           </div>
-          <button onClick={handleLogout} className="text-text-muted hover:text-red transition-colors" title="Log out">
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
+        </button>
       </div>
     </aside>
   );
