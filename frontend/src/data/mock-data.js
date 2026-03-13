@@ -194,7 +194,7 @@ export const NAV_ITEMS = Object.freeze([
   { label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false },
   { label: 'IP Search', icon: 'search', href: '/ip-search', public: true },
   { label: 'Threat Map', icon: 'globe', href: '/threat-map', public: false },
-  { label: 'Dark Web', icon: 'globe', href: '/dark-web', public: false },
+  { label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false },
   { label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false },
   { label: 'Threat News', icon: 'rss', href: '/threat-news', public: false },
 ]);

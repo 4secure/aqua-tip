@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldAlert, Search, Loader2, AlertTriangle, ShieldCheck, RotateCcw } from 'lucide-react';
+import { Search, Loader2, AlertTriangle, ShieldCheck, RotateCcw } from 'lucide-react';
+import { Icon } from '../data/icons';
 import { searchDarkWeb, fetchCredits } from '../api/dark-web';
 import { CreditBadge } from '../components/shared/CreditBadge';
 import { BreachCard } from '../components/shared/BreachCard';
@@ -157,7 +158,7 @@ export default function DarkWebPage() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center mb-8"
           >
-            <ShieldAlert size={48} className="text-violet mb-4" />
+            <span className="text-violet mb-4 [&_svg]:w-12 [&_svg]:h-12"><Icon name="incognito" /></span>
             <h1 className="font-display text-3xl font-bold text-text-primary mb-2">
               Dark Web Search
             </h1>
