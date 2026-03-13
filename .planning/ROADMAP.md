@@ -116,7 +116,7 @@ Plans:
 
 Plans:
 - [x] 05-01-PLAN.md — Backend: DarkWebProviderService, SearchController, form request, route with auth+credit middleware, Pest tests with Http::fake()
-- [ ] 05-02-PLAN.md — Frontend: CreditBadge + BreachCard components, DarkWebPage with centered-to-top search, credit badge on IP Search page
+- [x] 05-02-PLAN.md — Frontend: CreditBadge + BreachCard components, DarkWebPage with centered-to-top search, credit badge on IP Search page
 
 ## Progress
 
@@ -131,4 +131,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 5
 | 3. Rate Limiting Backend | 0/2 | Not started | - |
 | 4. Frontend Auth Integration | 3/3 | Complete   | 2026-03-13 |
 | 4.1. Layout Redesign | 1/2 | In Progress|  |
-| 5. Dark Web Search Backend + Frontend | 1/2 | In progress | - |
+| 5. Dark Web Search Backend + Frontend | 2/2 | Complete | 2026-03-13 |
