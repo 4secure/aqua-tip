@@ -59,10 +59,11 @@ Plans:
   1. An unauthenticated request to the IOC search endpoint succeeds on the first call and returns 429 on the second call within the same day
   2. An authenticated request to the IOC search endpoint succeeds for 10 calls and returns 429 on the 11th call within the same day
   3. Rate limit counters reset after midnight UTC, allowing new lookups the next day
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Database migrations, Credit model with lazy reset, DeductCredit middleware, IOC search + credit status endpoints
+- [ ] 03-02-PLAN.md — Comprehensive Pest tests for guest/auth credit limits, midnight UTC reset, and IOC search behavior
 
 ### Phase 4: Frontend Auth Integration
 **Goal**: The React frontend has auth-aware routing, themed login/signup pages, and an auth context that manages user session state
@@ -104,6 +105,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Laravel Foundation + Core Auth | 2/2 | Complete | 2026-03-12 |
 | 2. OAuth + Email Verification | 1/2 | In progress | - |
-| 3. Rate Limiting Backend | 0/1 | Not started | - |
+| 3. Rate Limiting Backend | 0/2 | Not started | - |
 | 4. Frontend Auth Integration | 0/3 | Not started | - |
 | 5. Rate Limit UI + IOC Search Wiring | 0/1 | Not started | - |
