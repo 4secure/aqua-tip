@@ -76,12 +76,12 @@ export default function LandingPage() {
             Start with 1 free search per day. No credit card required.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link to="/ioc-search">
+            <Link to="/ip-search">
               <GradientButton size="lg">
                 Threat Lookup <ArrowRight className="w-4 h-4" />
               </GradientButton>
             </Link>
-            <Link to="/ioc-search">
+            <Link to="/ip-search">
               <GradientButton variant="variant" size="lg">
                 View Pricing
               </GradientButton>
@@ -117,7 +117,7 @@ export default function LandingPage() {
                 Contact Us
               </Link>
               <Link
-                to="/ioc-search"
+                to="/ip-search"
                 className="font-display text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
               >
                 Pricing Plan

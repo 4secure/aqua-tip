@@ -8,16 +8,9 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
-import CtiSearchPage from './pages/CtiSearchPage';
-import CtiReportPage from './pages/CtiReportPage';
-import IocSearchPage from './pages/IocSearchPage';
-import FeedsPage from './pages/FeedsPage';
+import IpSearchPage from './pages/IocSearchPage';
 import ThreatMapPage from './pages/ThreatMapPage';
-import VulnScannerPage from './pages/VulnScannerPage';
-import DomainReportPage from './pages/DomainReportPage';
-import CveDetailPage from './pages/CveDetailPage';
 import SettingsPage from './pages/SettingsPage';
-import ComponentsPage from './pages/ComponentsPage';
 
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const GetStartedPage = lazy(() => import('./pages/GetStartedPage'));
@@ -25,6 +18,9 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const EulaPage = lazy(() => import('./pages/EulaPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const DarkWebPage = lazy(() => import('./pages/DarkWebPage'));
+const ThreatActorsPage = lazy(() => import('./pages/ThreatActorsPage'));
+const ThreatNewsPage = lazy(() => import('./pages/ThreatNewsPage'));
 
 function LazyFallback() {
   return (
@@ -42,7 +38,7 @@ export default function App() {
           <Routes>
             <Route index element={<LandingPage />} />
 
-            {/* Guest-only routes */}
+            {/* Guest-only routes (no AppLayout) */}
             <Route element={<GuestRoute />}>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -50,7 +46,7 @@ export default function App() {
               <Route path="/reset-password" element={<ResetPasswordPage />} />
             </Route>
 
-            {/* Auth required but NOT verified/onboarded -- standalone routes */}
+            {/* Auth required but NOT verified/onboarded -- standalone */}
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/get-started" element={<GetStartedPage />} />
 
@@ -58,20 +54,19 @@ export default function App() {
             <Route path="/eula" element={<EulaPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
-            {/* Protected: auth + verified + onboarded */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<AppLayout />}>
+            {/* All app routes with shared layout */}
+            <Route element={<AppLayout />}>
+              {/* Public route -- accessible without auth */}
+              <Route path="/ip-search" element={<IpSearchPage />} />
+
+              {/* Protected routes -- auth + verified + onboarded */}
+              <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/cti" element={<CtiSearchPage />} />
-                <Route path="/cti-report" element={<CtiReportPage />} />
-                <Route path="/ioc-search" element={<IocSearchPage />} />
-                <Route path="/feeds" element={<FeedsPage />} />
                 <Route path="/threat-map" element={<ThreatMapPage />} />
-                <Route path="/vuln-scanner" element={<VulnScannerPage />} />
-                <Route path="/domain-report" element={<DomainReportPage />} />
-                <Route path="/cve-detail" element={<CveDetailPage />} />
+                <Route path="/dark-web" element={<DarkWebPage />} />
+                <Route path="/threat-actors" element={<ThreatActorsPage />} />
+                <Route path="/threat-news" element={<ThreatNewsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/components" element={<ComponentsPage />} />
               </Route>
             </Route>
           </Routes>
