@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -27,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'oauth_id',
         'avatar_url',
         'email_verified_at',
+        'trial_ends_at',
     ];
 
     /**
@@ -50,7 +53,27 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'trial_ends_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user): void {
+            if ($user->trial_ends_at === null) {
+                $user->trial_ends_at = now()->addDays(30);
+            }
+        });
+    }
+
+    public function credit(): HasOne
+    {
+        return $this->hasOne(Credit::class);
+    }
+
+    public function searchLogs(): HasMany
+    {
+        return $this->hasMany(SearchLog::class);
     }
 }
