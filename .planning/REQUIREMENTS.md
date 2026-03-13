@@ -36,14 +36,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Frontend Auth
 
-- [ ] **FEND-01**: Auth context/provider wrapping the React app with login state, user data, loading state
-- [ ] **FEND-02**: Standalone sign-up page with Google, GitHub, and email/password form options
+- [x] **FEND-01**: Auth context/provider wrapping the React app with login state, user data, loading state
+- [x] **FEND-02**: Standalone sign-up page with Google, GitHub, and email/password form options
 - [ ] **FEND-03**: Standalone login page with Google, GitHub, and email/password form options
 - [ ] **FEND-04**: `/` (Landing Page) is always publicly accessible
 - [ ] **FEND-05**: `/ioc-search` is publicly accessible but rate-limited (1/day guest, 10/day signed-in)
-- [ ] **FEND-06**: All other routes require authentication, redirect to login if unauthenticated
+- [x] **FEND-06**: All other routes require authentication, redirect to login if unauthenticated
 - [ ] **FEND-07**: Auth pages match existing dark theme (glassmorphism cards, violet/cyan accents, Syne + JetBrains Mono fonts)
-- [ ] **FEND-08**: Email verification pending state shown to users who haven't verified yet
+- [x] **FEND-08**: Email verification pending state shown to users who haven't verified yet
 
 ## v2 Requirements
 
@@ -101,14 +101,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RATE-03 | Phase 3 | Complete |
 | RATE-04 | Phase 5 | Pending |
 | RATE-05 | Phase 5 | Pending |
-| FEND-01 | Phase 4 | Pending |
-| FEND-02 | Phase 4 | Pending |
+| FEND-01 | Phase 4 | Complete |
+| FEND-02 | Phase 4 | Complete |
 | FEND-03 | Phase 4 | Pending |
 | FEND-04 | Phase 4 | Pending |
 | FEND-05 | Phase 5 | Pending |
-| FEND-06 | Phase 4 | Pending |
+| FEND-06 | Phase 4 | Complete |
 | FEND-07 | Phase 4 | Pending |
-| FEND-08 | Phase 4 | Pending |
+| FEND-08 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 26 total
