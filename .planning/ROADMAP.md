@@ -16,6 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: OAuth + Email Verification** - Google and GitHub OAuth via Socialite, email verification flow, password reset
 - [ ] **Phase 3: Rate Limiting Backend** - Dual-key rate limiting on IOC search endpoint (IP for guests, user ID for authenticated)
 - [x] **Phase 4: Frontend Auth Integration** - Auth context, login/signup pages, route protection, themed auth UI (completed 2026-03-13)
+- [ ] **Phase 04.1: Layout Redesign** - Sidebar, Topbar, and AppLayout overhaul with collapsible sidebar, auth-aware nav, mobile responsive (INSERTED)
 - [ ] **Phase 5: Rate Limit UI + IOC Search Wiring** - IOC search connected to backend, rate limit feedback and upgrade CTAs
 
 ## Phase Details
@@ -82,6 +83,24 @@ Plans:
 - [ ] 04-02-PLAN.md — Frontend core: API functions, AuthContext updates, route guards, App.jsx routing, RegisterPage simplification, LoginPage update, Sidebar avatar dropdown
 - [ ] 04-03-PLAN.md — Frontend pages: VerifyEmailPage, GetStartedPage, ForgotPasswordPage, ResetPasswordPage, EULA/Privacy placeholder pages
 
+### Phase 04.1: Layout Redesign — Sidebar, Topbar, and AppLayout overhaul (INSERTED)
+
+**Goal:** The application shell (sidebar, topbar, AppLayout) is redesigned with collapsible sidebar, glassmorphism styling, auth-aware navigation states, mobile responsive drawer, and publicly accessible IP Search page
+**Depends on:** Phase 4
+**Requirements**: LAYOUT-NAV-FLAT, LAYOUT-ROUTE-PUBLIC-IP, LAYOUT-ROUTE-RENAME, LAYOUT-CTA-IPSEARCH, LAYOUT-SIDEBAR-COLLAPSE, LAYOUT-SIDEBAR-HOVER, LAYOUT-SIDEBAR-GLASS, LAYOUT-SIDEBAR-LOGO, LAYOUT-SIDEBAR-SETTINGS-SUBMENU, LAYOUT-AUTH-NAV-STATES, LAYOUT-MOBILE-DRAWER, LAYOUT-TOPBAR-REMOVE-SEARCH, LAYOUT-TOPBAR-AVATAR-DROPDOWN, LAYOUT-TOPBAR-GUEST-BUTTONS, LAYOUT-TOPBAR-BREADCRUMB, LAYOUT-DYNAMIC-OFFSET
+**Success Criteria** (what must be TRUE):
+  1. Sidebar shows flat nav list (no group headers) with 6 items: Dashboard, IP Search, Threat Map, Dark Web, Threat Actors, Threat News
+  2. Sidebar collapses to 64px icon-only rail, hover-expands as overlay, persists collapse state in localStorage
+  3. Unauthenticated users see locked nav items (grayed + lock icon) except IP Search; clicking locked items redirects to /login
+  4. IP Search (/ip-search) is publicly accessible with full AppLayout (sidebar + topbar) visible to guests
+  5. Topbar has no search trigger, shows avatar dropdown (Manage Profile + Logout) for authenticated users and Log In + Sign Up for guests
+  6. Mobile responsive: sidebar as overlay drawer with hamburger toggle in topbar
+**Plans**: 2 plans
+
+Plans:
+- [ ] 04.1-01-PLAN.md — Foundation: useSidebarCollapse hook, flat NAV_ITEMS, placeholder pages, route restructuring, LandingPage CTA updates
+- [ ] 04.1-02-PLAN.md — Layout shell rewrite: Sidebar (collapsible, glassmorphism, auth-aware), Topbar (avatar dropdown, hamburger), AppLayout (collapse state), main.css
+
 ### Phase 5: Rate Limit UI + IOC Search Wiring
 **Goal**: The IOC search page connects to the backend endpoint, displays rate limit status, and shows contextual CTAs when limits are reached
 **Depends on**: Phase 3, Phase 4
@@ -98,7 +117,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 5
 (Note: Phase 3 depends only on Phase 1, so it could run in parallel with Phase 2 if desired)
 
 | Phase | Plans Complete | Status | Completed |
@@ -107,4 +126,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. OAuth + Email Verification | 1/2 | In progress | - |
 | 3. Rate Limiting Backend | 0/2 | Not started | - |
 | 4. Frontend Auth Integration | 3/3 | Complete   | 2026-03-13 |
+| 4.1. Layout Redesign | 0/2 | Not started | - |
 | 5. Rate Limit UI + IOC Search Wiring | 0/1 | Not started | - |
