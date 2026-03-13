@@ -9,6 +9,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Credit\CreditStatusController;
+use App\Http\Controllers\Ioc\SearchController;
 use Illuminate\Support\Facades\Route;
 
 // Guest auth routes with rate limiting
@@ -37,3 +39,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/user', UserController::class);
     Route::post('/logout', LogoutController::class);
 });
+
+// IOC search (guests + authenticated users, credit-gated)
+Route::post('/ioc/search', SearchController::class)->middleware('deduct-credit');
+
+// Credit status (read-only, no deduction)
+Route::get('/credits', CreditStatusController::class);
