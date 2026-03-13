@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('phone', 20)->nullable()->after('avatar_url');
-            $table->timestamp('onboarding_completed_at')->nullable()->after('phone');
+            $table->string('phone', 20)->nullable();
+            $table->timestamp('onboarding_completed_at')->nullable();
         });
     }
 

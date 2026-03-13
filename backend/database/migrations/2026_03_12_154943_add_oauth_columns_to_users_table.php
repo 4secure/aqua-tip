@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('oauth_provider', 50)->nullable()->after('remember_token');
-            $table->string('oauth_id', 255)->nullable()->after('oauth_provider');
-            $table->string('avatar_url', 500)->nullable()->after('oauth_id');
+            $table->string('oauth_provider', 50)->nullable();
+            $table->string('oauth_id', 255)->nullable();
+            $table->string('avatar_url', 500)->nullable();
             $table->index(['oauth_provider', 'oauth_id']);
         });
     }
