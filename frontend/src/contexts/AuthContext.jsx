@@ -57,11 +57,14 @@ export function AuthProvider({ children }) {
     loading,
     error,
     isAuthenticated: user !== null,
+    emailVerified: user?.email_verified ?? false,
+    onboardingCompleted: user?.onboarding_completed ?? false,
     userInitials: getInitials(user?.name),
     login,
     register,
     logout,
-  }), [user, loading, error, login, register, logout]);
+    refreshUser: checkAuth,
+  }), [user, loading, error, login, register, logout, checkAuth]);
 
   return (
     <AuthContext.Provider value={value}>

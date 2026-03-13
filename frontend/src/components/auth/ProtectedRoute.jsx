@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProtectedRoute() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, emailVerified, onboardingCompleted, loading } = useAuth();
 
   if (loading) {
     return (
@@ -14,6 +14,14 @@ export default function ProtectedRoute() {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!emailVerified) {
+    return <Navigate to="/verify-email" replace />;
+  }
+
+  if (!onboardingCompleted) {
+    return <Navigate to="/get-started" replace />;
   }
 
   return <Outlet />;
