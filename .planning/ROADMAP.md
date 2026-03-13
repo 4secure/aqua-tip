@@ -75,12 +75,12 @@ Plans:
   3. A user can create an account on the signup page using email/password or OAuth buttons, and log in on the login page using the same methods
   4. Auth pages (login, signup, verify-email) use the existing dark theme with glassmorphism cards, violet/cyan accents, and the project's font stack
   5. A user who registered with email but has not verified sees a "check your email" pending state instead of accessing protected routes
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md — Backend adjustments: fix route middleware, update UserResource, simplify registration, add verification code + onboarding endpoints
+- [ ] 04-02-PLAN.md — Frontend core: API functions, AuthContext updates, route guards, App.jsx routing, RegisterPage simplification, LoginPage update, Sidebar avatar dropdown
+- [ ] 04-03-PLAN.md — Frontend pages: VerifyEmailPage, GetStartedPage, ForgotPasswordPage, ResetPasswordPage, EULA/Privacy placeholder pages
 
 ### Phase 5: Rate Limit UI + IOC Search Wiring
 **Goal**: The IOC search page connects to the backend endpoint, displays rate limit status, and shows contextual CTAs when limits are reached
