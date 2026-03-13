@@ -1,0 +1,12 @@
+vendor/laravel/sail
+node_modules
+.env
+.env.backup
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+tests
+.git
+docker
+cookies.txt
