@@ -3,6 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Authentication System** — Phases 1-5 (shipped 2026-03-14)
+- 🔄 **v1.1 PostgreSQL Migration & Railway Deployment** — Phases 6-7
 
 ## Phases
 
@@ -20,6 +21,36 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 </details>
 
+### v1.1 PostgreSQL Migration & Railway Deployment
+
+- [ ] Phase 6: PostgreSQL Migration
+- [ ] Phase 7: Railway Production Deployment
+
+#### Phase 6: PostgreSQL Migration
+**Goal:** Replace MySQL with PostgreSQL — all migrations, configs, and tests working on PostgreSQL locally.
+**Requirements:** DB-01, DB-02, DB-03, DB-04
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Switch config to PostgreSQL and remove MySQL-specific migration syntax
+- [ ] 06-02-PLAN.md — Create PostgreSQL database, run migrations, validate tests and local dev
+
+**Success criteria:**
+1. `DB_CONNECTION=pgsql` in `.env` with PostgreSQL driver configured
+2. All migrations run cleanly on a fresh PostgreSQL database
+3. All 44+ existing Pest tests pass without modification (or with minimal PostgreSQL-compatible fixes)
+4. Local dev environment works end-to-end with PostgreSQL
+
+#### Phase 7: Railway Production Deployment
+**Goal:** Deploy both frontend and backend to Railway with PostgreSQL, accessible via public URLs.
+**Requirements:** DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, DEPLOY-05, DEPLOY-06
+**Success criteria:**
+1. Backend Dockerfile builds successfully on Railway
+2. Backend connects to Railway PostgreSQL addon and migrations run
+3. Frontend static server serves the SPA on a Railway-generated domain
+4. Environment variables correctly configured (APP_KEY, CORS, session, Sanctum)
+5. Both services respond on their public URLs
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -30,3 +61,5 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 4. Frontend Auth Integration | v1.0 | 3/3 | Complete | 2026-03-13 |
 | 4.1. Layout Redesign | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 5. Dark Web Search | v1.0 | 2/2 | Complete | 2026-03-13 |
+| 6. PostgreSQL Migration | v1.1 | 0/2 | Planned | — |
+| 7. Railway Production Deployment | v1.1 | 0/0 | Pending | — |
