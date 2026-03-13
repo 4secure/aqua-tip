@@ -157,7 +157,7 @@ export default function GetStartedPage() {
             {/* Phone */}
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                Phone Number <span className="text-text-muted">(optional)</span>
+                Phone Number
               </label>
               <PhoneInput
                 defaultCountry="US"
