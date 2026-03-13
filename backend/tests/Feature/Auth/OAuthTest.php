@@ -44,7 +44,7 @@ test('google oauth callback creates new user with correct fields', function () {
 
     $response = $this->get('/api/auth/google/callback');
 
-    $response->assertRedirect(config('services.frontend_url') . '/dashboard');
+    $response->assertRedirect(config('services.frontend_url') . '/get-started');
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', [
         'email' => 'oauth@example.com',
@@ -58,12 +58,12 @@ test('google oauth callback creates new user with correct fields', function () {
     expect($user->email_verified_at)->not->toBeNull();
 });
 
-test('google oauth callback authenticates user and redirects to dashboard', function () {
+test('google oauth callback authenticates user and redirects to get-started for new users', function () {
     mockSocialiteUser('google');
 
     $response = $this->get('/api/auth/google/callback');
 
-    $response->assertRedirect(config('services.frontend_url') . '/dashboard');
+    $response->assertRedirect(config('services.frontend_url') . '/get-started');
     $this->assertAuthenticated();
 });
 
@@ -74,7 +74,7 @@ test('github oauth callback creates new user with correct fields', function () {
 
     $response = $this->get('/api/auth/github/callback');
 
-    $response->assertRedirect(config('services.frontend_url') . '/dashboard');
+    $response->assertRedirect(config('services.frontend_url') . '/get-started');
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', [
         'email' => 'github@example.com',
@@ -87,12 +87,12 @@ test('github oauth callback creates new user with correct fields', function () {
     expect($user->email_verified_at)->not->toBeNull();
 });
 
-test('github oauth callback authenticates user and redirects to dashboard', function () {
+test('github oauth callback authenticates user and redirects to get-started for new users', function () {
     mockSocialiteUser('github', ['email' => 'gh2@example.com']);
 
     $response = $this->get('/api/auth/github/callback');
 
-    $response->assertRedirect(config('services.frontend_url') . '/dashboard');
+    $response->assertRedirect(config('services.frontend_url') . '/get-started');
     $this->assertAuthenticated();
 });
 
@@ -103,6 +103,8 @@ test('oauth callback with existing email/password user merges accounts', functio
         'email' => 'existing@example.com',
         'oauth_provider' => null,
         'oauth_id' => null,
+        'phone' => '+1234567890',
+        'onboarding_completed_at' => now(),
     ]);
 
     mockSocialiteUser('google', ['email' => 'existing@example.com', 'id' => '99999']);
@@ -126,6 +128,8 @@ test('oauth callback with existing oauth user updates avatar and logs in', funct
         'oauth_provider' => 'google',
         'oauth_id' => '12345',
         'avatar_url' => 'https://old-avatar.com/pic.jpg',
+        'phone' => '+1234567890',
+        'onboarding_completed_at' => now(),
     ]);
 
     mockSocialiteUser('google', [

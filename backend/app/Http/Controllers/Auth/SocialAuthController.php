@@ -80,6 +80,10 @@ class SocialAuthController extends Controller
 
         $frontendUrl = config('services.frontend_url');
 
+        if (! $user->phone || ! $user->onboarding_completed_at) {
+            return redirect("{$frontendUrl}/get-started");
+        }
+
         return redirect("{$frontendUrl}/dashboard");
     }
 

@@ -8,6 +8,8 @@ use App\Http\Controllers\Auth\ResendVerificationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Auth\OnboardingController;
+use App\Http\Controllers\Auth\VerifyEmailCodeController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Credit\CreditStatusController;
 use App\Http\Controllers\Ioc\SearchController;
@@ -32,6 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/verification-notification', ResendVerificationController::class)
         ->middleware('throttle:6,1')
         ->name('verification.send');
+    Route::post('/email/verify-code', VerifyEmailCodeController::class);
+    Route::post('/onboarding', OnboardingController::class);
     Route::get('/user', UserController::class);
     Route::post('/logout', LogoutController::class);
 });

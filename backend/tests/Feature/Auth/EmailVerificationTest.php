@@ -2,7 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\VerifyEmailWithCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
@@ -73,7 +73,7 @@ test('resend endpoint sends verification notification for unverified user', func
     $response->assertOk()
         ->assertJson(['message' => 'Verification link sent.']);
 
-    Notification::assertSentTo($user, VerifyEmail::class);
+    Notification::assertSentTo($user, VerifyEmailWithCode::class);
 });
 
 test('resend endpoint returns already verified for verified user', function () {
