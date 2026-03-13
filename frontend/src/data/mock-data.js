@@ -191,36 +191,12 @@ export const NOTIFICATIONS = Object.freeze([
 ]);
 
 export const NAV_ITEMS = Object.freeze([
-  {
-    group: 'Intelligence',
-    items: [
-      { label: 'Dashboard', icon: 'dashboard', href: '/dashboard', badge: null },
-      { label: 'IP Lookup', icon: 'search', href: '/cti', badge: null },
-      { label: 'IOC Search', icon: 'fingerprint', href: '/ioc-search', badge: '2.3K' },
-      { label: 'Threat Feeds', icon: 'rss', href: '/feeds', badge: '10' },
-    ],
-  },
-  {
-    group: 'Attack Surface',
-    items: [
-      { label: 'Threat Map', icon: 'globe', href: '/threat-map', badge: 'LIVE' },
-      { label: 'Vuln Scanner', icon: 'shield', href: '/vuln-scanner', badge: null },
-    ],
-  },
-  {
-    group: 'Enrichment',
-    items: [
-      { label: 'Domain Intel', icon: 'domain', href: '/domain-report', badge: null },
-      { label: 'CVE Explorer', icon: 'bug', href: '/cve-detail', badge: '47' },
-    ],
-  },
-  {
-    group: 'System',
-    items: [
-      { label: 'Settings', icon: 'settings', href: '/settings', badge: null },
-      { label: 'Components', icon: 'components', href: '/components', badge: null },
-    ],
-  },
+  { label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false },
+  { label: 'IP Search', icon: 'search', href: '/ip-search', public: true },
+  { label: 'Threat Map', icon: 'globe', href: '/threat-map', public: false },
+  { label: 'Dark Web', icon: 'globe', href: '/dark-web', public: false },
+  { label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false },
+  { label: 'Threat News', icon: 'rss', href: '/threat-news', public: false },
 ]);
 
 export const IOC_RELATIONS = Object.freeze([
