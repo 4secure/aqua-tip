@@ -126,5 +126,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 5
 | 2. OAuth + Email Verification | 1/2 | In progress | - |
 | 3. Rate Limiting Backend | 0/2 | Not started | - |
 | 4. Frontend Auth Integration | 3/3 | Complete   | 2026-03-13 |
-| 4.1. Layout Redesign | 0/2 | Not started | - |
+| 4.1. Layout Redesign | 1/2 | In Progress|  |
 | 5. Rate Limit UI + IOC Search Wiring | 0/1 | Not started | - |

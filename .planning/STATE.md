@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 4.1 context gathered
-last_updated: "2026-03-13T15:43:04.071Z"
-last_activity: 2026-03-13 -- Completed 04-03-PLAN.md
+status: in-progress
+stopped_at: Completed 04.1-01-PLAN.md
+last_updated: "2026-03-13T16:01:06.921Z"
+last_activity: 2026-03-13 -- Completed 04.1-01-PLAN.md
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 11
+  completed_plans: 10
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-12)
 
 **Core value:** Users can securely sign up, log in, and access the platform -- with rate-limited IOC search for guests (1/day) and authenticated users (10/day).
-**Current focus:** Phase 4: Frontend Auth Integration
+**Current focus:** Phase 4.1: Layout Redesign
 
 ## Current Position
 
-Phase: 4 of 5 (Frontend Auth Integration) -- COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-03-13 -- Completed 04-03-PLAN.md
+Phase: 4.1 of 5 (Layout Redesign - Sidebar, Topbar, AppLayout Overhaul)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-03-13 -- Completed 04.1-01-PLAN.md
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [██████████] 100%
 | Phase 04 P01 | 7min | 2 tasks | 15 files |
 | Phase 04 P02 | 3min | 2 tasks | 13 files |
 | Phase 04 P03 | 15min | 3 tasks | 9 files |
+| Phase 04.1 P01 | 2min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ Recent decisions affecting current work:
 - [Phase 04]: Placeholder pages created for lazy imports; Plan 03 will replace with full implementations
 - [Phase 04]: Hand-rolled CodeInput component instead of third-party OTP library for full control
 - [Phase 04]: Phone field is required (not optional) per backend validation rules
+- [Phase 04.1]: Alias import IpSearchPage from IocSearchPage.jsx (file rename deferred)
+- [Phase 04.1]: New placeholder pages use lazy imports for code splitting
 
 ### Roadmap Evolution
 
@@ -106,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T15:43:04.066Z
-Stopped at: Phase 4.1 context gathered
-Resume file: .planning/phases/04.1-layout-redesign-sidebar-topbar-and-applayout-overhaul/04.1-CONTEXT.md
+Last session: 2026-03-13T16:00:25Z
+Stopped at: Completed 04.1-01-PLAN.md
+Resume file: .planning/phases/04.1-layout-redesign-sidebar-topbar-and-applayout-overhaul/04.1-01-SUMMARY.md
