@@ -1,59 +1,115 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LogOut, Settings } from 'lucide-react';
+import { Lock, Settings, LogOut, ChevronDown, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { NAV_ITEMS } from '../../data/mock-data';
 import { Icon } from '../../data/icons';
 import { useAuth } from '../../contexts/AuthContext';
 
-export default function Sidebar() {
-  const { user, userInitials, logout } = useAuth();
+export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }) {
+  const [hovered, setHovered] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { isAuthenticated, user, userInitials, logout } = useAuth();
   const navigate = useNavigate();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const hoverTimerRef = useRef(null);
 
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
+  const handleMouseEnter = useCallback(() => {
+    if (!collapsed) return;
+    hoverTimerRef.current = setTimeout(() => setHovered(true), 150);
+  }, [collapsed]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    setHovered(false);
   }, []);
 
-  async function handleLogout() {
-    setDropdownOpen(false);
-    await logout();
-    navigate('/');
-  }
+  const showLabels = !collapsed || hovered;
 
-  function handleSettingsClick() {
-    setDropdownOpen(false);
-    navigate('/settings');
-  }
+  const sidebarWidth = collapsed && !hovered ? 'w-16' : 'w-[260px]';
 
   return (
-    <aside id="sidebar" className="fixed left-0 top-0 w-[260px] h-screen bg-surface border-r border-border z-40 flex flex-col">
-      {/* Logo */}
-      <div className="h-[60px] flex items-center gap-3 px-5 border-b border-border">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet to-cyan flex items-center justify-center">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
-          </svg>
-        </div>
-        <div>
-          <div className="font-display font-bold text-base text-text-primary tracking-tight">AquaSecure</div>
-          <div className="text-[10px] text-text-muted tracking-wider uppercase">Threat Intel Platform</div>
-        </div>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4">
-        {NAV_ITEMS.map(group => (
-          <div key={group.group} className="mb-6">
-            <div className="px-4 mb-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-text-muted">{group.group}</div>
-            <div className="space-y-0.5">
-              {group.items.map(item => (
+      <aside
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`
+          fixed left-0 top-0 h-screen z-40 flex flex-col
+          ${sidebarWidth}
+          ${hovered && collapsed ? 'shadow-2xl z-50' : ''}
+          transition-all duration-300 ease-in-out
+          max-lg:fixed max-lg:z-50
+          ${mobileOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full'}
+          lg:translate-x-0
+        `}
+        style={{
+          background: 'rgba(15, 17, 23, 0.8)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderRight: '1px solid rgba(30, 32, 48, 0.8)',
+        }}
+      >
+        {/* Mobile close button */}
+        {mobileOpen && (
+          <button
+            className="absolute top-4 right-4 p-1 text-text-muted hover:text-text-primary lg:hidden"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Logo */}
+        <div className="h-[60px] flex items-center gap-3 px-5 border-b border-border/50 shrink-0">
+          <img
+            src="/logo.png"
+            alt="AquaSecure"
+            className="w-8 h-8 rounded-lg object-contain shrink-0"
+          />
+          {showLabels && (
+            <div className="min-w-0">
+              <div className="font-display font-bold text-base text-text-primary tracking-tight">AquaSecure</div>
+              <div className="text-[10px] text-text-muted tracking-wider uppercase">Threat Intel Platform</div>
+            </div>
+          )}
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          <div className="space-y-0.5">
+            {NAV_ITEMS.map(item => {
+              const isAccessible = item.public || isAuthenticated;
+
+              if (!isAccessible) {
+                return (
+                  <button
+                    key={item.href}
+                    onClick={() => navigate('/login')}
+                    className="flex items-center gap-3 px-4 py-2 text-sm rounded-lg mx-2 transition-all duration-200 text-text-muted/50 opacity-40 hover:opacity-60 w-[calc(100%-16px)]"
+                  >
+                    <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                      <Icon name={item.icon} />
+                    </span>
+                    {showLabels && (
+                      <>
+                        <span className="flex-1 text-left">{item.label}</span>
+                        <Lock className="w-3.5 h-3.5 shrink-0" />
+                      </>
+                    )}
+                  </button>
+                );
+              }
+
+              return (
                 <NavLink
                   key={item.href}
                   to={item.href}
@@ -67,69 +123,71 @@ export default function Sidebar() {
                 >
                   {({ isActive }) => (
                     <>
-                      <span className={`w-5 h-5 flex items-center justify-center ${isActive ? 'text-violet-light' : ''}`}>
+                      <span className={`w-5 h-5 flex items-center justify-center shrink-0 ${isActive ? 'text-violet-light' : ''}`}>
                         <Icon name={item.icon} />
                       </span>
-                      <span className="flex-1">{item.label}</span>
-                      {item.badge && (
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-                          item.badge === 'LIVE'
-                            ? 'bg-green/10 text-green border border-green/20'
-                            : 'bg-surface-3 text-text-muted'
-                        }`}>{item.badge}</span>
+                      {showLabels && (
+                        <span className="flex-1">{item.label}</span>
                       )}
                     </>
                   )}
                 </NavLink>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        ))}
-      </nav>
 
-      {/* Footer with avatar dropdown */}
-      <div className="p-4 border-t border-border relative" ref={dropdownRef}>
-        {/* Dropdown menu */}
-        {dropdownOpen && (
-          <div className="absolute bottom-full left-4 right-4 mb-2 bg-surface-2 border border-border rounded-lg shadow-lg overflow-hidden">
-            <button
-              onClick={handleSettingsClick}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface hover:text-text-primary transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="font-mono">Account Settings</span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface hover:text-red transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="font-mono">Logout</span>
-            </button>
-          </div>
-        )}
+          {/* Settings section - authenticated only */}
+          {isAuthenticated && (
+            <div className="mt-4 border-t border-border/50 pt-4">
+              <button
+                onClick={() => setSettingsOpen(v => !v)}
+                className="flex items-center gap-3 px-4 py-2 text-sm rounded-lg mx-2 transition-all duration-200 text-text-secondary hover:text-text-primary hover:bg-surface-2 w-[calc(100%-16px)]"
+              >
+                <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                  <Settings className="w-5 h-5" />
+                </span>
+                {showLabels && (
+                  <>
+                    <span className="flex-1 text-left">Settings</span>
+                    {settingsOpen
+                      ? <ChevronDown className="w-4 h-4 shrink-0" />
+                      : <ChevronRight className="w-4 h-4 shrink-0" />
+                    }
+                  </>
+                )}
+              </button>
 
-        <button
-          onClick={() => setDropdownOpen((v) => !v)}
-          className="w-full flex items-center gap-3 rounded-lg hover:bg-surface-2 transition-colors p-1 -m-1"
-        >
-          {user?.avatar_url ? (
-            <img
-              src={user.avatar_url}
-              alt={user.name || 'User'}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet to-cyan flex items-center justify-center text-xs font-bold text-white">
-              {userInitials}
+              {settingsOpen && showLabels && (
+                <NavLink
+                  to="/settings"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 pl-12 pr-4 py-2 text-sm rounded-lg mx-2 transition-all duration-200 ${
+                      isActive
+                        ? 'bg-violet/10 text-violet-light border border-violet/20'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
+                    }`
+                  }
+                >
+                  Profile Management
+                </NavLink>
+              )}
             </div>
           )}
-          <div className="flex-1 min-w-0 text-left">
-            <div className="text-sm font-medium text-text-primary truncate">{user?.name}</div>
-            <div className="text-xs text-text-muted truncate">{user?.email}</div>
-          </div>
-        </button>
-      </div>
-    </aside>
+        </nav>
+
+        {/* Collapse toggle - desktop only */}
+        <div className="p-3 border-t border-border/50 max-lg:hidden">
+          <button
+            onClick={toggle}
+            className="p-2 rounded-lg hover:bg-surface-2 text-text-muted transition-colors"
+          >
+            {collapsed
+              ? <ChevronRight className="w-4 h-4" />
+              : <ChevronLeft className="w-4 h-4" />
+            }
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
