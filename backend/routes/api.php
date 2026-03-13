@@ -24,7 +24,7 @@ Route::middleware('throttle:auth')->group(function () {
 // OAuth redirect URL (called via XHR from frontend)
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect']);
 
-// Auth required but NOT verified (for unverified users to verify)
+// Auth required (for unverified users to verify, fetch profile, and log out)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
         ->middleware('signed')
@@ -32,10 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/verification-notification', ResendVerificationController::class)
         ->middleware('throttle:6,1')
         ->name('verification.send');
-});
-
-// Auth + verified required (protected feature routes)
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/user', UserController::class);
     Route::post('/logout', LogoutController::class);
 });

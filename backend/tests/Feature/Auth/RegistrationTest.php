@@ -72,9 +72,26 @@ test('registration fails with duplicate email', function () {
         ->assertJsonValidationErrors('email');
 });
 
-test('registration requires all fields', function () {
+test('registration requires email and password', function () {
     $response = $this->postJson('/api/register', []);
 
     $response->assertStatus(422)
-        ->assertJsonValidationErrors(['name', 'email', 'password']);
+        ->assertJsonValidationErrors(['email', 'password']);
+});
+
+test('registration succeeds with only email and password', function () {
+    $response = $this->withHeaders([
+        'Origin' => 'http://localhost:5173',
+    ])->postJson('/api/register', [
+        'email' => 'noname@example.com',
+        'password' => 'Password1',
+    ]);
+
+    $response->assertStatus(201)
+        ->assertJsonPath('data.name', 'noname');
+
+    $this->assertDatabaseHas('users', [
+        'email' => 'noname@example.com',
+        'name' => 'noname',
+    ]);
 });

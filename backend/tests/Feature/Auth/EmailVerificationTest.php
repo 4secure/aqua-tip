@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\URL;
 
 uses(RefreshDatabase::class);
 
-test('unverified user gets 403 from /api/user', function () {
+test('unverified user gets 200 from /api/user', function () {
     $user = User::factory()->unverified()->create();
 
     $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
         ->actingAs($user)
         ->getJson('/api/user');
 
-    $response->assertStatus(403);
+    $response->assertOk()
+        ->assertJsonPath('data.email_verified', false);
 });
 
 test('verified user gets 200 from /api/user', function () {

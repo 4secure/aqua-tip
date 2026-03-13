@@ -29,6 +29,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'oauth_id',
         'avatar_url',
         'email_verified_at',
+        'phone',
+        'onboarding_completed_at',
         'trial_ends_at',
     ];
 
@@ -53,6 +55,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'onboarding_completed_at' => 'datetime',
             'trial_ends_at' => 'datetime',
             'password' => 'hashed',
         ];
