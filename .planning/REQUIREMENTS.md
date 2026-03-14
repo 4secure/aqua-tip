@@ -15,12 +15,12 @@ Requirements for OpenCTI integration milestone. Each maps to roadmap phases.
 
 ### IP Search
 
-- [ ] **IPSRC-01**: User can search an IP address and get real threat data from OpenCTI observables
-- [ ] **IPSRC-02**: IP Search results display threat score, classifications, and intelligence sources
-- [ ] **IPSRC-03**: IP Search shows ASN, geolocation (country/city), and ISP/organization for the IP
-- [ ] **IPSRC-04**: IP Search relations tab shows real relationships from OpenCTI
-- [ ] **IPSRC-05**: IP Search consumes credits (existing credit gating via deduct-credit middleware)
-- [ ] **IPSRC-06**: Credit refund on OpenCTI API failure (follow DarkWeb refund pattern)
+- [x] **IPSRC-01**: User can search an IP address and get real threat data from OpenCTI observables
+- [x] **IPSRC-02**: IP Search results display threat score, classifications, and intelligence sources
+- [x] **IPSRC-03**: IP Search shows ASN, geolocation (country/city), and ISP/organization for the IP
+- [x] **IPSRC-04**: IP Search relations tab shows real relationships from OpenCTI
+- [x] **IPSRC-05**: IP Search consumes credits (existing credit gating via deduct-credit middleware)
+- [x] **IPSRC-06**: Credit refund on OpenCTI API failure (follow DarkWeb refund pattern)
 
 ### Rate Limiting
 
@@ -84,12 +84,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-01 | Phase 8 | Complete |
 | FOUND-02 | Phase 8 | Complete |
 | FOUND-03 | Phase 8 | Complete |
-| IPSRC-01 | Phase 9 | Pending |
-| IPSRC-02 | Phase 9 | Pending |
-| IPSRC-03 | Phase 9 | Pending |
-| IPSRC-04 | Phase 9 | Pending |
-| IPSRC-05 | Phase 9 | Pending |
-| IPSRC-06 | Phase 9 | Pending |
+| IPSRC-01 | Phase 9 | Complete |
+| IPSRC-02 | Phase 9 | Complete |
+| IPSRC-03 | Phase 9 | Complete |
+| IPSRC-04 | Phase 9 | Complete |
+| IPSRC-05 | Phase 9 | Complete |
+| IPSRC-06 | Phase 9 | Complete |
 | RATE-04 | Phase 9 | Pending |
 | RATE-05 | Phase 9 | Pending |
 | TACT-01 | Phase 10 | Pending |

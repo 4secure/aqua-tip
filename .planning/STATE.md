@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: OpenCTI Integration
-status: completed
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-03-14T16:20:00.220Z"
-last_activity: 2026-03-14 -- Completed Phase 8 Plan 02 (OpenCTI Service)
+status: in-progress
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-03-14T18:10:38.000Z"
+last_activity: 2026-03-14 -- Completed Phase 9 Plan 01 (IP Search Service)
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 50
+  total_plans: 3
+  completed_plans: 3
+  percent: 60
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** Users can securely sign up, log in, and access the platform -- with rate-limited IP search for guests (1/day) and authenticated users (10/day).
-**Current focus:** Phase 8 - Foundation & OpenCTI Service
+**Current focus:** Phase 9 - IP Search Integration
 
 ## Current Position
 
-Phase: 8 of 11 (Foundation & OpenCTI Service)
-Plan: 2 of 2 complete
-Status: Phase 8 complete
-Last activity: 2026-03-14 -- Completed Phase 8 Plan 02 (OpenCTI Service)
+Phase: 9 of 11 (IP Search Integration)
+Plan: 1 of ? complete
+Status: Phase 9 in progress
+Last activity: 2026-03-14 -- Completed Phase 9 Plan 01 (IP Search Service)
 
-Progress: [#####░░░░░] 50%
+Progress: [######░░░░] 60%
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Progress: [#####░░░░░] 50%
 | v1.0 Phases 1-5 | 13 | ~3h | ~14 min |
 | v1.1 Phases 6-7 | 4 | ~1.5h | ~22 min |
 | v2.0 Phase 8 | 2 | 12min | 6 min |
+| v2.0 Phase 9-01 | 1 | 5min | 5 min |
 
 ## Accumulated Context
 
@@ -57,7 +58,9 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 - Zero new dependencies: Laravel HTTP client + raw GraphQL queries
 - Server-side caching for browse pages (threat actors 15 min, news 5 min, map 15 min)
 - Replaced IocDetectorService with Laravel's built-in ip validation rule
-- Controller returns placeholder response pending OpenCTI integration
+- Controller returns real OpenCTI data with credit refund on failure
+- Geo data always from ip-api.com (OpenCTI IPv4-Addr has no geo fields)
+- All credit tests mock IpSearchService to avoid real OpenCTI dependency
 - Mirrored DarkWebProviderService pattern for OpenCtiService consistency
 - 15s timeout with 2x retry on ConnectionException only for OpenCTI queries
 
@@ -69,6 +72,6 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-14T16:16:09Z
-Stopped at: Completed 08-02-PLAN.md
-Resume: Continue with Phase 9 (OpenCTI Browse Pages)
+Last session: 2026-03-14T18:10:38.000Z
+Stopped at: Completed 09-01-PLAN.md
+Resume: Continue with Phase 9 remaining plans
