@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: OpenCTI Integration
 status: in-progress
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-03-14T18:10:38.000Z"
-last_activity: 2026-03-14 -- Completed Phase 9 Plan 01 (IP Search Service)
+stopped_at: Completed 09-02-PLAN.md
+last_updated: "2026-03-15T19:25:34.000Z"
+last_activity: 2026-03-15 -- Completed Phase 9 Plan 02 (Frontend IP Search)
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 60
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 
 ## Current Position
 
-Phase: 9 of 11 (IP Search Integration)
-Plan: 1 of ? complete
-Status: Phase 9 in progress
-Last activity: 2026-03-14 -- Completed Phase 9 Plan 01 (IP Search Service)
+Phase: 10 of 11 (Threat Actors & Threat News)
+Plan: 0 of ? complete
+Status: Phase 9 complete, Phase 10 not started
+Last activity: 2026-03-15 -- Completed Phase 9 Plan 02 (Frontend IP Search)
 
-Progress: [######░░░░] 60%
+Progress: [########░░] 80%
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Progress: [######░░░░] 60%
 | v1.1 Phases 6-7 | 4 | ~1.5h | ~22 min |
 | v2.0 Phase 8 | 2 | 12min | 6 min |
 | v2.0 Phase 9-01 | 1 | 5min | 5 min |
+| v2.0 Phase 9-02 | 1 | ~30min | ~30 min |
 
 ## Accumulated Context
 
@@ -63,6 +64,9 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 - All credit tests mock IpSearchService to avoid real OpenCTI dependency
 - Mirrored DarkWebProviderService pattern for OpenCtiService consistency
 - 15s timeout with 2x retry on ConnectionException only for OpenCTI queries
+- Dynamic tabs built from response data presence (Summary+Raw always shown)
+- Indicators extracted from relationships (based-on) when direct query returns empty
+- Field normalization in IpSearchService: geo.as/asname, score, labels, abstract, count
 
 ### Blockers/Concerns
 
@@ -72,6 +76,6 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-14T18:10:38.000Z
-Stopped at: Completed 09-01-PLAN.md
-Resume: Continue with Phase 9 remaining plans
+Last session: 2026-03-15T19:25:34.000Z
+Stopped at: Completed 09-02-PLAN.md
+Resume: Continue with Phase 10 (Threat Actors & Threat News)

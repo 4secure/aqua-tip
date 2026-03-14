@@ -24,8 +24,8 @@ Requirements for OpenCTI integration milestone. Each maps to roadmap phases.
 
 ### Rate Limiting
 
-- [ ] **RATE-04**: Guest sees "Sign in for more lookups" CTA when credits exhausted on IP Search
-- [ ] **RATE-05**: Authenticated user sees "Daily limit reached" message when credits exhausted on IP Search
+- [x] **RATE-04**: Guest sees "Sign in for more lookups" CTA when credits exhausted on IP Search
+- [x] **RATE-05**: Authenticated user sees "Daily limit reached" message when credits exhausted on IP Search
 
 ### Threat Actors
 
@@ -90,8 +90,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IPSRC-04 | Phase 9 | Complete |
 | IPSRC-05 | Phase 9 | Complete |
 | IPSRC-06 | Phase 9 | Complete |
-| RATE-04 | Phase 9 | Pending |
-| RATE-05 | Phase 9 | Pending |
+| RATE-04 | Phase 9 | Complete |
+| RATE-05 | Phase 9 | Complete |
 | TACT-01 | Phase 10 | Pending |
 | TACT-02 | Phase 10 | Pending |
 | TACT-03 | Phase 10 | Pending |
