@@ -10,8 +10,8 @@ Requirements for OpenCTI integration milestone. Each maps to roadmap phases.
 ### Foundation
 
 - [x] **FOUND-01**: Rename "IOC Search" to "IP Search" across all backend and frontend files
-- [ ] **FOUND-02**: Add OpenCTI API configuration (base URL, Bearer token) to Laravel .env and config
-- [ ] **FOUND-03**: Create OpenCtiService class that executes GraphQL queries with auth, error handling, and timeout
+- [x] **FOUND-02**: Add OpenCTI API configuration (base URL, Bearer token) to Laravel .env and config
+- [x] **FOUND-03**: Create OpenCtiService class that executes GraphQL queries with auth, error handling, and timeout
 
 ### IP Search
 
@@ -82,8 +82,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FOUND-01 | Phase 8 | Complete |
-| FOUND-02 | Phase 8 | Pending |
-| FOUND-03 | Phase 8 | Pending |
+| FOUND-02 | Phase 8 | Complete |
+| FOUND-03 | Phase 8 | Complete |
 | IPSRC-01 | Phase 9 | Pending |
 | IPSRC-02 | Phase 9 | Pending |
 | IPSRC-03 | Phase 9 | Pending |

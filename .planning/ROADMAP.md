@@ -36,7 +36,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 **Milestone Goal:** Connect the platform to a real OpenCTI instance for IP search, threat actors, threat map, and threat news — replacing mock data with live threat intelligence.
 
-- [ ] **Phase 8: Foundation & OpenCTI Service** - Rename IOC to IP Search, configure OpenCTI API credentials, create base service class
+- [x] **Phase 8: Foundation & OpenCTI Service** - Rename IOC to IP Search, configure OpenCTI API credentials, create base service class (completed 2026-03-14)
 - [ ] **Phase 9: IP Search Integration** - Wire IP Search to real OpenCTI data with credit gating, refund on failure, and rate limit CTAs
 - [ ] **Phase 10: Threat Actors & Threat News** - Paginated list pages for intrusion sets and reports from OpenCTI
 - [ ] **Phase 11: Threat Map** - Live threat map with SSE streaming, animated arcs, and real-time counters
@@ -120,7 +120,7 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 5. Dark Web Search | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 6. PostgreSQL Migration | v1.1 | 2/2 | Complete | 2026-03-13 |
 | 7. Railway Production Deployment | v1.1 | 2/2 | Complete | 2026-03-14 |
-| 8. Foundation & OpenCTI Service | v2.0 | 1/2 | In Progress | - |
+| 8. Foundation & OpenCTI Service | 2/2 | Complete   | 2026-03-14 | - |
 | 9. IP Search Integration | v2.0 | 0/? | Not started | - |
 | 10. Threat Actors & Threat News | v2.0 | 0/? | Not started | - |
 | 11. Threat Map | v2.0 | 0/? | Not started | - |
