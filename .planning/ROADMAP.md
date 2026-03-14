@@ -55,7 +55,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 Plans:
 - [x] 08-01-PLAN.md — Rename IOC Search to IP Search across backend and frontend
-- [ ] 08-02-PLAN.md — Create OpenCTI service layer with config, service class, and health check
+- [x] 08-02-PLAN.md — Create OpenCTI service layer with config, service class, and health check
 
 ### Phase 9: IP Search Integration
 **Goal**: Users can search an IP address and get real threat intelligence from OpenCTI, with proper credit gating and rate limit feedback
@@ -67,11 +67,11 @@ Plans:
   3. IP Search relations tab displays real STIX relationships from OpenCTI (linked indicators, malware, actors)
   4. Each search consumes a credit; if OpenCTI API fails, the credit is refunded and the user sees an error message
   5. Guest with exhausted credits sees a "Sign in for more lookups" CTA; authenticated user sees "Daily limit reached" message
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — IpSearchService with OpenCTI queries, ip-api.com geo fallback, caching, and credit refund
+- [ ] 09-02-PLAN.md — Frontend IP Search page with live API data, dynamic tabs, and rate limit CTAs
 
 ### Phase 10: Threat Actors & Threat News
 **Goal**: Users can browse paginated lists of real threat actors and threat intelligence reports from OpenCTI
@@ -120,7 +120,7 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 5. Dark Web Search | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 6. PostgreSQL Migration | v1.1 | 2/2 | Complete | 2026-03-13 |
 | 7. Railway Production Deployment | v1.1 | 2/2 | Complete | 2026-03-14 |
-| 8. Foundation & OpenCTI Service | 2/2 | Complete   | 2026-03-14 | - |
-| 9. IP Search Integration | v2.0 | 0/? | Not started | - |
+| 8. Foundation & OpenCTI Service | v2.0 | 2/2 | Complete | 2026-03-14 |
+| 9. IP Search Integration | v2.0 | 0/2 | Not started | - |
 | 10. Threat Actors & Threat News | v2.0 | 0/? | Not started | - |
 | 11. Threat Map | v2.0 | 0/? | Not started | - |
