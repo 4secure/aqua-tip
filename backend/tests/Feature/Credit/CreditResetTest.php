@@ -2,10 +2,27 @@
 
 use App\Models\Credit;
 use App\Models\User;
+use App\Services\IpSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->app->bind(IpSearchService::class, function () {
+        $mock = Mockery::mock(IpSearchService::class);
+        $mock->shouldReceive('search')
+            ->andReturnUsing(fn (string $ip) => [
+                'ip' => $ip, 'found' => true, 'score' => 50, 'labels' => [],
+                'description' => null, 'created_by' => null, 'created_at' => null,
+                'updated_at' => null, 'geo' => null, 'relationships' => [],
+                'indicators' => [], 'sightings' => [], 'notes' => [],
+                'external_references' => [], 'raw' => null,
+            ]);
+
+        return $mock;
+    });
+});
 
 afterEach(function () {
     Carbon::setTestNow(null);

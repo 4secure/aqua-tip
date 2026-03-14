@@ -1,9 +1,26 @@
 <?php
 
 use App\Models\User;
+use App\Services\IpSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->app->bind(IpSearchService::class, function () {
+        $mock = Mockery::mock(IpSearchService::class);
+        $mock->shouldReceive('search')
+            ->andReturnUsing(fn (string $ip) => [
+                'ip' => $ip, 'found' => true, 'score' => 50, 'labels' => [],
+                'description' => null, 'created_by' => null, 'created_at' => null,
+                'updated_at' => null, 'geo' => null, 'relationships' => [],
+                'indicators' => [], 'sightings' => [], 'notes' => [],
+                'external_references' => [], 'raw' => null,
+            ]);
+
+        return $mock;
+    });
+});
 
 test('authenticated user can make 10 searches', function () {
     $user = User::factory()->create();

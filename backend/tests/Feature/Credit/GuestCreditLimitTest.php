@@ -1,8 +1,25 @@
 <?php
 
+use App\Services\IpSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->app->bind(IpSearchService::class, function () {
+        $mock = Mockery::mock(IpSearchService::class);
+        $mock->shouldReceive('search')
+            ->andReturnUsing(fn (string $ip) => [
+                'ip' => $ip, 'found' => true, 'score' => 50, 'labels' => [],
+                'description' => null, 'created_by' => null, 'created_at' => null,
+                'updated_at' => null, 'geo' => null, 'relationships' => [],
+                'indicators' => [], 'sightings' => [], 'notes' => [],
+                'external_references' => [], 'raw' => null,
+            ]);
+
+        return $mock;
+    });
+});
 
 test('guest first IP search returns 200 with data and credits', function () {
     $response = $this->withHeaders([
@@ -13,7 +30,7 @@ test('guest first IP search returns 200 with data and credits', function () {
 
     $response->assertStatus(200)
         ->assertJsonStructure([
-            'data' => ['ip', 'message'],
+            'data' => ['ip', 'found', 'score'],
             'credits' => ['remaining', 'limit', 'resets_at'],
         ]);
 });
