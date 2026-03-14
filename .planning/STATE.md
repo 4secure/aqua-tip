@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: OpenCTI Integration
-status: completed
-stopped_at: Phase 10 context gathered
-last_updated: "2026-03-14T20:26:24.881Z"
-last_activity: 2026-03-15 -- Completed Phase 9 Plan 02 (Frontend IP Search)
+status: in-progress
+stopped_at: Completed 10-01-PLAN.md (Threat Actors & Threat News API)
+last_updated: "2026-03-14T21:08:00.000Z"
+last_activity: 2026-03-15 -- Completed Phase 10 Plan 01 (Threat Actors & News API)
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 80
+  total_plans: 7
+  completed_plans: 6
+  percent: 86
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** Users can securely sign up, log in, and access the platform -- with rate-limited IP search for guests (1/day) and authenticated users (10/day).
-**Current focus:** Phase 9 - IP Search Integration
+**Current focus:** Phase 10 - Threat Actors & Threat News
 
 ## Current Position
 
 Phase: 10 of 11 (Threat Actors & Threat News)
-Plan: 0 of ? complete
-Status: Phase 9 complete, Phase 10 not started
-Last activity: 2026-03-15 -- Completed Phase 9 Plan 02 (Frontend IP Search)
+Plan: 1 of 2 complete
+Status: Phase 10 Plan 01 complete (API layer), Plan 02 (frontend) next
+Last activity: 2026-03-15 -- Completed Phase 10 Plan 01 (Threat Actors & News API)
 
-Progress: [########░░] 80%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [########░░] 80%
 | v2.0 Phase 9-01 | 1 | 5min | 5 min |
 | v2.0 Phase 9-02 | 1 | ~30min | ~30 min |
 | Phase 09 P03 | 1min | 2 tasks | 2 files |
+| v2.0 Phase 10-01 | 5min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 - Indicators extracted from relationships (based-on) when direct query returns empty
 - Field normalization in IpSearchService: geo.as/asname, score, labels, abstract, count
 - [Phase 09]: OpenCtiConnectionException propagates for refund; OpenCtiQueryException degrades to geo-only
+- [Phase 10]: Search as $search GraphQL variable, not filter; FilterGroup only when filters present
+- [Phase 10]: Report related entities from objects connection with inline fragments for 5 entity types
+- [Phase 10]: globalCount nullable -- frontend should handle missing total gracefully
 
 ### Blockers/Concerns
 
@@ -78,6 +82,6 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-14T20:26:24.878Z
-Stopped at: Phase 10 context gathered
-Resume: Continue with Phase 10 (Threat Actors & Threat News)
+Last session: 2026-03-14T21:08:00.000Z
+Stopped at: Completed 10-01-PLAN.md (Threat Actors & Threat News API)
+Resume: Continue with Phase 10 Plan 02 (Frontend pages for threat actors & news)

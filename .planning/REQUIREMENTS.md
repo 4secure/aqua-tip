@@ -29,17 +29,17 @@ Requirements for OpenCTI integration milestone. Each maps to roadmap phases.
 
 ### Threat Actors
 
-- [ ] **TACT-01**: User can view list of threat actors (intrusion sets) from OpenCTI
-- [ ] **TACT-02**: Each threat actor card shows name, description, aliases, and external references
-- [ ] **TACT-03**: Each threat actor shows primary motivation, resource level, sophistication, and goals
-- [ ] **TACT-04**: Threat actors list supports pagination
+- [x] **TACT-01**: User can view list of threat actors (intrusion sets) from OpenCTI
+- [x] **TACT-02**: Each threat actor card shows name, description, aliases, and external references
+- [x] **TACT-03**: Each threat actor shows primary motivation, resource level, sophistication, and goals
+- [x] **TACT-04**: Threat actors list supports pagination
 
 ### Threat News
 
-- [ ] **TNEWS-01**: User can view list of threat intelligence reports from OpenCTI
-- [ ] **TNEWS-02**: Each report card shows title, published date, description, and confidence level
-- [ ] **TNEWS-03**: Each report shows related entities (linked indicators, malware, actors)
-- [ ] **TNEWS-04**: Threat news list supports pagination
+- [x] **TNEWS-01**: User can view list of threat intelligence reports from OpenCTI
+- [x] **TNEWS-02**: Each report card shows title, published date, description, and confidence level
+- [x] **TNEWS-03**: Each report shows related entities (linked indicators, malware, actors)
+- [x] **TNEWS-04**: Threat news list supports pagination
 
 ### Threat Map
 
@@ -92,14 +92,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IPSRC-06 | Phase 9 | Complete |
 | RATE-04 | Phase 9 | Complete |
 | RATE-05 | Phase 9 | Complete |
-| TACT-01 | Phase 10 | Pending |
-| TACT-02 | Phase 10 | Pending |
-| TACT-03 | Phase 10 | Pending |
-| TACT-04 | Phase 10 | Pending |
-| TNEWS-01 | Phase 10 | Pending |
-| TNEWS-02 | Phase 10 | Pending |
-| TNEWS-03 | Phase 10 | Pending |
-| TNEWS-04 | Phase 10 | Pending |
+| TACT-01 | Phase 10 | Complete |
+| TACT-02 | Phase 10 | Complete |
+| TACT-03 | Phase 10 | Complete |
+| TACT-04 | Phase 10 | Complete |
+| TNEWS-01 | Phase 10 | Complete |
+| TNEWS-02 | Phase 10 | Complete |
+| TNEWS-03 | Phase 10 | Complete |
+| TNEWS-04 | Phase 10 | Complete |
 | TMAP-01 | Phase 11 | Pending |
 | TMAP-02 | Phase 11 | Pending |
 | TMAP-03 | Phase 11 | Pending |
