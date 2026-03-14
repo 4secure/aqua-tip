@@ -15,6 +15,8 @@ use App\Http\Controllers\Credit\CreditStatusController;
 use App\Http\Controllers\DarkWeb\SearchController as DarkWebSearchController;
 use App\Http\Controllers\IpSearch\SearchController;
 use App\Http\Controllers\OpenCti\HealthController as OpenCtiHealthController;
+use App\Http\Controllers\ThreatActor\IndexController as ThreatActorIndexController;
+use App\Http\Controllers\ThreatNews\IndexController as ThreatNewsIndexController;
 use Illuminate\Support\Facades\Route;
 
 // Guest auth routes with rate limiting
@@ -46,6 +48,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // OpenCTI health check
     Route::get('/opencti/health', OpenCtiHealthController::class);
+
+    // Threat actors & threat news (browse pages, no credit gating)
+    Route::get('/threat-actors', ThreatActorIndexController::class);
+    Route::get('/threat-news', ThreatNewsIndexController::class);
 });
 
 // IP search (guests + authenticated users, credit-gated)

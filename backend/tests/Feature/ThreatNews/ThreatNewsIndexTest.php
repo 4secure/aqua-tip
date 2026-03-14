@@ -275,3 +275,46 @@ test('list handles empty objects edges gracefully', function () {
 
     expect($result['items'][0]['related_entities'])->toBe([]);
 });
+
+// --- HTTP-level tests ---
+
+test('GET /api/threat-news returns 200 for authenticated user', function () {
+    mockOpenCtiForNews();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->getJson('/api/threat-news');
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'items',
+                'pagination' => ['has_next', 'has_previous', 'start_cursor', 'end_cursor', 'total'],
+            ],
+        ]);
+});
+
+test('GET /api/threat-news returns 401 for unauthenticated user', function () {
+    $response = $this->getJson('/api/threat-news');
+
+    $response->assertStatus(401);
+});
+
+test('GET /api/threat-news returns 502 on connection failure', function () {
+    app()->bind(OpenCtiService::class, function () {
+        $mock = Mockery::mock(OpenCtiService::class);
+        $mock->shouldReceive('query')
+            ->andThrow(new \App\Exceptions\OpenCtiConnectionException('Connection failed'));
+
+        return $mock;
+    });
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->getJson('/api/threat-news');
+
+    $response->assertStatus(502)
+        ->assertJsonPath('message', 'Unable to load threat news. Please try again.');
+});

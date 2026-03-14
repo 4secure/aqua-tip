@@ -243,3 +243,46 @@ test('list handles nullable globalCount', function () {
 
     expect($result['pagination']['total'])->toBeNull();
 });
+
+// --- HTTP-level tests ---
+
+test('GET /api/threat-actors returns 200 for authenticated user', function () {
+    mockOpenCtiForActors();
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->getJson('/api/threat-actors');
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'items',
+                'pagination' => ['has_next', 'has_previous', 'start_cursor', 'end_cursor', 'total'],
+            ],
+        ]);
+});
+
+test('GET /api/threat-actors returns 401 for unauthenticated user', function () {
+    $response = $this->getJson('/api/threat-actors');
+
+    $response->assertStatus(401);
+});
+
+test('GET /api/threat-actors returns 502 on connection failure', function () {
+    app()->bind(OpenCtiService::class, function () {
+        $mock = Mockery::mock(OpenCtiService::class);
+        $mock->shouldReceive('query')
+            ->andThrow(new \App\Exceptions\OpenCtiConnectionException('Connection failed'));
+
+        return $mock;
+    });
+
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->getJson('/api/threat-actors');
+
+    $response->assertStatus(502)
+        ->assertJsonPath('message', 'Unable to load threat actors. Please try again.');
+});
