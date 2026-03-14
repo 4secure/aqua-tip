@@ -77,7 +77,7 @@ class ThreatActorService
                         modified
                         goals
                         targetedCountries: stixCoreRelationships(
-                            relationship_type: ["targets"]
+                            relationship_type: "targets"
                             toTypes: ["Country"]
                             first: 20
                         ) {
@@ -93,7 +93,7 @@ class ThreatActorService
                             }
                         }
                         targetedSectors: stixCoreRelationships(
-                            relationship_type: ["targets"]
+                            relationship_type: "targets"
                             toTypes: ["Sector"]
                             first: 20
                         ) {
