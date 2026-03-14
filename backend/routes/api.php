@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Credit\CreditStatusController;
 use App\Http\Controllers\DarkWeb\SearchController as DarkWebSearchController;
 use App\Http\Controllers\IpSearch\SearchController;
+use App\Http\Controllers\OpenCti\HealthController as OpenCtiHealthController;
 use Illuminate\Support\Facades\Route;
 
 // Guest auth routes with rate limiting
@@ -42,6 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dark web search (authenticated + credit-gated)
     Route::post('/dark-web/search', DarkWebSearchController::class)->middleware('deduct-credit');
+
+    // OpenCTI health check
+    Route::get('/opencti/health', OpenCtiHealthController::class);
 });
 
 // IP search (guests + authenticated users, credit-gated)
