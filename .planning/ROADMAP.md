@@ -37,7 +37,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 **Milestone Goal:** Connect the platform to a real OpenCTI instance for IP search, threat actors, threat map, and threat news — replacing mock data with live threat intelligence.
 
 - [x] **Phase 8: Foundation & OpenCTI Service** - Rename IOC to IP Search, configure OpenCTI API credentials, create base service class (completed 2026-03-14)
-- [x] **Phase 9: IP Search Integration** - Wire IP Search to real OpenCTI data with credit gating, refund on failure, and rate limit CTAs (completed 2026-03-15)
+- [ ] **Phase 9: IP Search Integration** - Wire IP Search to real OpenCTI data with credit gating, refund on failure, and rate limit CTAs (gap closure in progress)
 - [ ] **Phase 10: Threat Actors & Threat News** - Paginated list pages for intrusion sets and reports from OpenCTI
 - [ ] **Phase 11: Threat Map** - Live threat map with SSE streaming, animated arcs, and real-time counters
 
@@ -67,11 +67,12 @@ Plans:
   3. IP Search relations tab displays real STIX relationships from OpenCTI (linked indicators, malware, actors)
   4. Each search consumes a credit; if OpenCTI API fails, the credit is refunded and the user sees an error message
   5. Guest with exhausted credits sees a "Sign in for more lookups" CTA; authenticated user sees "Daily limit reached" message
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [x] 09-01-PLAN.md — IpSearchService with OpenCTI queries, ip-api.com geo fallback, caching, and credit refund
 - [x] 09-02-PLAN.md — Frontend IP Search page with live API data, dynamic tabs, and rate limit CTAs
+- [ ] 09-03-PLAN.md — Gap closure: fix apiClient credits field and OpenCtiConnectionException propagation
 
 ### Phase 10: Threat Actors & Threat News
 **Goal**: Users can browse paginated lists of real threat actors and threat intelligence reports from OpenCTI
@@ -121,6 +122,6 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 6. PostgreSQL Migration | v1.1 | 2/2 | Complete | 2026-03-13 |
 | 7. Railway Production Deployment | v1.1 | 2/2 | Complete | 2026-03-14 |
 | 8. Foundation & OpenCTI Service | v2.0 | 2/2 | Complete | 2026-03-14 |
-| 9. IP Search Integration | v2.0 | 2/2 | Complete | 2026-03-15 |
+| 9. IP Search Integration | v2.0 | 2/3 | Gap closure | - |
 | 10. Threat Actors & Threat News | v2.0 | 0/? | Not started | - |
 | 11. Threat Map | v2.0 | 0/? | Not started | - |
