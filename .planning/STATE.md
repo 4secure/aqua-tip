@@ -1,16 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: PostgreSQL Migration & Railway Deployment
-status: completed
-stopped_at: Completed 07-02-PLAN.md (Railway deployment verified live)
-last_updated: "2026-03-14T03:04:04.428Z"
-last_activity: 2026-03-14 -- Completed 07-02 (Railway deployment live and verified)
+milestone: v2.0
+milestone_name: OpenCTI Integration
+status: executing
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-03-14T16:00:39Z"
+last_activity: 2026-03-14 -- Completed Phase 8 Plan 01 (IOC-to-IP rename)
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 1
+  completed_plans: 1
+  percent: 25
 ---
 
 # Project State
@@ -19,39 +20,53 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-14)
 
-**Core value:** Users can securely sign up, log in, and access the platform -- with rate-limited IOC search for guests (1/day) and authenticated users (10/day).
-**Current focus:** v1.1 milestone complete
+**Core value:** Users can securely sign up, log in, and access the platform -- with rate-limited IP search for guests (1/day) and authenticated users (10/day).
+**Current focus:** Phase 8 - Foundation & OpenCTI Service
 
 ## Current Position
 
-Phase: 7 -- Railway Production Deployment
-Plan: 2 of 2 (COMPLETE)
-Status: v1.1 milestone complete -- both services live on Railway
-Last activity: 2026-03-14 -- Completed 07-02 (Railway deployment live and verified)
+Phase: 8 of 11 (Foundation & OpenCTI Service)
+Plan: 1 of 1 complete
+Status: Phase 8 Plan 01 complete
+Last activity: 2026-03-14 -- Completed Phase 8 Plan 01 (IOC-to-IP rename)
+
+Progress: [##░░░░░░░░] 25%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 17 (v1.0: 13, v1.1: 4)
+- Average duration: ~15 min (estimated from 2-day delivery of 17 plans)
+- Total execution time: ~4.5 hours
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| v1.0 Phases 1-5 | 13 | ~3h | ~14 min |
+| v1.1 Phases 6-7 | 4 | ~1.5h | ~22 min |
+| v2.0 Phase 8 | 1 | 9min | 9 min |
 
 ## Accumulated Context
 
 ### Decisions
 
-All v1.0 decisions logged in PROJECT.md Key Decisions table.
-- [06-01] Removed Pdo\Mysql import from config/database.php as dead code after pgsql switch
-- [06-01] Kept mysql/mariadb connection blocks as harmless Laravel defaults
-- [Phase 06]: No source file changes needed for Plan 02 -- all migrations ran cleanly on PostgreSQL
-- [Phase 06]: All 92 Pest tests pass on both SQLite and PostgreSQL without modification
-- [06-02] User verified end-to-end local dev works with PostgreSQL backend
-- [07-01] Used git add -f for .env.production (template, not secrets) since .gitignore blocks .env*
-- [07-01] SESSION_DOMAIN omitted from production env template (public suffix list issue with .up.railway.app)
-- [Phase 07]: Used Railway reference variable for PostgreSQL connection, SESSION_DOMAIN omitted for .up.railway.app
+All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
+
+- OpenCTI proxy pattern: Laravel holds Bearer token, frontend never talks to OpenCTI directly
+- Zero new dependencies: Laravel HTTP client + raw GraphQL queries
+- Server-side caching for browse pages (threat actors 15 min, news 5 min, map 15 min)
+- Replaced IocDetectorService with Laravel's built-in ip validation rule
+- Controller returns placeholder response pending OpenCTI integration
 
 ### Blockers/Concerns
 
-- OAuth provider credentials (Google Cloud Console, GitHub Developer Settings) need manual setup
-- Email delivery in dev uses MAIL_MAILER=log -- verification links appear in Laravel log
-- 3 known gaps from v1.0 carried forward: RATE-04, RATE-05, FEND-05
-- PostgreSQL locally via Laragon or Docker needed for dev testing
+- OpenCTI instance data availability not yet verified -- may need connectors configured
+- Private network address (192.168.251.20) works locally but not from cloud hosting
+- Credit cost for empty results -- product decision needed before Phase 9
 
 ## Session Continuity
 
-Last session: 2026-03-14T02:56:54.903Z
-Stopped at: Completed 07-02-PLAN.md (Railway deployment verified live)
-Resume: v1.1 milestone complete. No pending plans.
+Last session: 2026-03-14T16:00:39Z
+Stopped at: Completed 08-01-PLAN.md
+Resume: Continue with next plan in Phase 8 or next phase

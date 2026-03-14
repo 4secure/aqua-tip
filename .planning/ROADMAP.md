@@ -54,7 +54,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Rename IOC Search to IP Search across backend and frontend
+- [x] 08-01-PLAN.md — Rename IOC Search to IP Search across backend and frontend
 - [ ] 08-02-PLAN.md — Create OpenCTI service layer with config, service class, and health check
 
 ### Phase 9: IP Search Integration
@@ -120,7 +120,7 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 5. Dark Web Search | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 6. PostgreSQL Migration | v1.1 | 2/2 | Complete | 2026-03-13 |
 | 7. Railway Production Deployment | v1.1 | 2/2 | Complete | 2026-03-14 |
-| 8. Foundation & OpenCTI Service | v2.0 | 0/2 | Planning | - |
+| 8. Foundation & OpenCTI Service | v2.0 | 1/2 | In Progress | - |
 | 9. IP Search Integration | v2.0 | 0/? | Not started | - |
 | 10. Threat Actors & Threat News | v2.0 | 0/? | Not started | - |
 | 11. Threat Map | v2.0 | 0/? | Not started | - |
