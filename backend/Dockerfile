@@ -8,11 +8,12 @@ RUN apk add --no-cache \
     libpng-dev \
     oniguruma-dev \
     libxml2-dev \
+    libpq-dev \
     zip \
     unzip
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -36,6 +37,10 @@ RUN composer dump-autoload --optimize && \
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
     chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+# Startup script
+COPY docker/start.sh /var/www/docker/start.sh
+RUN chmod +x /var/www/docker/start.sh
+
 # Nginx config
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 
@@ -44,4 +49,4 @@ COPY docker/supervisord.conf /etc/supervisord.conf
 
 EXPOSE 8080
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/var/www/docker/start.sh"]

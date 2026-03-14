@@ -44,6 +44,12 @@ Plans:
 #### Phase 7: Railway Production Deployment
 **Goal:** Deploy both frontend and backend to Railway with PostgreSQL, accessible via public URLs.
 **Requirements:** DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, DEPLOY-05, DEPLOY-06
+**Plans:** 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Fix Dockerfile for PostgreSQL, create startup script, production env template
+- [ ] 07-02-PLAN.md — Deploy to Railway, configure services, verify public URLs
+
 **Success criteria:**
 1. Backend Dockerfile builds successfully on Railway
 2. Backend connects to Railway PostgreSQL addon and migrations run
@@ -62,4 +68,4 @@ Plans:
 | 4.1. Layout Redesign | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 5. Dark Web Search | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 6. PostgreSQL Migration | v1.1 | 2/2 | Complete | 2026-03-14 |
-| 7. Railway Production Deployment | v1.1 | 0/0 | Pending | — |
+| 7. Railway Production Deployment | v1.1 | 0/2 | Planning | — |
