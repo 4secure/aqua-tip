@@ -42,6 +42,7 @@ async function request(method, url, data) {
       status: response.status,
       message: body?.message || 'Something went wrong',
       errors: body?.errors || null,
+      credits: body?.credits || null,
     };
     throw error;
   }
