@@ -54,4 +54,9 @@ return [
         'base_url' => env('DARK_WEB_API_URL', 'https://leakcheck.io/api/v2'),
     ],
 
+    'opencti' => [
+        'url' => env('OPENCTI_URL'),
+        'token' => env('OPENCTI_TOKEN'),
+    ],
+
 ];
