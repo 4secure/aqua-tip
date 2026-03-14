@@ -19,17 +19,6 @@ const MOTIVATION_OPTIONS = [
   { value: 'unknown', label: 'Unknown' },
 ];
 
-const SOPHISTICATION_OPTIONS = [
-  { value: '', label: 'All Sophistication' },
-  { value: 'none', label: 'None' },
-  { value: 'minimal', label: 'Minimal' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
-  { value: 'expert', label: 'Expert' },
-  { value: 'innovator', label: 'Innovator' },
-  { value: 'strategic', label: 'Strategic' },
-];
-
 const PAGE_SIZE = 20;
 
 export default function ThreatActorsPage() {
@@ -46,7 +35,6 @@ export default function ThreatActorsPage() {
   const after = searchParams.get('after') || '';
   const search = searchParams.get('search') || '';
   const motivation = searchParams.get('motivation') || '';
-  const sophistication = searchParams.get('sophistication') || '';
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -57,7 +45,6 @@ export default function ThreatActorsPage() {
       if (after) params.after = after;
       if (search) params.search = search;
       if (motivation) params.motivation = motivation;
-      if (sophistication) params.sophistication = sophistication;
 
       const response = await fetchThreatActors(params);
       const data = response.data || response;
@@ -70,7 +57,7 @@ export default function ThreatActorsPage() {
     } finally {
       setLoading(false);
     }
-  }, [after, search, motivation, sophistication]);
+  }, [after, search, motivation]);
 
   useEffect(() => {
     loadData();
@@ -183,17 +170,6 @@ export default function ThreatActorsPage() {
           ))}
         </select>
 
-        <select
-          value={sophistication}
-          onChange={(e) => updateParam('sophistication', e.target.value)}
-          className="px-3 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm focus:outline-none focus:border-violet transition-colors"
-        >
-          {SOPHISTICATION_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
       </div>
 
       {/* Error State */}
@@ -303,11 +279,6 @@ function ThreatActorCard({ actor, isExpanded, onToggle }) {
         {actor.motivation && (
           <span className="bg-violet/20 text-violet px-2 py-0.5 rounded text-xs font-mono">
             {actor.motivation}
-          </span>
-        )}
-        {actor.sophistication && (
-          <span className="bg-amber/20 text-amber px-2 py-0.5 rounded text-xs font-mono">
-            {actor.sophistication}
           </span>
         )}
       </div>

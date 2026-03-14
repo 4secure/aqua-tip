@@ -19,7 +19,6 @@ function fakeIntrusionSetsResponse(int $count = 2): array
                 'aliases' => ["Alias{$i}A", "Alias{$i}B"],
                 'primary_motivation' => 'espionage',
                 'resource_level' => 'government',
-                'sophistication' => 'advanced',
                 'goals' => ["Goal {$i} A", "Goal {$i} B"],
                 'externalReferences' => [
                     'edges' => [
@@ -75,7 +74,7 @@ test('list returns normalized threat actors with all fields', function () {
     $actor = $result['items'][0];
     expect($actor)->toHaveKeys([
         'id', 'name', 'description', 'aliases', 'motivation',
-        'resource_level', 'sophistication', 'goals', 'external_references',
+        'resource_level', 'goals', 'external_references',
     ]);
     expect($actor['id'])->toBe('intrusion-set-1');
     expect($actor['name'])->toBe('APT1');
@@ -168,30 +167,6 @@ test('list builds FilterGroup for motivation filter', function () {
 
     $service = app(\App\Services\ThreatActorService::class);
     $result = $service->list(20, null, null, 'espionage');
-
-    expect($result['items'])->toBeArray();
-});
-
-test('list builds FilterGroup for sophistication filter', function () {
-    app()->bind(OpenCtiService::class, function () {
-        $mock = Mockery::mock(OpenCtiService::class);
-        $mock->shouldReceive('query')
-            ->withArgs(function (string $graphql, array $variables) {
-                $filters = $variables['filters'] ?? null;
-                if (! $filters) {
-                    return false;
-                }
-
-                return $filters['filters'][0]['key'] === 'sophistication'
-                    && $filters['filters'][0]['values'] === ['advanced'];
-            })
-            ->andReturn(fakeIntrusionSetsResponse(0));
-
-        return $mock;
-    });
-
-    $service = app(\App\Services\ThreatActorService::class);
-    $result = $service->list(20, null, null, null, 'advanced');
 
     expect($result['items'])->toBeArray();
 });

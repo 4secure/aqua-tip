@@ -14,14 +14,13 @@ class ThreatActorService
      * List threat actors (intrusion sets) from OpenCTI.
      *
      * Returns paginated, normalized intrusion set data with optional
-     * text search and structured filters for motivation/sophistication.
+     * text search and structured filters for motivation.
      * Results are cached for 15 minutes.
      *
      * @param  int          $first          Number of results per page
      * @param  string|null  $after          Cursor for next page
      * @param  string|null  $search         Full-text search term
      * @param  string|null  $motivation     Filter by primary_motivation
-     * @param  string|null  $sophistication Filter by sophistication level
      * @return array{items: array, pagination: array}
      *
      * @throws \App\Exceptions\OpenCtiConnectionException
@@ -31,14 +30,13 @@ class ThreatActorService
         ?string $after = null,
         ?string $search = null,
         ?string $motivation = null,
-        ?string $sophistication = null,
     ): array {
         $cacheKey = 'threat_actors:' . md5(json_encode(func_get_args()));
 
         return Cache::remember(
             $cacheKey,
             now()->addMinutes(15),
-            fn () => $this->executeQuery($first, $after, $search, $motivation, $sophistication),
+            fn () => $this->executeQuery($first, $after, $search, $motivation),
         );
     }
 
@@ -50,7 +48,6 @@ class ThreatActorService
         ?string $after,
         ?string $search,
         ?string $motivation,
-        ?string $sophistication,
     ): array {
         $graphql = <<<'GRAPHQL'
         query (
@@ -77,7 +74,6 @@ class ThreatActorService
                         aliases
                         primary_motivation
                         resource_level
-                        sophistication
                         goals
                         externalReferences {
                             edges {
@@ -109,28 +105,19 @@ class ThreatActorService
             'orderMode' => 'asc',
         ];
 
-        if ($motivation || $sophistication) {
-            $filters = ['mode' => 'and', 'filters' => [], 'filterGroups' => []];
-
-            if ($motivation) {
-                $filters['filters'][] = [
-                    'key' => 'primary_motivation',
-                    'values' => [$motivation],
-                    'operator' => 'eq',
-                    'mode' => 'or',
-                ];
-            }
-
-            if ($sophistication) {
-                $filters['filters'][] = [
-                    'key' => 'sophistication',
-                    'values' => [$sophistication],
-                    'operator' => 'eq',
-                    'mode' => 'or',
-                ];
-            }
-
-            $variables['filters'] = $filters;
+        if ($motivation) {
+            $variables['filters'] = [
+                'mode' => 'and',
+                'filters' => [
+                    [
+                        'key' => 'primary_motivation',
+                        'values' => [$motivation],
+                        'operator' => 'eq',
+                        'mode' => 'or',
+                    ],
+                ],
+                'filterGroups' => [],
+            ];
         }
 
         $data = $this->openCti->query($graphql, $variables);
@@ -157,7 +144,6 @@ class ThreatActorService
                 'aliases' => $node['aliases'] ?? [],
                 'motivation' => $node['primary_motivation'] ?? null,
                 'resource_level' => $node['resource_level'] ?? null,
-                'sophistication' => $node['sophistication'] ?? null,
                 'goals' => $node['goals'] ?? [],
                 'external_references' => $this->flattenExternalReferences(
                     $node['externalReferences']['edges'] ?? [],
