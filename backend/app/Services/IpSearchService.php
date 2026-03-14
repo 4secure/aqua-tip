@@ -46,8 +46,11 @@ class IpSearchService
             $observable = $this->queryObservable($ip);
             $found = $observable !== null;
             $observableId = $observable['id'] ?? null;
-        } catch (\App\Exceptions\OpenCtiConnectionException|\App\Exceptions\OpenCtiQueryException) {
-            // OpenCTI unavailable or query failed — continue with geo-only results
+        } catch (\App\Exceptions\OpenCtiConnectionException $e) {
+            // Connection failure must propagate to controller for credit refund
+            throw $e;
+        } catch (\App\Exceptions\OpenCtiQueryException) {
+            // Query format error — continue with geo-only results
         }
 
         $geo = $this->fetchGeoFromIpApi($ip);
