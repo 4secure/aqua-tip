@@ -38,10 +38,17 @@ class IpSearchService
      */
     private function executeSearch(string $ip): array
     {
-        $observable = $this->queryObservable($ip);
+        $observable = null;
+        $found = false;
+        $observableId = null;
 
-        $found = $observable !== null;
-        $observableId = $observable['id'] ?? null;
+        try {
+            $observable = $this->queryObservable($ip);
+            $found = $observable !== null;
+            $observableId = $observable['id'] ?? null;
+        } catch (\App\Exceptions\OpenCtiConnectionException|\App\Exceptions\OpenCtiQueryException) {
+            // OpenCTI unavailable or query failed — continue with geo-only results
+        }
 
         $geo = $this->fetchGeoFromIpApi($ip);
 
@@ -52,10 +59,12 @@ class IpSearchService
         $externalReferences = [];
 
         if ($found && $observableId) {
-            $relationships = $this->queryRelationships($observableId);
-            $indicators = $this->queryIndicators($observableId);
-            $sightings = $this->querySightings($observableId);
-            $notes = $this->queryNotes($observableId);
+            try { $relationships = $this->queryRelationships($observableId); } catch (\App\Exceptions\OpenCtiQueryException) {}
+            try { $indicators = $this->queryIndicators($observableId); } catch (\App\Exceptions\OpenCtiQueryException) {}
+            // Also extract indicators found in relationships (e.g. based-on)
+            $indicators = $this->mergeRelationshipIndicators($indicators, $relationships, $observableId);
+            try { $sightings = $this->querySightings($observableId); } catch (\App\Exceptions\OpenCtiQueryException) {}
+            try { $notes = $this->queryNotes($observableId); } catch (\App\Exceptions\OpenCtiQueryException) {}
             $externalReferences = $this->extractExternalReferences($observable);
         }
 
@@ -158,21 +167,21 @@ class IpSearchService
                         start_time
                         stop_time
                         from {
-                            ... on StixCyberObservable { id entity_type name: observable_value }
+                            ... on StixCyberObservable { id entity_type observable_value }
                             ... on ThreatActor { id entity_type name }
                             ... on Malware { id entity_type name }
                             ... on IntrusionSet { id entity_type name }
                             ... on AttackPattern { id entity_type name }
-                            ... on Indicator { id entity_type name }
+                            ... on Indicator { id entity_type name pattern pattern_type x_opencti_score }
                             ... on Identity { id entity_type name }
                         }
                         to {
-                            ... on StixCyberObservable { id entity_type name: observable_value }
+                            ... on StixCyberObservable { id entity_type observable_value }
                             ... on ThreatActor { id entity_type name }
                             ... on Malware { id entity_type name }
                             ... on IntrusionSet { id entity_type name }
                             ... on AttackPattern { id entity_type name }
-                            ... on Indicator { id entity_type name }
+                            ... on Indicator { id entity_type name pattern pattern_type x_opencti_score }
                             ... on Identity { id entity_type name }
                         }
                     }
@@ -194,7 +203,10 @@ class IpSearchService
 
         $data = $this->openCti->query($graphql, $variables);
 
-        return $this->flattenEdges($data['stixCoreRelationships']['edges'] ?? []);
+        return array_map(
+            fn (array $rel) => $this->normalizeRelationshipNames($rel),
+            $this->flattenEdges($data['stixCoreRelationships']['edges'] ?? []),
+        );
     }
 
     /**
@@ -237,7 +249,10 @@ class IpSearchService
 
         $data = $this->openCti->query($graphql, $variables);
 
-        return $this->flattenEdges($data['indicators']['edges'] ?? []);
+        return array_map(
+            fn (array $ind) => $this->normalizeIndicator($ind),
+            $this->flattenEdges($data['indicators']['edges'] ?? []),
+        );
     }
 
     /**
@@ -256,12 +271,12 @@ class IpSearchService
                         attribute_count
                         confidence
                         from {
-                            ... on StixCyberObservable { id entity_type name: observable_value }
-                            ... on Indicator { id entity_type name }
+                            ... on StixCyberObservable { id entity_type observable_value }
+                            ... on Indicator { id entity_type name pattern pattern_type x_opencti_score }
                         }
                         to {
                             ... on Identity { id entity_type name }
-                            ... on StixCyberObservable { id entity_type name: observable_value }
+                            ... on StixCyberObservable { id entity_type observable_value }
                         }
                     }
                 }
@@ -282,7 +297,10 @@ class IpSearchService
 
         $data = $this->openCti->query($graphql, $variables);
 
-        return $this->flattenEdges($data['stixSightingRelationships']['edges'] ?? []);
+        return array_map(
+            fn (array $s) => $this->normalizeSighting($s),
+            $this->flattenEdges($data['stixSightingRelationships']['edges'] ?? []),
+        );
     }
 
     /**
@@ -322,7 +340,10 @@ class IpSearchService
 
         $data = $this->openCti->query($graphql, $variables);
 
-        return $this->flattenEdges($data['notes']['edges'] ?? []);
+        return array_map(
+            fn (array $note) => $this->normalizeNote($note),
+            $this->flattenEdges($data['notes']['edges'] ?? []),
+        );
     }
 
     /**
@@ -415,6 +436,97 @@ class IpSearchService
             'external_references' => $externalReferences,
             'raw' => $observable,
         ];
+    }
+
+    /**
+     * Extract Indicator entities from relationships and merge with queried indicators.
+     */
+    private function mergeRelationshipIndicators(array $indicators, array $relationships, string $observableId): array
+    {
+        $existingIds = array_column($indicators, 'id');
+
+        foreach ($relationships as $rel) {
+            foreach (['from', 'to'] as $direction) {
+                $entity = $rel[$direction] ?? null;
+                if (! $entity || ($entity['entity_type'] ?? '') !== 'Indicator') {
+                    continue;
+                }
+                if (in_array($entity['id'], $existingIds, true)) {
+                    continue;
+                }
+                $indicators[] = $this->normalizeIndicator([
+                    'id' => $entity['id'],
+                    'name' => $entity['name'] ?? null,
+                    'pattern' => $entity['pattern'] ?? null,
+                    'pattern_type' => $entity['pattern_type'] ?? null,
+                    'x_opencti_score' => $entity['x_opencti_score'] ?? null,
+                    'valid_from' => null,
+                    'valid_until' => null,
+                    'objectLabel' => [],
+                ]);
+                $existingIds[] = $entity['id'];
+            }
+        }
+
+        return $indicators;
+    }
+
+    /**
+     * Normalize relationship from/to nodes so observable_value becomes name.
+     */
+    private function normalizeRelationshipNames(array $rel): array
+    {
+        foreach (['from', 'to'] as $direction) {
+            if (isset($rel[$direction]['observable_value'])) {
+                $rel[$direction]['name'] = $rel[$direction]['observable_value'];
+                unset($rel[$direction]['observable_value']);
+            }
+        }
+
+        return $rel;
+    }
+
+    /**
+     * Normalize indicator fields for frontend consumption.
+     */
+    private function normalizeIndicator(array $ind): array
+    {
+        $ind['score'] = $ind['x_opencti_score'] ?? null;
+        unset($ind['x_opencti_score']);
+        $ind['labels'] = $ind['objectLabel'] ?? [];
+        unset($ind['objectLabel']);
+
+        return $ind;
+    }
+
+    /**
+     * Normalize sighting fields for frontend consumption.
+     */
+    private function normalizeSighting(array $s): array
+    {
+        $s['count'] = $s['attribute_count'] ?? null;
+        unset($s['attribute_count']);
+        foreach (['from', 'to'] as $direction) {
+            if (isset($s[$direction]['observable_value'])) {
+                $s[$direction]['name'] = $s[$direction]['observable_value'];
+                unset($s[$direction]['observable_value']);
+            }
+        }
+
+        return $s;
+    }
+
+    /**
+     * Normalize note fields for frontend consumption.
+     */
+    private function normalizeNote(array $note): array
+    {
+        $note['abstract'] = $note['attribute_abstract'] ?? null;
+        unset($note['attribute_abstract']);
+        $note['labels'] = $note['objectLabel'] ?? [];
+        unset($note['objectLabel']);
+
+        return $note;
     }
 
     /**

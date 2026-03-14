@@ -38,12 +38,21 @@ function D3Graph({ relationships, centerIp }) {
       const height = container.clientHeight;
 
       // Build nodes from relationships
+      // Use centerIp as canonical ID for any entity matching the searched IP
       const nodeMap = new Map();
+      const uuidToCanonical = new Map(); // maps OpenCTI UUID → centerIp when entity is the searched IP
       nodeMap.set(centerIp, { id: centerIp, type: 'IPv4-Addr', label: centerIp });
 
       for (const rel of relationships) {
         for (const entity of [rel.from, rel.to]) {
-          if (!entity || nodeMap.has(entity.id)) continue;
+          if (!entity) continue;
+          const isCenterEntity = (entity.name === centerIp || entity.observable_value === centerIp)
+            && (entity.entity_type === 'IPv4-Addr' || entity.entity_type === 'IPv6-Addr');
+          if (isCenterEntity) {
+            uuidToCanonical.set(entity.id, centerIp);
+            continue; // already in nodeMap as centerIp
+          }
+          if (nodeMap.has(entity.id)) continue;
           nodeMap.set(entity.id, {
             id: entity.id,
             type: entity.entity_type,
@@ -52,10 +61,11 @@ function D3Graph({ relationships, centerIp }) {
         }
       }
 
+      const resolveId = (id) => uuidToCanonical.get(id) || id;
       const nodes = Array.from(nodeMap.values());
       const links = relationships.map(rel => ({
-        source: rel.from?.id || centerIp,
-        target: rel.to?.id || centerIp,
+        source: resolveId(rel.from?.id) || centerIp,
+        target: resolveId(rel.to?.id) || centerIp,
         label: rel.relationship_type,
       }));
 
@@ -204,8 +214,8 @@ function SummaryTab({ result }) {
             <GeoField label="Country" value={geo.country ? `${countryFlag(geo.country_code)} ${geo.country}` : '--'} />
             <GeoField label="City" value={geo.city || '--'} />
             <GeoField label="Region" value={geo.region || '--'} />
-            <GeoField label="ASN" value={geo.asn || '--'} />
-            <GeoField label="AS Name" value={geo.as_name || '--'} />
+            <GeoField label="ASN" value={geo.as || '--'} />
+            <GeoField label="AS Name" value={geo.asname || '--'} />
             <GeoField label="ISP" value={geo.isp || '--'} />
             <GeoField label="Organization" value={geo.org || '--'} />
             <GeoField label="Coordinates" value={geo.lat != null ? `${geo.lat}, ${geo.lon}` : '--'} />
@@ -258,11 +268,24 @@ function IndicatorsTab({ indicators }) {
     <div className="space-y-3">
       {indicators.map((ind, i) => (
         <div key={i} className="glass-card p-5">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <Shield size={14} className="text-violet" />
             <span className="font-heading font-semibold text-sm">{ind.name || 'Unnamed Indicator'}</span>
             {ind.score != null && (
-              <span className="ml-auto text-xs font-mono text-text-muted">Score: {ind.score}</span>
+              <span
+                className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium"
+                style={{
+                  backgroundColor: (ind.score >= 70 ? '#FF3B5C' : ind.score >= 40 ? '#FFB020' : '#00C48C') + '25',
+                  color: ind.score >= 70 ? '#FF3B5C' : ind.score >= 40 ? '#FFB020' : '#00C48C',
+                }}
+              >
+                Score: {ind.score}
+              </span>
+            )}
+            {ind.pattern_type && (
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-cyan/15 text-cyan uppercase">
+                {ind.pattern_type}
+              </span>
             )}
           </div>
           {ind.pattern && (
@@ -271,7 +294,6 @@ function IndicatorsTab({ indicators }) {
             </pre>
           )}
           <div className="flex flex-wrap gap-4 mt-2 text-xs text-text-muted font-mono">
-            {ind.pattern_type && <span>Type: {ind.pattern_type}</span>}
             {ind.valid_from && <span>From: {formatDate(ind.valid_from)}</span>}
             {ind.valid_until && <span>Until: {formatDate(ind.valid_until)}</span>}
           </div>
