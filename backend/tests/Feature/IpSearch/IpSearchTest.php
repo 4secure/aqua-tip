@@ -5,52 +5,59 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('IOC search with valid IP returns data type ipv4', function () {
+test('IP search with valid IPv4 returns data', function () {
     $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
-        ->postJson('/api/ioc/search', ['query' => '8.8.8.8']);
+        ->postJson('/api/ip-search', ['query' => '8.8.8.8']);
 
     $response->assertStatus(200)
-        ->assertJsonPath('data.type', 'ipv4')
-        ->assertJsonPath('data.query', '8.8.8.8');
+        ->assertJsonPath('data.ip', '8.8.8.8');
 });
 
-test('IOC search with domain returns data type domain', function () {
+test('IP search with valid IPv6 returns data', function () {
     $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
-        ->postJson('/api/ioc/search', ['query' => 'malware.example.com']);
+        ->postJson('/api/ip-search', ['query' => '2001:4860:4860::8888']);
 
     $response->assertStatus(200)
-        ->assertJsonPath('data.type', 'domain');
+        ->assertJsonPath('data.ip', '2001:4860:4860::8888');
 });
 
-test('IOC search with SHA256 hash returns data type sha256', function () {
+test('IP search with domain returns 422 validation error', function () {
+    $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
+        ->postJson('/api/ip-search', ['query' => 'example.com']);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors('query');
+});
+
+test('IP search with hash returns 422 validation error', function () {
     $hash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
     $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
-        ->postJson('/api/ioc/search', ['query' => $hash]);
-
-    $response->assertStatus(200)
-        ->assertJsonPath('data.type', 'sha256');
-});
-
-test('IOC search without query returns 422 validation error', function () {
-    $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
-        ->postJson('/api/ioc/search', []);
+        ->postJson('/api/ip-search', ['query' => $hash]);
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors('query');
 });
 
-test('IOC search with empty string returns 422', function () {
+test('IP search without query returns 422 validation error', function () {
     $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
-        ->postJson('/api/ioc/search', ['query' => '']);
+        ->postJson('/api/ip-search', []);
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors('query');
 });
 
-test('IOC search response includes credits object', function () {
+test('IP search with empty string returns 422', function () {
     $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
-        ->postJson('/api/ioc/search', ['query' => '8.8.8.8']);
+        ->postJson('/api/ip-search', ['query' => '']);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors('query');
+});
+
+test('IP search response includes credits object', function () {
+    $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
+        ->postJson('/api/ip-search', ['query' => '8.8.8.8']);
 
     $response->assertStatus(200)
         ->assertJsonStructure([
@@ -63,12 +70,12 @@ test('search is logged in search_logs table', function () {
 
     $this->actingAs($user)
         ->withHeaders(['Origin' => 'http://localhost:5173'])
-        ->postJson('/api/ioc/search', ['query' => '8.8.8.8'])
+        ->postJson('/api/ip-search', ['query' => '8.8.8.8'])
         ->assertStatus(200);
 
     $this->assertDatabaseHas('search_logs', [
         'user_id' => $user->id,
-        'module' => 'ioc_search',
+        'module' => 'ip_search',
         'query' => '8.8.8.8',
     ]);
 });

@@ -4,14 +4,14 @@ export const THREAT_STATS = Object.freeze({
   malwareIPs: 14283,
   malwareDomains: 8741,
   cvesToday: 47,
-  newIOCs: 2319,
+  newIPs: 2319,
   malwareIPsDelta: 12.4,
   malwareDomainsDelta: -3.2,
   cvesTodayDelta: 8.1,
-  newIOCsDelta: 24.7,
+  newIPsDelta: 24.7,
 });
 
-export const RECENT_IOCS = Object.freeze([
+export const RECENT_IPS = Object.freeze([
   { type: 'IP', value: '185.220.101.34', threat: 'C2 Server', confidence: 95, source: 'AlienVault OTX', time: '2m ago', severity: 'critical' },
   { type: 'Domain', value: 'malware-c2.evil.ru', threat: 'Phishing', confidence: 88, source: 'PhishTank', time: '5m ago', severity: 'high' },
   { type: 'Hash', value: 'a1b2c3d4e5f6...', threat: 'Ransomware', confidence: 92, source: 'VirusTotal', time: '8m ago', severity: 'critical' },
@@ -81,16 +81,16 @@ export const IP_REPORT = Object.freeze({
 });
 
 export const FEEDS = Object.freeze([
-  { id: 1, name: 'AlienVault OTX', type: 'STIX/TAXII', status: 'active', iocs: 45200, updated: '2m ago', premium: false, category: 'Community' },
-  { id: 2, name: 'Recorded Future', type: 'REST API', status: 'active', iocs: 128400, updated: '5m ago', premium: true, category: 'Commercial' },
-  { id: 3, name: 'VirusTotal', type: 'REST API', status: 'active', iocs: 89300, updated: '1m ago', premium: true, category: 'Commercial' },
-  { id: 4, name: 'AbuseIPDB', type: 'REST API', status: 'active', iocs: 34100, updated: '10m ago', premium: false, category: 'Community' },
-  { id: 5, name: 'PhishTank', type: 'CSV Feed', status: 'active', iocs: 12800, updated: '15m ago', premium: false, category: 'Open Source' },
-  { id: 6, name: 'Spamhaus', type: 'DNS/REST', status: 'paused', iocs: 67500, updated: '2h ago', premium: true, category: 'Commercial' },
-  { id: 7, name: 'MISP Community', type: 'MISP JSON', status: 'active', iocs: 23400, updated: '30m ago', premium: false, category: 'Community' },
-  { id: 8, name: 'Shodan', type: 'REST API', status: 'error', iocs: 0, updated: 'Error', premium: true, category: 'Commercial' },
-  { id: 9, name: 'URLhaus', type: 'CSV Feed', status: 'active', iocs: 18900, updated: '8m ago', premium: false, category: 'Open Source' },
-  { id: 10, name: 'CrowdStrike Falcon', type: 'REST API', status: 'inactive', iocs: 0, updated: 'N/A', premium: true, category: 'Commercial' },
+  { id: 1, name: 'AlienVault OTX', type: 'STIX/TAXII', status: 'active', indicators: 45200, updated: '2m ago', premium: false, category: 'Community' },
+  { id: 2, name: 'Recorded Future', type: 'REST API', status: 'active', indicators: 128400, updated: '5m ago', premium: true, category: 'Commercial' },
+  { id: 3, name: 'VirusTotal', type: 'REST API', status: 'active', indicators: 89300, updated: '1m ago', premium: true, category: 'Commercial' },
+  { id: 4, name: 'AbuseIPDB', type: 'REST API', status: 'active', indicators: 34100, updated: '10m ago', premium: false, category: 'Community' },
+  { id: 5, name: 'PhishTank', type: 'CSV Feed', status: 'active', indicators: 12800, updated: '15m ago', premium: false, category: 'Open Source' },
+  { id: 6, name: 'Spamhaus', type: 'DNS/REST', status: 'paused', indicators: 67500, updated: '2h ago', premium: true, category: 'Commercial' },
+  { id: 7, name: 'MISP Community', type: 'MISP JSON', status: 'active', indicators: 23400, updated: '30m ago', premium: false, category: 'Community' },
+  { id: 8, name: 'Shodan', type: 'REST API', status: 'error', indicators: 0, updated: 'Error', premium: true, category: 'Commercial' },
+  { id: 9, name: 'URLhaus', type: 'CSV Feed', status: 'active', indicators: 18900, updated: '8m ago', premium: false, category: 'Open Source' },
+  { id: 10, name: 'CrowdStrike Falcon', type: 'REST API', status: 'inactive', indicators: 0, updated: 'N/A', premium: true, category: 'Commercial' },
 ]);
 
 export const VULNS = Object.freeze([
@@ -184,7 +184,7 @@ export const API_KEYS = Object.freeze([
 export const NOTIFICATIONS = Object.freeze([
   { id: 1, type: 'critical', title: 'Critical CVE Detected', message: 'CVE-2025-0282 affects your monitored assets', time: '2m ago', read: false },
   { id: 2, type: 'alert', title: 'Feed Sync Error', message: 'Shodan feed failed to sync — API key expired', time: '15m ago', read: false },
-  { id: 3, type: 'info', title: 'New IOCs Available', message: '2,319 new indicators added from 7 feeds', time: '1h ago', read: false },
+  { id: 3, type: 'info', title: 'New IPs Available', message: '2,319 new indicators added from 7 feeds', time: '1h ago', read: false },
   { id: 4, type: 'success', title: 'Scan Complete', message: 'Vulnerability scan of api.company.com finished', time: '2h ago', read: true },
   { id: 5, type: 'alert', title: 'Blocklist Match', message: 'IP 103.224.182.251 matched on Spamhaus DROP', time: '3h ago', read: true },
   { id: 6, type: 'info', title: 'Weekly Report Ready', message: 'Your threat intelligence summary is available', time: '5h ago', read: true },
@@ -199,7 +199,7 @@ export const NAV_ITEMS = Object.freeze([
   { label: 'Threat News', icon: 'rss', href: '/threat-news', public: false },
 ]);
 
-export const IOC_RELATIONS = Object.freeze([
+export const IP_RELATIONS = Object.freeze([
   { source: '185.220.101.34', target: 'malware-c2.evil.ru', type: 'resolves_to' },
   { source: 'malware-c2.evil.ru', target: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4', type: 'serves' },
   { source: '185.220.101.34', target: '103.224.182.251', type: 'communicates_with' },

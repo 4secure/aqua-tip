@@ -219,7 +219,7 @@ export default function CtiReportPage() {
           </div>
         </div>
         <div className="glass-card p-4">
-          <div className="text-xs text-text-muted mb-3 uppercase tracking-wider font-semibold">Related IOCs</div>
+          <div className="text-xs text-text-muted mb-3 uppercase tracking-wider font-semibold">Related IPs</div>
           <div className="space-y-2">
             <div className="copyable-field text-xs w-full">malware-c2.evil.ru</div>
             <div className="copyable-field text-xs w-full">api-update.download</div>

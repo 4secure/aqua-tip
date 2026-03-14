@@ -21,7 +21,7 @@ test('GET /api/credits for guest after 1 search returns remaining 0', function (
     $headers = ['Origin' => 'http://localhost:5173'];
 
     $this->withHeaders($headers)
-        ->postJson('/api/ioc/search', ['query' => '8.8.8.8'])
+        ->postJson('/api/ip-search', ['query' => '8.8.8.8'])
         ->assertStatus(200);
 
     $response = $this->withHeaders($headers)

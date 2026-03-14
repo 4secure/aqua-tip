@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { LogIn, Clock } from 'lucide-react';
-import { IOC_RELATIONS, IP_REPORT } from '../data/mock-data';
+import { IP_RELATIONS, IP_REPORT } from '../data/mock-data';
 import { Icon } from '../data/icons';
 import { CreditBadge } from '../components/shared/CreditBadge';
 import { fetchCredits } from '../api/dark-web';
@@ -30,7 +30,7 @@ function D3Graph() {
         { id: 'APT-29', type: 'actor', label: 'APT-29' },
       ];
 
-      const links = IOC_RELATIONS.filter(r => r.target).map(r => ({
+      const links = IP_RELATIONS.filter(r => r.target).map(r => ({
         source: r.source, target: r.target, label: r.type,
       }));
 
@@ -83,7 +83,7 @@ function D3Graph() {
 
 const TABS = ['summary', 'relations', 'sandbox', 'osint', 'raw'];
 
-export default function IocSearchPage() {
+export default function IpSearchPage() {
   const [activeTab, setActiveTab] = useState('summary');
   const [credits, setCredits] = useState({ remaining: 0, limit: 0, is_guest: false, resets_at: null });
   const { isAuthenticated } = useAuth();
@@ -102,8 +102,8 @@ export default function IocSearchPage() {
       <div className="glass-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="font-heading text-xl font-bold">IOC Search</h1>
-            <p className="text-sm text-text-muted mt-1">Search any indicator — IPs, domains, hashes, URLs, emails, CVEs</p>
+            <h1 className="font-heading text-xl font-bold">IP Search</h1>
+            <p className="text-sm text-text-muted mt-1">Search any IP address -- IPv4 and IPv6 supported</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-sm text-text-muted">
@@ -114,7 +114,7 @@ export default function IocSearchPage() {
         </div>
         <div className="flex gap-3">
           <div className="flex-1 relative">
-            <input type="text" placeholder="Enter IOC — auto-detects type (IP, domain, MD5, SHA256, URL, email, CVE)" className="input-mono w-full py-3 pr-32" defaultValue="185.220.101.34" />
+            <input type="text" placeholder="Enter an IP address (e.g. 185.220.101.34 or 2001:db8::1)" className="input-mono w-full py-3 pr-32" defaultValue="185.220.101.34" />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
               <span className="chip-red">IP Detected</span>
             </div>
@@ -202,12 +202,12 @@ export default function IocSearchPage() {
       {activeTab === 'relations' && (
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title mb-0">IOC Relationship Graph</h3>
+            <h3 className="section-title mb-0">IP Relationship Graph</h3>
             <div className="flex gap-2">
-              <span className="chip-red text-[10px]">● IP</span>
-              <span className="chip-violet text-[10px]">● Domain</span>
-              <span className="chip-cyan text-[10px]">● Hash</span>
-              <span className="chip-amber text-[10px]">● Actor</span>
+              <span className="chip-red text-[10px]">IP</span>
+              <span className="chip-violet text-[10px]">Domain</span>
+              <span className="chip-cyan text-[10px]">Hash</span>
+              <span className="chip-amber text-[10px]">Actor</span>
             </div>
           </div>
           <D3Graph />

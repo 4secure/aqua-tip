@@ -1,6 +1,6 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { THREAT_STATS, RECENT_IOCS, ATTACK_CATEGORIES, THREAT_MAP_POINTS } from '../data/mock-data';
+import { THREAT_STATS, RECENT_IPS, ATTACK_CATEGORIES, THREAT_MAP_POINTS } from '../data/mock-data';
 import { Icon } from '../data/icons';
 import { useChartJs } from '../hooks/useChartJs';
 import { useLeaflet } from '../hooks/useLeaflet';
@@ -49,7 +49,7 @@ export default function DashboardPage() {
     { label: 'Malware IPs', value: THREAT_STATS.malwareIPs.toLocaleString(), delta: THREAT_STATS.malwareIPsDelta, color: 'red' },
     { label: 'Malware Domains', value: THREAT_STATS.malwareDomains.toLocaleString(), delta: THREAT_STATS.malwareDomainsDelta, color: 'violet' },
     { label: 'CVEs Today', value: THREAT_STATS.cvesToday, delta: THREAT_STATS.cvesTodayDelta, color: 'amber' },
-    { label: 'New IOCs', value: THREAT_STATS.newIOCs.toLocaleString(), delta: THREAT_STATS.newIOCsDelta, color: 'cyan' },
+    { label: 'New IPs', value: THREAT_STATS.newIPs.toLocaleString(), delta: THREAT_STATS.newIPsDelta, color: 'cyan' },
   ];
 
   const typeColors = { IP: 'chip-red', Domain: 'chip-violet', Hash: 'chip-cyan', URL: 'chip-amber' };
@@ -94,32 +94,32 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* 2-col: IOC Table + Attack Chart */}
+      {/* 2-col: IP Table + Attack Chart */}
       <div className="grid grid-cols-5 gap-4">
         <div className="col-span-3 glass-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title mb-0">Recent IOCs</h3>
+            <h3 className="section-title mb-0">Recent IPs</h3>
             <button className="btn-ghost text-xs">View All →</button>
           </div>
           <div className="table-wrapper">
             <table className="data-table">
               <thead><tr><th>Type</th><th>Indicator</th><th>Threat</th><th>Confidence</th><th>Source</th><th>Time</th></tr></thead>
               <tbody>
-                {RECENT_IOCS.map((ioc, i) => (
+                {RECENT_IPS.map((entry, i) => (
                   <tr key={i}>
-                    <td><span className={typeColors[ioc.type] || 'chip-violet'}>{ioc.type}</span></td>
-                    <td className="font-mono text-xs text-text-primary">{ioc.value}</td>
-                    <td className="text-text-secondary text-xs">{ioc.threat}</td>
+                    <td><span className={typeColors[entry.type] || 'chip-violet'}>{entry.type}</span></td>
+                    <td className="font-mono text-xs text-text-primary">{entry.value}</td>
+                    <td className="text-text-secondary text-xs">{entry.threat}</td>
                     <td>
                       <div className="flex items-center gap-2">
                         <div className="w-12 h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full" style={{width:`${ioc.confidence}%`, background: ioc.confidence > 90 ? '#FF3B5C' : ioc.confidence > 75 ? '#FFB020' : '#00C48C'}}></div>
+                          <div className="h-full rounded-full" style={{width:`${entry.confidence}%`, background: entry.confidence > 90 ? '#FF3B5C' : entry.confidence > 75 ? '#FFB020' : '#00C48C'}}></div>
                         </div>
-                        <span className="text-xs text-text-muted">{ioc.confidence}%</span>
+                        <span className="text-xs text-text-muted">{entry.confidence}%</span>
                       </div>
                     </td>
-                    <td className="text-xs text-text-secondary">{ioc.source}</td>
-                    <td className="text-xs text-text-muted">{ioc.time}</td>
+                    <td className="text-xs text-text-secondary">{entry.source}</td>
+                    <td className="text-xs text-text-muted">{entry.time}</td>
                   </tr>
                 ))}
               </tbody>

@@ -31,7 +31,7 @@ export default function FeedsPage() {
         </div>
         <div className="glass-card p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-violet/10 flex items-center justify-center text-violet"><Icon name="rss" /></div>
-          <div><div className="text-xl font-heading font-bold">419.7K</div><div className="text-xs text-text-muted">Total IOCs</div></div>
+          <div><div className="text-xl font-heading font-bold">419.7K</div><div className="text-xs text-text-muted">Total Indicators</div></div>
         </div>
         <div className="glass-card p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-amber/10 flex items-center justify-center"><div className="live-dot live-dot-amber"></div></div>
@@ -51,7 +51,7 @@ export default function FeedsPage() {
               <th>Feed Name</th>
               <th>Type</th>
               <th>Status</th>
-              <th>IOCs</th>
+              <th>Indicators</th>
               <th>Last Updated</th>
               <th>Category</th>
               <th></th>
@@ -68,7 +68,7 @@ export default function FeedsPage() {
                 </td>
                 <td className="font-mono text-xs text-text-secondary">{feed.type}</td>
                 <td><span className={`feed-status ${feed.status}`}><span className="dot"></span>{feed.status.charAt(0).toUpperCase() + feed.status.slice(1)}</span></td>
-                <td className="font-mono text-sm">{feed.iocs > 0 ? feed.iocs.toLocaleString() : '\u2014'}</td>
+                <td className="font-mono text-sm">{feed.indicators > 0 ? feed.indicators.toLocaleString() : '\u2014'}</td>
                 <td className="text-xs text-text-muted">{feed.updated}</td>
                 <td><span className="chip-violet text-[10px]">{feed.category}</span></td>
                 <td className="text-right">
@@ -92,7 +92,7 @@ export default function FeedsPage() {
             <div className="space-y-3">
               <div className="flex justify-between text-sm"><span className="text-text-muted">Type</span><span className="font-mono text-xs">STIX/TAXII</span></div>
               <div className="flex justify-between text-sm"><span className="text-text-muted">Status</span><span className="feed-status active"><span className="dot"></span>Active</span></div>
-              <div className="flex justify-between text-sm"><span className="text-text-muted">Total IOCs</span><span className="font-heading font-semibold">45,200</span></div>
+              <div className="flex justify-between text-sm"><span className="text-text-muted">Total Indicators</span><span className="font-heading font-semibold">45,200</span></div>
               <div className="flex justify-between text-sm"><span className="text-text-muted">Update Interval</span><span>5 minutes</span></div>
             </div>
             <div>
@@ -106,7 +106,7 @@ export default function FeedsPage() {
 }`}</code></pre>
             </div>
             <div>
-              <div className="text-xs text-text-muted uppercase tracking-wider font-semibold mb-3">Sample IOCs</div>
+              <div className="text-xs text-text-muted uppercase tracking-wider font-semibold mb-3">Sample Indicators</div>
               <div className="space-y-1.5">
                 <div className="copyable-field text-xs w-full">185.220.101.34</div>
                 <div className="copyable-field text-xs w-full">malware-c2.evil.ru</div>

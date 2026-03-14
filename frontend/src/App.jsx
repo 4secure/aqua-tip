@@ -8,7 +8,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
-import IpSearchPage from './pages/IocSearchPage';
+import IpSearchPage from './pages/IpSearchPage';
 import ThreatMapPage from './pages/ThreatMapPage';
 import SettingsPage from './pages/SettingsPage';
 
