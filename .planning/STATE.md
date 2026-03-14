@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: PostgreSQL Migration & Railway Deployment
-status: completed
-stopped_at: Completed 06-02-PLAN.md (all tasks done, Phase 6 complete)
-last_updated: "2026-03-13T21:31:18.215Z"
-last_activity: 2026-03-14 -- Completed 06-02 (PostgreSQL database setup and verification, checkpoint approved)
+status: in-progress
+stopped_at: Completed 07-01-PLAN.md (backend deployment artifacts ready)
+last_updated: "2026-03-14T02:17:35Z"
+last_activity: 2026-03-14 -- Completed 07-01 (Dockerfile fix, startup script, production env template)
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** Users can securely sign up, log in, and access the platform -- with rate-limited IOC search for guests (1/day) and authenticated users (10/day).
-**Current focus:** PostgreSQL migration and Railway deployment
+**Current focus:** Railway production deployment
 
 ## Current Position
 
-Phase: 6 -- PostgreSQL Migration
-Plan: 2 of 2 (COMPLETE)
-Status: All plans complete -- Phase 6 finished
-Last activity: 2026-03-14 -- Completed 06-02 (PostgreSQL database setup and verification, checkpoint approved)
+Phase: 7 -- Railway Production Deployment
+Plan: 1 of 2 (COMPLETE)
+Status: Plan 1 complete -- deployment artifacts ready, proceed to Plan 2 (Railway deploy)
+Last activity: 2026-03-14 -- Completed 07-01 (Dockerfile fix, startup script, production env template)
 
 ## Accumulated Context
 
@@ -39,6 +39,8 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 - [Phase 06]: No source file changes needed for Plan 02 -- all migrations ran cleanly on PostgreSQL
 - [Phase 06]: All 92 Pest tests pass on both SQLite and PostgreSQL without modification
 - [06-02] User verified end-to-end local dev works with PostgreSQL backend
+- [07-01] Used git add -f for .env.production (template, not secrets) since .gitignore blocks .env*
+- [07-01] SESSION_DOMAIN omitted from production env template (public suffix list issue with .up.railway.app)
 
 ### Blockers/Concerns
 
@@ -49,6 +51,6 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-13T21:01:00Z
-Stopped at: Completed 06-02-PLAN.md (all tasks done, Phase 6 complete)
-Resume: Phase 6 complete -- proceed to next milestone phase if applicable
+Last session: 2026-03-14T02:16:25Z
+Stopped at: Completed 07-01-PLAN.md (backend deployment artifacts ready)
+Resume: Proceed to 07-02-PLAN.md (Railway deployment and service configuration)

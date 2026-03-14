@@ -47,7 +47,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Fix Dockerfile for PostgreSQL, create startup script, production env template
+- [x] 07-01-PLAN.md — Fix Dockerfile for PostgreSQL, create startup script, production env template
 - [ ] 07-02-PLAN.md — Deploy to Railway, configure services, verify public URLs
 
 **Success criteria:**
@@ -68,4 +68,4 @@ Plans:
 | 4.1. Layout Redesign | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 5. Dark Web Search | v1.0 | 2/2 | Complete | 2026-03-13 |
 | 6. PostgreSQL Migration | v1.1 | 2/2 | Complete | 2026-03-14 |
-| 7. Railway Production Deployment | v1.1 | 0/2 | Planning | — |
+| 7. Railway Production Deployment | v1.1 | 1/2 | In Progress | — |
