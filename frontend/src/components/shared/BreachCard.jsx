@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, KeyRound, Database, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, KeyRound, Database, Calendar, ChevronDown, ChevronUp, Globe } from 'lucide-react';
 
 function formatDate(dateStr) {
   if (!dateStr) return 'Unknown';
@@ -46,7 +46,7 @@ export function BreachCard({ breach }) {
         <FieldRow icon={Mail} label="Email" value={breach.email} />
         <FieldRow icon={KeyRound} label="Password" value={breach.password} />
         <FieldRow icon={Database} label="Source" value={breach.source} />
-        <FieldRow icon={Calendar} label="Breach Date" value={formatDate(breach.breach_date)} />
+        <FieldRow icon={Globe} label="URL" value={breach.url} />
       </div>
 
       {hasExtra && (

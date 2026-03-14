@@ -22,18 +22,21 @@ class DarkWebProviderService
         $baseUrl = config('services.dark_web.base_url');
         $apiKey = config('services.dark_web.api_key');
 
-        $response = Http::withHeaders(['X-API-Key' => $apiKey])
-            ->timeout(10)
+        $response = Http::withHeaders(['X-API-KEY' => $apiKey])
+            ->timeout(15)
             ->retry(2, 500, fn (\Exception $e) => $e instanceof ConnectionException)
-            ->get($baseUrl . '/query/' . urlencode($query), ['type' => $type]);
+            ->get($baseUrl . '/export', [
+                'q' => $query,
+                'limit' => 1000,
+            ]);
 
         $response->throw();
 
         $body = $response->json();
 
         return [
-            'found' => $body['found'] ?? 0,
-            'results' => $this->normalizeResults($body['result'] ?? []),
+            'found' => $body['total_in_db'] ?? 0,
+            'results' => $this->normalizeResults($body['results'] ?? []),
         ];
     }
 
@@ -43,15 +46,16 @@ class DarkWebProviderService
     private function normalizeResults(array $items): array
     {
         return array_map(fn (array $item) => [
-            'email' => $item['email'] ?? null,
-            'password' => $this->maskPassword($item['password'] ?? null),
-            'username' => $item['username'] ?? null,
-            'source' => $item['source']['name'] ?? null,
-            'breach_date' => $item['source']['breach_date'] ?? null,
-            'first_name' => $item['first_name'] ?? null,
-            'last_name' => $item['last_name'] ?? null,
-            'phone' => $item['phone'] ?? null,
-            'fields' => $item['fields'] ?? [],
+            'email' => $item['Email'] ?? null,
+            'password' => $this->maskPassword($item['Password'] ?? null),
+            'username' => $item['Username'] ?? null,
+            'source' => $item['TLD'] ?? $item['URL'] ?? null,
+            'url' => $item['URL'] ?? null,
+            'breach_date' => null,
+            'first_name' => $item['FirstName'] ?? null,
+            'last_name' => $item['LastName'] ?? null,
+            'phone' => $item['Phone'] ?? null,
+            'fields' => [],
         ], $items);
     }
 

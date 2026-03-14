@@ -84,11 +84,11 @@ Plans:
   3. User can view a paginated list of threat reports showing title, published date, description, and confidence level per card
   4. Each report shows related entities (linked indicators, malware, actors) when available
   5. Both lists support forward/backward pagination with cursor-based navigation
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
+- [ ] 10-01-PLAN.md — Backend services, controllers, and routes for threat actors and threat news API endpoints
+- [ ] 10-02-PLAN.md — Frontend pages with card grids, search/filters, expandable details, and pagination
 
 ### Phase 11: Threat Map
 **Goal**: Users see a live geographic threat map with real-time streaming data from OpenCTI
@@ -123,5 +123,5 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 7. Railway Production Deployment | v1.1 | 2/2 | Complete | 2026-03-14 |
 | 8. Foundation & OpenCTI Service | v2.0 | 2/2 | Complete | 2026-03-14 |
 | 9. IP Search Integration | v2.0 | 2/3 | Gap closure | - |
-| 10. Threat Actors & Threat News | v2.0 | 0/? | Not started | - |
+| 10. Threat Actors & Threat News | v2.0 | 0/2 | Planned | - |
 | 11. Threat Map | v2.0 | 0/? | Not started | - |
