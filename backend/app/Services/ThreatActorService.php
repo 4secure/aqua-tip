@@ -30,13 +30,15 @@ class ThreatActorService
         ?string $after = null,
         ?string $search = null,
         ?string $motivation = null,
+        string $orderBy = 'modified',
+        string $orderMode = 'desc',
     ): array {
         $cacheKey = 'threat_actors:' . md5(json_encode(func_get_args()));
 
         return Cache::remember(
             $cacheKey,
             now()->addMinutes(15),
-            fn () => $this->executeQuery($first, $after, $search, $motivation),
+            fn () => $this->executeQuery($first, $after, $search, $motivation, $orderBy, $orderMode),
         );
     }
 
@@ -48,6 +50,8 @@ class ThreatActorService
         ?string $after,
         ?string $search,
         ?string $motivation,
+        string $orderBy,
+        string $orderMode,
     ): array {
         $graphql = <<<'GRAPHQL'
         query (
@@ -134,8 +138,8 @@ class ThreatActorService
             'first' => $first,
             'after' => $after,
             'search' => $search ?: null,
-            'orderBy' => 'name',
-            'orderMode' => 'asc',
+            'orderBy' => $orderBy,
+            'orderMode' => $orderMode,
         ];
 
         if ($motivation) {

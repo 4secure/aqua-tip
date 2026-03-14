@@ -14,13 +14,15 @@ class IndexController extends Controller
      * List threat actors (intrusion sets) from OpenCTI.
      *
      * GET /api/threat-actors
-     * Query params: after, search, motivation
+     * Query params: after, search, motivation, sort, order
      */
     public function __invoke(Request $request): JsonResponse
     {
         $after = $request->query('after');
         $search = $request->query('search');
         $motivation = $request->query('motivation');
+        $sort = $request->query('sort', 'modified');
+        $order = $request->query('order', 'desc');
 
         try {
             $data = app(ThreatActorService::class)->list(
@@ -28,6 +30,8 @@ class IndexController extends Controller
                 $after,
                 $search,
                 $motivation,
+                $sort,
+                $order,
             );
         } catch (OpenCtiConnectionException) {
             return response()->json([

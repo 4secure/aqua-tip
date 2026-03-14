@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock } from 'lucide-react';
+import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ArrowUpDown } from 'lucide-react';
 import { fetchThreatActors } from '../api/threat-actors';
 import PaginationControls from '../components/shared/PaginationControls';
 import SkeletonCard from '../components/shared/SkeletonCard';
@@ -48,13 +48,14 @@ export default function ThreatActorsPage() {
   const after = searchParams.get('after') || '';
   const search = searchParams.get('search') || '';
   const motivation = searchParams.get('motivation') || '';
+  const order = searchParams.get('order') || 'desc';
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const params = {};
+      const params = { sort: 'modified', order };
       if (after) params.after = after;
       if (search) params.search = search;
       if (motivation) params.motivation = motivation;
@@ -70,7 +71,7 @@ export default function ThreatActorsPage() {
     } finally {
       setLoading(false);
     }
-  }, [after, search, motivation]);
+  }, [after, search, motivation, order]);
 
   useEffect(() => {
     loadData();
@@ -111,6 +112,10 @@ export default function ThreatActorsPage() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
+
+  const toggleOrder = useCallback(() => {
+    updateParam('order', order === 'desc' ? 'asc' : 'desc');
+  }, [order, updateParam]);
 
   const handleNext = useCallback(() => {
     if (pagination?.end_cursor) {
@@ -177,6 +182,14 @@ export default function ThreatActorsPage() {
             </option>
           ))}
         </select>
+
+        <button
+          onClick={toggleOrder}
+          className="flex items-center gap-2 px-3 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm hover:bg-surface-2 transition-colors"
+        >
+          <ArrowUpDown size={14} />
+          {order === 'desc' ? 'Newest first' : 'Oldest first'}
+        </button>
       </div>
 
       {/* Error State */}

@@ -125,8 +125,8 @@ test('list forwards pagination params to GraphQL query', function () {
             ->withArgs(function (string $graphql, array $variables) {
                 return $variables['first'] === 21
                     && $variables['after'] === 'my-cursor'
-                    && $variables['orderBy'] === 'name'
-                    && $variables['orderMode'] === 'asc';
+                    && $variables['orderBy'] === 'modified'
+                    && $variables['orderMode'] === 'desc';
             })
             ->andReturn(fakeIntrusionSetsResponse(0));
 
