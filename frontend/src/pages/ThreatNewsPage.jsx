@@ -63,7 +63,7 @@ export default function ThreatNewsPage() {
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedId, setExpandedId] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
   const [cursorHistory, setCursorHistory] = useState([]);
   const [entityFilterName, setEntityFilterName] = useState('');
 
@@ -84,7 +84,6 @@ export default function ThreatNewsPage() {
       if (after) params.after = after;
       if (confidence) params.confidence = confidence;
 
-      // Use entity name as search term when filtering by entity
       const effectiveSearch = entity || search;
       if (effectiveSearch) params.search = effectiveSearch;
 
@@ -190,10 +189,6 @@ export default function ThreatNewsPage() {
   }, [setSearchParams]);
 
   const currentOffset = cursorHistory.length * PAGE_SIZE;
-
-  const toggleExpand = useCallback((id) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -305,8 +300,7 @@ export default function ThreatNewsPage() {
               <ReportCard
                 key={report.id}
                 report={report}
-                isExpanded={expandedId === report.id}
-                onToggle={() => toggleExpand(report.id)}
+                onClick={() => setSelectedReport(report)}
                 onEntityClick={handleEntityChipClick}
               />
             ))}
@@ -321,25 +315,35 @@ export default function ThreatNewsPage() {
           />
         </>
       )}
+
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {selectedReport && (
+          <ReportModal
+            report={selectedReport}
+            onClose={() => setSelectedReport(null)}
+            onEntityClick={handleEntityChipClick}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 /* ── Report Card ── */
 
-function ReportCard({ report, isExpanded, onToggle, onEntityClick }) {
+function ReportCard({ report, onClick, onEntityClick }) {
   const entities = report.related_entities || [];
   const visibleEntities = entities.slice(0, MAX_VISIBLE_ENTITIES);
   const overflowCount = entities.length - MAX_VISIBLE_ENTITIES;
   const badge = confidenceBadge(report.confidence ?? 0);
 
   return (
-    <motion.div
-      layout
-      onClick={onToggle}
+    <div
+      onClick={onClick}
       className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-5 cursor-pointer hover:border-violet/40 transition-colors"
     >
-      {/* Title + Date row */}
+      {/* Title + Confidence */}
       <div className="flex items-start justify-between gap-3 mb-2">
         <h3 className="font-display text-lg font-bold text-text-primary leading-tight">
           {report.name}
@@ -383,87 +387,149 @@ function ReportCard({ report, isExpanded, onToggle, onEntityClick }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* Expanded section */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="mt-4 pt-4 border-t border-border space-y-3">
-              {/* Full related entities */}
-              {entities.length > MAX_VISIBLE_ENTITIES && (
-                <div>
-                  <span className="text-xs font-display text-text-muted uppercase tracking-wider">
-                    All Related Entities
-                  </span>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {entities.map((ent) => {
-                      const color = chipColor(ent.entity_type);
-                      return (
-                        <button
-                          key={ent.id}
-                          onClick={(e) => onEntityClick(e, ent)}
-                          className={`${color.bg} ${color.text} text-xs px-2 py-0.5 rounded-full font-mono hover:opacity-80 transition-opacity`}
-                        >
-                          {ent.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+/* ── Report Modal ── */
 
-              {/* Full description */}
-              {report.description && (
-                <div>
-                  <span className="text-xs font-display text-text-muted uppercase tracking-wider">
-                    Full Description
-                  </span>
-                  <p className="font-mono text-sm text-text-primary mt-0.5 whitespace-pre-line">
-                    {report.description}
-                  </p>
-                </div>
-              )}
+function ReportModal({ report, onClose, onEntityClick }) {
+  const entities = report.related_entities || [];
+  const badge = confidenceBadge(report.confidence ?? 0);
 
-              {/* External references */}
-              {report.external_references?.length > 0 && (
-                <div>
-                  <span className="text-xs font-display text-text-muted uppercase tracking-wider">
-                    External References
-                  </span>
-                  <ul className="mt-1 space-y-1">
-                    {report.external_references.map((ref, i) => (
-                      <li key={i}>
-                        {ref.url ? (
-                          <a
-                            href={ref.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1.5 text-sm font-mono text-cyan hover:underline"
-                          >
-                            <ExternalLink size={12} />
-                            {ref.source_name}
-                          </a>
-                        ) : (
-                          <span className="text-sm font-mono text-text-muted">
-                            {ref.source_name}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </motion.div>
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-primary/80 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ duration: 0.2 }}
+        className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-surface border border-border rounded-2xl p-6 shadow-2xl"
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-surface-2 transition-colors"
+        >
+          <X size={18} className="text-text-muted" />
+        </button>
+
+        {/* Title + Confidence */}
+        <div className="flex items-start gap-3 mb-2 pr-10">
+          <h2 className="font-display text-2xl font-bold text-text-primary leading-tight">
+            {report.name}
+          </h2>
+          <span className={`shrink-0 mt-1 ${badge.bg} ${badge.text} px-2.5 py-1 rounded text-xs font-mono`}>
+            {badge.label} ({report.confidence ?? 0})
+          </span>
+        </div>
+
+        {/* Published date */}
+        <p className="font-mono text-xs text-text-muted mb-4">
+          {formatDate(report.published)}
+        </p>
+
+        {/* Report types */}
+        {report.report_types?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-5">
+            {report.report_types.map((type) => (
+              <span key={type} className="bg-surface-2 text-text-muted px-2.5 py-1 rounded text-xs font-mono">
+                {type}
+              </span>
+            ))}
+          </div>
         )}
-      </AnimatePresence>
+
+        {/* Description */}
+        {report.description && (
+          <div className="mb-5">
+            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+              Description
+            </h3>
+            <p className="font-mono text-sm text-text-primary whitespace-pre-line leading-relaxed">
+              {report.description}
+            </p>
+          </div>
+        )}
+
+        {/* Related Entities */}
+        {entities.length > 0 && (
+          <div className="mb-5">
+            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+              Related Entities
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {entities.map((ent) => {
+                const color = chipColor(ent.entity_type);
+                return (
+                  <button
+                    key={ent.id}
+                    onClick={(e) => {
+                      onEntityClick(e, ent);
+                      onClose();
+                    }}
+                    className={`${color.bg} ${color.text} text-xs px-2 py-0.5 rounded-full font-mono hover:opacity-80 transition-opacity`}
+                  >
+                    {ent.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* External References */}
+        {report.external_references?.length > 0 && (
+          <div>
+            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+              External References
+            </h3>
+            <ul className="space-y-1.5">
+              {report.external_references.map((ref, i) => (
+                <li key={i}>
+                  {ref.url ? (
+                    <a
+                      href={ref.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm font-mono text-cyan hover:underline"
+                    >
+                      <ExternalLink size={12} />
+                      {ref.source_name}
+                    </a>
+                  ) : (
+                    <span className="text-sm font-mono text-text-muted">
+                      {ref.source_name}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </motion.div>
     </motion.div>
   );
 }
