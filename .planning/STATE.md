@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: PostgreSQL Migration & Railway Deployment
-status: in-progress
-stopped_at: Completed 07-01-PLAN.md (backend deployment artifacts ready)
-last_updated: "2026-03-14T02:17:35Z"
-last_activity: 2026-03-14 -- Completed 07-01 (Dockerfile fix, startup script, production env template)
+status: completed
+stopped_at: Completed 07-02-PLAN.md (Railway deployment verified live)
+last_updated: "2026-03-14T02:56:54.907Z"
+last_activity: 2026-03-14 -- Completed 07-02 (Railway deployment live and verified)
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** Users can securely sign up, log in, and access the platform -- with rate-limited IOC search for guests (1/day) and authenticated users (10/day).
-**Current focus:** Railway production deployment
+**Current focus:** v1.1 milestone complete
 
 ## Current Position
 
 Phase: 7 -- Railway Production Deployment
-Plan: 1 of 2 (COMPLETE)
-Status: Plan 1 complete -- deployment artifacts ready, proceed to Plan 2 (Railway deploy)
-Last activity: 2026-03-14 -- Completed 07-01 (Dockerfile fix, startup script, production env template)
+Plan: 2 of 2 (COMPLETE)
+Status: v1.1 milestone complete -- both services live on Railway
+Last activity: 2026-03-14 -- Completed 07-02 (Railway deployment live and verified)
 
 ## Accumulated Context
 
@@ -41,6 +41,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 - [06-02] User verified end-to-end local dev works with PostgreSQL backend
 - [07-01] Used git add -f for .env.production (template, not secrets) since .gitignore blocks .env*
 - [07-01] SESSION_DOMAIN omitted from production env template (public suffix list issue with .up.railway.app)
+- [Phase 07]: Used Railway reference variable for PostgreSQL connection, SESSION_DOMAIN omitted for .up.railway.app
 
 ### Blockers/Concerns
 
@@ -51,6 +52,6 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-14T02:16:25Z
-Stopped at: Completed 07-01-PLAN.md (backend deployment artifacts ready)
-Resume: Proceed to 07-02-PLAN.md (Railway deployment and service configuration)
+Last session: 2026-03-14T02:56:54.903Z
+Stopped at: Completed 07-02-PLAN.md (Railway deployment verified live)
+Resume: v1.1 milestone complete. No pending plans.

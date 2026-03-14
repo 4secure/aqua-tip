@@ -19,8 +19,8 @@ Requirements for PostgreSQL migration and Railway deployment.
 - [x] **DEPLOY-01**: Backend Dockerfile builds and runs Laravel with PHP-FPM + Nginx
 - [x] **DEPLOY-02**: Backend connects to Railway PostgreSQL addon via environment variables
 - [x] **DEPLOY-03**: Migrations run successfully on Railway PostgreSQL
-- [ ] **DEPLOY-04**: Frontend static server deploys and serves SPA on Railway
-- [ ] **DEPLOY-05**: Both services accessible via Railway-generated public URLs
+- [x] **DEPLOY-04**: Frontend static server deploys and serves SPA on Railway
+- [x] **DEPLOY-05**: Both services accessible via Railway-generated public URLs
 - [x] **DEPLOY-06**: Environment variables configured for production (APP_KEY, CORS, session domain, Sanctum stateful domains)
 
 ## v2 Requirements
@@ -54,8 +54,8 @@ Deferred to future milestones.
 | DEPLOY-01 | Phase 7 | Complete |
 | DEPLOY-02 | Phase 7 | Complete |
 | DEPLOY-03 | Phase 7 | Complete |
-| DEPLOY-04 | Phase 7 | Pending |
-| DEPLOY-05 | Phase 7 | Pending |
+| DEPLOY-04 | Phase 7 | Complete |
+| DEPLOY-05 | Phase 7 | Complete |
 | DEPLOY-06 | Phase 7 | Complete |
 
 **Coverage:**
