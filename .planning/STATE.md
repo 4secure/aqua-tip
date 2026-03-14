@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: OpenCTI Integration
-status: in-progress
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-03-15T19:25:34.000Z"
+status: completed
+stopped_at: Completed 09-03-PLAN.md
+last_updated: "2026-03-14T20:05:57.546Z"
 last_activity: 2026-03-15 -- Completed Phase 9 Plan 02 (Frontend IP Search)
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 5
+  completed_plans: 5
   percent: 80
 ---
 
@@ -48,6 +48,7 @@ Progress: [########░░] 80%
 | v2.0 Phase 8 | 2 | 12min | 6 min |
 | v2.0 Phase 9-01 | 1 | 5min | 5 min |
 | v2.0 Phase 9-02 | 1 | ~30min | ~30 min |
+| Phase 09 P03 | 1min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,7 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 - Dynamic tabs built from response data presence (Summary+Raw always shown)
 - Indicators extracted from relationships (based-on) when direct query returns empty
 - Field normalization in IpSearchService: geo.as/asname, score, labels, abstract, count
+- [Phase 09]: OpenCtiConnectionException propagates for refund; OpenCtiQueryException degrades to geo-only
 
 ### Blockers/Concerns
 
@@ -76,6 +78,6 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-15T19:25:34.000Z
-Stopped at: Completed 09-02-PLAN.md
+Last session: 2026-03-14T20:05:57.542Z
+Stopped at: Completed 09-03-PLAN.md
 Resume: Continue with Phase 10 (Threat Actors & Threat News)
