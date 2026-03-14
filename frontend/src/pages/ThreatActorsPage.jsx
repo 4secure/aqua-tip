@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X } from 'lucide-react';
+import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock } from 'lucide-react';
 import { fetchThreatActors } from '../api/threat-actors';
 import PaginationControls from '../components/shared/PaginationControls';
 import SkeletonCard from '../components/shared/SkeletonCard';
@@ -18,6 +18,19 @@ const MOTIVATION_OPTIONS = [
   { value: 'disruption', label: 'Disruption' },
   { value: 'unknown', label: 'Unknown' },
 ];
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  try {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } catch {
+    return dateStr;
+  }
+}
 
 const PAGE_SIZE = 21;
 
@@ -250,6 +263,14 @@ function ThreatActorCard({ actor, onClick }) {
         {actor.name}
       </h3>
 
+      {/* Modified date */}
+      {actor.modified && (
+        <p className="flex items-center gap-1.5 font-mono text-xs text-text-muted mb-2">
+          <Clock size={12} />
+          {formatDate(actor.modified)}
+        </p>
+      )}
+
       {actor.aliases?.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
           {actor.aliases.map((alias) => (
@@ -267,6 +288,26 @@ function ThreatActorCard({ actor, onClick }) {
         <p className="font-mono text-sm text-text-muted line-clamp-3 mb-3">
           {actor.description}
         </p>
+      )}
+
+      {/* Targeted Countries */}
+      {actor.targeted_countries?.length > 0 && (
+        <div className="flex items-start gap-1.5 mb-2">
+          <Globe size={13} className="text-cyan shrink-0 mt-0.5" />
+          <p className="font-mono text-xs text-text-muted line-clamp-1">
+            {actor.targeted_countries.join(', ')}
+          </p>
+        </div>
+      )}
+
+      {/* Targeted Sectors */}
+      {actor.targeted_sectors?.length > 0 && (
+        <div className="flex items-start gap-1.5 mb-3">
+          <Crosshair size={13} className="text-amber shrink-0 mt-0.5" />
+          <p className="font-mono text-xs text-text-muted line-clamp-1">
+            {actor.targeted_sectors.join(', ')}
+          </p>
+        </div>
       )}
 
       <div className="flex flex-wrap gap-2">
@@ -345,6 +386,14 @@ function ThreatActorModal({ actor, onClose }) {
           </div>
         )}
 
+        {/* Modified date */}
+        {actor.modified && (
+          <p className="flex items-center gap-1.5 font-mono text-xs text-text-muted mb-4">
+            <Clock size={12} />
+            Modified {formatDate(actor.modified)}
+          </p>
+        )}
+
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mb-5">
           {actor.motivation && (
@@ -385,6 +434,46 @@ function ThreatActorModal({ actor, onClose }) {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {/* Targeted Countries */}
+        {actor.targeted_countries?.length > 0 && (
+          <div className="mb-5">
+            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Globe size={12} />
+              Targeted Countries
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {actor.targeted_countries.map((country) => (
+                <span
+                  key={country}
+                  className="bg-cyan/10 text-cyan px-2.5 py-1 rounded-full text-xs font-mono"
+                >
+                  {country}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Targeted Sectors */}
+        {actor.targeted_sectors?.length > 0 && (
+          <div className="mb-5">
+            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Crosshair size={12} />
+              Targeted Sectors
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {actor.targeted_sectors.map((sector) => (
+                <span
+                  key={sector}
+                  className="bg-amber/10 text-amber px-2.5 py-1 rounded-full text-xs font-mono"
+                >
+                  {sector}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 

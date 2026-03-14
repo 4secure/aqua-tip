@@ -19,7 +19,20 @@ function fakeIntrusionSetsResponse(int $count = 2): array
                 'aliases' => ["Alias{$i}A", "Alias{$i}B"],
                 'primary_motivation' => 'espionage',
                 'resource_level' => 'government',
+                'modified' => '2025-01-15T10:30:00.000Z',
                 'goals' => ["Goal {$i} A", "Goal {$i} B"],
+                'targetedCountries' => [
+                    'edges' => [
+                        ['node' => ['to' => ['name' => 'United States']]],
+                        ['node' => ['to' => ['name' => 'Germany']]],
+                    ],
+                ],
+                'targetedSectors' => [
+                    'edges' => [
+                        ['node' => ['to' => ['name' => 'Government']]],
+                        ['node' => ['to' => ['name' => 'Defense']]],
+                    ],
+                ],
                 'externalReferences' => [
                     'edges' => [
                         [
@@ -74,7 +87,8 @@ test('list returns normalized threat actors with all fields', function () {
     $actor = $result['items'][0];
     expect($actor)->toHaveKeys([
         'id', 'name', 'description', 'aliases', 'motivation',
-        'resource_level', 'goals', 'external_references',
+        'resource_level', 'modified', 'goals', 'targeted_countries',
+        'targeted_sectors', 'external_references',
     ]);
     expect($actor['id'])->toBe('intrusion-set-1');
     expect($actor['name'])->toBe('APT1');

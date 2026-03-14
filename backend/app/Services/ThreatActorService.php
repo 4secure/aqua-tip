@@ -74,7 +74,40 @@ class ThreatActorService
                         aliases
                         primary_motivation
                         resource_level
+                        modified
                         goals
+                        targetedCountries: stixCoreRelationships(
+                            relationship_type: ["targets"]
+                            toTypes: ["Country"]
+                            first: 20
+                        ) {
+                            edges {
+                                node {
+                                    to {
+                                        ... on Country {
+                                            id
+                                            name
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        targetedSectors: stixCoreRelationships(
+                            relationship_type: ["targets"]
+                            toTypes: ["Sector"]
+                            first: 20
+                        ) {
+                            edges {
+                                node {
+                                    to {
+                                        ... on Sector {
+                                            id
+                                            name
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         externalReferences {
                             edges {
                                 node {
@@ -144,7 +177,14 @@ class ThreatActorService
                 'aliases' => $node['aliases'] ?? [],
                 'motivation' => $node['primary_motivation'] ?? null,
                 'resource_level' => $node['resource_level'] ?? null,
+                'modified' => $node['modified'] ?? null,
                 'goals' => $node['goals'] ?? [],
+                'targeted_countries' => $this->flattenRelationshipTargets(
+                    $node['targetedCountries']['edges'] ?? [],
+                ),
+                'targeted_sectors' => $this->flattenRelationshipTargets(
+                    $node['targetedSectors']['edges'] ?? [],
+                ),
                 'external_references' => $this->flattenExternalReferences(
                     $node['externalReferences']['edges'] ?? [],
                 ),
@@ -161,6 +201,17 @@ class ThreatActorService
                 'total' => $pageInfo['globalCount'] ?? null,
             ],
         ];
+    }
+
+    /**
+     * Flatten relationship target edges (countries, sectors) into name arrays.
+     */
+    private function flattenRelationshipTargets(array $edges): array
+    {
+        return array_values(array_unique(array_filter(array_map(
+            fn (array $edge) => $edge['node']['to']['name'] ?? null,
+            $edges,
+        ))));
     }
 
     /**
