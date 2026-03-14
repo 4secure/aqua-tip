@@ -19,7 +19,7 @@ const MOTIVATION_OPTIONS = [
   { value: 'unknown', label: 'Unknown' },
 ];
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 21;
 
 export default function ThreatActorsPage() {
   const [searchParams, setSearchParams] = useSearchParams();

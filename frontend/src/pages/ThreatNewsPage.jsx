@@ -54,7 +54,7 @@ function formatDate(dateStr) {
   }
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 21;
 const MAX_VISIBLE_ENTITIES = 4;
 
 export default function ThreatNewsPage() {

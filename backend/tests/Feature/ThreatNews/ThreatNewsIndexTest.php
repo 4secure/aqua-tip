@@ -155,7 +155,7 @@ test('list forwards pagination and sort params to GraphQL query', function () {
         $mock = Mockery::mock(OpenCtiService::class);
         $mock->shouldReceive('query')
             ->withArgs(function (string $graphql, array $variables) {
-                return $variables['first'] === 20
+                return $variables['first'] === 21
                     && $variables['after'] === 'my-cursor'
                     && $variables['orderBy'] === 'published'
                     && $variables['orderMode'] === 'desc';
@@ -166,7 +166,7 @@ test('list forwards pagination and sort params to GraphQL query', function () {
     });
 
     $service = app(\App\Services\ThreatNewsService::class);
-    $result = $service->list(20, 'my-cursor');
+    $result = $service->list(21, 'my-cursor');
 
     expect($result['items'])->toBeArray();
 });
@@ -185,7 +185,7 @@ test('list passes search as GraphQL variable not filter', function () {
     });
 
     $service = app(\App\Services\ThreatNewsService::class);
-    $result = $service->list(20, null, 'apt28');
+    $result = $service->list(21, null, 'apt28');
 
     expect($result['items'])->toBeArray();
 });
@@ -212,7 +212,7 @@ test('list builds FilterGroup for confidence filter', function () {
     });
 
     $service = app(\App\Services\ThreatNewsService::class);
-    $result = $service->list(20, null, null, '85');
+    $result = $service->list(21, null, null, '85');
 
     expect($result['items'])->toBeArray();
 });

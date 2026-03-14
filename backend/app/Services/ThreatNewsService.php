@@ -28,7 +28,7 @@ class ThreatNewsService
      * @throws \App\Exceptions\OpenCtiConnectionException
      */
     public function list(
-        int $first = 20,
+        int $first = 21,
         ?string $after = null,
         ?string $search = null,
         ?string $confidence = null,

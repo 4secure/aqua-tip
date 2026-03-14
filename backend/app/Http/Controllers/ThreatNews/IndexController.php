@@ -26,7 +26,7 @@ class IndexController extends Controller
 
         try {
             $data = app(ThreatNewsService::class)->list(
-                20,
+                21,
                 $after,
                 $search,
                 $confidence,
