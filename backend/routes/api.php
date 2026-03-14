@@ -13,7 +13,7 @@ use App\Http\Controllers\Auth\VerifyEmailCodeController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Credit\CreditStatusController;
 use App\Http\Controllers\DarkWeb\SearchController as DarkWebSearchController;
-use App\Http\Controllers\Ioc\SearchController;
+use App\Http\Controllers\IpSearch\SearchController;
 use Illuminate\Support\Facades\Route;
 
 // Guest auth routes with rate limiting
@@ -44,8 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/dark-web/search', DarkWebSearchController::class)->middleware('deduct-credit');
 });
 
-// IOC search (guests + authenticated users, credit-gated)
-Route::post('/ioc/search', SearchController::class)->middleware('deduct-credit');
+// IP search (guests + authenticated users, credit-gated)
+Route::post('/ip-search', SearchController::class)->middleware('deduct-credit');
 
 // Credit status (read-only, no deduction)
 Route::get('/credits', CreditStatusController::class);

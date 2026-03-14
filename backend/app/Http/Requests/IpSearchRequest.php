@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class IocSearchRequest extends FormRequest
+class IpSearchRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,7 +17,7 @@ class IocSearchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'query' => 'required|string|max:500',
+            'query' => ['required', 'string', 'ip'],
         ];
     }
 }
