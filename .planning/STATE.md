@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: OpenCTI Integration
-status: completed
-stopped_at: Completed 10-02-PLAN.md (Threat Actors & News Frontend)
-last_updated: "2026-03-15T01:39:47.149Z"
-last_activity: 2026-03-15 -- Completed Phase 10 Plan 02 (Threat Actors & News Frontend)
+status: in-progress
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-03-15T02:39:40Z"
+last_activity: 2026-03-15 -- Completed Phase 11 Plan 01 (Threat Map Backend)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_plans: 8
+  completed_plans: 8
+  percent: 87
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** Users can securely sign up, log in, and access the platform -- with rate-limited IP search for guests (1/day) and authenticated users (10/day).
-**Current focus:** Phase 10 - Threat Actors & Threat News
+**Current focus:** Phase 11 - Threat Map
 
 ## Current Position
 
-Phase: 10 of 11 (Threat Actors & Threat News)
-Plan: 2 of 2 complete
-Status: Phase 10 complete, Phase 11 (Threat Map) next
-Last activity: 2026-03-15 -- Completed Phase 10 Plan 02 (Threat Actors & News Frontend)
+Phase: 11 of 11 (Threat Map)
+Plan: 1 of 2 complete
+Status: Phase 11 Plan 01 complete, Plan 02 (Frontend) next
+Last activity: 2026-03-15 -- Completed Phase 11 Plan 01 (Threat Map Backend)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 87%
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100%
 | v2.0 Phase 9-02 | 1 | ~30min | ~30 min |
 | Phase 09 P03 | 1min | 2 tasks | 2 files |
 | v2.0 Phase 10-01 | 5min | 2 tasks | 7 files |
+| v2.0 Phase 11-01 | 6min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 - [Phase 10-02]: 21 cards per page for visual grid balance (7 rows of 3)
 - [Phase 10-02]: Sophistication field removed -- not in OpenCTI IntrusionSet schema
 - [Phase 10-02]: relationship_type must be string not array in OpenCTI GraphQL filters
+- [Phase 11-01]: ThreatMapService does not inject OpenCtiService for SSE relay; stream controller handles HTTP streaming directly
+- [Phase 11-01]: resolveGeo accepts optional countryCode hint for centroid fallback when ip-api fails
+- [Phase 11-01]: Attack type color mapping: red (C2/DDoS/malware), amber (scanning/BEC), violet (phishing/APT), cyan (recon/default)
 
 ### Blockers/Concerns
 
@@ -86,6 +90,6 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-15T00:00:00.000Z
-Stopped at: Completed 10-02-PLAN.md (Threat Actors & News Frontend)
-Resume: Phase 10 complete. Continue with Phase 11 (Threat Map) or address Phase 9 Plan 03 gap closure.
+Last session: 2026-03-15T02:39:40Z
+Stopped at: Completed 11-01-PLAN.md
+Resume: Phase 11 Plan 01 complete. Continue with Phase 11 Plan 02 (Frontend) or address Phase 9 Plan 03 gap closure.

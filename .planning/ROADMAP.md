@@ -103,7 +103,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Backend: ThreatMapService, CountryCentroids, Snapshot and Stream controllers with SSE relay
+- [x] 11-01-PLAN.md — Backend: ThreatMapService, CountryCentroids, Snapshot and Stream controllers with SSE relay
 - [ ] 11-02-PLAN.md — Frontend: useThreatStream hook, sub-components, ThreatMapPage refactor with live data
 
 ## Progress
@@ -124,4 +124,4 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 8. Foundation & OpenCTI Service | v2.0 | 2/2 | Complete | 2026-03-14 |
 | 9. IP Search Integration | v2.0 | 2/3 | Gap closure | - |
 | 10. Threat Actors & Threat News | v2.0 | Complete    | 2026-03-15 | 2026-03-15 |
-| 11. Threat Map | v2.0 | 0/2 | Planned | - |
+| 11. Threat Map | v2.0 | 1/2 | In Progress | - |
