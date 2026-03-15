@@ -44,5 +44,6 @@ export async function resetPassword({ token, email, password, password_confirmat
 }
 
 export async function completeOnboarding({ name, phone }) {
+  await csrfCookie();
   return apiClient.post('/api/onboarding', { name, phone });
 }
