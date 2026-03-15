@@ -147,3 +147,26 @@
 .stagger-in > *:nth-child(6) { animation-delay: 0.3s; }
 .stagger-in > *:nth-child(7) { animation-delay: 0.35s; }
 .stagger-in > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* Map event pulse-and-fade markers */
+@keyframes mapEventPulse {
+  0% { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+.map-event-pulse {
+  border-radius: 50%;
+  animation: mapEventPulse 1.5s ease-out forwards;
+  pointer-events: none;
+}
+
+.map-event-pulse--red { background: rgba(255, 59, 92, 0.6); box-shadow: 0 0 12px rgba(255, 59, 92, 0.4); }
+.map-event-pulse--amber { background: rgba(255, 176, 32, 0.6); box-shadow: 0 0 12px rgba(255, 176, 32, 0.4); }
+.map-event-pulse--violet { background: rgba(122, 68, 228, 0.6); box-shadow: 0 0 12px rgba(122, 68, 228, 0.4); }
+.map-event-pulse--cyan { background: rgba(0, 229, 255, 0.6); box-shadow: 0 0 12px rgba(0, 229, 255, 0.4); }
+
+.map-event-pulse--highlight {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+  animation: mapEventPulse 2s ease-out forwards;
+}
