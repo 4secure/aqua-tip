@@ -16,6 +16,8 @@ use App\Http\Controllers\DarkWeb\SearchController as DarkWebSearchController;
 use App\Http\Controllers\IpSearch\SearchController;
 use App\Http\Controllers\OpenCti\HealthController as OpenCtiHealthController;
 use App\Http\Controllers\ThreatActor\IndexController as ThreatActorIndexController;
+use App\Http\Controllers\ThreatMap\SnapshotController as ThreatMapSnapshotController;
+use App\Http\Controllers\ThreatMap\StreamController as ThreatMapStreamController;
 use App\Http\Controllers\ThreatNews\IndexController as ThreatNewsIndexController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +54,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Threat actors & threat news (browse pages, no credit gating)
     Route::get('/threat-actors', ThreatActorIndexController::class);
     Route::get('/threat-news', ThreatNewsIndexController::class);
+
+    // Threat map (live streaming, no credit gating)
+    Route::get('/threat-map/snapshot', ThreatMapSnapshotController::class);
+    Route::get('/threat-map/stream', ThreatMapStreamController::class);
 });
 
 // IP search (guests + authenticated users, credit-gated)
