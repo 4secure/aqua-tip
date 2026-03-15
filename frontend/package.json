@@ -12,7 +12,6 @@
     "@vitejs/plugin-react": "^5.1.4",
     "autoprefixer": "^10.4.27",
     "chart.js": "^4.5.1",
-    "cobe": "^0.6.5",
     "d3": "^7.9.0",
     "framer-motion": "^12.35.2",
     "leaflet": "^1.9.4",

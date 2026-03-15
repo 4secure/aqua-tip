@@ -114,7 +114,7 @@ export function LandingScroll() {
             }}
           >
             <div className="relative w-[700px] h-[700px]">
-              <Globe className="w-full h-full" />
+              <Globe className="w-full h-full" width={700} height={700} />
               <div
                 className="absolute inset-0 -z-10 blur-3xl rounded-full"
                 style={{
@@ -215,7 +215,7 @@ export function LandingScroll() {
             </div>
           </div>
           <div className="w-64 h-64 mt-10">
-            <Globe className="w-full h-full" />
+            <Globe className="w-full h-full" width={256} height={256} />
           </div>
         </section>
 

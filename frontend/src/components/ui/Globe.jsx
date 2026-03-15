@@ -1,111 +1,342 @@
-import { useEffect, useRef, useCallback, memo } from "react";
-import createGlobe from "cobe";
+import { useEffect, useRef, useState, memo } from "react";
+import * as d3 from "d3";
 
-export const Globe = memo(function Globe({ className }) {
+// Dark-theme-only hardcoded colors
+const OCEAN_BG_COLOR = "#070511";
+const GLOBE_STROKE_COLOR = "#a855f7";
+const LAND_DOT_COLOR = "#a78bfa";
+
+const PING_COLORS = [
+  [239, 68, 68], // red
+  [249, 115, 22], // orange
+  [234, 179, 8], // yellow
+];
+
+const GEOJSON_URL =
+  "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/refs/heads/master/110m/physical/ne_110m_land.json";
+
+export const Globe = memo(function Globe({ width = 600, height = 700, className = "" }) {
   const canvasRef = useRef(null);
-  const pointerInteracting = useRef(null);
-  const pointerInteractionMovement = useRef(0);
-  const phiRef = useRef(0);
-  const widthRef = useRef(0);
-
-  const onResize = useCallback(() => {
-    if (canvasRef.current) {
-      widthRef.current = canvasRef.current.offsetWidth;
-    }
-  }, []);
+  const containerRef = useRef(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!canvasRef.current) return;
+
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
 
-    window.addEventListener("resize", onResize);
-    onResize();
+    const containerWidth = Math.min(width, window.innerWidth - 40);
+    const containerHeight = Math.min(height, window.innerHeight - 100);
+    const radius = Math.min(containerWidth, containerHeight) / 2.5;
 
-    const dpr = Math.min(window.devicePixelRatio, 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    canvas.width = containerWidth * dpr;
+    canvas.height = containerHeight * dpr;
+    canvas.style.width = `${containerWidth}px`;
+    canvas.style.height = `${containerHeight}px`;
+    context.scale(dpr, dpr);
 
-    const globe = createGlobe(canvas, {
-      devicePixelRatio: dpr,
-      width: widthRef.current * dpr,
-      height: widthRef.current * dpr,
-      phi: 0,
-      theta: 0.25,
-      dark: 1,
-      diffuse: 1.2,
-      mapSamples: 20000,
-      mapBrightness: 12,
-      baseColor: [0.039, 0.043, 0.063],
-      markerColor: [0.478, 0.267, 0.894],
-      glowColor: [0.608, 0.420, 0.969],
-      markers: [
-        { location: [37.7749, -122.4194], size: 0.06 },
-        { location: [51.5074, -0.1278], size: 0.06 },
-        { location: [35.6762, 139.6503], size: 0.06 },
-        { location: [-33.8688, 151.2093], size: 0.05 },
-        { location: [1.3521, 103.8198], size: 0.05 },
-        { location: [55.7558, 37.6173], size: 0.06 },
-        { location: [48.8566, 2.3522], size: 0.05 },
-        { location: [-23.5505, -46.6333], size: 0.05 },
-      ],
-      onRender: (state) => {
-        if (!pointerInteracting.current) {
-          phiRef.current += 0.005;
+    const centerX = containerWidth / 2;
+    const centerY = containerHeight / 2;
+
+    const projection = d3
+      .geoOrthographic()
+      .scale(radius)
+      .translate([centerX, centerY])
+      .clipAngle(90);
+
+    const path = d3.geoPath().projection(projection).context(context);
+
+    // Cache graticule geometry — no need to recreate every frame
+    const graticuleData = d3.geoGraticule()();
+
+    const pointInPolygon = (point, polygon) => {
+      const [x, y] = point;
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const [xi, yi] = polygon[i];
+        const [xj, yj] = polygon[j];
+        if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+          inside = !inside;
         }
-        state.phi = phiRef.current + pointerInteractionMovement.current;
-        state.width = widthRef.current * dpr;
-        state.height = widthRef.current * dpr;
-      },
-    });
-
-    const handlePointerDown = (e) => {
-      pointerInteracting.current =
-        e.clientX - pointerInteractionMovement.current;
-      canvas.style.cursor = "grabbing";
+      }
+      return inside;
     };
 
-    const handlePointerUp = () => {
-      pointerInteracting.current = null;
-      canvas.style.cursor = "grab";
+    const pointInFeature = (point, feature) => {
+      const geometry = feature.geometry;
+      if (geometry.type === "Polygon") {
+        const coordinates = geometry.coordinates;
+        if (!pointInPolygon(point, coordinates[0])) return false;
+        for (let i = 1; i < coordinates.length; i++) {
+          if (pointInPolygon(point, coordinates[i])) return false;
+        }
+        return true;
+      } else if (geometry.type === "MultiPolygon") {
+        for (const polygon of geometry.coordinates) {
+          if (pointInPolygon(point, polygon[0])) {
+            let inHole = false;
+            for (let i = 1; i < polygon.length; i++) {
+              if (pointInPolygon(point, polygon[i])) {
+                inHole = true;
+                break;
+              }
+            }
+            if (!inHole) return true;
+          }
+        }
+        return false;
+      }
+      return false;
     };
 
-    const handlePointerOut = () => {
-      pointerInteracting.current = null;
-      canvas.style.cursor = "grab";
+    const generateDotsInPolygon = (feature, dotSpacing = 18) => {
+      const dots = [];
+      const bounds = d3.geoBounds(feature);
+      const [[minLng, minLat], [maxLng, maxLat]] = bounds;
+      const stepSize = dotSpacing * 0.08;
+      for (let lng = minLng; lng <= maxLng; lng += stepSize) {
+        for (let lat = minLat; lat <= maxLat; lat += stepSize) {
+          const point = [lng, lat];
+          if (pointInFeature(point, feature)) {
+            dots.push(point);
+          }
+        }
+      }
+      return dots;
     };
 
-    const handlePointerMove = (e) => {
-      if (pointerInteracting.current !== null) {
-        const delta = e.clientX - pointerInteracting.current;
-        pointerInteractionMovement.current = delta / 200;
+    // Store dots as flat arrays for faster iteration
+    let dotLngs = null;
+    let dotLats = null;
+    let dotCount = 0;
+    const pings = [];
+    let pingColorIndex = 0;
+    let landFeatures;
+    let isVisible = true;
+    const dotRadius = 1.2;
+
+    const render = () => {
+      context.clearRect(0, 0, containerWidth, containerHeight);
+
+      const currentScale = projection.scale();
+      const scaleFactor = currentScale / radius;
+
+      // Ocean background
+      context.beginPath();
+      context.arc(centerX, centerY, currentScale, 0, 2 * Math.PI);
+      context.fillStyle = OCEAN_BG_COLOR;
+      context.fill();
+      context.strokeStyle = GLOBE_STROKE_COLOR;
+      context.lineWidth = 2 * scaleFactor;
+      context.stroke();
+
+      if (!landFeatures) return;
+
+      // Graticule (cached geometry)
+      context.beginPath();
+      path(graticuleData);
+      context.strokeStyle = GLOBE_STROKE_COLOR;
+      context.lineWidth = scaleFactor;
+      context.globalAlpha = 0.15;
+      context.stroke();
+      context.globalAlpha = 1;
+
+      // Land outlines
+      context.beginPath();
+      for (const feature of landFeatures.features) {
+        path(feature);
+      }
+      context.strokeStyle = GLOBE_STROKE_COLOR;
+      context.lineWidth = scaleFactor;
+      context.stroke();
+
+      // Halftone dots — single batched path for all dots
+      const r = dotRadius * scaleFactor;
+      const twoPi = 2 * Math.PI;
+      context.beginPath();
+      for (let i = 0; i < dotCount; i++) {
+        const projected = projection([dotLngs[i], dotLats[i]]);
+        if (projected) {
+          const px = projected[0];
+          const py = projected[1];
+          if (px >= 0 && px <= containerWidth && py >= 0 && py <= containerHeight) {
+            context.moveTo(px + r, py);
+            context.arc(px, py, r, 0, twoPi);
+          }
+        }
+      }
+      context.fillStyle = LAND_DOT_COLOR;
+      context.fill();
+
+      // Threat pings
+      if (pings.length === 0) return;
+      const now = Date.now();
+      for (let i = pings.length - 1; i >= 0; i--) {
+        const ping = pings[i];
+        const elapsed = now - ping.startTime;
+        const progress = elapsed / ping.duration;
+        if (progress >= 1) {
+          pings.splice(i, 1);
+          continue;
+        }
+
+        const projected = projection([ping.lng, ping.lat]);
+        if (!projected) continue;
+
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const [cr, cg, cb] = ping.color;
+        const fade = 1 - progress;
+
+        // Center dot
+        context.beginPath();
+        context.arc(projected[0], projected[1], 3 * scaleFactor, 0, twoPi);
+        context.fillStyle = `rgba(${cr},${cg},${cb},${fade})`;
+        context.fill();
+
+        // Expanding ring
+        context.beginPath();
+        context.arc(projected[0], projected[1], eased * 20 * scaleFactor, 0, twoPi);
+        context.strokeStyle = `rgba(${cr},${cg},${cb},${fade * 0.8})`;
+        context.lineWidth = 1.5 * scaleFactor;
+        context.stroke();
       }
     };
 
-    canvas.addEventListener("pointerdown", handlePointerDown);
-    canvas.addEventListener("pointerup", handlePointerUp);
-    canvas.addEventListener("pointerout", handlePointerOut);
-    canvas.addEventListener("pointermove", handlePointerMove);
+    const loadWorldData = async () => {
+      try {
+        const response = await fetch(GEOJSON_URL);
+        if (!response.ok) throw new Error("Failed to load land data");
+
+        landFeatures = await response.json();
+
+        const tempDots = [];
+        for (const feature of landFeatures.features) {
+          const dots = generateDotsInPolygon(feature, 18);
+          for (const [lng, lat] of dots) {
+            tempDots.push(lng, lat);
+          }
+        }
+
+        // Store as typed arrays for cache-friendly iteration
+        dotCount = tempDots.length / 2;
+        dotLngs = new Float64Array(dotCount);
+        dotLats = new Float64Array(dotCount);
+        for (let i = 0; i < dotCount; i++) {
+          dotLngs[i] = tempDots[i * 2];
+          dotLats[i] = tempDots[i * 2 + 1];
+        }
+
+        render();
+      } catch (err) {
+        setError("Failed to load land map data");
+      }
+    };
+
+    // Rotation and interaction
+    const rotation = [0, 0];
+    let autoRotate = true;
+    const rotationSpeed = 0.2;
+
+    const rotationTimer = d3.timer(() => {
+      if (!isVisible) return;
+      if (autoRotate) {
+        rotation[0] += rotationSpeed;
+        projection.rotate(rotation);
+        render();
+      }
+    });
+
+    // Pause when off-screen to free up main thread for scroll
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0 }
+    );
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    const handleMouseDown = (event) => {
+      autoRotate = false;
+      const startX = event.clientX;
+      const startRotation = [...rotation];
+
+      const handleMouseMove = (moveEvent) => {
+        const dx = moveEvent.clientX - startX;
+        rotation[0] = startRotation[0] + dx * 0.5;
+        projection.rotate(rotation);
+        render();
+      };
+
+      const handleMouseUp = () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+        setTimeout(() => {
+          autoRotate = true;
+        }, 10);
+      };
+
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    };
+
+    canvas.addEventListener("mousedown", handleMouseDown);
+
+    loadWorldData();
+
+    const pingInterval = setInterval(() => {
+      if (dotCount === 0) return;
+      const idx = Math.floor(Math.random() * dotCount);
+      const color = PING_COLORS[pingColorIndex % PING_COLORS.length];
+      pingColorIndex++;
+      pings.push({
+        lng: dotLngs[idx],
+        lat: dotLats[idx],
+        startTime: Date.now(),
+        duration: 1500,
+        color,
+      });
+    }, 300);
 
     return () => {
-      globe.destroy();
-      window.removeEventListener("resize", onResize);
-      canvas.removeEventListener("pointerdown", handlePointerDown);
-      canvas.removeEventListener("pointerup", handlePointerUp);
-      canvas.removeEventListener("pointerout", handlePointerOut);
-      canvas.removeEventListener("pointermove", handlePointerMove);
+      rotationTimer.stop();
+      clearInterval(pingInterval);
+      observer.disconnect();
+      canvas.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [onResize]);
+  }, [width, height]);
+
+  if (error) {
+    return (
+      <div className={className}>
+        <div style={{ textAlign: "center" }}>
+          <p className="text-red font-display font-semibold mb-2">
+            Error loading Earth visualization
+          </p>
+          <p className="text-text-secondary text-sm font-mono">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <canvas
-      ref={canvasRef}
+    <div
+      ref={containerRef}
       className={className}
-      style={{
-        width: "100%",
-        height: "100%",
-        cursor: "grab",
-        contain: "layout paint size",
-        aspectRatio: "1 / 1",
-        willChange: "transform",
-      }}
-    />
+      style={{ position: "relative", willChange: "transform" }}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{
+          maxWidth: "100%",
+          height: "auto",
+          cursor: "grab",
+        }}
+      />
+    </div>
   );
 });
