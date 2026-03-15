@@ -46,7 +46,7 @@ export function useThreatStream() {
   const [counters, setCounters] = useState({ threats: 0, countries: 0, types: 0 });
   const [connected, setConnected] = useState(false);
   const esRef = useRef(null);
-  const snapshotLoaded = useRef(false);
+  const [snapshotLoaded, setSnapshotLoaded] = useState(false);
 
   const recalculate = useCallback((eventList) => {
     setCounters(deriveCounters(eventList));
@@ -67,10 +67,10 @@ export function useThreatStream() {
         } else {
           recalculate(initialEvents);
         }
-        snapshotLoaded.current = true;
+        setSnapshotLoaded(true);
       } catch {
         // Snapshot failed - continue with empty state, SSE may still work
-        snapshotLoaded.current = true;
+        setSnapshotLoaded(true);
       }
     }
 
@@ -80,7 +80,7 @@ export function useThreatStream() {
 
   // SSE connection
   useEffect(() => {
-    if (!snapshotLoaded.current) return;
+    if (!snapshotLoaded) return;
 
     const es = new EventSource(`${BASE_URL}/api/threat-map/stream`, {
       withCredentials: true,
@@ -94,6 +94,7 @@ export function useThreatStream() {
     es.onmessage = (msg) => {
       try {
         const newEvent = JSON.parse(msg.data);
+        if (newEvent.error) return;
         setEvents((prev) => {
           const updated = [newEvent, ...prev].slice(0, MAX_EVENTS);
           setCounters(deriveCounters(updated));
@@ -113,7 +114,7 @@ export function useThreatStream() {
       es.close();
       esRef.current = null;
     };
-  }, [snapshotLoaded.current]);
+  }, [snapshotLoaded]);
 
   const countryCounts = aggregateCountryCounts(events);
   const typeCounts = aggregateTypeCounts(events);

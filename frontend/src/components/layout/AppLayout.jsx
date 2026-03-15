@@ -31,7 +31,7 @@ export default function AppLayout() {
         onHamburgerClick={() => setMobileOpen(true)}
         onNotifClick={toggleNotif}
       />
-      <main className={`flex-1 pt-[60px] p-6 transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-[260px]'} ml-0`}>
+      <main className={`flex-1 pt-[84px] p-6 transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-[260px]'} ml-0`}>
         <Outlet />
       </main>
       <NotificationDrawer open={notifOpen} onClose={closeNotif} />

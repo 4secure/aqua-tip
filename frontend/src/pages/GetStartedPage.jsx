@@ -161,7 +161,7 @@ export default function GetStartedPage() {
               </label>
               <PhoneInput
                 defaultCountry="US"
-                value={phone}
+                value={phone || undefined}
                 onChange={(val) => {
                   setPhone(val || '');
                   setErrors((prev) => ({ ...prev, phone: undefined }));

@@ -13,11 +13,16 @@ export function useLeaflet({ center, zoom, markers, onReady }) {
       zoom,
       zoomControl: false,
       attributionControl: false,
+      maxBounds: [[-90, -180], [90, 180]],
+      maxBoundsViscosity: 1.0,
+      minZoom: 2,
     });
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
       maxZoom: 19,
+      noWrap: true,
+      bounds: [[-90, -180], [90, 180]],
     }).addTo(map);
 
     // Add popup styles

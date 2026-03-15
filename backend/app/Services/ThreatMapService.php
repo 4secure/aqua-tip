@@ -157,6 +157,83 @@ class ThreatMapService
     }
 
     /**
+     * Poll OpenCTI for IP observables created after $since.
+     *
+     * Returns parsed (but not geo-enriched) events, newest first.
+     *
+     * @param  string  $since  ISO-8601 timestamp cursor
+     * @return array<int, array>
+     */
+    public function pollRecentEvents(string $since): array
+    {
+        $graphql = <<<'GRAPHQL'
+        query ($filters: FilterGroup) {
+            stixCyberObservables(filters: $filters, first: 30, orderBy: created_at, orderMode: desc) {
+                edges {
+                    node {
+                        id
+                        entity_type
+                        observable_value
+                        created_at
+                        objectLabel {
+                            value
+                        }
+                        ... on IPv4Addr {
+                            value
+                        }
+                        ... on IPv6Addr {
+                            value
+                        }
+                    }
+                }
+            }
+        }
+        GRAPHQL;
+
+        $variables = [
+            'filters' => [
+                'mode' => 'and',
+                'filters' => [
+                    [
+                        'key' => 'entity_type',
+                        'values' => ['IPv4-Addr', 'IPv6-Addr'],
+                        'operator' => 'eq',
+                        'mode' => 'or',
+                    ],
+                    [
+                        'key' => 'created_at',
+                        'values' => [$since],
+                        'operator' => 'gt',
+                        'mode' => 'or',
+                    ],
+                ],
+                'filterGroups' => [],
+            ],
+        ];
+
+        $data = $this->openCti->query($graphql, $variables);
+        $edges = $data['stixCyberObservables']['edges'] ?? [];
+
+        $events = [];
+
+        foreach ($edges as $edge) {
+            $node = $edge['node'] ?? null;
+
+            if ($node === null) {
+                continue;
+            }
+
+            $parsed = $this->parseStixEvent($node);
+
+            if ($parsed !== null) {
+                $events[] = $parsed;
+            }
+        }
+
+        return $events;
+    }
+
+    /**
      * Fetch recent STIX events from OpenCTI for the snapshot.
      */
     private function fetchSnapshot(): array
@@ -169,9 +246,14 @@ class ThreatMapService
                         id
                         entity_type
                         observable_value
-                        value
                         created_at
                         objectLabel {
+                            value
+                        }
+                        ... on IPv4Addr {
+                            value
+                        }
+                        ... on IPv6Addr {
                             value
                         }
                     }

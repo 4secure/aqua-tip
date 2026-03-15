@@ -20,6 +20,13 @@ export default function ThreatMapFeed({ events, onEventClick }) {
   const scrollRef = useRef(null);
   const [userScrolled, setUserScrolled] = useState(false);
   const prevFirstId = useRef(null);
+  const [, setTick] = useState(0);
+
+  // Re-render every 30s so relative timestamps stay current
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;

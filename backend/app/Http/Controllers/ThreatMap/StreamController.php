@@ -4,134 +4,85 @@ namespace App\Http\Controllers\ThreatMap;
 
 use App\Http\Controllers\Controller;
 use App\Services\ThreatMapService;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StreamController extends Controller
 {
     /**
-     * Relay OpenCTI SSE events to the authenticated frontend client.
+     * Stream threat map events to the frontend via SSE.
      *
      * GET /api/threat-map/stream
      *
-     * Sets proper SSE headers and streams parsed/enriched STIX events.
-     * Sends heartbeat comments every 30 seconds. Stops when client disconnects.
+     * Polls OpenCTI GraphQL for recent IP observables every 10 seconds,
+     * emitting new events as SSE data frames. Uses the same auth as all
+     * other OpenCTI queries (Bearer token on GraphQL), avoiding the
+     * separate "Access streams" capability required by /stream/live.
      */
     public function __invoke(): StreamedResponse
     {
         $service = app(ThreatMapService::class);
 
         return response()->stream(function () use ($service) {
-            // Disable output buffering for real-time streaming
             while (ob_get_level()) {
                 ob_end_flush();
             }
 
             @set_time_limit(0);
 
-            // Set browser reconnect interval to 10 seconds
             echo "retry: 10000\n\n";
+            $this->flush();
 
-            if (function_exists('flush')) {
-                @flush();
-            }
+            $seenIds = [];
+            $cursor = now()->subMinutes(2)->toIso8601String();
 
-            $baseUrl = config('services.opencti.url');
-            $token = config('services.opencti.token');
+            while (true) {
+                if (connection_aborted()) {
+                    break;
+                }
 
-            if (empty($baseUrl) || empty($token)) {
-                echo "data: " . json_encode(['error' => 'OpenCTI not configured']) . "\n\n";
+                try {
+                    $events = $service->pollRecentEvents($cursor);
 
-                return;
-            }
+                    foreach ($events as $event) {
+                        $id = $event['id'];
 
-            try {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $token,
-                    'Accept' => 'text/event-stream',
-                ])->withOptions([
-                    'stream' => true,
-                    'timeout' => 0,
-                    'read_timeout' => 0,
-                ])->get($baseUrl . '/stream');
-
-                $body = $response->getBody();
-                $lastHeartbeat = time();
-
-                while (! $body->eof()) {
-                    // Check if client disconnected
-                    if (connection_aborted()) {
-                        break;
-                    }
-
-                    $line = '';
-
-                    // Read a line from the stream
-                    while (! $body->eof()) {
-                        $char = $body->read(1);
-
-                        if ($char === "\n") {
-                            break;
+                        if (isset($seenIds[$id])) {
+                            continue;
                         }
 
-                        $line .= $char;
-                    }
+                        $seenIds[$id] = true;
 
-                    // Send heartbeat every 30 seconds
-                    if (time() - $lastHeartbeat >= 30) {
-                        echo ": heartbeat\n\n";
+                        $geo = $service->resolveGeo($event['ip']);
 
-                        if (function_exists('flush')) {
-                            @flush();
+                        if ($geo !== null) {
+                            $event['lat'] = $geo['lat'];
+                            $event['lng'] = $geo['lng'];
+                            $event['city'] = $geo['city'];
+                            $event['country'] = $geo['country'];
+                            $event['countryCode'] = $geo['countryCode'];
                         }
 
-                        $lastHeartbeat = time();
+                        echo "data: " . json_encode($event) . "\n\n";
+                        $this->flush();
                     }
 
-                    // Parse SSE data lines
-                    if (! str_starts_with($line, 'data: ')) {
-                        continue;
+                    // Advance cursor to latest event timestamp
+                    if (! empty($events)) {
+                        $cursor = $events[0]['timestamp'];
                     }
-
-                    $jsonStr = substr($line, 6);
-                    $raw = json_decode($jsonStr, true);
-
-                    if (! is_array($raw)) {
-                        continue;
-                    }
-
-                    // Parse the STIX event data
-                    $eventData = $raw['data'] ?? $raw;
-                    $parsed = $service->parseStixEvent($eventData);
-
-                    if ($parsed === null) {
-                        continue;
-                    }
-
-                    // Enrich with geo coordinates
-                    $geo = $service->resolveGeo($parsed['ip']);
-
-                    if ($geo !== null) {
-                        $parsed['lat'] = $geo['lat'];
-                        $parsed['lng'] = $geo['lng'];
-                        $parsed['city'] = $geo['city'];
-                        $parsed['country'] = $geo['country'];
-                        $parsed['countryCode'] = $geo['countryCode'];
-                    }
-
-                    echo "data: " . json_encode($parsed) . "\n\n";
-
-                    if (function_exists('flush')) {
-                        @flush();
-                    }
+                } catch (\Throwable) {
+                    // Query failed — send heartbeat and retry next cycle
                 }
-            } catch (\Throwable) {
-                echo "data: " . json_encode(['error' => 'Stream connection lost']) . "\n\n";
 
-                if (function_exists('flush')) {
-                    @flush();
+                echo ": heartbeat\n\n";
+                $this->flush();
+
+                // Trim seen IDs to prevent unbounded growth
+                if (count($seenIds) > 500) {
+                    $seenIds = array_slice($seenIds, -200, 200, true);
                 }
+
+                sleep(10);
             }
         }, 200, [
             'Content-Type' => 'text/event-stream',
@@ -139,5 +90,12 @@ class StreamController extends Controller
             'Connection' => 'keep-alive',
             'X-Accel-Buffering' => 'no',
         ]);
+    }
+
+    private function flush(): void
+    {
+        if (function_exists('flush')) {
+            @flush();
+        }
     }
 }
