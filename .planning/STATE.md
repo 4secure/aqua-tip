@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: OpenCTI Integration
-status: in-progress
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-03-15T02:39:40Z"
-last_activity: 2026-03-15 -- Completed Phase 11 Plan 01 (Threat Map Backend)
+status: completed
+stopped_at: Completed 11-02-PLAN.md (checkpoint pending)
+last_updated: "2026-03-15T02:46:55.719Z"
+last_activity: 2026-03-15 -- Completed Phase 11 Plan 02 (Threat Map Frontend)
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
-  percent: 87
+  completed_phases: 4
+  total_plans: 9
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 ## Current Position
 
 Phase: 11 of 11 (Threat Map)
-Plan: 1 of 2 complete
-Status: Phase 11 Plan 01 complete, Plan 02 (Frontend) next
-Last activity: 2026-03-15 -- Completed Phase 11 Plan 01 (Threat Map Backend)
+Plan: 2 of 2 complete
+Status: Phase 11 complete (checkpoint pending human verification)
+Last activity: 2026-03-15 -- Completed Phase 11 Plan 02 (Threat Map Frontend)
 
-Progress: [████████░░] 87%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [████████░░] 87%
 | Phase 09 P03 | 1min | 2 tasks | 2 files |
 | v2.0 Phase 10-01 | 5min | 2 tasks | 7 files |
 | v2.0 Phase 11-01 | 6min | 2 tasks | 8 files |
+| Phase 11 P02 | 8min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 - [Phase 11-01]: ThreatMapService does not inject OpenCtiService for SSE relay; stream controller handles HTTP streaming directly
 - [Phase 11-01]: resolveGeo accepts optional countryCode hint for centroid fallback when ip-api fails
 - [Phase 11-01]: Attack type color mapping: red (C2/DDoS/malware), amber (scanning/BEC), violet (phishing/APT), cyan (recon/default)
+- [Phase 11]: Used apiClient (fetch-based) instead of axios for snapshot loading -- project convention
+- [Phase 11]: Ref-based chart update for donut to avoid destroy/recreate on each SSE event
 
 ### Blockers/Concerns
 
@@ -90,6 +93,6 @@ All v1.0 and v1.1 decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-03-15T02:39:40Z
-Stopped at: Completed 11-01-PLAN.md
-Resume: Phase 11 Plan 01 complete. Continue with Phase 11 Plan 02 (Frontend) or address Phase 9 Plan 03 gap closure.
+Last session: 2026-03-15T02:46:55.714Z
+Stopped at: Completed 11-02-PLAN.md (checkpoint pending)
+Resume: Phase 11 Plan 02 complete. All v2.0 phases complete. Checkpoint pending for threat map human verification.

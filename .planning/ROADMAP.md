@@ -39,7 +39,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 - [x] **Phase 8: Foundation & OpenCTI Service** - Rename IOC to IP Search, configure OpenCTI API credentials, create base service class (completed 2026-03-14)
 - [ ] **Phase 9: IP Search Integration** - Wire IP Search to real OpenCTI data with credit gating, refund on failure, and rate limit CTAs (gap closure in progress)
 - [x] **Phase 10: Threat Actors & Threat News** - Paginated list pages for intrusion sets and reports from OpenCTI (completed 2026-03-15)
-- [ ] **Phase 11: Threat Map** - Live threat map with SSE streaming, pulse-and-fade markers, and real-time counters
+- [x] **Phase 11: Threat Map** - Live threat map with SSE streaming, pulse-and-fade markers, and real-time counters (completed 2026-03-15)
 
 ## Phase Details
 
@@ -124,4 +124,4 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 8. Foundation & OpenCTI Service | v2.0 | 2/2 | Complete | 2026-03-14 |
 | 9. IP Search Integration | v2.0 | 2/3 | Gap closure | - |
 | 10. Threat Actors & Threat News | v2.0 | Complete    | 2026-03-15 | 2026-03-15 |
-| 11. Threat Map | v2.0 | 1/2 | In Progress | - |
+| 11. Threat Map | 2/2 | Complete   | 2026-03-15 | - |

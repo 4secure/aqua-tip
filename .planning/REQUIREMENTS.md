@@ -44,10 +44,10 @@ Requirements for OpenCTI integration milestone. Each maps to roadmap phases.
 ### Threat Map
 
 - [x] **TMAP-01**: Laravel consumes OpenCTI SSE /stream endpoint for real-time STIX events
-- [ ] **TMAP-02**: Threat map displays animated arc lines between attacker and target countries
-- [ ] **TMAP-03**: Map markers pulse and show threat counts per country/location
-- [ ] **TMAP-04**: Live feed sidebar shows individual threat events as they arrive (type, source, timestamp)
-- [ ] **TMAP-05**: Real-time counters for active threats, countries affected, and attack types
+- [x] **TMAP-02**: Threat map displays animated arc lines between attacker and target countries
+- [x] **TMAP-03**: Map markers pulse and show threat counts per country/location
+- [x] **TMAP-04**: Live feed sidebar shows individual threat events as they arrive (type, source, timestamp)
+- [x] **TMAP-05**: Real-time counters for active threats, countries affected, and attack types
 
 ## Future Requirements
 
@@ -101,10 +101,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TNEWS-03 | Phase 10 | Complete |
 | TNEWS-04 | Phase 10 | Complete |
 | TMAP-01 | Phase 11 | Complete |
-| TMAP-02 | Phase 11 | Pending |
-| TMAP-03 | Phase 11 | Pending |
-| TMAP-04 | Phase 11 | Pending |
-| TMAP-05 | Phase 11 | Pending |
+| TMAP-02 | Phase 11 | Complete |
+| TMAP-03 | Phase 11 | Complete |
+| TMAP-04 | Phase 11 | Complete |
+| TMAP-05 | Phase 11 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 24 total
