@@ -153,11 +153,24 @@ export const Globe = memo(function Globe({ width = 600, height = 700, className 
       context.lineWidth = scaleFactor;
       context.stroke();
 
-      // Halftone dots — single batched path for all dots
+      // Halftone dots — front-face only, single batched path
       const r = dotRadius * scaleFactor;
       const twoPi = 2 * Math.PI;
+      const DEG = Math.PI / 180;
+      const rot = projection.rotate();
+      const lambda0 = -rot[0] * DEG;
+      const phi0 = -rot[1] * DEG;
+      const cosPhi0 = Math.cos(phi0);
+      const sinPhi0 = Math.sin(phi0);
+
       context.beginPath();
       for (let i = 0; i < dotCount; i++) {
+        // Back-face cull: skip dots on the far side of the globe
+        const lambda = dotLngs[i] * DEG;
+        const phi = dotLats[i] * DEG;
+        const cosC = sinPhi0 * Math.sin(phi) + cosPhi0 * Math.cos(phi) * Math.cos(lambda - lambda0);
+        if (cosC < 0) continue;
+
         const projected = projection([dotLngs[i], dotLats[i]]);
         if (projected) {
           const px = projected[0];
@@ -182,6 +195,12 @@ export const Globe = memo(function Globe({ width = 600, height = 700, className 
           pings.splice(i, 1);
           continue;
         }
+
+        // Back-face cull pings too
+        const pLambda = ping.lng * DEG;
+        const pPhi = ping.lat * DEG;
+        const pCosC = sinPhi0 * Math.sin(pPhi) + cosPhi0 * Math.cos(pPhi) * Math.cos(pLambda - lambda0);
+        if (pCosC < 0) continue;
 
         const projected = projection([ping.lng, ping.lat]);
         if (!projected) continue;

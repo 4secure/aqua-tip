@@ -80,7 +80,7 @@ export function LandingScroll() {
   const globeScale = useTransform(
     scrollYProgress,
     [0, 0.5, 1.0],
-    [1.1, 1.1, 0.8]
+    [1.4, 1.4, 0.8]
   );
   const globeOpacity = useTransform(
     scrollYProgress,
