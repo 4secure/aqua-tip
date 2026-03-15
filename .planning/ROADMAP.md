@@ -87,8 +87,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Backend services, controllers, and routes for threat actors and threat news API endpoints
-- [ ] 10-02-PLAN.md — Frontend pages with card grids, search/filters, expandable details, and pagination
+- [x] 10-01-PLAN.md — Backend services, controllers, and routes for threat actors and threat news API endpoints
+- [x] 10-02-PLAN.md — Frontend pages with card grids, search/filters, detail modals, and pagination
 
 ### Phase 11: Threat Map
 **Goal**: Users see a live geographic threat map with real-time streaming data from OpenCTI
@@ -123,5 +123,5 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 7. Railway Production Deployment | v1.1 | 2/2 | Complete | 2026-03-14 |
 | 8. Foundation & OpenCTI Service | v2.0 | 2/2 | Complete | 2026-03-14 |
 | 9. IP Search Integration | v2.0 | 2/3 | Gap closure | - |
-| 10. Threat Actors & Threat News | 1/2 | In Progress|  | - |
+| 10. Threat Actors & Threat News | v2.0 | 2/2 | Complete | 2026-03-15 |
 | 11. Threat Map | v2.0 | 0/? | Not started | - |
