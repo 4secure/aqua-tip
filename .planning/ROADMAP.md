@@ -38,8 +38,8 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 - [x] **Phase 8: Foundation & OpenCTI Service** - Rename IOC to IP Search, configure OpenCTI API credentials, create base service class (completed 2026-03-14)
 - [ ] **Phase 9: IP Search Integration** - Wire IP Search to real OpenCTI data with credit gating, refund on failure, and rate limit CTAs (gap closure in progress)
-- [ ] **Phase 10: Threat Actors & Threat News** - Paginated list pages for intrusion sets and reports from OpenCTI
-- [ ] **Phase 11: Threat Map** - Live threat map with SSE streaming, animated arcs, and real-time counters
+- [x] **Phase 10: Threat Actors & Threat News** - Paginated list pages for intrusion sets and reports from OpenCTI (completed 2026-03-15)
+- [ ] **Phase 11: Threat Map** - Live threat map with SSE streaming, pulse-and-fade markers, and real-time counters
 
 ## Phase Details
 
@@ -96,15 +96,15 @@ Plans:
 **Requirements**: TMAP-01, TMAP-02, TMAP-03, TMAP-04, TMAP-05
 **Success Criteria** (what must be TRUE):
   1. Laravel backend consumes OpenCTI SSE /stream endpoint and serves processed threat events to the frontend
-  2. Map displays animated arc lines between attacker and target countries as threat events arrive
-  3. Map markers pulse at threat locations and show threat counts per country
-  4. Live feed sidebar shows individual threat events (type, source, target, timestamp) updating in real time
+  2. Map displays pulse-and-fade markers at event locations colored by attack type
+  3. Map markers pulse at threat locations and show threat counts per country via popups
+  4. Live feed sidebar shows individual threat events (type, source IP, country, timestamp) updating in real time
   5. Real-time counters display active threats, countries affected, and attack type breakdown
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
+- [ ] 11-01-PLAN.md — Backend: ThreatMapService, CountryCentroids, Snapshot and Stream controllers with SSE relay
+- [ ] 11-02-PLAN.md — Frontend: useThreatStream hook, sub-components, ThreatMapPage refactor with live data
 
 ## Progress
 
@@ -123,5 +123,5 @@ Phases 8 first (foundation), then 9-11. Phases 10 and 11 are independent of each
 | 7. Railway Production Deployment | v1.1 | 2/2 | Complete | 2026-03-14 |
 | 8. Foundation & OpenCTI Service | v2.0 | 2/2 | Complete | 2026-03-14 |
 | 9. IP Search Integration | v2.0 | 2/3 | Gap closure | - |
-| 10. Threat Actors & Threat News | v2.0 | 2/2 | Complete | 2026-03-15 |
-| 11. Threat Map | v2.0 | 0/? | Not started | - |
+| 10. Threat Actors & Threat News | v2.0 | Complete    | 2026-03-15 | 2026-03-15 |
+| 11. Threat Map | v2.0 | 0/2 | Planned | - |
