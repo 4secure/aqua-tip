@@ -1,289 +1,299 @@
-# Pitfalls Research
+# Domain Pitfalls
 
-**Domain:** OpenCTI GraphQL API integration into existing Laravel + React threat intelligence platform
-**Project:** AQUA TIP v2.0 -- OpenCTI Integration
-**Researched:** 2026-03-14
-**Confidence:** HIGH (based on codebase inspection, OpenCTI docs, Laravel HTTP client docs, community issue reports)
+**Domain:** Adding universal Threat Search and UI refresh to existing TIP
+**Project:** AQUA TIP v2.1 -- Threat Search & UI Refresh
+**Researched:** 2026-03-17
+**Confidence:** HIGH (based on direct codebase analysis of all affected files + OpenCTI documentation)
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Exposing the OpenCTI Bearer Token to the Frontend
+Mistakes that cause rewrites, broken user flows, or data integrity issues.
 
-**What goes wrong:**
-The OpenCTI API token (UUID v4) is stored in JavaScript code, environment variables prefixed with `VITE_`, or passed in frontend API responses. Any user can extract it from browser DevTools (Network tab, source maps, or `import.meta.env`). With this token, they bypass all credit-based rate limiting and have direct, unlimited access to the OpenCTI instance with whatever permissions that token's user has.
+### Pitfall 1: Hardcoded IP Validation Blocks Universal Search
 
-**Why it happens:**
-Developers want to call the OpenCTI GraphQL endpoint directly from React to avoid building a backend proxy. The `VITE_` prefix in Vite exposes env vars to the browser bundle. It feels like extra work to proxy through Laravel when the API is "just a GraphQL call."
+**What goes wrong:** The current `IpSearchRequest` validates with `'query' => ['required', 'string', 'ip']` -- the Laravel `ip` rule rejects domains, URLs, file hashes, email addresses, and every other non-IP observable type. Deploying the renamed "Threat Search" without replacing this validation rule means 100% of non-IP searches return 422.
 
-**How to avoid:**
-1. Store the OpenCTI API token in Laravel's `.env` as `OPENCTI_API_TOKEN` (no `VITE_` prefix -- never exposed to frontend)
-2. All OpenCTI queries go through Laravel controllers using `Http::withToken(config('services.opencti.token'))`
-3. The React frontend only calls Laravel API endpoints (`/api/ip-search`, `/api/threat-actors`, etc.) -- never the OpenCTI URL directly
-4. Add `OPENCTI_API_TOKEN` to `.env.example` with a placeholder, and to `.gitignore` patterns
-5. The OpenCTI base URL (`http://192.168.251.20:8080`) should also be server-side only in `config/services.php`
+**Why it happens:** The validation was correctly scoped for IP-only search. When renaming to Threat Search, developers focus on the GraphQL query and UI changes but forget the request validation layer sits upstream and silently blocks everything.
 
-**Warning signs:**
-- Any `VITE_OPENCTI` variable in `.env` or frontend code
-- Frontend code importing or referencing `192.168.251.20`
-- GraphQL queries constructed in `.jsx` files
-- Network tab showing requests to the OpenCTI host from the browser
+**Consequences:** Users see "Invalid input" for every domain, hash, or URL search. Credits are not deducted (validation happens pre-middleware), but the feature appears completely broken for its core new capability.
 
-**Phase to address:**
-Phase 1 (Backend service layer setup). Must be the very first decision -- all subsequent code depends on this proxy architecture.
+**Prevention:**
+- Replace the `ip` validation rule with permissive string validation: `['required', 'string', 'min:2', 'max:512']`.
+- Optionally add a regex-based custom rule that accepts known observable formats (IPs, domains, hashes, URLs, emails) while rejecting obvious garbage.
+- Let OpenCTI's `value` filter determine if a match exists -- return "not found" for unrecognized input rather than 422.
+
+**Detection:** Any manual test with a domain name like `example.com` immediately surfaces this.
+
+**Phase:** Must be the first backend change in the search generalization phase.
 
 ---
 
-### Pitfall 2: OpenCTI GraphQL Over-Fetching and Response Size Explosion
+### Pitfall 2: GraphQL entity_type Filter Removal Breaks Downstream Assumptions
 
-**What goes wrong:**
-A single GraphQL query for STIX objects returns deeply nested relationships (created_by, objectMarking, objectLabel, externalReferences, reports, indicators, observedData, etc.). A query like `stixCoreObjects(search: "8.8.8.8")` without field selection or pagination returns megabytes of nested STIX data, causing timeouts, memory exhaustion in Laravel's HTTP client, and slow frontend rendering.
+**What goes wrong:** The current query filters `entity_type` to `['IPv4-Addr', 'IPv6-Addr']`. Removing this filter to support all observables means `stixCyberObservables` returns ANY of the 20+ STIX observable types. The entire downstream pipeline assumes IP data.
 
-**Why it happens:**
-OpenCTI's schema is extremely rich -- STIX objects have deep relationship graphs. Unlike REST APIs where the server decides response shape, GraphQL returns exactly what you ask for -- but developers often copy queries from the GraphQL playground that include `... on` fragments for every possible type. OpenCTI also uses Relay-style cursor pagination, and fetching without `first` limits defaults to returning all matching objects.
+**Why it happens:** Developers remove the entity_type filter to "support everything" without tracing all the places that assume the result is an IP address.
 
-**How to avoid:**
-1. Write minimal GraphQL queries -- select only the fields the UI actually displays
-2. Always specify `first: N` (e.g., `first: 25`) in list queries -- never query without pagination
-3. Avoid deep nesting beyond 2 levels (object -> direct relations -> stop)
-4. Create dedicated query files in Laravel (e.g., `app/GraphQL/Queries/`) with field selections tailored to each page
-5. Set Laravel HTTP client timeout: `Http::timeout(10)` -- fail fast rather than hang
-6. Log response sizes during development to catch bloat early
+**Consequences:**
+- **Geo enrichment fires for non-IPs:** `fetchGeoFromIpApi()` calls `ip-api.com` with a domain/hash, wasting the 45 req/min free tier rate limit and returning garbage.
+- **D3 graph breaks:** `D3Graph` component uses `centerIp` prop and hardcodes `type: 'IPv4-Addr'` for the center node. Non-IP center nodes get the wrong color and label.
+- **Response schema is wrong:** Top-level key is `'ip'` in `buildResponse()`. A hash search returns `{ ip: "a1b2c3d4..." }` which is semantically incorrect.
+- **UI copy is wrong:** "No threats found for {result.ip}" shows a hash where it says "IP." The search header says "Search any IP address."
+- **Score ring context lost:** The threat score ring works for any type, but the label "Threat Score" is IP-centric.
 
-**Warning signs:**
-- API responses > 100KB for a single search
-- Laravel process memory spikes during OpenCTI calls
-- Frontend takes > 2 seconds to render search results
-- GraphQL queries with `... on StixDomainObject` fragments listing 20+ fields
+**Prevention:**
+1. Add observable type detection on the backend after the OpenCTI query returns. Check `entity_type` and skip geo enrichment for non-IP types.
+2. Rename the response key from `ip` to `query` (or `value`) in the API response.
+3. On the frontend, replace all `result.ip` references with `result.query`.
+4. Rename D3Graph prop from `centerIp` to `centerValue`, add `centerType` prop.
+5. Use `filter_var($query, FILTER_VALIDATE_IP)` in PHP to decide whether to call geo enrichment.
 
-**Phase to address:**
-Phase 2 (IP Search integration). Build the first query with minimal fields and validate response sizes before expanding.
+**Detection:** Search for a domain and observe geo section with null data, D3 graph with wrong node type, and confusing "IP" labels.
 
----
-
-### Pitfall 3: OpenCTI Instance Has No Data (Empty Results Everywhere)
-
-**What goes wrong:**
-The integration code is correct, queries work, but every search returns empty results. The Threat Map shows nothing, Threat Actors is blank, Threat News has zero reports. Developers debug the code for hours thinking the queries are wrong, when the actual problem is that the OpenCTI instance has no data ingested.
-
-**Why it happens:**
-A fresh OpenCTI instance is an empty shell. Data only appears after connectors (AlienVault OTX, MITRE ATT&CK, AbuseIPDB, etc.) are configured and have completed their initial data import, which can take hours. The instance at `192.168.251.20:8080` may or may not have active connectors. Even with connectors, specific data types (IP observables, geographical locations, intrusion sets, reports) may be sparsely populated.
-
-**How to avoid:**
-1. Before writing any integration code, manually check what data exists: open `http://192.168.251.20:8080` in a browser, navigate to Observations > Indicators, Activities > Intrusion Sets, etc.
-2. Run a test GraphQL query in the playground first: `{ stixCyberObservables(first: 5) { edges { node { entity_type observable_value } } } }`
-3. Design all pages with explicit empty states ("No threat data available. Configure OpenCTI connectors to populate data.")
-4. Implement seed/test data as a fallback: if the OpenCTI instance returns zero results for a query, display a helpful message rather than a blank page
-5. Document which OpenCTI connectors are needed for each feature (e.g., AbuseIPDB or AlienVault for IP reputation, MITRE ATT&CK for threat actors)
-
-**Warning signs:**
-- All searches return `{ edges: [] }` with `pageInfo.hasNextPage: false`
-- OpenCTI dashboard shows 0 entities
-- Connectors page shows no active connectors or all connectors errored
-
-**Phase to address:**
-Phase 1 (Setup and validation). Verify data availability before building any page. If the instance is empty, configure at minimum the MITRE ATT&CK connector (free, provides intrusion sets and attack patterns) and one feed connector.
+**Phase:** Must be addressed simultaneously in backend and frontend. Ship as a coordinated change -- do NOT update one without the other.
 
 ---
 
-### Pitfall 4: Credit Deduction Before OpenCTI Call Fails (No Refund Path)
+### Pitfall 3: Route Rename Breaks Bookmarks, CTAs, Tests, and Navigation
 
-**What goes wrong:**
-The existing `DeductCredit` middleware runs before the controller. If the credit is deducted but the OpenCTI API call then fails (timeout, connection refused, 500 error), the user loses a credit for a failed search. With only 10 credits/day for authenticated users and 1/day for guests, this is a terrible user experience.
+**What goes wrong:** The route `/ip-search` must become `/threat-search`. This URL is hardcoded in **13+ files** across the codebase. Missing even one creates a broken link, failing test, or dead navigation item.
 
-**Why it happens:**
-The current middleware pattern (inherited from v1.0) deducts first, then passes to the controller. This was acceptable when the controller used `MockThreatDataService::generate()` which never fails. With a real external API call, failure is not just possible -- it is inevitable (network issues, OpenCTI restarts, maintenance windows).
+**Affected files identified by grep:**
 
-**How to avoid:**
-1. Move credit deduction to after the OpenCTI call succeeds, or implement a refund mechanism
-2. Pattern A (preferred): Deduct in middleware, refund in controller's catch block:
-   ```php
-   try {
-       $data = $this->openCtiService->searchIp($query);
-   } catch (OpenCtiUnavailableException $e) {
-       Credit::where('id', $credit->id)->increment('remaining');
-       return response()->json(['error' => 'Threat intelligence service temporarily unavailable'], 503);
-   }
-   ```
-3. Pattern B: Move deduction into the controller after successful response (requires removing `deduct-credit` middleware for OpenCTI routes)
-4. The existing Dark Web search (`DarkWeb\SearchController`) already has a credit refund pattern -- follow that precedent
-5. Always return a user-friendly error distinguishing "no results found" (valid search, zero hits) from "service unavailable" (OpenCTI down)
+Backend (5+ files):
+- `routes/api.php` -- route definition
+- `app/Http/Controllers/IpSearch/SearchController.php` -- namespace/class name
+- `tests/Feature/IpSearch/IpSearchTest.php` -- route path in test assertions
+- `tests/Feature/IpSearch/IpSearchRefundTest.php` -- route path in test assertions
+- `tests/Feature/Credit/CreditStatusTest.php`, `CreditResetTest.php`, `AuthCreditLimitTest.php`, `GuestCreditLimitTest.php` -- all POST to `/api/ip-search`
 
-**Warning signs:**
-- Users report credits disappearing without getting results
-- Error logs show OpenCTI connection failures after credit deduction
-- No `increment('remaining')` call in any catch block
+Frontend (8 files):
+- `App.jsx` -- route definition + import
+- `components/layout/Sidebar.jsx` -- nav item
+- `components/layout/Topbar.jsx` -- search reference
+- `components/landing/LandingScroll.jsx` -- CTA link
+- `pages/LandingPage.jsx` -- CTA link
+- `pages/DashboardPage.jsx` -- quick action link
+- `pages/IpSearchPage.jsx` -- file name + content
+- `api/ip-search.js` -- API endpoint + function name
+- `data/mock-data.js` -- references
 
-**Phase to address:**
-Phase 2 (IP Search integration). Must be built into the first controller that calls OpenCTI.
+**Why it happens:** String-based route references scattered across the codebase with no centralized route constants. A find-and-replace on "ip-search" misses variations: "IP Search" (display name), `IpSearchPage` (component name), `searchIpAddress` (API function), `ip_search:` (cache key).
 
----
+**Prevention:**
+1. Compile full grep list before starting: `ip-search`, `ip_search`, `IpSearch`, `ipSearch`, `IP Search`, `Ip Search`.
+2. Rename in dependency order: backend route first, then API client, then page component, then all referencing components, then tests.
+3. Run the full 92-test Pest suite after backend rename.
+4. Manually verify: landing page CTA, sidebar link, topbar reference, dashboard quick-action.
 
-### Pitfall 5: Codebase Rename IOC -> IP Search Leaves Broken References
-
-**What goes wrong:**
-Renaming "IOC" to "IP Search" across the codebase (16 files identified) breaks routes, test expectations, database values, or search logs. A partial rename creates a confusing mix where backend says "ioc" and frontend says "ip-search," or existing `SearchLog` records with `module: 'ioc_search'` become orphaned/inconsistent.
-
-**Why it happens:**
-"IOC" appears in: file names (`IocSearchPage.jsx`, `IocSearchTest.php`, `IocSearchRequest.php`, `IocDetectorService.php`), route paths (`/api/ioc/search`), namespaces (`App\Http\Controllers\Ioc`), class names, test assertions, mock data, the sidebar component, and `SearchLog` entries. A find-and-replace misses contextual differences (the route path format differs from the class name format differs from the display text).
-
-**How to avoid:**
-1. Create a rename checklist organized by layer:
-   - **Routes**: `/api/ioc/search` -> `/api/ip-search` (update `api.php` + frontend API calls)
-   - **Controllers**: `Ioc\SearchController` -> `IpSearch\SearchController` (move file + update namespace)
-   - **Requests**: `IocSearchRequest` -> `IpSearchRequest`
-   - **Services**: `IocDetectorService` -- keep this name, it still detects IOC types (IP, domain, hash) even though the page is renamed
-   - **Tests**: `Ioc\IocSearchTest` -> `IpSearch\IpSearchTest` (update all route references in assertions)
-   - **Frontend**: File rename `IocSearchPage.jsx` -> `IpSearchPage.jsx` (already imported as `IpSearchPage` in App.jsx)
-   - **SearchLog**: Keep `module: 'ioc_search'` in existing records, use `module: 'ip_search'` for new records. Do NOT run a migration to update old records -- it provides no value and risks data loss
-   - **Sidebar/Nav**: Update display text "IOC Search" -> "IP Search"
-2. Run the full test suite after rename (`php artisan test`) -- all 92 tests must pass
-3. Test the frontend route `/ip-search` still works (it already does based on App.jsx)
-
-**Warning signs:**
-- 404 on API calls after rename (route path mismatch)
-- Test failures referencing old route paths
-- Mixed terminology in UI ("IOC" in some places, "IP Search" in others)
-- Import errors from renamed files
-
-**Phase to address:**
-Phase 1 (Preparation). Do the rename as a standalone commit before any OpenCTI integration work. This keeps the rename diff clean and reviewable.
+**Phase:** This MUST be the first task in the milestone. Everything depends on naming being settled.
 
 ---
 
-### Pitfall 6: OpenCTI Server-to-Server CORS / Network Connectivity from Railway
+### Pitfall 4: Breaking the Public Access Pattern
 
-**What goes wrong:**
-The Laravel backend on Railway (cloud) cannot reach the OpenCTI instance at `http://192.168.251.20:8080` (local/private network). The IP `192.168.x.x` is a private RFC 1918 address, unreachable from the public internet. Integration works in local development (Laragon can reach the local network) but completely fails in production.
+**What goes wrong:** IP Search is the ONLY public route inside AppLayout. In `App.jsx`:
 
-**Why it happens:**
-The OpenCTI instance is on a private network. Railway containers run on public cloud infrastructure with no VPN or tunnel to the private network. Developers test locally where everything works, then deploy and discover the architecture is fundamentally broken for production.
+```jsx
+<Route element={<AppLayout />}>
+  {/* Public route -- accessible without auth */}
+  <Route path="/ip-search" element={<IpSearchPage />} />
 
-**How to avoid:**
-1. Acknowledge this constraint upfront: local OpenCTI + cloud Laravel requires a tunnel or public exposure
-2. Options (pick one):
-   - **Option A**: Expose OpenCTI via a reverse proxy with a public domain (e.g., Cloudflare Tunnel, ngrok) -- adds security risk, requires IP allowlisting
-   - **Option B**: Move OpenCTI to a cloud instance (Railway addon, Docker on VPS)
-   - **Option C**: Keep backend local too (Laragon for both dev and "production") -- acceptable for a portfolio/demo project
-   - **Option D**: Environment-conditional: local OpenCTI URL for dev, cloud OpenCTI URL for production (requires two instances)
-3. Configure `OPENCTI_BASE_URL` in `.env` so the URL is environment-specific
-4. Add a health check endpoint that verifies OpenCTI connectivity: `GET /api/health/opencti`
+  {/* Protected routes -- auth + verified + onboarded */}
+  <Route element={<ProtectedRoute />}>
+    ...
+  </Route>
+</Route>
+```
 
-**Warning signs:**
-- `cURL error 7: Failed to connect` in Laravel logs on Railway
-- Integration tests pass locally but fail in CI/CD
-- OpenCTI calls timeout after 30 seconds on deployed backend
+When renaming to Threat Search, the new route may accidentally be placed inside the `<ProtectedRoute />` wrapper.
 
-**Phase to address:**
-Phase 1 (Architecture decision). This is a deployment topology question that must be answered before writing integration code. If the answer is "local only for now," document it explicitly.
+**Consequences:** The entire landing page funnels users to `/threat-search`. If it requires auth, unauthenticated users hit a redirect to `/login`, making the product's primary conversion flow broken. This is the #1 CTA on the landing page.
 
-## Technical Debt Patterns
+**Prevention:**
+- Keep the threat search route at the same nesting level (sibling to ProtectedRoute, child of AppLayout).
+- Add a smoke test: visit `/threat-search` in an incognito window without logging in.
+- Consider adding a comment in App.jsx: `{/* PUBLIC -- must remain outside ProtectedRoute */}`
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Hardcoding GraphQL queries as strings in controllers | Fast to implement, easy to read | No reuse, no type safety, copy-paste drift between controllers | Never -- extract to a dedicated query class/file from day one |
-| Skipping OpenCTI response caching | Simpler code, always fresh data | Repeated identical queries waste OpenCTI resources and credits | MVP only -- add Redis/database caching by Phase 3 |
-| Using `Http::get()` without timeout/retry | Fewer lines of code | Silent hangs when OpenCTI is slow, user stares at spinner | Never -- always set `timeout(10)->retry(2, 100)` |
-| Mixing OpenCTI data shapes with frontend display shapes | No transformation layer needed | Frontend breaks when OpenCTI schema changes; STIX field names leak into UI | Never -- always transform in a service/resource layer |
-| Not logging OpenCTI queries/responses | Less log noise | Impossible to debug production issues, no visibility into what queries are slow | Only in very early prototyping |
+**Phase:** Address during route rename. Verify immediately with unauthenticated browser test.
 
-## Integration Gotchas
+---
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| OpenCTI GraphQL | Sending queries as GET requests with query params | Always POST to `/graphql` with JSON body `{ query, variables }` |
-| OpenCTI GraphQL | Expecting REST-style HTTP error codes (404, 500) | GraphQL returns 200 with `{ errors: [...] }` -- check the `errors` array, not HTTP status |
-| OpenCTI Auth | Using the admin token for API calls | Create a dedicated API user with read-only permissions in OpenCTI; admin tokens can modify/delete data |
-| OpenCTI Pagination | Using `offset` pagination (skip/take) | OpenCTI uses Relay cursor pagination: `first`, `after`, `edges`, `pageInfo.endCursor`, `pageInfo.hasNextPage` |
-| OpenCTI Filters | Passing filter values as plain strings | OpenCTI filter format is structured: `{ key: "entity_type", values: ["IPv4-Addr"], operator: "eq", mode: "or" }` |
-| Laravel HTTP Client | Not setting `Accept: application/json` header | OpenCTI may return HTML error pages instead of JSON on some error paths |
-| Laravel -> OpenCTI | Trusting response data without validation | Validate that expected fields exist before passing to frontend; OpenCTI schema can change between versions |
-| Credit System | Applying same credit cost to all OpenCTI features | IP Search, Threat Actors (listing), Threat Map (read-only) have different value -- consider free listing pages vs. credit-gated deep searches |
+## Moderate Pitfalls
 
-## Performance Traps
+### Pitfall 5: Cache Key Collision and Staleness After Rename
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Unbounded GraphQL queries (no `first` limit) | Timeout on large datasets, memory spike | Always specify `first: 25` or similar limit | When OpenCTI has > 1,000 objects of that type |
-| No response caching for repeated searches | Same IP searched 10 times = 10 OpenCTI calls | Cache responses in Laravel (15-60 min TTL) with query hash as key | Immediately -- even with 10 users |
-| Fetching full STIX objects when only summary needed | 500ms+ API response times, large JSON payloads | Create "list" queries (name, type, date only) vs. "detail" queries (full object) | When displaying lists of 25+ items |
-| Synchronous OpenCTI calls blocking Laravel workers | All web workers stuck waiting on slow OpenCTI responses | Set aggressive timeouts (5-10s), consider queue-based processing for heavy queries | When OpenCTI response time > 3 seconds |
-| Loading entire threat map dataset on page load | Browser freezes rendering thousands of geo markers | Paginate or cluster map data server-side, load by region/viewport | When OpenCTI has > 500 location-tagged objects |
+**What goes wrong:** The current cache key is `'ip_search:' . md5($ip)`. After generalization, the same query value could be searched as different types. More importantly, stale cache entries from old IP searches persist under the old key prefix, creating inconsistency during rollout.
 
-## Security Mistakes
+**Prevention:**
+- Change cache key to `'threat_search:' . md5($query)`.
+- Old `ip_search:*` cache entries expire naturally (15 min TTL), so no cache flush needed.
+- If adding type-aware search later, include type in cache key: `'threat_search:' . md5($type . ':' . $query)`.
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| OpenCTI token in frontend code or `VITE_` env var | Full unauthenticated access to OpenCTI instance | Store in Laravel `.env` only, proxy all requests through backend |
-| Using OpenCTI admin user token | API calls can modify/delete threat intelligence data | Create a read-only API user in OpenCTI specifically for AQUA TIP |
-| Not sanitizing OpenCTI response data before rendering | XSS via malicious STIX object names/descriptions (threat actors can have arbitrary names) | Sanitize all OpenCTI string fields before rendering in React; use `textContent` not `innerHTML` |
-| Exposing OpenCTI internal IDs in frontend URLs | Information disclosure about internal data structure | Map OpenCTI UUIDs to opaque identifiers or use them only server-side |
-| No rate limiting on OpenCTI proxy endpoints (Threat Actors, Threat News) | Authenticated users can make unlimited OpenCTI calls, exhausting instance resources | Apply credit system or separate rate limiting to all OpenCTI-backed endpoints |
-| OpenCTI instance on HTTP (not HTTPS) | Token transmitted in cleartext over the network | Acceptable on local network (`192.168.x.x`); must use HTTPS if exposed to internet |
+---
 
-## UX Pitfalls
+### Pitfall 6: Geo Enrichment Rate Limit Exhaustion for Non-IP Searches
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Showing raw STIX field names in UI | Users see `IPv4-Addr`, `intrusion-set`, `observable_value` -- meaningless jargon | Map STIX types to human labels: "IP Address", "Threat Group", "Observable" |
-| No loading state during OpenCTI calls | User clicks search, nothing happens for 2-5 seconds, clicks again (double search, double credit) | Show immediate loading spinner, disable search button during request |
-| Empty page with no explanation when OpenCTI has no data | User thinks the feature is broken | Show contextual empty states: "No threat intelligence data found for this IP address" with explanation |
-| Showing "0 results" the same as "service unavailable" | User cannot distinguish "clean IP" from "system error" | Separate states: "No threats found" (green, reassuring) vs. "Service unavailable, try again later" (orange, warning) |
-| Credit deducted for empty results | User pays a credit to learn nothing | Consider: should searches that return zero results still cost a credit? Document the decision either way |
-| Search input accepts any text but only IPs work with OpenCTI | User searches for a domain name, gets confusing error or empty results | Validate input type client-side, show which search types are supported (IPv4, IPv6) |
+**What goes wrong:** `ip-api.com` free tier allows 45 requests/minute. If universal search sends every query through geo enrichment regardless of type, non-IP searches waste rate limit quota. Under moderate usage, legitimate IP geo lookups start failing.
 
-## "Looks Done But Isn't" Checklist
+**Prevention:**
+- Add a type guard before the geo call in the search service:
+  ```php
+  $isIp = filter_var($query, FILTER_VALIDATE_IP) !== false;
+  $geo = $isIp ? $this->fetchGeoFromIpApi($query) : null;
+  ```
+- This is a one-line change but prevents a subtle production degradation.
 
-- [ ] **IP Search:** Returns data but no error handling -- verify behavior when OpenCTI is unreachable (connection refused, timeout, 500)
-- [ ] **IP Search:** Works for IPv4 but untested with IPv6, domains, hashes -- verify all `IocDetectorService` types work or show clear "not supported" messages
-- [ ] **Threat Map:** Shows markers but no clustering -- verify with 500+ locations that the map remains usable (not a blob of overlapping markers)
-- [ ] **Threat Actors:** Lists intrusion sets but no pagination controls -- verify "Load More" or infinite scroll works with cursor-based pagination
-- [ ] **Threat News:** Displays reports but no date filtering -- verify reports are sorted by recency, not by internal ID
-- [ ] **Credit refund:** Controller catches errors but verify the `increment('remaining')` actually restores the credit (race condition with concurrent requests)
-- [ ] **Empty states:** All four OpenCTI pages show appropriate empty states -- verify with a real empty OpenCTI instance, not just by mocking empty responses
-- [ ] **Token rotation:** OpenCTI token works today but verify behavior when token is expired/revoked -- should return 401 error message, not a generic 500
-- [ ] **Rate limit CTA:** Guest sees "Sign in for more lookups" but verify the CTA actually links to the registration page and preserves the search query
+---
 
-## Recovery Strategies
+### Pitfall 7: OpenCTI Value Search is Exact-Match -- Users Expect Fuzzy
 
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| Token exposed in frontend | MEDIUM | 1. Revoke token in OpenCTI admin. 2. Create new API user with read-only perms. 3. Store new token in Laravel `.env` only. 4. Audit OpenCTI logs for unauthorized access. |
-| Credits lost to failed API calls | LOW | 1. Query `search_logs` for failed searches. 2. Manually restore credits via `credits` table UPDATE. 3. Implement refund logic in controller. |
-| Rename left broken references | LOW | 1. Run full test suite to find all failures. 2. Global search for old term ("ioc", "IOC"). 3. Fix one layer at a time (routes, then controllers, then tests, then frontend). |
-| Over-fetching causing timeouts | MEDIUM | 1. Identify slow queries via Laravel logs. 2. Reduce field selection in GraphQL queries. 3. Add `first` limits. 4. Add response caching. |
-| Production cannot reach OpenCTI | HIGH | 1. Decision point: expose OpenCTI publicly or move backend local. 2. If exposing: set up Cloudflare Tunnel + IP allowlist. 3. If local: document that production deployment requires VPN. |
-| OpenCTI instance has no data | LOW | 1. Configure MITRE ATT&CK connector (free, provides intrusion sets). 2. Configure AlienVault OTX connector (free, provides IP/domain observables). 3. Wait 1-2 hours for initial import. |
+**What goes wrong:** The current filter uses `operator: 'eq'` for the `value` field. This works for IPs (users type exact addresses). For domains, users might type `example.com` when OpenCTI stores `www.example.com`. For hashes, a partial paste returns nothing. Users think the platform has no data.
 
-## Pitfall-to-Phase Mapping
+**Prevention:**
+- Use the `search` parameter on `stixCyberObservables` (full-text search) instead of or in addition to the exact filter.
+- Or use `operator: 'search'` in the filter for broader matching.
+- Display a helpful message: "No exact match found. Try the full observable value."
+- Consider a two-pass strategy: try exact match first, fall back to search if no results.
 
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Token exposure (Pitfall 1) | Phase 1: Backend service layer | Grep codebase for `VITE_OPENCTI`; verify no frontend code references OpenCTI URL |
-| Over-fetching (Pitfall 2) | Phase 2: IP Search | Measure response size of first query; must be < 50KB for a single IP search |
-| Empty data (Pitfall 3) | Phase 1: Setup | Run test query against OpenCTI instance; document available data types |
-| Credit refund (Pitfall 4) | Phase 2: IP Search | Write test: mock OpenCTI timeout, assert credit is refunded |
-| Rename breakage (Pitfall 5) | Phase 1: Preparation | All 92 existing tests pass after rename; frontend route `/ip-search` loads |
-| Network connectivity (Pitfall 6) | Phase 1: Architecture | Document deployment topology; add `/api/health/opencti` endpoint |
-| GraphQL 200-with-errors (Integration table) | Phase 2: IP Search | Write test: mock GraphQL error response, assert proper error returned to frontend |
-| No caching (Performance table) | Phase 3: Optimization | Verify repeated identical search hits cache, not OpenCTI |
-| STIX jargon in UI (UX table) | Phase 2-4: All feature pages | Visual review: no raw STIX type names visible in any page |
-| Listing pages consuming credits (Security table) | Phase 3-4: Threat Actors, News | Decide and document: which endpoints are free (listings) vs. credit-gated (searches) |
+---
+
+### Pitfall 8: Threat Actors 4-Column Grid Overflow
+
+**What goes wrong:** Switching from 3-column (`xl:grid-cols-3`) to 4-column grid means cards become ~25% narrower. Current card content includes name, date, aliases (chips), description (3-line clamp), countries, sectors, and motivation badge. In 4 columns, long names like "UNC2452 (Dark Halo / SolarStorm)" overflow, and alias chip rows wrap badly.
+
+**Prevention:**
+- The milestone spec removes descriptions from cards, which helps significantly.
+- Use `xl:grid-cols-4` (1280px+), NOT `lg:grid-cols-4` or `md:grid-cols-4`.
+- Keep `md:grid-cols-2` and `lg:grid-cols-3` as intermediate breakpoints.
+- Test with the actual longest actor names from the OpenCTI dataset.
+- Apply `truncate` or `line-clamp-1` to actor names in the card.
+
+---
+
+### Pitfall 9: Threat News Row Layout Click Propagation Conflicts
+
+**What goes wrong:** The current card layout has entity chips that use `e.stopPropagation()` to prevent card click from firing when a chip is clicked. In a row layout, click targets are smaller and denser. The interaction model (click row to open modal vs. click chip to filter) becomes confusing.
+
+**Prevention:**
+- Verify `e.stopPropagation()` survives the layout change (it likely does, but test).
+- Consider whether modals still make sense for rows. Rows often use expand-in-place or navigate-to-detail patterns.
+- Ensure touch targets are at least 44px on mobile for both the row and the chips within it.
+
+---
+
+### Pitfall 10: Removing Confidence Badge vs. Confidence Filter -- Scope Confusion
+
+**What goes wrong:** The milestone says "no confidence" on the Threat News layout. If developers interpret this as removing both the per-card badge AND the toolbar confidence filter dropdown, users lose the ability to filter low-confidence noise.
+
+**Prevention:**
+- Clarify: remove the per-card/per-row confidence badge. KEEP the confidence filter dropdown in the toolbar.
+- The filter is valuable for data quality; the badge was visual noise on every card.
+
+---
+
+### Pitfall 11: Pagination Position Change Breaks Scroll UX
+
+**What goes wrong:** Moving pagination from bottom to top means the `PaginationControls` component needs different spacing (`pt-6` was designed for bottom placement). Also, after clicking "Next" to load page 2, the user's scroll position may be mid-page rather than at the top of results.
+
+**Prevention:**
+- Change spacing from `pt-6` to `pb-4` for top placement.
+- Add `window.scrollTo({ top: 0, behavior: 'smooth' })` in the page navigation handlers.
+- Consider rendering pagination at both top and bottom for longer result lists.
+
+---
+
+### Pitfall 12: Frontend D3 Graph IP-Specific Assumptions
+
+**What goes wrong:** The `D3Graph` component has IP-specific logic throughout:
+- Prop named `centerIp`
+- Center node hardcoded as `type: 'IPv4-Addr'`
+- `ENTITY_COLORS` map only covers IPv4/IPv6 + threat types (no Domain-Name, File, URL, etc.)
+- `uuidToCanonical` check compares `entity.name === centerIp` and checks `entity_type === 'IPv4-Addr'`
+
+For a domain search, the center node gets `DEFAULT_ENTITY_COLOR` (gray) instead of a distinctive color, and the canonical ID resolution fails.
+
+**Prevention:**
+- Pass `centerType` alongside `centerValue` from the parent.
+- Expand `ENTITY_COLORS` to include `'Domain-Name'`, `'Url'`, `'StixFile'`, `'Email-Addr'`, etc.
+- Update the canonical ID check to match on `entity_type` dynamically.
+
+---
+
+### Pitfall 13: Subheading Change on Threat Actors -- "Browse known intrusion sets" Mismatch
+
+**What goes wrong:** The current subheading says "Browse known threat actor profiles from OpenCTI." The milestone specifies a clean subheading change. If the subheading references "intrusion sets" (the actual OpenCTI entity type), it creates jargon confusion. If it says "threat actors" but the backend still queries `intrusionSets`, there is a terminology mismatch that could confuse developers maintaining the code.
+
+**Prevention:**
+- Keep user-facing text as "threat actors" (human-friendly).
+- Keep code-level naming as `intrusionSets` (matches OpenCTI API).
+- Add a code comment: `// OpenCTI calls these "intrusionSets"; we display them as "Threat Actors"`.
+
+---
+
+## Minor Pitfalls
+
+### Pitfall 14: Sidebar Navigation Label Width
+
+**What goes wrong:** "IP Search" (9 chars) becomes "Threat Search" (13 chars). May overflow sidebar tooltip in collapsed state or text area in expanded state if sidebar has a fixed width.
+
+**Prevention:** Check Sidebar.jsx width constraints. Test both collapsed and expanded states.
+
+---
+
+### Pitfall 15: Test Coverage Gap for New Observable Types
+
+**What goes wrong:** The existing Pest tests only cover IP search. After generalization, there are zero tests for domain, hash, URL, or email searches. Regressions in non-IP paths have no safety net.
+
+**Prevention:**
+- Add at minimum one test per observable type (domain, hash, URL) using mocked OpenCTI responses.
+- Test that geo enrichment is skipped for non-IP types.
+- Test that the response schema shape is consistent regardless of input type.
+
+---
+
+### Pitfall 16: Loading Skeleton Mismatch After Layout Change
+
+**What goes wrong:** Both pages currently show `<SkeletonCard count={6} />` in a 3-column grid during loading. After switching Threat Actors to 4-column and Threat News to rows, the skeleton still renders as 3-column cards, creating a visual jank when real content loads.
+
+**Prevention:**
+- Update Threat Actors skeleton to 4-column grid.
+- Create a `SkeletonRow` component for Threat News row layout.
+- Match skeleton dimensions to actual content dimensions.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Route rename (IP -> Threat Search) | References in 13+ files (Pitfall 3) | Comprehensive grep + full test suite run |
+| Route rename | Public access broken (Pitfall 4) | Keep route outside ProtectedRoute |
+| Backend search generalization | Validation blocks non-IP (Pitfall 1) | Replace `ip` rule with string validation |
+| Backend search generalization | Geo enrichment waste (Pitfall 6) | Type-guard before ip-api.com call |
+| Backend search generalization | Response key `ip` is wrong (Pitfall 2) | Rename to `query` or `value` |
+| Backend search generalization | Cache key prefix stale (Pitfall 5) | New prefix `threat_search:` |
+| GraphQL query changes | entity_type filter removal cascades (Pitfall 2) | Add type detection, conditional enrichment |
+| GraphQL query changes | Exact match misses (Pitfall 7) | Use `search` param or `operator: search` |
+| Frontend search page update | D3 graph IP assumptions (Pitfall 12) | Rename props, expand entity colors |
+| Frontend search page update | All `result.ip` references break (Pitfall 2) | Systematic rename to `result.query` |
+| Threat Actors UI refresh | 4-col grid overflow (Pitfall 8) | Use xl breakpoint, test with real data |
+| Threat Actors UI refresh | Loading skeleton mismatch (Pitfall 16) | Update skeleton to 4-col |
+| Threat News UI refresh | Row layout click conflicts (Pitfall 9) | Verify stopPropagation |
+| Threat News UI refresh | Confidence scope confusion (Pitfall 10) | Remove badge, keep filter |
+| Threat News UI refresh | Pagination position (Pitfall 11) | Adjust spacing, add scroll-to-top |
+| Testing | No coverage for new types (Pitfall 15) | Add mocked tests per observable type |
 
 ## Sources
 
-- [OpenCTI GraphQL API Documentation](https://docs.opencti.io/latest/reference/api/) -- HIGH confidence, official docs
-- [OpenCTI GraphQL Playground Usage](https://docs.opencti.io/latest/development/api-usage/) -- HIGH confidence, official docs
-- [OpenCTI Data Model (SDOs, SCOs, SROs)](https://docs.opencti.io/latest/usage/data-model/) -- HIGH confidence, official docs
-- [OpenCTI Connectors Documentation](https://docs.opencti.io/latest/deployment/connectors/) -- HIGH confidence, official docs
-- [OpenCTI Authentication Configuration](https://docs.opencti.io/latest/deployment/authentication/) -- HIGH confidence, official docs
-- [OpenCTI Introspection Disabled by Default (Issue #8598)](https://github.com/OpenCTI-Platform/opencti/issues/8598) -- HIGH confidence, confirms playground config pitfall
-- [OpenCTI Pagination Cursor Bug (Issue #1879)](https://github.com/OpenCTI-Platform/opencti/issues/1879) -- MEDIUM confidence, documents cursor pagination edge cases
-- [OpenCTI Practical API Usage Guide](https://www.mickaelwalter.fr/opencti-use-the-api/) -- MEDIUM confidence, community walkthrough with working examples
-- [Laravel 12.x HTTP Client Documentation](https://laravel.com/docs/12.x/http-client) -- HIGH confidence, official docs for timeout/retry patterns
-- [OpenCTI GraphQL Schema (GitHub)](https://github.com/OpenCTI-Platform/opencti/blob/master/opencti-platform/opencti-graphql/config/schema/opencti.graphql) -- HIGH confidence, authoritative schema reference
-- [OpenCTI Empty Instance / No Data Issues (Issue #7463)](https://github.com/OpenCTI-Platform/opencti/issues/7463) -- MEDIUM confidence, confirms empty data problem
-- AQUA TIP codebase inspection (v1.1) -- HIGH confidence, direct code review of `DeductCredit` middleware, `SearchController`, `api.php` routes, `App.jsx` routing
+- Direct codebase analysis of: `IpSearchService.php`, `IpSearchRequest.php`, `IpSearchPage.jsx`, `ThreatActorsPage.jsx`, `ThreatNewsPage.jsx`, `App.jsx`, `api.php`, `PaginationControls.jsx`
+- [OpenCTI Filters Documentation](https://docs.opencti.io/latest/reference/filters/)
+- [OpenCTI Data Model](https://docs.opencti.io/latest/usage/data-model/)
+- [OpenCTI GraphQL API Reference](https://docs.opencti.io/latest/reference/api/)
+- [OpenCTI entity_type filter discussion (GitHub #7637)](https://github.com/OpenCTI-Platform/opencti/issues/7637)
 
 ---
-*Pitfalls research for: OpenCTI GraphQL integration into AQUA TIP v2.0*
-*Researched: 2026-03-14*
+*Pitfalls research for: AQUA TIP v2.1 -- Threat Search & UI Refresh*
+*Researched: 2026-03-17*

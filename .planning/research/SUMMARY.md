@@ -1,156 +1,184 @@
 # Project Research Summary
 
-**Project:** AQUA TIP - Threat Intelligence Platform (OpenCTI Integration)
-**Domain:** OpenCTI GraphQL API integration into existing Laravel 12 + React 19 TIP
-**Researched:** 2026-03-14
+**Project:** AQUA TIP v2.1 -- Threat Search & UI Refresh
+**Domain:** Threat Intelligence Platform (expanding observable search + UI polish)
+**Researched:** 2026-03-17
 **Confidence:** HIGH
 
 ## Executive Summary
 
-AQUA TIP v2.0 replaces mock threat intelligence data with real data from an internal OpenCTI instance via its GraphQL API. The integration covers four features: IP Search (credit-gated observable lookup), Threat Actors (intrusion set browsing), Threat News (report listing), and Threat Map (geographic threat visualization). The recommended approach requires zero new dependencies -- Laravel's built-in HTTP client handles all GraphQL communication through a single `OpenCtiService` class that mirrors the existing `DarkWebProviderService` pattern. The React frontend continues to call Laravel API endpoints only; it never talks to OpenCTI directly.
+AQUA TIP v2.1 is a focused expansion of the existing IP-only search into a universal observable search covering IPs, domains, URLs, emails, and file hashes, plus a UI refresh of the Threat Actors and Threat News pages. The critical finding across all research is that this milestone requires zero new dependencies. The existing stack (React 19, Tailwind CSS 3, Laravel 12, OpenCTI GraphQL) already handles every capability needed. The OpenCTI `stixCyberObservables` GraphQL query accepts any `entity_type` filter, so the backend change is fundamentally a parameter expansion, not an architecture change.
 
-The architecture is a strict backend proxy: Laravel holds the OpenCTI Bearer token, executes four fixed GraphQL queries, flattens Relay-style edge/node responses into clean arrays, and serves them through standard REST endpoints. IP Search reuses the existing credit-gating middleware with a refund-on-failure pattern. Threat Actors, Threat News, and Threat Map are auth-only browse pages with server-side caching (5-15 minute TTLs). This proxy pattern enforces credit gating, keeps the OpenCTI token server-side, handles the private network topology (OpenCTI at `192.168.251.20` is unreachable from browsers), and decouples the frontend from OpenCTI's STIX-heavy schema.
+The recommended approach is a clean-break strategy: create a new `ThreatSearchService` and `ThreatSearchPage` rather than modifying the existing IP search in-place. The current `IpSearchPage.jsx` is a 697-line monolith with IP-specific assumptions baked into props, labels, and data keys. Attempting incremental modification risks subtle breakage across geo enrichment, D3 graph rendering, and response schema expectations. A fresh composition from extracted components is safer and produces better code structure.
 
-The primary risks are operational, not architectural. The OpenCTI instance may have sparse or no data if connectors are not configured -- every page needs graceful empty states. The IOC-to-IP-Search rename touches 16+ files across backend and frontend and should be done as an isolated commit before integration work begins. Network topology is a deployment constraint: the private OpenCTI address works from Laragon locally but not from cloud hosting. GraphQL over-fetching can cause response bloat and timeouts if queries are not carefully scoped. All of these have straightforward mitigations documented in the research.
+The primary risks are all execution risks, not technology risks. The route rename from `/ip-search` to `/threat-search` touches 13+ files across frontend and backend. The hardcoded `ip` validation rule will silently reject 100% of non-IP searches if not replaced. Geo enrichment will fire wastefully for non-IP types if not guarded. And the public access pattern for the search route (the landing page's primary CTA) must be preserved during migration. All of these are preventable with disciplined sequencing: backend first, component extraction second, new page third, UI refreshes last.
 
 ## Key Findings
 
 ### Recommended Stack
 
-No new Composer or npm packages are needed. The entire integration is built with Laravel's existing HTTP client (`Http::withToken()->post()`) and the React frontend's existing Axios setup. Four fixed GraphQL queries (observables, intrusion sets, reports, locations) do not justify a GraphQL client library. The existing `DarkWebProviderService` establishes the exact pattern to follow: config-driven credentials in `services.php`, single service class, timeout/retry configuration, response normalization.
+No new packages or infrastructure. Every v2.1 capability is built with existing tools. The research explicitly evaluated and rejected `ioc-extractor` (over-engineered for single-input detection), shadcn/UI (inconsistent with existing custom Tailwind), Zod (overkill for one search input), TanStack Table (not needed for styled row layout), and Apollo/urql (backend already proxies GraphQL). See `.planning/research/STACK.md` for full rationale.
 
-**Core technologies:**
-- **Laravel HTTP Client** (built-in): GraphQL transport via `Http::withToken()->post()` -- zero new dependencies
-- **Raw GraphQL query strings**: Four fixed queries; simpler and more maintainable than a query-builder abstraction
-- **Laravel Cache** (built-in): Server-side response caching for browse pages (threat actors 15 min, threat map 15 min, threat news 5 min)
-- **OpenCTI GraphQL API** (v5.x/6.x): Relay-style cursor pagination, FilterGroup input types, Bearer token auth
+**Core technologies (all existing):**
+- **React 19 + Vite 7**: Frontend, no changes to build or framework
+- **Tailwind CSS 3**: All UI refresh work uses utility classes only
+- **Laravel 12 + built-in HTTP Client**: Backend search service, validation, caching
+- **OpenCTI GraphQL API**: `stixCyberObservables` query with `entity_type` filter -- works for all observable types
+- **D3.js**: Relationship graph generalized from IP-centric to type-agnostic
+- **Framer Motion**: Already used for modals and transitions, reused as-is
 
 ### Expected Features
 
+See `.planning/research/FEATURES.md` for complete tables.
+
 **Must have (table stakes):**
-- IP search with threat score display (`x_opencti_score`), related indicators, and related reports
-- Credit gating on IP search (reuse existing `DeductCredit` middleware with refund on failure)
-- Searchable/filterable threat actor listing with name, description, aliases, country attribution
-- Report listing with title, date, author, keyword search, date filtering
-- Threat map with real geographic markers from OpenCTI Location entities and threat counts
-- Loading states, error states, and empty states for all four pages
-- Rate limit CTAs (RATE-04 guest upgrade, RATE-05 daily limit) -- frontend JSX already exists
+- Multi-type observable auto-detection (IP, domain, URL, email, file hash)
+- Observable type badge on results
+- Score/severity display (reuse existing)
+- Labels/tags display (reuse existing)
+- Relationships tab with D3 graph (generalize existing)
+- Credit deduction per search (reuse existing middleware)
+- Search state in URL params for sharing
+- Threat Actors 4-col grid without description text
+- Threat News row-based layout without confidence badge
 
 **Should have (differentiators):**
-- Unified search detecting IP/domain/hash and routing to correct query type
-- D3 relationship graph populated with real STIX relationship data
-- Threat actor profile cards with country flags and TTP badges
-- Credit-gated access model (unique vs raw OpenCTI access)
+- Auto-detect with manual override dropdown
+- Conditional geo enrichment (IP types only)
+- Sightings timeline generalized to all types
+- Top pagination on Threat News
 
-**Defer (v2.x+):**
-- Report detail page with full STIX content
-- Threat actor detail page with arsenal and victimology
-- Domain and hash search (extend IP search to other observable types)
-- Multi-source enrichment (VirusTotal, AbuseIPDB, Shodan)
-- Animated threat map arcs (high frontend complexity, needs attack flow data)
-- STIX bundle import/export (rebuilds OpenCTI ingestion -- out of scope)
+**Defer (v2+):**
+- Bulk/batch observable search (needs queue infrastructure)
+- Multi-source enrichment (VirusTotal, Shodan -- explicitly out of scope)
+- STIX export/download
+- Priority 2/3 observable types (MAC, crypto wallet, user account)
+- Real-time observable monitoring
 
 ### Architecture Approach
 
-All OpenCTI communication goes through a single `OpenCtiService` class with four public methods (`searchObservable`, `listIntrusionSets`, `listReports`, `getGeographicalThreats`) and a private `execute()` method handling auth, timeout, retry, and error checking. Each feature gets its own invokable controller following the existing single-action pattern. IP Search is credit-gated; the other three endpoints require auth only. The frontend adds one new API module (`opencti.js`) and wires four existing pages to real endpoints.
+Single unified `POST /api/threat-search` endpoint replacing `POST /api/ip-search`. The backend uses a type registry pattern where `ThreatSearchService::OBSERVABLE_TYPES` maps friendly type keys to OpenCTI `entity_type` values. Auto-detection uses PHP's `filter_var()` for IPs/URLs/emails and regex for hash lengths. The frontend uses a polymorphic result page -- one `ThreatSearchPage.jsx` with conditional geo section for IPs only. All existing tab components (D3Graph, Indicators, Sightings, Notes, External Refs) work for any observable type since they consume normalized data structures. See `.planning/research/ARCHITECTURE.md` for data flow diagrams and component boundaries.
 
 **Major components:**
-1. **`OpenCtiService`** -- Sends GraphQL queries to OpenCTI, flattens edge/node responses, handles errors and retries
-2. **`IpSearch\SearchController`** -- Credit-gated IP lookup with refund on OpenCTI failure (replaces mock service)
-3. **`ThreatActors\IndexController`** / **`ThreatNews\IndexController`** / **`ThreatMap\IndexController`** -- Auth-only browse endpoints with server-side caching
-4. **Frontend API module + page rewiring** -- `opencti.js` API client; four pages switch from mock data to real API responses
+1. **ThreatSearchService (NEW)** -- Replaces IpSearchService; type detection, OpenCTI query, conditional geo enrichment
+2. **ThreatSearchRequest (NEW)** -- Type-aware Laravel validation replacing strict IP rule
+3. **ThreatSearchController (NEW)** -- HTTP handler with credit gating and search logging
+4. **ThreatSearchPage.jsx (NEW)** -- Composed from extracted components + new SearchHeader with type dropdown
+5. **ThreatActorsPage.jsx (MODIFIED)** -- Layout-only: 4-col grid, remove descriptions
+6. **ThreatNewsPage.jsx (MODIFIED)** -- Layout-only: row-based, remove confidence badge, top pagination
 
 ### Critical Pitfalls
 
-1. **OpenCTI token exposure** -- Never use `VITE_` prefix for OpenCTI credentials. Token stays in Laravel `.env`, all queries proxied through backend. This is the foundational architectural constraint.
-2. **Empty OpenCTI instance** -- A fresh instance has no data. Verify data availability before building pages. At minimum, configure MITRE ATT&CK connector (free) and one feed connector. Design all pages with explicit empty states.
-3. **Credit lost on API failure** -- `DeductCredit` middleware runs before the controller. Implement refund in the controller's catch block (pattern already exists in `DarkWeb\SearchController`).
-4. **GraphQL over-fetching** -- Select only displayed fields, always specify `first: N`, limit nesting to 2 levels, set 15-second timeout. Measure response sizes during development.
-5. **IOC-to-IP rename breakage** -- Touches 16+ files across routes, controllers, requests, tests, frontend. Do as isolated commit before integration. Run full test suite after.
-6. **Network topology** -- OpenCTI at `192.168.251.20` is unreachable from cloud hosting. Acceptable for local development; document the constraint explicitly.
+See `.planning/research/PITFALLS.md` for all 16 pitfalls with detailed prevention strategies.
+
+1. **Hardcoded IP validation blocks all non-IP searches** -- Replace Laravel `ip` rule with permissive string validation before anything else. One forgotten rule = 100% failure for the new feature.
+2. **Route rename touches 13+ files** -- Grep for all variations (`ip-search`, `ip_search`, `IpSearch`, `ipSearch`, `IP Search`). Rename in dependency order. Run full test suite after.
+3. **Public access pattern broken during migration** -- The threat search route MUST remain outside `<ProtectedRoute>` in App.jsx. It is the landing page's primary CTA target.
+4. **Geo enrichment fires for non-IP types** -- Guard with `filter_var($query, FILTER_VALIDATE_IP)` before calling ip-api.com. Otherwise wastes 45 req/min rate limit.
+5. **D3 graph has IP-specific assumptions** -- Props named `centerIp`, hardcoded entity colors for IPv4 only, canonical ID check assumes IP type. Must generalize props and color map.
 
 ## Implications for Roadmap
 
 Based on research, suggested phase structure:
 
-### Phase 1: Foundation and Preparation
-**Rationale:** Two prerequisite tasks must complete before any OpenCTI code: (1) verify OpenCTI instance has data, and (2) complete the IOC-to-IP rename cleanly. Both are low-risk but block everything downstream.
-**Delivers:** Renamed codebase (IOC -> IP Search across all layers), verified OpenCTI data availability, `config/services.php` with OpenCTI credentials, environment variables, health check endpoint (`GET /api/health/opencti`).
-**Addresses features:** Rename IOC to IP Search.
-**Avoids pitfalls:** #5 (rename breakage), #3 (empty instance), #6 (network connectivity -- verified here).
+### Phase 1: Backend Search Generalization
 
-### Phase 2: OpenCTI Service + IP Search Integration
-**Rationale:** IP Search is the highest-value, highest-risk feature. It validates the entire OpenCTI integration pattern (service class, GraphQL query execution, error handling, credit refund) and replaces the existing mock with real data. Building this first proves the architecture works.
-**Delivers:** `OpenCtiService` with `execute()` and `searchObservable()` methods, `IpSearch\SearchController` wired to OpenCTI, credit refund on failure, D3 graph populated with real STIX relationships, loading/error/empty states on IP search page.
-**Addresses features:** IP search with threat score, related indicators, related reports, credit gating with refund, raw STIX view.
-**Avoids pitfalls:** #1 (token exposure -- proxy pattern established), #4 (credit refund), #2 (over-fetching -- first query validated).
+**Rationale:** Frontend depends on backend endpoint. Old frontend keeps working on old endpoint during development.
+**Delivers:** `POST /api/threat-search` accepting any observable type with auto-detection
+**Addresses:** Multi-type observable search (table stakes), conditional geo enrichment, credit gating
+**Avoids:** Pitfall 1 (validation), Pitfall 2 (entity_type cascade), Pitfall 5 (cache keys), Pitfall 6 (geo rate limit)
+**Scope:** ThreatSearchService, ThreatSearchRequest, ThreatSearchController, route registration, backward-compat redirect for `/api/ip-search`
 
-### Phase 3: Threat Actors + Threat News
-**Rationale:** Both are list/browse pages with the same pattern (paginated GraphQL query, cursor pagination, server-side caching, no credit gating). They can be built in parallel or sequentially using the service class proven in Phase 2.
-**Delivers:** `listIntrusionSets()` and `listReports()` service methods, two new controllers, two fully implemented frontend pages replacing placeholders, search/filter/pagination on both pages, 15-minute and 5-minute server-side caching.
-**Addresses features:** Threat actor listing with name/description/aliases/labels, threat news listing with title/date/author/search.
-**Avoids pitfalls:** #2 (over-fetching -- use "list" queries with minimal fields).
+### Phase 2: Frontend Component Extraction
 
-### Phase 4: Threat Map with Real Geographic Data
-**Rationale:** The threat map is last because it has the most complex data transformation (Location entities with relationship counts for marker sizing) and the highest risk of empty data (geographic data depends on specific OpenCTI connectors). The existing mock map provides a functional fallback.
-**Delivers:** `getGeographicalThreats()` service method, `ThreatMap\IndexController`, Leaflet map populated with real country markers and threat density, attack type breakdown from real data, 15-minute server-side caching.
-**Addresses features:** Geographic markers from real data, country-level threat counts, attack type breakdown.
-**Avoids pitfalls:** #3 (empty data -- fall back to mock with "demo data" badge if no Location entities exist).
+**Rationale:** De-risks Phase 3 by extracting reusable components from the 697-line IpSearchPage monolith before building the new page. If extraction breaks something, old page is the canary.
+**Delivers:** Shared components in `components/threat-search/` (D3Graph, tabs, score display, geo section)
+**Addresses:** Architecture pattern of composable components over monolith
+**Avoids:** Pitfall 12 (D3 graph IP assumptions -- fix during extraction)
+
+### Phase 3: Universal Threat Search Page + Route Migration
+
+**Rationale:** Depends on Phase 1 (backend) and Phase 2 (extracted components). This is where the user-facing feature ships.
+**Delivers:** ThreatSearchPage.jsx with type selector, route `/threat-search`, redirects, nav updates, landing page CTA updates
+**Addresses:** Unified search input, type badge, search state in URL, auto-detect with manual override
+**Avoids:** Pitfall 3 (route rename across 13+ files), Pitfall 4 (public access pattern), Pitfall 14 (sidebar label width)
+
+### Phase 4: Threat Actors UI Refresh
+
+**Rationale:** Independent of search work. Frontend-only, no backend changes. Can run in parallel with Phase 5.
+**Delivers:** 4-col grid layout, descriptions removed from cards, clean subheading
+**Addresses:** Threat Actors clean card grid (table stakes)
+**Avoids:** Pitfall 8 (grid overflow), Pitfall 16 (skeleton mismatch), Pitfall 13 (subheading terminology)
+
+### Phase 5: Threat News UI Refresh
+
+**Rationale:** Independent of search work and Threat Actors. Frontend-only. Can run in parallel with Phase 4.
+**Delivers:** Row-based layout, confidence badge removed, pagination at top and bottom
+**Addresses:** Threat News row layout (table stakes), top pagination (differentiator)
+**Avoids:** Pitfall 9 (click propagation), Pitfall 10 (confidence scope confusion), Pitfall 11 (pagination scroll UX)
+
+### Phase 6: Cleanup and Testing
+
+**Rationale:** Remove deprecated code only after new code is verified working. Add test coverage for new observable types.
+**Delivers:** Removed old IpSearch files, updated search logs, test coverage for domain/hash/URL/email searches
+**Addresses:** Pitfall 15 (test coverage gap)
 
 ### Phase Ordering Rationale
 
-- **Phase 1 before all else** because the rename creates a clean baseline and data verification prevents building on an empty foundation.
-- **Phase 2 first feature** because IP Search is the primary CTA, validates the entire integration pattern, and has the most complexity (credit gating + refund). If this works, Phases 3-4 are mechanical.
-- **Phases 3 and 4 are independent** of each other -- they only depend on the `OpenCtiService` from Phase 2. They could theoretically be built in parallel.
-- **Phase 4 last** because geographic data is the most likely to be sparse in OpenCTI and the existing mock map is an acceptable fallback.
+- Backend before frontend: the new API must exist before the UI can call it. Old UI continues working during backend development.
+- Component extraction before new page: isolates refactoring risk. If extraction breaks the old page, you catch it before building on top.
+- Search feature before UI refreshes: Threat Actors and News refreshes are independent and lower risk. They can be done last or in parallel.
+- Cleanup last: removing old code before new code is verified is how you break production. Keep backward compatibility until the new flow is proven.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 2 (IP Search):** The GraphQL query for `stixCyberObservables` with relationship expansion needs validation against the actual OpenCTI playground. Field names (`x_opencti_score`, `stixCoreRelationships` inline) should be verified before implementation.
-- **Phase 4 (Threat Map):** Geographic data structure in OpenCTI varies by instance configuration. The relationship count approach for threat density needs playground validation. May need to adjust the query strategy based on available data.
+- **Phase 1 (Backend):** File hash GraphQL filter syntax (`hashes.MD5` vs `hashes_MD5`) has MEDIUM confidence. Must verify against live OpenCTI GraphQL playground before implementing hash search. The exact key format varies between OpenCTI versions.
+- **Phase 1 (Backend):** Exact-match vs fuzzy search behavior (Pitfall 7). The `operator: 'search'` parameter needs testing to determine if it provides useful fuzzy matching without returning too many irrelevant results.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 1 (Foundation):** Pure renaming and config work. No unknowns.
-- **Phase 3 (Threat Actors + News):** Straightforward list/pagination pattern. Identical to Phase 2 service methods but simpler (no credit gating).
+- **Phase 2 (Component Extraction):** Standard React refactoring. Extract components, update imports, verify.
+- **Phase 3 (New Page + Routes):** Well-documented React Router patterns. The grep list for route rename is already compiled in PITFALLS.md.
+- **Phase 4 and 5 (UI Refreshes):** Pure Tailwind CSS layout changes. Specs are detailed in FEATURES.md and ARCHITECTURE.md.
+- **Phase 6 (Cleanup):** Mechanical deletion and test writing.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Zero new dependencies. All tools already in use. OpenCTI API docs are comprehensive. GraphQL queries verified against pycti source and official schema. |
-| Features | HIGH | Feature set clearly scoped to 4 pages. Table stakes identified from competitor analysis (OpenCTI native, MISP, VirusTotal). Dependency tree is simple and linear. |
-| Architecture | HIGH | Proxy pattern already proven with DarkWebProviderService. All patterns (credit refund, response normalization, invokable controllers) exist in the codebase. |
-| Pitfalls | HIGH | All critical pitfalls sourced from OpenCTI official docs, GitHub issues, and existing codebase inspection. No speculative issues. |
+| Stack | HIGH | Zero new dependencies; all capabilities verified against existing codebase |
+| Features | HIGH | Feature set derived from OpenCTI docs, existing codebase analysis, and TIP industry patterns |
+| Architecture | HIGH | Architecture is an expansion of proven existing patterns, not greenfield design |
+| Pitfalls | HIGH | All pitfalls identified through direct codebase grep and tracing actual data flows |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **OpenCTI data availability:** The instance at `192.168.251.20:8080` has not been verified for data content. Run test queries in the GraphQL playground before Phase 2 begins. If empty, configure MITRE ATT&CK + AlienVault OTX connectors (both free) and wait for initial import (1-2 hours).
-- **Exact GraphQL field names:** Queries are based on pycti source code and OpenCTI docs, but the exact schema depends on the OpenCTI version running on the instance. Verify via the GraphQL playground introspection before hardcoding queries.
-- **Deployment topology:** The private network address works locally but blocks cloud deployment. This is documented but not resolved -- the project should explicitly decide whether production is local-only or requires a tunnel/public OpenCTI instance.
-- **Observable metadata richness:** ASN, geolocation, and enrichment data for IP observables depends on which connectors are active. The UI should handle sparse metadata gracefully rather than assuming all fields are populated.
-- **Credit cost for empty results:** Should a search that returns zero OpenCTI results still cost a credit? This is a product decision that needs to be made before Phase 2 implementation.
+- **File hash GraphQL filter syntax:** The exact filter key for querying by MD5/SHA-1/SHA-256 in OpenCTI (`hashes.MD5` vs `hashes_MD5` vs plain `value` filter) needs live validation. Mitigation: test against the GraphQL playground early in Phase 1. If hash-specific filters fail, fall back to searching by `observable_value` which stores the hash string directly.
+- **Fuzzy search behavior:** OpenCTI's `search` parameter behavior for partial domain matches is undocumented for the `stixCyberObservables` endpoint. Mitigation: implement exact match first, add fuzzy fallback as a stretch goal if exact match proves insufficient during testing.
+- **OpenCTI version compatibility:** The platform's OpenCTI instance version was not confirmed. Filter syntax can vary between major versions. Mitigation: check `GET /api/settings` on the OpenCTI instance to confirm version during Phase 1.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [OpenCTI GraphQL API Documentation](https://docs.opencti.io/latest/reference/api/)
-- [OpenCTI Filter Reference](https://docs.opencti.io/latest/reference/filters/)
-- [OpenCTI Data Model (STIX)](https://docs.opencti.io/latest/usage/data-model/)
-- [OpenCTI GraphQL Schema (GitHub)](https://github.com/OpenCTI-Platform/opencti/blob/master/opencti-platform/opencti-graphql/config/schema/opencti.graphql)
-- [OpenCTI pycti source code](https://github.com/OpenCTI-Platform/client-python) -- query structure reference for observables, intrusion sets, reports
-- [Laravel 12.x HTTP Client Documentation](https://laravel.com/docs/12.x/http-client)
-- Existing AQUA TIP codebase -- `DarkWebProviderService`, `DeductCredit` middleware, `SearchController` patterns
+- [OpenCTI Data Model](https://docs.opencti.io/latest/usage/data-model/) -- entity type taxonomy, observable types
+- [OpenCTI Observations](https://docs.opencti.io/latest/usage/exploring-observations/) -- observable vs indicator distinction
+- [OpenCTI GraphQL API](https://docs.opencti.io/latest/reference/api/) -- query structure, filter syntax
+- [OpenCTI Filters Reference](https://docs.opencti.io/latest/reference/filters/) -- filter operators and modes
+- [STIX 2.1 Cyber Observable Objects](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html) -- SCO specification
+- Existing codebase: `IpSearchService.php`, `OpenCtiService.php`, `IpSearchPage.jsx`, `ThreatActorsPage.jsx`, `ThreatNewsPage.jsx`, `App.jsx`
 
 ### Secondary (MEDIUM confidence)
-- [OpenCTI Practical API Usage Guide](https://www.mickaelwalter.fr/opencti-use-the-api/)
-- [OpenCTI Pagination Cursor Bug (Issue #1879)](https://github.com/OpenCTI-Platform/opencti/issues/1879)
-- [OpenCTI Introspection Config (Issue #8598)](https://github.com/OpenCTI-Platform/opencti/issues/8598)
-- [Top TIP Features 2026 - Stellar Cyber](https://stellarcyber.ai/learn/top-threat-intelligence-platforms/)
-- [Global Threat Map open-source project](https://www.helpnetsecurity.com/2026/02/04/global-threat-map-open-source-osint/)
+- [Elastic OpenCTI Integration](https://docs.elastic.co/integrations/ti_opencti) -- full enumeration of observable types
+- [OpenCTI Python Client](https://github.com/OpenCTI-Platform/client-python) -- entity_type mapping reference
+- [OpenCTI entity_type filter discussion (GitHub #7637)](https://github.com/OpenCTI-Platform/opencti/issues/7637) -- filter behavior
+
+### Tertiary (LOW confidence)
+- [ANY.RUN TI Lookup](https://any.run/threat-intelligence-lookup/) -- UI pattern reference for universal search
+- [Pulsedive](https://pulsedive.com/) -- multi-type observable search patterns
+- [AufaitUX Cybersecurity Dashboard Design](https://www.aufaitux.com/blog/cybersecurity-dashboard-ui-ux-design/) -- card grid and dark theme patterns
 
 ---
-*Research completed: 2026-03-14*
+*Research completed: 2026-03-17*
 *Ready for roadmap: yes*
