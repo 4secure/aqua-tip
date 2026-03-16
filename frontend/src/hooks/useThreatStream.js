@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { apiClient } from '../api/client';
 
 const MAX_EVENTS = 50;
+const MAX_RETRIES = 10;
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function aggregateCountryCounts(events) {
@@ -46,6 +47,8 @@ export function useThreatStream() {
   const [counters, setCounters] = useState({ threats: 0, countries: 0, types: 0 });
   const [connected, setConnected] = useState(false);
   const esRef = useRef(null);
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef(null);
   const [snapshotLoaded, setSnapshotLoaded] = useState(false);
 
   const recalculate = useCallback((eventList) => {
@@ -78,41 +81,89 @@ export function useThreatStream() {
     return () => { cancelled = true; };
   }, [recalculate]);
 
-  // SSE connection
+  // SSE connection with reconnection and visibility handling
   useEffect(() => {
     if (!snapshotLoaded) return;
 
-    const es = new EventSource(`${BASE_URL}/api/threat-map/stream`, {
-      withCredentials: true,
-    });
-    esRef.current = es;
-
-    es.onopen = () => {
-      setConnected(true);
-    };
-
-    es.onmessage = (msg) => {
-      try {
-        const newEvent = JSON.parse(msg.data);
-        if (newEvent.error) return;
-        setEvents((prev) => {
-          const updated = [newEvent, ...prev].slice(0, MAX_EVENTS);
-          setCounters(deriveCounters(updated));
-          return updated;
-        });
-      } catch {
-        // Ignore malformed messages
+    function connect() {
+      // Clean up any existing connection
+      if (esRef.current) {
+        esRef.current.close();
+        esRef.current = null;
       }
-    };
 
-    es.onerror = () => {
-      setConnected(false);
-      // EventSource auto-reconnects; server sends retry: 10000
-    };
+      const es = new EventSource(`${BASE_URL}/api/threat-map/stream`, {
+        withCredentials: true,
+      });
+      esRef.current = es;
+
+      es.onopen = () => {
+        setConnected(true);
+        retryCountRef.current = 0;
+      };
+
+      es.onmessage = (msg) => {
+        try {
+          const newEvent = JSON.parse(msg.data);
+          if (newEvent.error) return;
+          setEvents((prev) => {
+            const updated = [newEvent, ...prev].slice(0, MAX_EVENTS);
+            setCounters(deriveCounters(updated));
+            return updated;
+          });
+        } catch {
+          // Ignore malformed messages
+        }
+      };
+
+      es.addEventListener('stream-error', (msg) => {
+        try {
+          const payload = JSON.parse(msg.data);
+          console.warn('[ThreatStream] Server error:', payload.error);
+        } catch {
+          // Ignore malformed stream-error events
+        }
+      });
+
+      es.onerror = () => {
+        setConnected(false);
+        es.close();
+        esRef.current = null;
+
+        if (retryCountRef.current < MAX_RETRIES) {
+          const delay = Math.min(1000 * Math.pow(2, retryCountRef.current), 30000);
+          retryCountRef.current += 1;
+          retryTimerRef.current = setTimeout(connect, delay);
+        }
+      };
+    }
+
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        // Tab hidden — disconnect to free resources
+        clearTimeout(retryTimerRef.current);
+        if (esRef.current) {
+          esRef.current.close();
+          esRef.current = null;
+        }
+        setConnected(false);
+      } else {
+        // Tab visible — reconnect immediately
+        retryCountRef.current = 0;
+        connect();
+      }
+    }
+
+    connect();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      es.close();
-      esRef.current = null;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(retryTimerRef.current);
+      if (esRef.current) {
+        esRef.current.close();
+        esRef.current = null;
+      }
     };
   }, [snapshotLoaded]);
 

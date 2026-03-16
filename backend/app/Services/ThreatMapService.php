@@ -3,11 +3,15 @@
 namespace App\Services;
 
 use App\Data\CountryCentroids;
+use GeoIp2\Database\Reader;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class ThreatMapService
 {
+    private ?Reader $geoReader = null;
+    private bool $geoReaderChecked = false;
+
     /**
      * Attack type labels mapped to color categories.
      * Red: C2/DDoS/Malware, Amber: Scanning/BEC, Violet: Phishing/APT, Cyan: Recon.
@@ -78,6 +82,74 @@ class ThreatMapService
     }
 
     /**
+     * Parse a live stream STIX event (from OpenCTI SSE) into a normalized event.
+     *
+     * The stream format differs from GraphQL: data is nested under extensions
+     * and the IP is in the top-level 'value' field.
+     *
+     * @param  array   $stixData  The 'data' object from the stream event
+     * @param  string  $message   The human-readable message from the stream
+     * @return array|null
+     */
+    public function parseStreamEvent(array $stixData, string $message = ''): ?array
+    {
+        $ip = $stixData['value'] ?? null;
+
+        if ($ip === null || ! filter_var($ip, FILTER_VALIDATE_IP)) {
+            return null;
+        }
+
+        $extensions = $stixData['extensions'] ?? [];
+        $labels = [];
+        $entityType = 'IPv4-Addr';
+
+        foreach ($extensions as $ext) {
+            if (isset($ext['type'])) {
+                $entityType = $ext['type'];
+            }
+
+            if (isset($ext['labels']) && is_array($ext['labels'])) {
+                $labels = $ext['labels'];
+            }
+        }
+
+        $attackType = $this->classifyLabels($labels, $entityType);
+        $color = $this->getColorForType($attackType);
+
+        return [
+            'id' => $stixData['id'] ?? uniqid('evt-'),
+            'type' => $attackType,
+            'color' => $color,
+            'ip' => $ip,
+            'entity_type' => $entityType,
+            'timestamp' => $stixData['modified'] ?? $stixData['created'] ?? now()->toIso8601String(),
+            'message' => $message ?: $ip,
+        ];
+    }
+
+    /**
+     * Classify attack type from a flat labels array + entity type fallback.
+     */
+    private function classifyLabels(array $labels, string $entityType): string
+    {
+        foreach ($labels as $label) {
+            $normalized = strtolower($label);
+
+            if (isset(self::TYPE_COLORS[$normalized])) {
+                return ucfirst($normalized);
+            }
+
+            foreach (array_keys(self::TYPE_COLORS) as $knownType) {
+                if (str_contains($normalized, $knownType)) {
+                    return ucfirst($knownType);
+                }
+            }
+        }
+
+        return self::ENTITY_TYPE_MAP[$entityType] ?? 'Unknown';
+    }
+
+    /**
      * Geocode an IP address using ip-api.com with country centroid fallback.
      *
      * @param  string       $ip           The IP address to geocode
@@ -108,12 +180,58 @@ class ThreatMapService
     }
 
     /**
+     * Get or create the MaxMind GeoLite2 Reader (lazy singleton).
+     */
+    private function getGeoReader(): ?Reader
+    {
+        if ($this->geoReaderChecked) {
+            return $this->geoReader;
+        }
+
+        $this->geoReaderChecked = true;
+
+        $dbPath = storage_path('app/geoip/GeoLite2-City.mmdb');
+
+        if (file_exists($dbPath)) {
+            try {
+                $this->geoReader = new Reader($dbPath);
+            } catch (\Throwable) {
+                // DB unreadable — fall through to HTTP fallback
+            }
+        }
+
+        return $this->geoReader;
+    }
+
+    /**
      * Execute the geo lookup (called inside cache closure).
      */
     private function fetchGeo(string $ip, ?string $countryCode): ?array
     {
+        // Primary: local MaxMind GeoLite2 database (microseconds)
         try {
-            $response = Http::timeout(3)
+            $reader = $this->getGeoReader();
+
+            if ($reader !== null) {
+                $record = $reader->city($ip);
+
+                return [
+                    'lat' => $record->location->latitude,
+                    'lng' => $record->location->longitude,
+                    'city' => $record->city->name,
+                    'country' => $record->country->name,
+                    'countryCode' => $record->country->isoCode,
+                ];
+            }
+        } catch (\GeoIp2\Exception\AddressNotFoundException) {
+            // IP not in database — fall through
+        } catch (\Throwable) {
+            // DB read error — fall through to HTTP fallback
+        }
+
+        // Fallback: ip-api.com HTTP
+        try {
+            $response = Http::timeout(2)
                 ->get("http://ip-api.com/json/{$ip}", [
                     'fields' => 'status,lat,lon,city,country,countryCode',
                 ]);
@@ -138,7 +256,7 @@ class ThreatMapService
             // Network error — fall through to centroid
         }
 
-        // Centroid fallback
+        // Last resort: country centroid fallback
         if ($countryCode !== null) {
             $centroid = CountryCentroids::get($countryCode);
 
@@ -168,7 +286,7 @@ class ThreatMapService
     {
         $graphql = <<<'GRAPHQL'
         query ($filters: FilterGroup) {
-            stixCyberObservables(filters: $filters, first: 30, orderBy: created_at, orderMode: desc) {
+            stixCyberObservables(types: ["IPv4-Addr", "IPv6-Addr"], filters: $filters, first: 30, orderBy: created_at, orderMode: desc) {
                 edges {
                     node {
                         id
@@ -176,12 +294,6 @@ class ThreatMapService
                         observable_value
                         created_at
                         objectLabel {
-                            value
-                        }
-                        ... on IPv4Addr {
-                            value
-                        }
-                        ... on IPv6Addr {
                             value
                         }
                     }
@@ -194,12 +306,6 @@ class ThreatMapService
             'filters' => [
                 'mode' => 'and',
                 'filters' => [
-                    [
-                        'key' => 'entity_type',
-                        'values' => ['IPv4-Addr', 'IPv6-Addr'],
-                        'operator' => 'eq',
-                        'mode' => 'or',
-                    ],
                     [
                         'key' => 'created_at',
                         'values' => [$since],
@@ -235,12 +341,14 @@ class ThreatMapService
 
     /**
      * Fetch recent STIX events from OpenCTI for the snapshot.
+     *
+     * Fetches 100 most recent observables without time filter for richer initial load.
      */
     private function fetchSnapshot(): array
     {
         $graphql = <<<'GRAPHQL'
-        query ($filters: FilterGroup) {
-            stixCyberObservables(filters: $filters, first: 100, orderBy: created_at, orderMode: desc) {
+        {
+            stixCyberObservables(types: ["IPv4-Addr", "IPv6-Addr"], first: 100, orderBy: created_at, orderMode: desc) {
                 edges {
                     node {
                         id
@@ -250,42 +358,13 @@ class ThreatMapService
                         objectLabel {
                             value
                         }
-                        ... on IPv4Addr {
-                            value
-                        }
-                        ... on IPv6Addr {
-                            value
-                        }
                     }
                 }
             }
         }
         GRAPHQL;
 
-        $fifteenMinutesAgo = now()->subMinutes(15)->toIso8601String();
-
-        $variables = [
-            'filters' => [
-                'mode' => 'and',
-                'filters' => [
-                    [
-                        'key' => 'entity_type',
-                        'values' => ['IPv4-Addr', 'IPv6-Addr'],
-                        'operator' => 'eq',
-                        'mode' => 'or',
-                    ],
-                    [
-                        'key' => 'created_at',
-                        'values' => [$fifteenMinutesAgo],
-                        'operator' => 'gt',
-                        'mode' => 'or',
-                    ],
-                ],
-                'filterGroups' => [],
-            ],
-        ];
-
-        $data = $this->openCti->query($graphql, $variables);
+        $data = $this->openCti->query($graphql);
         $edges = $data['stixCyberObservables']['edges'] ?? [];
 
         $events = [];

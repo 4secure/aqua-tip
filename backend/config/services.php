@@ -57,6 +57,7 @@ return [
     'opencti' => [
         'url' => env('OPENCTI_URL'),
         'token' => env('OPENCTI_TOKEN'),
+        'stream_id' => env('OPENCTI_STREAM_ID'),
     ],
 
 ];
