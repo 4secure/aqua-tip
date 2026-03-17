@@ -181,8 +181,8 @@ export default function ThreatNewsPage() {
         </p>
       </div>
 
-      {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Toolbar: Search + Pagination */}
+      <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search
             size={16}
@@ -198,6 +198,29 @@ export default function ThreatNewsPage() {
           />
         </div>
 
+        {pagination && (
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="font-mono text-sm text-text-muted whitespace-nowrap">
+              {pagination.total != null
+                ? `${currentOffset + 1}\u2013${Math.min(currentOffset + PAGE_SIZE, pagination.total)} of ${pagination.total}`
+                : `${currentOffset + 1}\u2013${currentOffset + PAGE_SIZE}`}
+            </span>
+            <button
+              onClick={handlePrevious}
+              disabled={!pagination.has_previous}
+              className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={16} className="text-text-muted" />
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={!pagination.has_next}
+              className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={16} className="text-text-muted" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Entity Filter Banner */}
@@ -234,8 +257,14 @@ export default function ThreatNewsPage() {
 
       {/* Loading State */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <SkeletonCard count={6} />
+        <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl overflow-hidden">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className="flex items-center gap-4 px-4 py-3 border-b border-border animate-pulse">
+              <div className="h-4 bg-surface-2 rounded flex-1" />
+              <div className="hidden sm:block h-4 bg-surface-2 rounded w-32" />
+              <div className="h-4 bg-surface-2 rounded w-20" />
+            </div>
+          ))}
         </div>
       )}
 
@@ -252,20 +281,18 @@ export default function ThreatNewsPage() {
         </div>
       )}
 
-      {/* Card Grid */}
+      {/* Report List */}
       {!loading && !error && items.length > 0 && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {items.map((report) => (
-              <ReportCard
-                key={report.id}
-                report={report}
-                onClick={() => setSelectedReport(report)}
-                onEntityClick={handleEntityChipClick}
-              />
-            ))}
-          </div>
-        </>
+        <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl overflow-hidden">
+          {items.map((report) => (
+            <ReportRow
+              key={report.id}
+              report={report}
+              onClick={() => setSelectedReport(report)}
+              onEntityClick={handleEntityChipClick}
+            />
+          ))}
+        </div>
       )}
 
       {/* Detail Modal */}
@@ -282,37 +309,24 @@ export default function ThreatNewsPage() {
   );
 }
 
-/* ── Report Card ── */
+/* ── Report Row ── */
 
-function ReportCard({ report, onClick, onEntityClick }) {
+function ReportRow({ report, onClick, onEntityClick }) {
   const entities = report.related_entities || [];
   const visibleEntities = entities.slice(0, MAX_VISIBLE_ENTITIES);
   const overflowCount = entities.length - MAX_VISIBLE_ENTITIES;
+
   return (
     <div
       onClick={onClick}
-      className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-5 cursor-pointer hover:border-violet/40 transition-colors"
+      className="flex items-center gap-4 px-4 py-3 border-b border-border hover:bg-surface-2 cursor-pointer transition-colors"
     >
-      {/* Title */}
-      <h3 className="font-display text-lg font-bold text-text-primary leading-tight mb-2">
+      <h3 className="font-display text-sm font-semibold text-text-primary truncate flex-1 min-w-0">
         {report.name}
       </h3>
 
-      {/* Published date */}
-      <p className="font-mono text-xs text-text-muted mb-3">
-        {formatDate(report.published)}
-      </p>
-
-      {/* Description snippet */}
-      {report.description && (
-        <p className="font-mono text-sm text-text-muted line-clamp-3 mb-3">
-          {report.description}
-        </p>
-      )}
-
-      {/* Related entity chips */}
       {entities.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
           {visibleEntities.map((ent) => {
             const color = chipColor(ent.entity_type);
             return (
@@ -332,6 +346,10 @@ function ReportCard({ report, onClick, onEntityClick }) {
           )}
         </div>
       )}
+
+      <span className="font-mono text-xs text-text-muted shrink-0 w-24 text-right">
+        {formatDate(report.published)}
+      </span>
     </div>
   );
 }
