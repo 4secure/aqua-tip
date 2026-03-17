@@ -8,18 +8,10 @@ import {
   RotateCcw,
   ExternalLink,
   X,
-  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { fetchThreatNews } from '../api/threat-news';
-import PaginationControls from '../components/shared/PaginationControls';
-import SkeletonCard from '../components/shared/SkeletonCard';
-
-const CONFIDENCE_OPTIONS = [
-  { value: '', label: 'All Confidence' },
-  { value: '0', label: 'Low (0\u201329)' },
-  { value: '30', label: 'Medium (30\u201369)' },
-  { value: '70', label: 'High (70\u2013100)' },
-];
 
 const ENTITY_TYPE_COLORS = {
   IntrusionSet: { bg: 'bg-violet/20', text: 'text-violet' },
@@ -33,12 +25,6 @@ const DEFAULT_CHIP_COLOR = { bg: 'bg-surface-2', text: 'text-text-muted' };
 
 function chipColor(entityType) {
   return ENTITY_TYPE_COLORS[entityType] || DEFAULT_CHIP_COLOR;
-}
-
-function confidenceBadge(confidence) {
-  if (confidence >= 70) return { bg: 'bg-green/20', text: 'text-green', label: 'High' };
-  if (confidence >= 30) return { bg: 'bg-amber/20', text: 'text-amber', label: 'Medium' };
-  return { bg: 'bg-red/20', text: 'text-red', label: 'Low' };
 }
 
 function formatDate(dateStr) {
@@ -55,7 +41,7 @@ function formatDate(dateStr) {
 }
 
 const PAGE_SIZE = 21;
-const MAX_VISIBLE_ENTITIES = 4;
+const MAX_VISIBLE_ENTITIES = 3;
 
 export default function ThreatNewsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -71,8 +57,6 @@ export default function ThreatNewsPage() {
 
   const after = searchParams.get('after') || '';
   const search = searchParams.get('search') || '';
-  const confidence = searchParams.get('confidence') || '';
-  const order = searchParams.get('order') || 'desc';
   const entity = searchParams.get('entity') || '';
 
   const loadData = useCallback(async () => {
@@ -80,9 +64,8 @@ export default function ThreatNewsPage() {
     setError(null);
 
     try {
-      const params = { sort: 'published', order };
+      const params = { sort: 'published', order: 'desc' };
       if (after) params.after = after;
-      if (confidence) params.confidence = confidence;
 
       const effectiveSearch = entity || search;
       if (effectiveSearch) params.search = effectiveSearch;
@@ -98,7 +81,7 @@ export default function ThreatNewsPage() {
     } finally {
       setLoading(false);
     }
-  }, [after, search, confidence, order, entity]);
+  }, [after, search, entity]);
 
   useEffect(() => {
     loadData();
@@ -160,10 +143,6 @@ export default function ThreatNewsPage() {
     updateParam('entity', '');
   }, [updateParam]);
 
-  const toggleOrder = useCallback(() => {
-    updateParam('order', order === 'desc' ? 'asc' : 'desc');
-  }, [order, updateParam]);
-
   const handleNext = useCallback(() => {
     if (pagination?.end_cursor) {
       setCursorHistory((prev) => [...prev, after]);
@@ -198,7 +177,7 @@ export default function ThreatNewsPage() {
           Threat News
         </h1>
         <p className="font-mono text-sm text-text-muted">
-          Browse threat intelligence reports from OpenCTI
+          Browse threat intelligence reports
         </p>
       </div>
 
@@ -219,25 +198,6 @@ export default function ThreatNewsPage() {
           />
         </div>
 
-        <select
-          value={confidence}
-          onChange={(e) => updateParam('confidence', e.target.value)}
-          className="px-3 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm focus:outline-none focus:border-violet transition-colors"
-        >
-          {CONFIDENCE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-
-        <button
-          onClick={toggleOrder}
-          className="flex items-center gap-2 px-3 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm hover:bg-surface-2 transition-colors"
-        >
-          <ArrowUpDown size={14} />
-          {order === 'desc' ? 'Newest first' : 'Oldest first'}
-        </button>
       </div>
 
       {/* Entity Filter Banner */}
@@ -287,7 +247,7 @@ export default function ThreatNewsPage() {
             No reports available
           </p>
           <p className="font-mono text-sm text-text-muted mt-1">
-            Try adjusting your search or filters
+            Try adjusting your search
           </p>
         </div>
       )}
@@ -305,14 +265,6 @@ export default function ThreatNewsPage() {
               />
             ))}
           </div>
-
-          <PaginationControls
-            pagination={pagination}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            pageSize={PAGE_SIZE}
-            currentOffset={currentOffset}
-          />
         </>
       )}
 
@@ -336,22 +288,15 @@ function ReportCard({ report, onClick, onEntityClick }) {
   const entities = report.related_entities || [];
   const visibleEntities = entities.slice(0, MAX_VISIBLE_ENTITIES);
   const overflowCount = entities.length - MAX_VISIBLE_ENTITIES;
-  const badge = confidenceBadge(report.confidence ?? 0);
-
   return (
     <div
       onClick={onClick}
       className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-5 cursor-pointer hover:border-violet/40 transition-colors"
     >
-      {/* Title + Confidence */}
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <h3 className="font-display text-lg font-bold text-text-primary leading-tight">
-          {report.name}
-        </h3>
-        <span className={`shrink-0 ${badge.bg} ${badge.text} px-2 py-0.5 rounded text-xs font-mono`}>
-          {badge.label} ({report.confidence ?? 0})
-        </span>
-      </div>
+      {/* Title */}
+      <h3 className="font-display text-lg font-bold text-text-primary leading-tight mb-2">
+        {report.name}
+      </h3>
 
       {/* Published date */}
       <p className="font-mono text-xs text-text-muted mb-3">
@@ -395,7 +340,6 @@ function ReportCard({ report, onClick, onEntityClick }) {
 
 function ReportModal({ report, onClose, onEntityClick }) {
   const entities = report.related_entities || [];
-  const badge = confidenceBadge(report.confidence ?? 0);
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -436,15 +380,10 @@ function ReportModal({ report, onClose, onEntityClick }) {
           <X size={18} className="text-text-muted" />
         </button>
 
-        {/* Title + Confidence */}
-        <div className="flex items-start gap-3 mb-2 pr-10">
-          <h2 className="font-display text-2xl font-bold text-text-primary leading-tight">
-            {report.name}
-          </h2>
-          <span className={`shrink-0 mt-1 ${badge.bg} ${badge.text} px-2.5 py-1 rounded text-xs font-mono`}>
-            {badge.label} ({report.confidence ?? 0})
-          </span>
-        </div>
+        {/* Title */}
+        <h2 className="font-display text-2xl font-bold text-text-primary leading-tight pr-10 mb-2">
+          {report.name}
+        </h2>
 
         {/* Published date */}
         <p className="font-mono text-xs text-text-muted mb-4">
