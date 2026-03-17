@@ -32,7 +32,7 @@ function formatDate(dateStr) {
   }
 }
 
-const PAGE_SIZE = 21;
+const PAGE_SIZE = 24;
 
 export default function ThreatActorsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -151,7 +151,7 @@ export default function ThreatActorsPage() {
           Threat Actors
         </h1>
         <p className="font-mono text-sm text-text-muted">
-          Browse known threat actor profiles from OpenCTI
+          Browse known threat actor profiles
         </p>
       </div>
 
@@ -210,8 +210,8 @@ export default function ThreatActorsPage() {
 
       {/* Loading State */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <SkeletonCard count={6} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <SkeletonCard count={8} />
         </div>
       )}
 
@@ -231,7 +231,7 @@ export default function ThreatActorsPage() {
       {/* Card Grid */}
       {!loading && !error && items.length > 0 && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {items.map((actor) => (
               <ThreatActorCard
                 key={actor.id}
