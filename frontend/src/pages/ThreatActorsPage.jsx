@@ -286,7 +286,7 @@ function ThreatActorCard({ actor, onClick }) {
 
       {actor.aliases?.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
-          {actor.aliases.map((alias) => (
+          {actor.aliases.slice(0, 3).map((alias) => (
             <span
               key={alias}
               className="bg-surface-2 text-cyan text-xs px-2 py-0.5 rounded-full font-mono"
@@ -294,22 +294,30 @@ function ThreatActorCard({ actor, onClick }) {
               {alias}
             </span>
           ))}
+          {actor.aliases.length > 3 && (
+            <span className="bg-surface-2 text-text-muted text-xs px-2 py-0.5 rounded-full font-mono">
+              +{actor.aliases.length - 3} more
+            </span>
+          )}
         </div>
-      )}
-
-      {actor.description && (
-        <p className="font-mono text-sm text-text-muted line-clamp-3 mb-3">
-          {actor.description}
-        </p>
       )}
 
       {/* Targeted Countries */}
       {actor.targeted_countries?.length > 0 && (
         <div className="flex items-start gap-1.5 mb-2">
           <Globe size={13} className="text-cyan shrink-0 mt-0.5" />
-          <p className="font-mono text-xs text-text-muted line-clamp-1">
-            {actor.targeted_countries.join(', ')}
-          </p>
+          <div className="flex flex-wrap gap-1">
+            {actor.targeted_countries.slice(0, 3).map((country) => (
+              <span key={country} className="font-mono text-xs text-text-muted">
+                {country}{actor.targeted_countries.indexOf(country) < Math.min(actor.targeted_countries.length, 3) - 1 ? ',' : ''}
+              </span>
+            ))}
+            {actor.targeted_countries.length > 3 && (
+              <span className="font-mono text-xs text-text-muted">
+                +{actor.targeted_countries.length - 3} more
+              </span>
+            )}
+          </div>
         </div>
       )}
 
@@ -317,9 +325,18 @@ function ThreatActorCard({ actor, onClick }) {
       {actor.targeted_sectors?.length > 0 && (
         <div className="flex items-start gap-1.5 mb-3">
           <Crosshair size={13} className="text-amber shrink-0 mt-0.5" />
-          <p className="font-mono text-xs text-text-muted line-clamp-1">
-            {actor.targeted_sectors.join(', ')}
-          </p>
+          <div className="flex flex-wrap gap-1">
+            {actor.targeted_sectors.slice(0, 3).map((sector) => (
+              <span key={sector} className="font-mono text-xs text-text-muted">
+                {sector}{actor.targeted_sectors.indexOf(sector) < Math.min(actor.targeted_sectors.length, 3) - 1 ? ',' : ''}
+              </span>
+            ))}
+            {actor.targeted_sectors.length > 3 && (
+              <span className="font-mono text-xs text-text-muted">
+                +{actor.targeted_sectors.length - 3} more
+              </span>
+            )}
+          </div>
         </div>
       )}
 
