@@ -52,7 +52,7 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 - [x] **Phase 12: Threat Actors UI Refresh** - 4-col grid layout, remove descriptions and clean subheading (completed 2026-03-17)
 - [x] **Phase 13: Threat News UI Refresh** - Row-based layout with tags, top pagination, no confidence (completed 2026-03-17)
 - [x] **Phase 14: Backend Search Generalization** - New ThreatSearch endpoint accepting all 9 observable types (completed 2026-03-18)
-- [ ] **Phase 15: Frontend Threat Search + Route Migration** - Rename IpSearchPage to ThreatSearchPage, add detected-type badge, migrate all routes
+- [x] **Phase 15: Frontend Threat Search + Route Migration** - Rename IpSearchPage to ThreatSearchPage, add detected-type badge, migrate all routes (completed 2026-03-18)
 
 ## Phase Details
 
@@ -105,7 +105,7 @@ Plans:
   2. Search results display a badge showing the detected observable type in the result header
   3. /threat-search is the active route and /ip-search redirects to it (no dead links)
   4. All sidebar links, landing page CTAs, and navigation references point to /threat-search
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 15-01-PLAN.md — Rename files, generalize search page, add type badge, migrate all routes
 
@@ -128,4 +128,4 @@ Plans:
 | 12. Threat Actors UI Refresh | v2.1 | 1/1 | Complete | 2026-03-17 |
 | 13. Threat News UI Refresh | 1/1 | Complete    | 2026-03-17 | - |
 | 14. Backend Search Generalization | 2/2 | Complete    | 2026-03-18 | - |
-| 15. Frontend Threat Search + Route Migration | v2.1 | 0/1 | Not started | - |
+| 15. Frontend Threat Search + Route Migration | 1/1 | Complete   | 2026-03-18 | - |

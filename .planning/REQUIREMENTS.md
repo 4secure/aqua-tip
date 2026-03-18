@@ -1,0 +1,89 @@
+# Requirements: AQUA TIP
+
+**Defined:** 2026-03-17
+**Core Value:** Real threat intelligence from OpenCTI — searchable across all observable types through a secure, credit-gated platform.
+
+## v2.1 Requirements
+
+Requirements for Threat Search & UI Refresh milestone. Each maps to roadmap phases.
+
+### Threat Search
+
+- [x] **SRCH-01**: User can search any of 9 observable types (IPv4, IPv6, Domain, URL, Email, MD5, SHA-1, SHA-256, Hostname)
+- [x] **SRCH-02**: Backend auto-detects input type via regex matching
+- [x] **SRCH-03**: User can manually override detected type via dropdown
+- [x] **SRCH-04**: Results display detected type badge in header
+- [x] **SRCH-05**: Geo enrichment shown only for IP-type results
+- [x] **SRCH-06**: Relationship graph renders for all observable types
+- [x] **SRCH-07**: Indicators and Sightings tabs work for all observable types
+- [x] **SRCH-08**: Notes tab shows OpenCTI notes for any observable
+
+### Route Migration
+
+- [x] **ROUTE-01**: `/ip-search` renamed to `/threat-search` across entire codebase
+- [x] **ROUTE-02**: All navigation links and landing page CTAs updated
+- [x] **ROUTE-03**: Backend controllers/services renamed from IpSearch to ThreatSearch
+
+### Threat Actors UI
+
+- [x] **TA-01**: Cards display 4 per row
+- [x] **TA-02**: Card descriptions removed
+- [x] **TA-03**: "OpenCTI" removed from page subheading
+
+### Threat News UI
+
+- [x] **TN-01**: Cards replaced with row-based table layout
+- [x] **TN-02**: Tags shown in both table rows and detail modal
+- [x] **TN-03**: Confidence level removed from entire page
+- [x] **TN-04**: Pagination and count moved to top, replacing filters
+
+## Future Requirements
+
+### Search Enhancements
+
+- **SRCH-09**: Fuzzy/partial match search across observable values
+- **SRCH-10**: Search history with recent queries
+- **SRCH-11**: Bulk search (paste multiple IOCs)
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Full-text search across all OpenCTI entities | Security risk + performance — stick to observable value matching |
+| New dependencies (ioc-extractor, TanStack Table, etc.) | Existing stack handles all requirements |
+| Dashboard data integration | Deferred to future milestone |
+| Mobile-specific responsive layouts | Web-first, desktop primary |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SRCH-01 | Phase 14 | Complete |
+| SRCH-02 | Phase 14 | Complete |
+| SRCH-03 | Phase 15 | Complete |
+| SRCH-04 | Phase 15 | Complete |
+| SRCH-05 | Phase 14 | Complete |
+| SRCH-06 | Phase 14 | Complete |
+| SRCH-07 | Phase 14 | Complete |
+| SRCH-08 | Phase 14 | Complete |
+| ROUTE-01 | Phase 15 | Complete |
+| ROUTE-02 | Phase 15 | Complete |
+| ROUTE-03 | Phase 14 | Complete |
+| TA-01 | Phase 12 | Complete |
+| TA-02 | Phase 12 | Complete |
+| TA-03 | Phase 12 | Complete |
+| TN-01 | Phase 13 | Complete |
+| TN-02 | Phase 13 | Complete |
+| TN-03 | Phase 13 | Complete |
+| TN-04 | Phase 13 | Complete |
+
+**Coverage:**
+- v2.1 requirements: 18 total
+- Mapped to phases: 18
+- Unmapped: 0
+
+---
+*Requirements defined: 2026-03-17*
+*Last updated: 2026-03-17 after roadmap revision (phase reorder)*
