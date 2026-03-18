@@ -4,7 +4,7 @@ milestone: v2.1
 milestone_name: Threat Search & UI Refresh
 status: completed
 stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-03-18T15:44:00.931Z"
+last_updated: "2026-03-18T15:48:07.898Z"
 last_activity: 2026-03-18 -- Phase 15 Plan 01 complete (frontend threat search route migration)
 progress:
   total_phases: 4

@@ -128,4 +128,4 @@ Plans:
 | 12. Threat Actors UI Refresh | v2.1 | 1/1 | Complete | 2026-03-17 |
 | 13. Threat News UI Refresh | 1/1 | Complete    | 2026-03-17 | - |
 | 14. Backend Search Generalization | 2/2 | Complete    | 2026-03-18 | - |
-| 15. Frontend Threat Search + Route Migration | 1/1 | Complete   | 2026-03-18 | - |
+| 15. Frontend Threat Search + Route Migration | 1/1 | Complete    | 2026-03-18 | - |
