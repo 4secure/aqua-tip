@@ -130,7 +130,7 @@ Plans:
 | 13. Threat News UI Refresh | 1/1 | Complete    | 2026-03-17 | - |
 | 14. Backend Search Generalization | 2/2 | Complete    | 2026-03-18 | - |
 | 15. Frontend Threat Search + Route Migration | 1/1 | Complete    | 2026-03-18 | - |
-| 16. Threat Actors UX Polish | v2.1 | 1/1 | Complete | 2026-03-18 |
+| 16. Threat Actors UX Polish | v2.1 | Complete    | 2026-03-18 | 2026-03-18 |
 
 ### Phase 16: Threat Actors UX Polish
 
@@ -148,14 +148,15 @@ Plans:
 
 ### Phase 17: Threat News UX Polish
 
-**Goal:** Fix tag display, add dynamic tag filter from all threat news data, and move date column to first position
+**Goal:** Replace entity tags with OpenCTI label-based categories, add dynamic category filter dropdown, and move date column to first position
 **Depends on:** Phase 13
-**Requirements**: TBD
+**Requirements**: SC-1, SC-2, SC-3
 **Success Criteria** (what must be TRUE):
-  1. Threat News tags display correctly (actual entity tags from data)
-  2. Threat News has a dynamic tag filter populated from all available tags in the data
-  3. Threat News date column appears as the first column in the table
-**Plans:** 0 plans
+  1. Threat News categories display correctly from OpenCTI labels (not related entities)
+  2. Threat News has a dynamic category filter dropdown populated from all available labels, synced with chip clicks
+  3. Threat News date column appears as the first column with time sub-detail
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 17 to break down)
+- [ ] 17-01-PLAN.md — Backend: replace related entities with labels, add label filtering, create labels endpoint
+- [ ] 17-02-PLAN.md — Frontend: category chips, dropdown filter, date-first column layout
