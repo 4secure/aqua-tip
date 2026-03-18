@@ -20,6 +20,7 @@ use App\Http\Controllers\ThreatActor\IndexController as ThreatActorIndexControll
 use App\Http\Controllers\ThreatMap\SnapshotController as ThreatMapSnapshotController;
 use App\Http\Controllers\ThreatMap\StreamController as ThreatMapStreamController;
 use App\Http\Controllers\ThreatNews\IndexController as ThreatNewsIndexController;
+use App\Http\Controllers\ThreatNews\LabelsController as ThreatNewsLabelsController;
 use Illuminate\Support\Facades\Route;
 
 // Guest auth routes with rate limiting
@@ -55,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Threat actors & threat news (browse pages, no credit gating)
     Route::get('/threat-actors', ThreatActorIndexController::class);
     Route::get('/threat-news', ThreatNewsIndexController::class);
+    Route::get('/threat-news/labels', ThreatNewsLabelsController::class);
 
     // Threat map (live streaming, no credit gating)
     Route::get('/threat-map/snapshot', ThreatMapSnapshotController::class);

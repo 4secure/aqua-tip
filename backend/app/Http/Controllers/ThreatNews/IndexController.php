@@ -21,6 +21,7 @@ class IndexController extends Controller
         $after = $request->query('after');
         $search = $request->query('search');
         $confidence = $request->query('confidence');
+        $label = $request->query('label');
         $sort = $request->query('sort', 'published');
         $order = $request->query('order', 'desc');
 
@@ -30,6 +31,7 @@ class IndexController extends Controller
                 $after,
                 $search,
                 $confidence,
+                $label,
                 $sort,
                 $order,
             );
