@@ -14,13 +14,14 @@ class ThreatNewsService
      * List threat intelligence reports from OpenCTI.
      *
      * Returns paginated, normalized report data with optional text search,
-     * confidence filter, and configurable sort order.
+     * confidence filter, label filter, and configurable sort order.
      * Results are cached for 5 minutes.
      *
      * @param  int          $first      Number of results per page
      * @param  string|null  $after      Cursor for next page
      * @param  string|null  $search     Full-text search term
      * @param  string|null  $confidence Filter by confidence level
+     * @param  string|null  $labelId    Filter by label ID
      * @param  string       $orderBy    Sort field (default: published)
      * @param  string       $orderMode  Sort direction (default: desc)
      * @return array{items: array, pagination: array}
@@ -32,6 +33,7 @@ class ThreatNewsService
         ?string $after = null,
         ?string $search = null,
         ?string $confidence = null,
+        ?string $labelId = null,
         string $orderBy = 'published',
         string $orderMode = 'desc',
     ): array {
@@ -40,7 +42,25 @@ class ThreatNewsService
         return Cache::remember(
             $cacheKey,
             now()->addMinutes(5),
-            fn () => $this->executeQuery($first, $after, $search, $confidence, $orderBy, $orderMode),
+            fn () => $this->executeQuery($first, $after, $search, $confidence, $labelId, $orderBy, $orderMode),
+        );
+    }
+
+    /**
+     * List all available report labels from OpenCTI.
+     *
+     * Results are cached for 15 minutes.
+     *
+     * @return array<int, array{id: string|null, value: string|null, color: string|null}>
+     *
+     * @throws \App\Exceptions\OpenCtiConnectionException
+     */
+    public function labels(): array
+    {
+        return Cache::remember(
+            'threat_news:labels',
+            now()->addMinutes(15),
+            fn () => $this->executeLabelsQuery(),
         );
     }
 
@@ -52,6 +72,7 @@ class ThreatNewsService
         ?string $after,
         ?string $search,
         ?string $confidence,
+        ?string $labelId,
         string $orderBy,
         string $orderMode,
     ): array {
@@ -89,34 +110,12 @@ class ThreatNewsService
                                 }
                             }
                         }
-                        objects(first: 20) {
+                        objectLabel {
                             edges {
                                 node {
-                                    ... on IntrusionSet {
-                                        id
-                                        entity_type
-                                        name
-                                    }
-                                    ... on Malware {
-                                        id
-                                        entity_type
-                                        name
-                                    }
-                                    ... on Indicator {
-                                        id
-                                        entity_type
-                                        name
-                                    }
-                                    ... on ThreatActor {
-                                        id
-                                        entity_type
-                                        name
-                                    }
-                                    ... on AttackPattern {
-                                        id
-                                        entity_type
-                                        name
-                                    }
+                                    id
+                                    value
+                                    color
                                 }
                             }
                         }
@@ -141,17 +140,30 @@ class ThreatNewsService
             'orderMode' => $orderMode,
         ];
 
+        $filterItems = [];
+
         if ($confidence) {
+            $filterItems[] = [
+                'key' => 'confidence',
+                'values' => [$confidence],
+                'operator' => 'eq',
+                'mode' => 'or',
+            ];
+        }
+
+        if ($labelId) {
+            $filterItems[] = [
+                'key' => 'objectLabel',
+                'values' => [$labelId],
+                'operator' => 'eq',
+                'mode' => 'or',
+            ];
+        }
+
+        if (!empty($filterItems)) {
             $variables['filters'] = [
                 'mode' => 'and',
-                'filters' => [
-                    [
-                        'key' => 'confidence',
-                        'values' => [$confidence],
-                        'operator' => 'eq',
-                        'mode' => 'or',
-                    ],
-                ],
+                'filters' => $filterItems,
                 'filterGroups' => [],
             ];
         }
@@ -159,6 +171,37 @@ class ThreatNewsService
         $data = $this->openCti->query($graphql, $variables);
 
         return $this->normalizeResponse($data);
+    }
+
+    /**
+     * Execute the labels GraphQL query against OpenCTI.
+     */
+    private function executeLabelsQuery(): array
+    {
+        $graphql = <<<'GRAPHQL'
+        query ($first: Int!) {
+          labels(first: $first, orderBy: value, orderMode: asc) {
+            edges {
+              node {
+                id
+                value
+                color
+              }
+            }
+          }
+        }
+        GRAPHQL;
+
+        $data = $this->openCti->query($graphql, ['first' => 200]);
+
+        return array_map(
+            fn (array $edge) => [
+                'id' => $edge['node']['id'] ?? null,
+                'value' => $edge['node']['value'] ?? null,
+                'color' => $edge['node']['color'] ?? null,
+            ],
+            $data['labels']['edges'] ?? [],
+        );
     }
 
     /**
@@ -180,8 +223,8 @@ class ThreatNewsService
                 'published' => $node['published'] ?? null,
                 'confidence' => $node['confidence'] ?? null,
                 'report_types' => $node['report_types'] ?? [],
-                'related_entities' => $this->flattenRelatedEntities(
-                    $node['objects']['edges'] ?? [],
+                'labels' => $this->flattenLabels(
+                    $node['objectLabel']['edges'] ?? [],
                 ),
                 'external_references' => $this->flattenExternalReferences(
                     $node['externalReferences']['edges'] ?? [],
@@ -202,30 +245,18 @@ class ThreatNewsService
     }
 
     /**
-     * Flatten related entities from the objects connection.
-     *
-     * Filters out empty nodes (from unmatched inline fragments).
+     * Flatten label edges into a simple array.
      */
-    private function flattenRelatedEntities(array $edges): array
+    private function flattenLabels(array $edges): array
     {
-        $entities = [];
-
-        foreach ($edges as $edge) {
-            $node = $edge['node'] ?? [];
-
-            // Skip empty nodes (unmatched inline fragments return empty objects)
-            if (empty($node['id'])) {
-                continue;
-            }
-
-            $entities[] = [
-                'id' => $node['id'],
-                'entity_type' => $node['entity_type'] ?? null,
-                'name' => $node['name'] ?? null,
-            ];
-        }
-
-        return $entities;
+        return array_map(
+            fn (array $edge) => [
+                'id' => $edge['node']['id'] ?? null,
+                'value' => $edge['node']['value'] ?? null,
+                'color' => $edge['node']['color'] ?? null,
+            ],
+            $edges,
+        );
     }
 
     /**
