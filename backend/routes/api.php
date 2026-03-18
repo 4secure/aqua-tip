@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Credit\CreditStatusController;
 use App\Http\Controllers\DarkWeb\SearchController as DarkWebSearchController;
 use App\Http\Controllers\IpSearch\SearchController;
+use App\Http\Controllers\ThreatSearch\SearchController as ThreatSearchController;
 use App\Http\Controllers\OpenCti\HealthController as OpenCtiHealthController;
 use App\Http\Controllers\ThreatActor\IndexController as ThreatActorIndexController;
 use App\Http\Controllers\ThreatMap\SnapshotController as ThreatMapSnapshotController;
@@ -62,6 +63,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // IP search (guests + authenticated users, credit-gated)
 Route::post('/ip-search', SearchController::class)->middleware('deduct-credit');
+
+// Threat search (guests + authenticated users, credit-gated)
+Route::post('/threat-search', ThreatSearchController::class)->middleware('deduct-credit');
 
 // Credit status (read-only, no deduction)
 Route::get('/credits', CreditStatusController::class);
