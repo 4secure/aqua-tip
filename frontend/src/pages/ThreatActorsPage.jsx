@@ -166,7 +166,7 @@ export default function ThreatActorsPage() {
             type="text"
             defaultValue={search}
             onChange={handleSearchChange}
-            placeholder="Search threat actors..."
+            placeholder="Search Threat Actors, Keywords..."
             className="w-full pl-9 pr-4 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm placeholder:text-text-muted focus:outline-none focus:border-violet transition-colors"
           />
         </div>
