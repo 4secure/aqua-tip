@@ -53,6 +53,7 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 - [x] **Phase 13: Threat News UI Refresh** - Row-based layout with tags, top pagination, no confidence (completed 2026-03-17)
 - [x] **Phase 14: Backend Search Generalization** - New ThreatSearch endpoint accepting all 9 observable types (completed 2026-03-18)
 - [x] **Phase 15: Frontend Threat Search + Route Migration** - Rename IpSearchPage to ThreatSearchPage, add detected-type badge, migrate all routes (completed 2026-03-18)
+- [x] **Phase 16: Threat Actors UX Polish** - Remove motivation filter/sort toggle, add inline pagination toolbar, delete PaginationControls (completed 2026-03-18)
 
 ## Phase Details
 
@@ -129,6 +130,7 @@ Plans:
 | 13. Threat News UI Refresh | 1/1 | Complete    | 2026-03-17 | - |
 | 14. Backend Search Generalization | 2/2 | Complete    | 2026-03-18 | - |
 | 15. Frontend Threat Search + Route Migration | 1/1 | Complete    | 2026-03-18 | - |
+| 16. Threat Actors UX Polish | v2.1 | 1/1 | Complete | 2026-03-18 |
 
 ### Phase 16: Threat Actors UX Polish
 
@@ -139,10 +141,10 @@ Plans:
   1. Threat Actors page has no motivation filter dropdown and no sort controls
   2. Threat Actors page shows pagination controls and result count beside the search bar (same pattern as Threat News)
   3. Threat Actors cards are sorted newest-first by default
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 16-01-PLAN.md — Remove motivation/sort controls, add inline pagination toolbar, delete PaginationControls
+- [x] 16-01-PLAN.md — Remove motivation/sort controls, add inline pagination toolbar, delete PaginationControls
 
 ### Phase 17: Threat News UX Polish
 

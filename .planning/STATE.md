@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Threat Search & UI Refresh
-status: completed
-stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-03-18T15:48:07.898Z"
-last_activity: 2026-03-18 -- Phase 15 Plan 01 complete (frontend threat search route migration)
+status: in-progress
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-03-18T18:25:17Z"
+last_activity: 2026-03-18 -- Phase 16 Plan 01 complete (threat actors ux polish)
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
+  total_phases: 8
+  completed_phases: 5
+  total_plans: 6
+  completed_plans: 6
   percent: 100
 ---
 
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform.
-**Current focus:** Phase 15 - Frontend Threat Search Route Migration (complete)
+**Current focus:** Phase 16 - Threat Actors UX Polish (Plan 01 complete)
 
 ## Current Position
 
 Milestone: v2.1 Threat Search & UI Refresh
-Phase: 15 of 15 (Frontend Threat Search Route Migration)
+Phase: 16 of 17 (Threat Actors UX Polish)
 Plan: 1 of 1 in current phase (complete)
-Status: Phase 15 complete -- v2.1 milestone complete
-Last activity: 2026-03-18 -- Phase 15 Plan 01 complete (frontend threat search route migration)
+Status: Phase 16 Plan 01 complete
+Last activity: 2026-03-18 -- Phase 16 Plan 01 complete (threat actors ux polish)
 
-Progress: [██████████] 100% (v2.1 complete)
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100% (v2.1 complete)
 | Phase 14 P01 | 4min | 2 tasks | 3 files |
 | Phase 14 P02 | 3min | 2 tasks | 3 files |
 | Phase 15 P01 | 5min | 2 tasks | 8 files |
+| Phase 16 P01 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,13 @@ Recent decisions affecting current work:
 - [Phase 14]: Single value filter (no entity_type) for generalized observable search
 - [Phase 14]: Mirrored IpSearch controller pattern exactly for ThreatSearch consistency
 - [Phase 15]: Generalized 422 error from "Invalid IP address" to "Invalid input" for multi-type support
+- [Phase 16]: Replicated ThreatNewsPage inline pagination toolbar pattern for Threat Actors consistency
+- [Phase 16]: Hardcoded order desc -- no user-facing sort toggle needed
+
+### Roadmap Evolution
+
+- Phase 16 added: Threat Actors UX Polish (remove motivation filter/sorting, add pagination + count beside search bar)
+- Phase 17 added: Threat News UX Polish (fix tags, add dynamic tag filter, move date column first)
 
 ### Pending Todos
 
@@ -78,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T15:43:02Z
-Stopped at: Completed 15-01-PLAN.md
-Resume file: .planning/phases/15-frontend-threat-search-route-migration/15-01-SUMMARY.md
+Last session: 2026-03-18T18:25:17Z
+Stopped at: Completed 16-01-PLAN.md
+Resume file: .planning/phases/16-threat-actors-ux-polish/16-01-SUMMARY.md
