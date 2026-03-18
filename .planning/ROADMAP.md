@@ -5,7 +5,7 @@
 - ✅ **v1.0 Authentication System** — Phases 1-5 (shipped 2026-03-14)
 - ✅ **v1.1 PostgreSQL Migration & Railway Deployment** — Phases 6-7 (shipped 2026-03-14)
 - ✅ **v2.0 OpenCTI Integration** — Phases 8-11 (shipped 2026-03-16)
-- 🚧 **v2.1 Threat Search & UI Refresh** — Phases 12-15 (in progress)
+- 🚧 **v2.1 Threat Search & UI Refresh** — Phases 12-17 (in progress)
 
 ## Phases
 
@@ -129,3 +129,31 @@ Plans:
 | 13. Threat News UI Refresh | 1/1 | Complete    | 2026-03-17 | - |
 | 14. Backend Search Generalization | 2/2 | Complete    | 2026-03-18 | - |
 | 15. Frontend Threat Search + Route Migration | 1/1 | Complete    | 2026-03-18 | - |
+
+### Phase 16: Threat Actors UX Polish
+
+**Goal:** Remove motivation filter and sorting from Threat Actors page, default to newest-first, and add pagination controls with result count beside the search bar (matching Threat News pattern)
+**Depends on:** Phase 12
+**Requirements**: TAP-01, TAP-02, TAP-03
+**Success Criteria** (what must be TRUE):
+  1. Threat Actors page has no motivation filter dropdown and no sort controls
+  2. Threat Actors page shows pagination controls and result count beside the search bar (same pattern as Threat News)
+  3. Threat Actors cards are sorted newest-first by default
+**Plans:** 1 plan
+
+Plans:
+- [ ] 16-01-PLAN.md — Remove motivation/sort controls, add inline pagination toolbar, delete PaginationControls
+
+### Phase 17: Threat News UX Polish
+
+**Goal:** Fix tag display, add dynamic tag filter from all threat news data, and move date column to first position
+**Depends on:** Phase 13
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Threat News tags display correctly (actual entity tags from data)
+  2. Threat News has a dynamic tag filter populated from all available tags in the data
+  3. Threat News date column appears as the first column in the table
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 17 to break down)

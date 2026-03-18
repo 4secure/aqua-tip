@@ -1,23 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ArrowUpDown } from 'lucide-react';
+import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchThreatActors } from '../api/threat-actors';
-import PaginationControls from '../components/shared/PaginationControls';
 import SkeletonCard from '../components/shared/SkeletonCard';
-
-const MOTIVATION_OPTIONS = [
-  { value: '', label: 'All Motivations' },
-  { value: 'espionage', label: 'Espionage' },
-  { value: 'financial-gain', label: 'Financial Gain' },
-  { value: 'ideology', label: 'Ideology' },
-  { value: 'personal-gain', label: 'Personal Gain' },
-  { value: 'personal-satisfaction', label: 'Personal Satisfaction' },
-  { value: 'dominance', label: 'Dominance' },
-  { value: 'coercion', label: 'Coercion' },
-  { value: 'disruption', label: 'Disruption' },
-  { value: 'unknown', label: 'Unknown' },
-];
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -47,18 +33,15 @@ export default function ThreatActorsPage() {
 
   const after = searchParams.get('after') || '';
   const search = searchParams.get('search') || '';
-  const motivation = searchParams.get('motivation') || '';
-  const order = searchParams.get('order') || 'desc';
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const params = { sort: 'modified', order };
+      const params = { sort: 'modified', order: 'desc' };
       if (after) params.after = after;
       if (search) params.search = search;
-      if (motivation) params.motivation = motivation;
 
       const response = await fetchThreatActors(params);
       const data = response.data || response;
@@ -71,7 +54,7 @@ export default function ThreatActorsPage() {
     } finally {
       setLoading(false);
     }
-  }, [after, search, motivation, order]);
+  }, [after, search]);
 
   useEffect(() => {
     loadData();
@@ -113,10 +96,6 @@ export default function ThreatActorsPage() {
     };
   }, []);
 
-  const toggleOrder = useCallback(() => {
-    updateParam('order', order === 'desc' ? 'asc' : 'desc');
-  }, [order, updateParam]);
-
   const handleNext = useCallback(() => {
     if (pagination?.end_cursor) {
       setCursorHistory((prev) => [...prev, after]);
@@ -155,8 +134,8 @@ export default function ThreatActorsPage() {
         </p>
       </div>
 
-      {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Toolbar: Search + Pagination */}
+      <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search
             size={16}
@@ -171,25 +150,29 @@ export default function ThreatActorsPage() {
           />
         </div>
 
-        <select
-          value={motivation}
-          onChange={(e) => updateParam('motivation', e.target.value)}
-          className="px-3 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm focus:outline-none focus:border-violet transition-colors"
-        >
-          {MOTIVATION_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-
-        <button
-          onClick={toggleOrder}
-          className="flex items-center gap-2 px-3 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm hover:bg-surface-2 transition-colors"
-        >
-          <ArrowUpDown size={14} />
-          {order === 'desc' ? 'Newest first' : 'Oldest first'}
-        </button>
+        {pagination && (
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="font-mono text-sm text-text-muted whitespace-nowrap">
+              {pagination.total != null
+                ? `${currentOffset + 1}\u2013${Math.min(currentOffset + PAGE_SIZE, pagination.total)} of ${pagination.total}`
+                : `${currentOffset + 1}\u2013${currentOffset + PAGE_SIZE}`}
+            </span>
+            <button
+              onClick={handlePrevious}
+              disabled={!pagination.has_previous}
+              className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={16} className="text-text-muted" />
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={!pagination.has_next}
+              className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={16} className="text-text-muted" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Error State */}
@@ -240,14 +223,6 @@ export default function ThreatActorsPage() {
               />
             ))}
           </div>
-
-          <PaginationControls
-            pagination={pagination}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            pageSize={PAGE_SIZE}
-            currentOffset={currentOffset}
-          />
         </>
       )}
 
