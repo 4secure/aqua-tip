@@ -500,7 +500,7 @@ export default function ThreatSearchPage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="font-heading text-xl font-bold">Threat Search</h1>
-            <p className="text-sm text-text-muted mt-1">Search IPs, domains, URLs, emails, and file hashes</p>
+            <p className="text-sm text-text-muted mt-1">Search IPs, domains, hostnames, emails, etc ...</p>
           </div>
         </div>
         <div className="flex gap-3">

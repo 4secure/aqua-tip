@@ -26,7 +26,7 @@ class ThreatActorService
      * @throws \App\Exceptions\OpenCtiConnectionException
      */
     public function list(
-        int $first = 21,
+        int $first = 24,
         ?string $after = null,
         ?string $search = null,
         ?string $motivation = null,

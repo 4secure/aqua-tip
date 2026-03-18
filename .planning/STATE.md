@@ -4,7 +4,7 @@ milestone: v2.1
 milestone_name: Threat Search & UI Refresh
 status: completed
 stopped_at: Completed 17-02-PLAN.md
-last_updated: "2026-03-18T19:44:17Z"
+last_updated: "2026-03-18T19:48:21.905Z"
 last_activity: 2026-03-18 -- Phase 17 Plan 02 complete (threat news category chips + dropdown filter)
 progress:
   total_phases: 6

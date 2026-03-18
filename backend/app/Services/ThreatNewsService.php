@@ -29,7 +29,7 @@ class ThreatNewsService
      * @throws \App\Exceptions\OpenCtiConnectionException
      */
     public function list(
-        int $first = 21,
+        int $first = 20,
         ?string $after = null,
         ?string $search = null,
         ?string $confidence = null,
@@ -111,13 +111,9 @@ class ThreatNewsService
                             }
                         }
                         objectLabel {
-                            edges {
-                                node {
-                                    id
-                                    value
-                                    color
-                                }
-                            }
+                            id
+                            value
+                            color
                         }
                     }
                 }
@@ -174,7 +170,7 @@ class ThreatNewsService
     }
 
     /**
-     * Execute the labels GraphQL query against OpenCTI.
+     * Fetch all labels from OpenCTI.
      */
     private function executeLabelsQuery(): array
     {
@@ -192,7 +188,7 @@ class ThreatNewsService
         }
         GRAPHQL;
 
-        $data = $this->openCti->query($graphql, ['first' => 200]);
+        $data = $this->openCti->query($graphql, ['first' => 500]);
 
         return array_map(
             fn (array $edge) => [
@@ -224,7 +220,7 @@ class ThreatNewsService
                 'confidence' => $node['confidence'] ?? null,
                 'report_types' => $node['report_types'] ?? [],
                 'labels' => $this->flattenLabels(
-                    $node['objectLabel']['edges'] ?? [],
+                    $node['objectLabel'] ?? [],
                 ),
                 'external_references' => $this->flattenExternalReferences(
                     $node['externalReferences']['edges'] ?? [],
@@ -247,15 +243,15 @@ class ThreatNewsService
     /**
      * Flatten label edges into a simple array.
      */
-    private function flattenLabels(array $edges): array
+    private function flattenLabels(array $labels): array
     {
         return array_map(
-            fn (array $edge) => [
-                'id' => $edge['node']['id'] ?? null,
-                'value' => $edge['node']['value'] ?? null,
-                'color' => $edge['node']['color'] ?? null,
+            fn (array $label) => [
+                'id' => $label['id'] ?? null,
+                'value' => $label['value'] ?? null,
+                'color' => $label['color'] ?? null,
             ],
-            $edges,
+            $labels,
         );
     }
 

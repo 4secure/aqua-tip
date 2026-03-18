@@ -26,7 +26,7 @@ class IndexController extends Controller
 
         try {
             $data = app(ThreatActorService::class)->list(
-                21,
+                24,
                 $after,
                 $search,
                 $motivation,

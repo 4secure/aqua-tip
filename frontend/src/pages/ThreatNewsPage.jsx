@@ -43,20 +43,7 @@ function formatDate(dateStr) {
   }
 }
 
-function formatTime(dateStr) {
-  if (!dateStr) return '';
-  try {
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  } catch {
-    return '';
-  }
-}
-
-const PAGE_SIZE = 21;
+const PAGE_SIZE = 20;
 const MAX_VISIBLE_CATEGORIES = 3;
 
 export default function ThreatNewsPage() {
@@ -230,7 +217,7 @@ export default function ThreatNewsPage() {
             setCategoryFilterName(selected?.value || '');
             updateParam('label', e.target.value);
           }}
-          className="bg-surface border border-border text-text-primary rounded-lg font-mono text-sm px-3 py-2.5 focus:outline-none focus:border-violet transition-colors appearance-none shrink-0"
+          className="bg-surface border border-border text-text-primary rounded-lg font-mono text-xs px-2 py-2.5 focus:outline-none focus:border-violet transition-colors appearance-none shrink-0"
         >
           <option value="">All categories</option>
           {categories.map((cat) => (
@@ -363,15 +350,10 @@ function ReportRow({ report, onClick, onCategoryClick }) {
       onClick={onClick}
       className="flex items-center gap-4 px-4 py-3 border-b border-border hover:bg-surface-2 cursor-pointer transition-colors"
     >
-      {/* Date - first column, fixed width */}
-      <div className="shrink-0 w-[100px]">
-        <p className="font-mono text-sm text-text-primary">
-          {formatDate(report.published)}
-        </p>
-        <p className="font-mono text-[11px] text-text-muted">
-          {formatTime(report.published)}
-        </p>
-      </div>
+      {/* Date - first column */}
+      <span className="font-mono text-xs text-text-muted shrink-0 w-24">
+        {formatDate(report.published)}
+      </span>
 
       {/* Title - flexible */}
       <h3 className="font-display text-sm font-semibold text-text-primary truncate flex-1 min-w-0">
