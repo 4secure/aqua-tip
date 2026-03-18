@@ -24,7 +24,7 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
-            <Link to="/ip-search">
+            <Link to="/threat-search">
               <GradientButton size="sm">
                 Threat Lookup <ArrowRight className="w-3.5 h-3.5" />
               </GradientButton>
@@ -68,12 +68,12 @@ export default function LandingPage() {
             Start with 1 free search per day. No credit card required.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link to="/ip-search">
+            <Link to="/threat-search">
               <GradientButton size="lg">
                 Threat Lookup <ArrowRight className="w-4 h-4" />
               </GradientButton>
             </Link>
-            <Link to="/ip-search">
+            <Link to="/threat-search">
               <GradientButton variant="variant" size="lg">
                 View Pricing
               </GradientButton>
@@ -109,7 +109,7 @@ export default function LandingPage() {
                 Contact Us
               </Link>
               <Link
-                to="/ip-search"
+                to="/threat-search"
                 className="font-display text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
               >
                 Pricing Plan

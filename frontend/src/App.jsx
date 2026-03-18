@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import GuestRoute from './components/auth/GuestRoute';
@@ -8,7 +8,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
-import IpSearchPage from './pages/IpSearchPage';
+import ThreatSearchPage from './pages/ThreatSearchPage';
 import ThreatMapPage from './pages/ThreatMapPage';
 import SettingsPage from './pages/SettingsPage';
 
@@ -57,7 +57,8 @@ export default function App() {
             {/* All app routes with shared layout */}
             <Route element={<AppLayout />}>
               {/* Public route -- accessible without auth */}
-              <Route path="/ip-search" element={<IpSearchPage />} />
+              <Route path="/threat-search" element={<ThreatSearchPage />} />
+              <Route path="/ip-search" element={<Navigate to="/threat-search" replace />} />
 
               {/* Protected routes -- auth + verified + onboarded */}
               <Route element={<ProtectedRoute />}>

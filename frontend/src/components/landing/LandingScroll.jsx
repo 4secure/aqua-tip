@@ -146,12 +146,12 @@ export function LandingScroll() {
                 infrastructure.
               </p>
               <div className="flex items-center gap-4 mt-2">
-                <Link to="/ip-search">
+                <Link to="/threat-search">
                   <GradientButton size="lg">
                     Threat Lookup <ArrowRight className="w-4 h-4" />
                   </GradientButton>
                 </Link>
-                <Link to="/ip-search">
+                <Link to="/threat-search">
                   <GradientButton variant="variant" size="lg">
                     View Pricing
                   </GradientButton>
@@ -202,12 +202,12 @@ export function LandingScroll() {
               feeds.
             </p>
             <div className="flex items-center gap-3 mt-2">
-              <Link to="/ip-search">
+              <Link to="/threat-search">
                 <GradientButton size="lg">
                   Get Started <ArrowRight className="w-4 h-4" />
                 </GradientButton>
               </Link>
-              <Link to="/ip-search">
+              <Link to="/threat-search">
                 <GradientButton variant="variant" size="lg">
                   View Pricing
                 </GradientButton>
