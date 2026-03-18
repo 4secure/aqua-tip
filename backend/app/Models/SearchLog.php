@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SearchLog extends Model
 {
+    public const VALID_MODULES = ['threat_search', 'ip_search', 'dark_web'];
+
     public const UPDATED_AT = null;
 
     protected $fillable = [

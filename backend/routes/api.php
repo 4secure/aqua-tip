@@ -24,6 +24,7 @@ use App\Http\Controllers\ThreatNews\LabelsController as ThreatNewsLabelsControll
 use App\Http\Controllers\Dashboard\CountsController as DashboardCountsController;
 use App\Http\Controllers\Dashboard\IndicatorsController as DashboardIndicatorsController;
 use App\Http\Controllers\Dashboard\CategoriesController as DashboardCategoriesController;
+use App\Http\Controllers\SearchHistory\IndexController as SearchHistoryIndexController;
 use Illuminate\Support\Facades\Route;
 
 // Guest auth routes with rate limiting
@@ -64,6 +65,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Threat map (live streaming, no credit gating)
     Route::get('/threat-map/snapshot', ThreatMapSnapshotController::class);
     Route::get('/threat-map/stream', ThreatMapStreamController::class);
+
+    // Search history (authenticated, no credit gating)
+    Route::get('/search-history', SearchHistoryIndexController::class);
 });
 
 // IP search (guests + authenticated users, credit-gated)
