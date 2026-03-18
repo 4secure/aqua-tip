@@ -155,7 +155,7 @@ Plans:
   1. Threat News categories display correctly from OpenCTI labels (not related entities)
   2. Threat News has a dynamic category filter dropdown populated from all available labels, synced with chip clicks
   3. Threat News date column appears as the first column with time sub-detail
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 17-01-PLAN.md — Backend: replace related entities with labels, add label filtering, create labels endpoint

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Threat Search & UI Refresh
-status: in-progress
-stopped_at: Completed 17-01-PLAN.md
-last_updated: "2026-03-18T19:39:29Z"
-last_activity: 2026-03-18 -- Phase 17 Plan 01 complete (threat news backend labels)
+status: completed
+stopped_at: Completed 17-02-PLAN.md
+last_updated: "2026-03-18T19:44:17Z"
+last_activity: 2026-03-18 -- Phase 17 Plan 02 complete (threat news category chips + dropdown filter)
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 7
-  completed_plans: 7
+  completed_phases: 6
+  total_plans: 8
+  completed_plans: 8
   percent: 100
 ---
 
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform.
-**Current focus:** Phase 17 - Threat News UX Polish (Plan 01 complete)
+**Current focus:** Phase 17 - Threat News UX Polish (Plan 02 complete)
 
 ## Current Position
 
 Milestone: v2.1 Threat Search & UI Refresh
 Phase: 17 of 17 (Threat News UX Polish)
-Plan: 1 of 1 in current phase (complete)
-Status: Phase 17 Plan 01 complete
-Last activity: 2026-03-18 -- Phase 17 Plan 01 complete (threat news backend labels)
+Plan: 2 of 2 in current phase (complete)
+Status: Phase 17 Plan 02 complete
+Last activity: 2026-03-18 -- Phase 17 Plan 02 complete (threat news category chips + dropdown filter)
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 2)
+- Total plans completed: 29 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 3)
 - Total milestones: 3 shipped in 4 days
 
 **By Milestone:**
@@ -52,6 +52,7 @@ Progress: [██████████] 100%
 | Phase 15 P01 | 5min | 2 tasks | 8 files |
 | Phase 16 P01 | 3min | 2 tasks | 3 files |
 | Phase 17 P01 | 2min | 2 tasks | 4 files |
+| Phase 17 P02 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Recent decisions affecting current work:
 - [Phase 16]: Hardcoded order desc -- no user-facing sort toggle needed
 - [Phase 17]: Incremental filter building pattern for combining confidence + label filters
 - [Phase 17]: 15-minute cache TTL for labels (slower changing than reports)
+- [Phase 17]: Hash-based categoryColor for deterministic chip colors without backend color dependency
+- [Phase 17]: Single label URL param syncs both dropdown and chip clicks
 
 ### Roadmap Evolution
 
@@ -89,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T19:39:29Z
-Stopped at: Completed 17-01-PLAN.md
-Resume file: .planning/phases/17-threat-news-ux-polish/17-01-SUMMARY.md
+Last session: 2026-03-18T19:44:17Z
+Stopped at: Completed 17-02-PLAN.md
+Resume file: .planning/phases/17-threat-news-ux-polish/17-02-SUMMARY.md
