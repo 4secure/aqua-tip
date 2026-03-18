@@ -1,0 +1,74 @@
+<?php
+
+use App\Exceptions\OpenCtiConnectionException;
+use App\Services\DashboardService;
+
+function fakeDashboardCounts(): array
+{
+    return [
+        ['entity_type' => 'IPv4-Addr', 'label' => 'IP Addresses', 'count' => 1234],
+        ['entity_type' => 'Domain-Name', 'label' => 'Domains', 'count' => 567],
+        ['entity_type' => 'Url', 'label' => 'URLs', 'count' => 890],
+        ['entity_type' => 'Email-Addr', 'label' => 'Email Addresses', 'count' => 123],
+    ];
+}
+
+function mockDashboardCounts(array $counts = null): void
+{
+    $counts ??= fakeDashboardCounts();
+
+    app()->bind(DashboardService::class, function () use ($counts) {
+        $mock = Mockery::mock(DashboardService::class);
+        $mock->shouldReceive('getCounts')->andReturn($counts);
+
+        return $mock;
+    });
+}
+
+test('GET /api/dashboard/counts returns 200 with correct structure', function () {
+    mockDashboardCounts();
+
+    $response = $this->getJson('/api/dashboard/counts');
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                ['entity_type', 'label', 'count'],
+            ],
+        ]);
+
+    expect($response->json('data'))->toHaveCount(4);
+});
+
+test('GET /api/dashboard/counts is publicly accessible (no auth required)', function () {
+    mockDashboardCounts();
+
+    $response = $this->getJson('/api/dashboard/counts');
+
+    $response->assertStatus(200);
+});
+
+test('GET /api/dashboard/counts returns 502 on OpenCTI connection failure', function () {
+    app()->bind(DashboardService::class, function () {
+        $mock = Mockery::mock(DashboardService::class);
+        $mock->shouldReceive('getCounts')
+            ->andThrow(new OpenCtiConnectionException('Connection failed'));
+
+        return $mock;
+    });
+
+    $response = $this->getJson('/api/dashboard/counts');
+
+    $response->assertStatus(502)
+        ->assertJsonPath('message', 'Unable to load dashboard counts. Please try again.');
+});
+
+test('GET /api/dashboard/counts returns correct entity types', function () {
+    mockDashboardCounts();
+
+    $response = $this->getJson('/api/dashboard/counts');
+
+    $entityTypes = array_column($response->json('data'), 'entity_type');
+
+    expect($entityTypes)->toBe(['IPv4-Addr', 'Domain-Name', 'Url', 'Email-Addr']);
+});
