@@ -11,20 +11,23 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { fetchThreatNews } from '../api/threat-news';
+import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
 
-const ENTITY_TYPE_COLORS = {
-  IntrusionSet: { bg: 'bg-violet/20', text: 'text-violet' },
-  ThreatActor: { bg: 'bg-violet/20', text: 'text-violet' },
-  Malware: { bg: 'bg-red/20', text: 'text-red' },
-  Indicator: { bg: 'bg-cyan/20', text: 'text-cyan' },
-  AttackPattern: { bg: 'bg-amber/20', text: 'text-amber' },
-};
+const CATEGORY_COLORS = [
+  { bg: 'bg-violet/20', text: 'text-violet' },
+  { bg: 'bg-cyan/20', text: 'text-cyan' },
+  { bg: 'bg-amber/20', text: 'text-amber' },
+  { bg: 'bg-red/20', text: 'text-red' },
+  { bg: 'bg-surface-2', text: 'text-text-muted' },
+];
 
-const DEFAULT_CHIP_COLOR = { bg: 'bg-surface-2', text: 'text-text-muted' };
-
-function chipColor(entityType) {
-  return ENTITY_TYPE_COLORS[entityType] || DEFAULT_CHIP_COLOR;
+function categoryColor(labelValue) {
+  let hash = 0;
+  for (let i = 0; i < labelValue.length; i++) {
+    hash = ((hash << 5) - hash) + labelValue.charCodeAt(i);
+    hash |= 0;
+  }
+  return CATEGORY_COLORS[Math.abs(hash) % CATEGORY_COLORS.length];
 }
 
 function formatDate(dateStr) {
@@ -40,8 +43,21 @@ function formatDate(dateStr) {
   }
 }
 
+function formatTime(dateStr) {
+  if (!dateStr) return '';
+  try {
+    return new Date(dateStr).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  } catch {
+    return '';
+  }
+}
+
 const PAGE_SIZE = 21;
-const MAX_VISIBLE_ENTITIES = 3;
+const MAX_VISIBLE_CATEGORIES = 3;
 
 export default function ThreatNewsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,13 +67,23 @@ export default function ThreatNewsPage() {
   const [error, setError] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [cursorHistory, setCursorHistory] = useState([]);
-  const [entityFilterName, setEntityFilterName] = useState('');
+  const [categoryFilterName, setCategoryFilterName] = useState('');
+  const [categories, setCategories] = useState([]);
 
   const debounceRef = useRef(null);
 
   const after = searchParams.get('after') || '';
   const search = searchParams.get('search') || '';
-  const entity = searchParams.get('entity') || '';
+  const label = searchParams.get('label') || '';
+
+  useEffect(() => {
+    fetchThreatNewsLabels()
+      .then((res) => {
+        const data = res.data || res;
+        setCategories(Array.isArray(data) ? data : data.data || []);
+      })
+      .catch(() => setCategories([]));
+  }, []);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -66,9 +92,8 @@ export default function ThreatNewsPage() {
     try {
       const params = { sort: 'published', order: 'desc' };
       if (after) params.after = after;
-
-      const effectiveSearch = entity || search;
-      if (effectiveSearch) params.search = effectiveSearch;
+      if (search) params.search = search;
+      if (label) params.label = label;
 
       const response = await fetchThreatNews(params);
       const data = response.data || response;
@@ -81,7 +106,7 @@ export default function ThreatNewsPage() {
     } finally {
       setLoading(false);
     }
-  }, [after, search, entity]);
+  }, [after, search, label]);
 
   useEffect(() => {
     loadData();
@@ -123,13 +148,13 @@ export default function ThreatNewsPage() {
     };
   }, []);
 
-  const handleEntityChipClick = useCallback(
-    (e, entityItem) => {
+  const handleCategoryClick = useCallback(
+    (e, category) => {
       e.stopPropagation();
-      setEntityFilterName(entityItem.name);
+      setCategoryFilterName(category.value);
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev);
-        next.set('entity', entityItem.name);
+        next.set('label', category.id);
         next.delete('after');
         return next;
       });
@@ -138,9 +163,9 @@ export default function ThreatNewsPage() {
     [setSearchParams]
   );
 
-  const clearEntityFilter = useCallback(() => {
-    setEntityFilterName('');
-    updateParam('entity', '');
+  const clearCategoryFilter = useCallback(() => {
+    setCategoryFilterName('');
+    updateParam('label', '');
   }, [updateParam]);
 
   const handleNext = useCallback(() => {
@@ -181,7 +206,7 @@ export default function ThreatNewsPage() {
         </p>
       </div>
 
-      {/* Toolbar: Search + Pagination */}
+      {/* Toolbar: Search + Category Dropdown + Pagination */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search
@@ -193,10 +218,27 @@ export default function ThreatNewsPage() {
             defaultValue={search}
             onChange={handleSearchChange}
             placeholder="Search reports..."
-            disabled={!!entity}
+            disabled={!!label}
             className="w-full pl-9 pr-4 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm placeholder:text-text-muted focus:outline-none focus:border-violet transition-colors disabled:opacity-50"
           />
         </div>
+
+        <select
+          value={label}
+          onChange={(e) => {
+            const selected = categories.find((c) => c.id === e.target.value);
+            setCategoryFilterName(selected?.value || '');
+            updateParam('label', e.target.value);
+          }}
+          className="bg-surface border border-border text-text-primary rounded-lg font-mono text-sm px-3 py-2.5 focus:outline-none focus:border-violet transition-colors appearance-none shrink-0"
+        >
+          <option value="">All categories</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.value}
+            </option>
+          ))}
+        </select>
 
         {pagination && (
           <div className="flex items-center gap-2 shrink-0">
@@ -223,15 +265,15 @@ export default function ThreatNewsPage() {
         )}
       </div>
 
-      {/* Entity Filter Banner */}
-      {entity && (
+      {/* Category Filter Banner */}
+      {label && (
         <div className="flex items-center gap-2 bg-violet/10 border border-violet/30 rounded-lg px-4 py-2.5">
           <span className="font-mono text-sm text-violet">
-            Showing reports related to:{' '}
-            <span className="font-semibold">{entityFilterName || entity}</span>
+            Showing reports with category:{' '}
+            <span className="font-semibold">{categoryFilterName || label}</span>
           </span>
           <button
-            onClick={clearEntityFilter}
+            onClick={clearCategoryFilter}
             className="ml-auto p-1 hover:bg-violet/20 rounded transition-colors"
           >
             <X size={14} className="text-violet" />
@@ -260,9 +302,9 @@ export default function ThreatNewsPage() {
         <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl overflow-hidden">
           {Array.from({ length: 8 }, (_, i) => (
             <div key={i} className="flex items-center gap-4 px-4 py-3 border-b border-border animate-pulse">
+              <div className="h-8 bg-surface-2 rounded w-[100px] shrink-0" />
               <div className="h-4 bg-surface-2 rounded flex-1" />
               <div className="hidden sm:block h-4 bg-surface-2 rounded w-32" />
-              <div className="h-4 bg-surface-2 rounded w-20" />
             </div>
           ))}
         </div>
@@ -289,7 +331,7 @@ export default function ThreatNewsPage() {
               key={report.id}
               report={report}
               onClick={() => setSelectedReport(report)}
-              onEntityClick={handleEntityChipClick}
+              onCategoryClick={handleCategoryClick}
             />
           ))}
         </div>
@@ -301,7 +343,7 @@ export default function ThreatNewsPage() {
           <ReportModal
             report={selectedReport}
             onClose={() => setSelectedReport(null)}
-            onEntityClick={handleEntityChipClick}
+            onCategoryClick={handleCategoryClick}
           />
         )}
       </AnimatePresence>
@@ -309,33 +351,45 @@ export default function ThreatNewsPage() {
   );
 }
 
-/* ── Report Row ── */
+/* -- Report Row -- */
 
-function ReportRow({ report, onClick, onEntityClick }) {
-  const entities = report.related_entities || [];
-  const visibleEntities = entities.slice(0, MAX_VISIBLE_ENTITIES);
-  const overflowCount = entities.length - MAX_VISIBLE_ENTITIES;
+function ReportRow({ report, onClick, onCategoryClick }) {
+  const labels = report.labels || [];
+  const visibleLabels = labels.slice(0, MAX_VISIBLE_CATEGORIES);
+  const overflowCount = labels.length - MAX_VISIBLE_CATEGORIES;
 
   return (
     <div
       onClick={onClick}
       className="flex items-center gap-4 px-4 py-3 border-b border-border hover:bg-surface-2 cursor-pointer transition-colors"
     >
+      {/* Date - first column, fixed width */}
+      <div className="shrink-0 w-[100px]">
+        <p className="font-mono text-sm text-text-primary">
+          {formatDate(report.published)}
+        </p>
+        <p className="font-mono text-[11px] text-text-muted">
+          {formatTime(report.published)}
+        </p>
+      </div>
+
+      {/* Title - flexible */}
       <h3 className="font-display text-sm font-semibold text-text-primary truncate flex-1 min-w-0">
         {report.name}
       </h3>
 
-      {entities.length > 0 && (
+      {/* Category chips */}
+      {labels.length > 0 && (
         <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-          {visibleEntities.map((ent) => {
-            const color = chipColor(ent.entity_type);
+          {visibleLabels.map((cat) => {
+            const color = categoryColor(cat.value);
             return (
               <button
-                key={ent.id}
-                onClick={(e) => onEntityClick(e, ent)}
+                key={cat.id}
+                onClick={(e) => onCategoryClick(e, cat)}
                 className={`${color.bg} ${color.text} text-xs px-2 py-0.5 rounded-full font-mono hover:opacity-80 transition-opacity`}
               >
-                {ent.name}
+                {cat.value}
               </button>
             );
           })}
@@ -346,18 +400,14 @@ function ReportRow({ report, onClick, onEntityClick }) {
           )}
         </div>
       )}
-
-      <span className="font-mono text-xs text-text-muted shrink-0 w-24 text-right">
-        {formatDate(report.published)}
-      </span>
     </div>
   );
 }
 
-/* ── Report Modal ── */
+/* -- Report Modal -- */
 
-function ReportModal({ report, onClose, onEntityClick }) {
-  const entities = report.related_entities || [];
+function ReportModal({ report, onClose, onCategoryClick }) {
+  const labels = report.labels || [];
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -431,25 +481,25 @@ function ReportModal({ report, onClose, onEntityClick }) {
           </div>
         )}
 
-        {/* Related Entities */}
-        {entities.length > 0 && (
+        {/* Categories */}
+        {labels.length > 0 && (
           <div className="mb-5">
             <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
-              Related Entities
+              Categories
             </h3>
             <div className="flex flex-wrap gap-1.5">
-              {entities.map((ent) => {
-                const color = chipColor(ent.entity_type);
+              {labels.map((cat) => {
+                const color = categoryColor(cat.value);
                 return (
                   <button
-                    key={ent.id}
+                    key={cat.id}
                     onClick={(e) => {
-                      onEntityClick(e, ent);
+                      onCategoryClick(e, cat);
                       onClose();
                     }}
                     className={`${color.bg} ${color.text} text-xs px-2 py-0.5 rounded-full font-mono hover:opacity-80 transition-opacity`}
                   >
-                    {ent.name}
+                    {cat.value}
                   </button>
                 );
               })}
