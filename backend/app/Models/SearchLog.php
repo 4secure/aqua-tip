@@ -14,6 +14,7 @@ class SearchLog extends Model
         'ip_address',
         'module',
         'query',
+        'type',
     ];
 
     public function user(): BelongsTo
