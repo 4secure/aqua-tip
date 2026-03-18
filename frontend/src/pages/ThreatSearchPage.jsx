@@ -5,7 +5,7 @@ import {
   Network, FileText, Eye, StickyNote, Code, ExternalLink, Globe,
 } from 'lucide-react';
 import { CreditBadge } from '../components/shared/CreditBadge';
-import { searchIpAddress, fetchCredits } from '../api/ip-search';
+import { searchThreat, fetchCredits } from '../api/threat-search';
 import { useAuth } from '../contexts/AuthContext';
 
 /* ── Entity type → color mapping for D3 graph ── */
@@ -16,6 +16,11 @@ const ENTITY_COLORS = {
   'Threat-Actor': '#FFB020',
   'Intrusion-Set': '#FFB020',
   'Attack-Pattern': '#00E5FF',
+  'Domain-Name': '#00E5FF',
+  'Url': '#7A44E4',
+  'Email-Addr': '#FFB020',
+  'StixFile': '#00C48C',
+  'Hostname': '#9B6BF7',
 };
 const DEFAULT_ENTITY_COLOR = '#5A6173';
 
@@ -23,8 +28,18 @@ function entityColor(entityType) {
   return ENTITY_COLORS[entityType] || DEFAULT_ENTITY_COLOR;
 }
 
+const TYPE_BADGE_COLORS = {
+  'IPv4-Addr':     { bg: '#FF3B5C25', text: '#FF3B5C' },
+  'IPv6-Addr':     { bg: '#FF3B5C25', text: '#FF3B5C' },
+  'Domain-Name':   { bg: '#00E5FF25', text: '#00E5FF' },
+  'Url':           { bg: '#7A44E425', text: '#7A44E4' },
+  'Email-Addr':    { bg: '#FFB02025', text: '#FFB020' },
+  'StixFile':      { bg: '#00C48C25', text: '#00C48C' },
+  'Hostname':      { bg: '#9B6BF725', text: '#9B6BF7' },
+};
+
 /* ── D3 Force-Directed Relationship Graph ── */
-function D3Graph({ relationships, centerIp }) {
+function D3Graph({ relationships, centerQuery, detectedType }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -38,19 +53,18 @@ function D3Graph({ relationships, centerIp }) {
       const height = container.clientHeight;
 
       // Build nodes from relationships
-      // Use centerIp as canonical ID for any entity matching the searched IP
+      // Use centerQuery as canonical ID for any entity matching the searched IP
       const nodeMap = new Map();
-      const uuidToCanonical = new Map(); // maps OpenCTI UUID → centerIp when entity is the searched IP
-      nodeMap.set(centerIp, { id: centerIp, type: 'IPv4-Addr', label: centerIp });
+      const uuidToCanonical = new Map(); // maps OpenCTI UUID → centerQuery when entity is the searched IP
+      nodeMap.set(centerQuery, { id: centerQuery, type: detectedType || 'unknown', label: centerQuery });
 
       for (const rel of relationships) {
         for (const entity of [rel.from, rel.to]) {
           if (!entity) continue;
-          const isCenterEntity = (entity.name === centerIp || entity.observable_value === centerIp)
-            && (entity.entity_type === 'IPv4-Addr' || entity.entity_type === 'IPv6-Addr');
+          const isCenterEntity = (entity.name === centerQuery || entity.observable_value === centerQuery);
           if (isCenterEntity) {
-            uuidToCanonical.set(entity.id, centerIp);
-            continue; // already in nodeMap as centerIp
+            uuidToCanonical.set(entity.id, centerQuery);
+            continue; // already in nodeMap as centerQuery
           }
           if (nodeMap.has(entity.id)) continue;
           nodeMap.set(entity.id, {
@@ -64,8 +78,8 @@ function D3Graph({ relationships, centerIp }) {
       const resolveId = (id) => uuidToCanonical.get(id) || id;
       const nodes = Array.from(nodeMap.values());
       const links = relationships.map(rel => ({
-        source: resolveId(rel.from?.id) || centerIp,
-        target: resolveId(rel.to?.id) || centerIp,
+        source: resolveId(rel.from?.id) || centerQuery,
+        target: resolveId(rel.to?.id) || centerQuery,
         label: rel.relationship_type,
       }));
 
@@ -91,7 +105,7 @@ function D3Graph({ relationships, centerIp }) {
           .on('end', (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
 
       node.append('circle')
-        .attr('r', d => d.id === centerIp ? 20 : 14)
+        .attr('r', d => d.id === centerQuery ? 20 : 14)
         .attr('fill', d => entityColor(d.type) + '30')
         .attr('stroke', d => entityColor(d.type)).attr('stroke-width', 2);
 
@@ -99,7 +113,7 @@ function D3Graph({ relationships, centerIp }) {
         .text(d => d.label.length > 20 ? d.label.slice(0, 17) + '...' : d.label)
         .attr('fill', '#E8EAED').attr('font-size', '10px')
         .attr('font-family', 'JetBrains Mono').attr('text-anchor', 'middle')
-        .attr('dy', d => d.id === centerIp ? 32 : 26);
+        .attr('dy', d => d.id === centerQuery ? 32 : 26);
 
       simulation.on('tick', () => {
         link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
@@ -113,7 +127,7 @@ function D3Graph({ relationships, centerIp }) {
     });
 
     return () => { if (cleanup) cleanup(); };
-  }, [relationships, centerIp]);
+  }, [relationships, centerQuery]);
 
   return (
     <div
@@ -391,7 +405,7 @@ function RawTab({ result }) {
 
 /* ── Main Page Component ── */
 
-export default function IpSearchPage() {
+export default function ThreatSearchPage() {
   const [query, setQuery] = useState('');
   const [result, setResult] = useState(null);
   const [credits, setCredits] = useState({ remaining: 0, limit: 0, is_guest: false, resets_at: null });
@@ -440,7 +454,7 @@ export default function IpSearchPage() {
     setError(null);
 
     try {
-      const response = await searchIpAddress({ query: query.trim() });
+      const response = await searchThreat({ query: query.trim() });
       setResult(response.data);
       if (response.credits) {
         setCredits(response.credits);
@@ -456,7 +470,7 @@ export default function IpSearchPage() {
         if (err.credits) setCredits(err.credits);
         // Keep previous result visible
       } else if (status === 422) {
-        setError({ status: 422, message: err.message || 'Invalid IP address' });
+        setError({ status: 422, message: err.message || 'Invalid input' });
         setResult(null);
       } else {
         setError({ status, message: err.message || 'Something went wrong' });
@@ -485,15 +499,15 @@ export default function IpSearchPage() {
       <div className="glass-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="font-heading text-xl font-bold">IP Search</h1>
-            <p className="text-sm text-text-muted mt-1">Search any IP address -- IPv4 and IPv6 supported</p>
+            <h1 className="font-heading text-xl font-bold">Threat Search</h1>
+            <p className="text-sm text-text-muted mt-1">Search IPs, domains, URLs, emails, and file hashes</p>
           </div>
         </div>
         <div className="flex gap-3">
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Enter an IP address (e.g. 185.220.101.34 or 2001:db8::1)"
+              placeholder="e.g., 185.220.101.34, example.com, d41d8cd98f00b204e9800998ecf8427e"
               className="input-mono w-full py-3"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -592,7 +606,20 @@ export default function IpSearchPage() {
                     <div className={`score-value text-lg ${level.color}`}>{result.score}</div>
                   </div>
                   <div>
-                    <div className="font-heading font-semibold text-lg">{result.ip}</div>
+                    <div className="font-heading font-semibold text-lg flex items-center gap-2">
+                      {result.query}
+                      {result.detected_type && (
+                        <span
+                          className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium"
+                          style={{
+                            backgroundColor: (TYPE_BADGE_COLORS[result.detected_type]?.bg || '#5A617325'),
+                            color: (TYPE_BADGE_COLORS[result.detected_type]?.text || '#5A6173'),
+                          }}
+                        >
+                          {result.detected_type}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-sm text-text-muted">
                       Threat Score: <span className={`${level.color} font-semibold`}>{level.label}</span>
                     </div>
@@ -627,9 +654,9 @@ export default function IpSearchPage() {
                   <ShieldCheck size={24} className="text-green" />
                 </div>
                 <div>
-                  <div className="font-heading font-semibold text-green">No threats found for {result.ip}</div>
+                  <div className="font-heading font-semibold text-green">No threats found for {result.query}</div>
                   <p className="text-sm text-text-secondary mt-1">
-                    This IP has no known threat intelligence in our database.
+                    No known threat intelligence found in our database.
                   </p>
                 </div>
               </div>
@@ -657,18 +684,19 @@ export default function IpSearchPage() {
           {activeTab === 'relations' && result.relationships?.length > 0 && (
             <div className="glass-card p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="section-title mb-0">IP Relationship Graph</h3>
+                <h3 className="section-title mb-0">Relationship Graph</h3>
                 <div className="flex gap-2">
-                  <span className="chip-red text-[10px]">IP</span>
+                  <span className="chip-red text-[10px]">Observable</span>
                   <span className="chip-violet text-[10px]">Malware</span>
                   <span className="chip-amber text-[10px]">Threat Actor</span>
                   <span className="chip-cyan text-[10px]">Attack Pattern</span>
                 </div>
               </div>
               <D3Graph
-                key={result.ip}
+                key={result.query}
                 relationships={result.relationships}
-                centerIp={result.ip}
+                centerQuery={result.query}
+                detectedType={result.detected_type}
               />
             </div>
           )}
