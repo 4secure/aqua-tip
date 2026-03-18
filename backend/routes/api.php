@@ -21,6 +21,9 @@ use App\Http\Controllers\ThreatMap\SnapshotController as ThreatMapSnapshotContro
 use App\Http\Controllers\ThreatMap\StreamController as ThreatMapStreamController;
 use App\Http\Controllers\ThreatNews\IndexController as ThreatNewsIndexController;
 use App\Http\Controllers\ThreatNews\LabelsController as ThreatNewsLabelsController;
+use App\Http\Controllers\Dashboard\CountsController as DashboardCountsController;
+use App\Http\Controllers\Dashboard\IndicatorsController as DashboardIndicatorsController;
+use App\Http\Controllers\Dashboard\CategoriesController as DashboardCategoriesController;
 use Illuminate\Support\Facades\Route;
 
 // Guest auth routes with rate limiting
@@ -71,3 +74,8 @@ Route::post('/threat-search', ThreatSearchController::class)->middleware('deduct
 
 // Credit status (read-only, no deduction)
 Route::get('/credits', CreditStatusController::class);
+
+// Dashboard stats (public, no auth, no credit gating)
+Route::get('/dashboard/counts', DashboardCountsController::class);
+Route::get('/dashboard/indicators', DashboardIndicatorsController::class);
+Route::get('/dashboard/categories', DashboardCategoriesController::class);
