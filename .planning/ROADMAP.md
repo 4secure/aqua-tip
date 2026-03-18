@@ -5,7 +5,7 @@
 - ✅ **v1.0 Authentication System** — Phases 1-5 (shipped 2026-03-14)
 - ✅ **v1.1 PostgreSQL Migration & Railway Deployment** — Phases 6-7 (shipped 2026-03-14)
 - ✅ **v2.0 OpenCTI Integration** — Phases 8-11 (shipped 2026-03-16)
-- 🚧 **v2.1 Threat Search & UI Refresh** — Phases 12-17 (in progress)
+- ✅ **v2.1 Threat Search & UI Refresh** — Phases 12-17 (shipped 2026-03-18)
 
 ## Phases
 
@@ -45,70 +45,19 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 
 </details>
 
-### 🚧 v2.1 Threat Search & UI Refresh (In Progress)
+<details>
+<summary>✅ v2.1 Threat Search & UI Refresh (Phases 12-17) — SHIPPED 2026-03-18</summary>
 
-**Milestone Goal:** Expand IP Search into a universal Threat Search for all OpenCTI observable types, and refresh the Threat Actors and Threat News page UIs.
+- [x] Phase 12: Threat Actors UI Refresh (1/1 plans) — completed 2026-03-17
+- [x] Phase 13: Threat News UI Refresh (1/1 plans) — completed 2026-03-17
+- [x] Phase 14: Backend Search Generalization (2/2 plans) — completed 2026-03-18
+- [x] Phase 15: Frontend Threat Search + Route Migration (1/1 plans) — completed 2026-03-18
+- [x] Phase 16: Threat Actors UX Polish (1/1 plans) — completed 2026-03-18
+- [x] Phase 17: Threat News UX Polish (2/2 plans) — completed 2026-03-18
 
-- [x] **Phase 12: Threat Actors UI Refresh** - 4-col grid layout, remove descriptions and clean subheading (completed 2026-03-17)
-- [x] **Phase 13: Threat News UI Refresh** - Row-based layout with tags, top pagination, no confidence (completed 2026-03-17)
-- [x] **Phase 14: Backend Search Generalization** - New ThreatSearch endpoint accepting all 9 observable types (completed 2026-03-18)
-- [x] **Phase 15: Frontend Threat Search + Route Migration** - Rename IpSearchPage to ThreatSearchPage, add detected-type badge, migrate all routes (completed 2026-03-18)
-- [x] **Phase 16: Threat Actors UX Polish** - Remove motivation filter/sort toggle, add inline pagination toolbar, delete PaginationControls (completed 2026-03-18)
+Full details: `.planning/milestones/v2.1-ROADMAP.md`
 
-## Phase Details
-
-### Phase 12: Threat Actors UI Refresh
-**Goal**: Threat Actors page displays a clean, dense card grid without visual clutter
-**Depends on**: Nothing (independent UI work)
-**Requirements**: TA-01, TA-02, TA-03
-**Success Criteria** (what must be TRUE):
-  1. Threat Actors page displays cards in a 4-column grid on desktop viewports
-  2. Card faces show actor name, aliases, and metadata but no description text
-  3. Page subheading reads without the word "OpenCTI" appearing in it
-**Plans:** 1/1 plans complete
-Plans:
-- [ ] 12-01-PLAN.md — Grid layout, card cleanup, and overflow caps
-
-### Phase 13: Threat News UI Refresh
-**Goal**: Threat News page uses a scannable row-based layout with tags and streamlined navigation
-**Depends on**: Nothing (independent UI work)
-**Requirements**: TN-01, TN-02, TN-03, TN-04
-**Success Criteria** (what must be TRUE):
-  1. Threat News page renders reports as horizontal rows instead of card grid
-  2. Each row and the detail modal display entity tags for the report
-  3. No confidence level badge or indicator appears anywhere on the page
-  4. Pagination controls and result count appear above the report list (replacing the filter bar)
-**Plans:** 1/1 plans complete
-Plans:
-- [ ] 13-01-PLAN.md — Row layout, confidence removal, inline toolbar pagination
-
-### Phase 14: Backend Search Generalization
-**Goal**: Backend accepts and processes searches for any of 9 observable types with auto-detection
-**Depends on**: Nothing (backend-only, old frontend keeps working)
-**Requirements**: SRCH-01, SRCH-02, SRCH-05, SRCH-06, SRCH-07, SRCH-08, ROUTE-03
-**Success Criteria** (what must be TRUE):
-  1. POST /api/threat-search accepts IPv4, IPv6, Domain, URL, Email, MD5, SHA-1, SHA-256, and Hostname queries and returns OpenCTI observable data
-  2. Backend auto-detects the input type via regex/validation and includes the detected type in the response
-  3. Geo enrichment data (ASN, country, city, ISP) is returned only for IP-type searches and omitted for all other types
-  4. Relationship graph data, Indicators, Sightings, and Notes are returned for all observable types
-  5. Backend controllers and services use ThreatSearch naming (IpSearch naming retired from backend)
-**Plans:** 2/2 plans complete
-Plans:
-- [ ] 14-01-PLAN.md — ThreatSearchService, migration, and SearchLog model update
-- [ ] 14-02-PLAN.md — ThreatSearch controller, request validation, and route registration
-
-### Phase 15: Frontend Threat Search + Route Migration
-**Goal**: Users search any observable type from a unified Threat Search page at the new /threat-search route
-**Depends on**: Phase 14 (backend endpoint must exist)
-**Requirements**: SRCH-03, SRCH-04, ROUTE-01, ROUTE-02
-**Success Criteria** (what must be TRUE):
-  1. SRCH-03 dropped per user decision -- no type selector dropdown needed
-  2. Search results display a badge showing the detected observable type in the result header
-  3. /threat-search is the active route and /ip-search redirects to it (no dead links)
-  4. All sidebar links, landing page CTAs, and navigation references point to /threat-search
-**Plans:** 1/1 plans complete
-Plans:
-- [ ] 15-01-PLAN.md — Rename files, generalize search page, add type badge, migrate all routes
+</details>
 
 ## Progress
 
@@ -127,36 +76,8 @@ Plans:
 | 10. Threat Actors & Threat News | v2.0 | 2/2 | Complete | 2026-03-15 |
 | 11. Threat Map | v2.0 | 2/2 | Complete | 2026-03-15 |
 | 12. Threat Actors UI Refresh | v2.1 | 1/1 | Complete | 2026-03-17 |
-| 13. Threat News UI Refresh | 1/1 | Complete    | 2026-03-17 | - |
-| 14. Backend Search Generalization | 2/2 | Complete    | 2026-03-18 | - |
-| 15. Frontend Threat Search + Route Migration | 1/1 | Complete    | 2026-03-18 | - |
-| 16. Threat Actors UX Polish | v2.1 | Complete    | 2026-03-18 | 2026-03-18 |
-
-### Phase 16: Threat Actors UX Polish
-
-**Goal:** Remove motivation filter and sorting from Threat Actors page, default to newest-first, and add pagination controls with result count beside the search bar (matching Threat News pattern)
-**Depends on:** Phase 12
-**Requirements**: TAP-01, TAP-02, TAP-03
-**Success Criteria** (what must be TRUE):
-  1. Threat Actors page has no motivation filter dropdown and no sort controls
-  2. Threat Actors page shows pagination controls and result count beside the search bar (same pattern as Threat News)
-  3. Threat Actors cards are sorted newest-first by default
-**Plans:** 1/1 plans complete
-
-Plans:
-- [x] 16-01-PLAN.md — Remove motivation/sort controls, add inline pagination toolbar, delete PaginationControls
-
-### Phase 17: Threat News UX Polish
-
-**Goal:** Replace entity tags with OpenCTI label-based categories, add dynamic category filter dropdown, and move date column to first position
-**Depends on:** Phase 13
-**Requirements**: SC-1, SC-2, SC-3
-**Success Criteria** (what must be TRUE):
-  1. Threat News categories display correctly from OpenCTI labels (not related entities)
-  2. Threat News has a dynamic category filter dropdown populated from all available labels, synced with chip clicks
-  3. Threat News date column appears as the first column with time sub-detail
-**Plans:** 2/2 plans complete
-
-Plans:
-- [ ] 17-01-PLAN.md — Backend: replace related entities with labels, add label filtering, create labels endpoint
-- [ ] 17-02-PLAN.md — Frontend: category chips, dropdown filter, date-first column layout
+| 13. Threat News UI Refresh | v2.1 | 1/1 | Complete | 2026-03-17 |
+| 14. Backend Search Generalization | v2.1 | 2/2 | Complete | 2026-03-18 |
+| 15. Frontend Threat Search + Route Migration | v2.1 | 1/1 | Complete | 2026-03-18 |
+| 16. Threat Actors UX Polish | v2.1 | 1/1 | Complete | 2026-03-18 |
+| 17. Threat News UX Polish | v2.1 | 2/2 | Complete | 2026-03-18 |
