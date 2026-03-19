@@ -66,7 +66,7 @@ Full details: `.planning/milestones/v2.1-ROADMAP.md`
 
 - [x] **Phase 18: Dashboard Stats Backend** - DashboardService aggregating OpenCTI stats into a single cached endpoint (completed 2026-03-18)
 - [x] **Phase 19: Search History Backend** - Auth-only endpoint exposing existing search_logs for recent queries (completed 2026-03-18)
-- [ ] **Phase 20: Dashboard Page Rewrite** - Replace all mock data with live API calls, add credit and search widgets
+- [x] **Phase 20: Dashboard Page Rewrite** - Replace all mock data with live API calls, add credit and search widgets (completed 2026-03-19)
 - [ ] **Phase 21: Threat Search History** - Recent searches empty state on Threat Search page with click-to-rerun
 
 ## Phase Details
@@ -156,5 +156,5 @@ Phases execute in numeric order: 18 → 19 → 20 → 21
 | 17. Threat News UX Polish | v2.1 | 2/2 | Complete | 2026-03-18 |
 | 18. Dashboard Stats Backend | 2/2 | Complete    | 2026-03-18 | - |
 | 19. Search History Backend | 1/1 | Complete    | 2026-03-18 | - |
-| 20. Dashboard Page Rewrite | 1/2 | In Progress|  | - |
+| 20. Dashboard Page Rewrite | 2/2 | Complete   | 2026-03-19 | - |
 | 21. Threat Search History | v2.2 | 0/? | Not started | - |

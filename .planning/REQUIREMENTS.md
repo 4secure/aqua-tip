@@ -18,8 +18,8 @@ Requirements for Live Dashboard & Search History milestone. Each maps to roadmap
 
 ### Dashboard Widgets
 
-- [ ] **WIDG-01**: User sees their remaining daily credit balance on dashboard
-- [ ] **WIDG-02**: User sees their recent searches on dashboard
+- [x] **WIDG-01**: User sees their remaining daily credit balance on dashboard
+- [x] **WIDG-02**: User sees their recent searches on dashboard
 
 ### Search History
 
@@ -31,8 +31,8 @@ Requirements for Live Dashboard & Search History milestone. Each maps to roadmap
 
 ### Cleanup
 
-- [ ] **CLEAN-01**: All mock data imports removed from DashboardPage
-- [ ] **CLEAN-02**: Unused mock data exports removed from mock-data.js
+- [x] **CLEAN-01**: All mock data imports removed from DashboardPage
+- [x] **CLEAN-02**: Unused mock data exports removed from mock-data.js
 
 ## Future Requirements
 
@@ -72,15 +72,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-04 | Phase 18 | Complete |
 | DASH-05 | Phase 20 | Complete |
 | DASH-06 | Phase 18 | Complete |
-| WIDG-01 | Phase 20 | Pending |
-| WIDG-02 | Phase 20 | Pending |
+| WIDG-01 | Phase 20 | Complete |
+| WIDG-02 | Phase 20 | Complete |
 | HIST-01 | Phase 19 | Complete |
 | HIST-02 | Phase 19 | Complete |
 | HIST-03 | Phase 21 | Pending |
 | HIST-04 | Phase 21 | Pending |
 | HIST-05 | Phase 21 | Pending |
-| CLEAN-01 | Phase 20 | Pending |
-| CLEAN-02 | Phase 20 | Pending |
+| CLEAN-01 | Phase 20 | Complete |
+| CLEAN-02 | Phase 20 | Complete |
 
 **Coverage:**
 - v2.2 requirements: 15 total
