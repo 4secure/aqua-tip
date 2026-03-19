@@ -48,13 +48,13 @@ class DashboardService
      *
      * @throws OpenCtiConnectionException When OpenCTI is unreachable and no cached data exists
      */
-    public function getIndicators(): array
+    public function getIndicators(?string $label = null): array
     {
-        $cacheKey = 'dashboard_indicators';
+        $cacheKey = $label ? "dashboard_indicators_label_{$label}" : 'dashboard_indicators';
         $cached = Cache::get($cacheKey);
 
         try {
-            $fresh = $this->fetchIndicators();
+            $fresh = $this->fetchIndicators($label);
             Cache::put($cacheKey, $fresh, now()->addMinutes(5));
 
             return $fresh;
@@ -155,11 +155,11 @@ class DashboardService
      *
      * @return array<int, array{id: string, value: string, entity_type: string, score: int|null, created_at: string, labels: array<int, string>}>
      */
-    private function fetchIndicators(): array
+    private function fetchIndicators(?string $label = null): array
     {
         $graphql = <<<'GRAPHQL'
-        {
-            stixCyberObservables(first: 10, orderBy: created_at, orderMode: desc) {
+        query ($filters: FilterGroup) {
+            stixCyberObservables(first: 10, orderBy: created_at, orderMode: desc, filters: $filters) {
                 edges {
                     node {
                         id
@@ -176,7 +176,26 @@ class DashboardService
         }
         GRAPHQL;
 
-        $data = $this->openCti->query($graphql);
+        $variables = [];
+
+        if ($label !== null) {
+            $variables = [
+                'filters' => [
+                    'mode' => 'and',
+                    'filters' => [
+                        [
+                            'key' => 'objectLabel',
+                            'values' => [$label],
+                            'operator' => 'eq',
+                            'mode' => 'or',
+                        ],
+                    ],
+                    'filterGroups' => [],
+                ],
+            ];
+        }
+
+        $data = $this->openCti->query($graphql, $variables);
         $edges = $data['stixCyberObservables']['edges'] ?? [];
 
         return array_map(fn (array $edge) => [
