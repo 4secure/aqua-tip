@@ -1,0 +1,92 @@
+# Requirements: AQUA TIP v2.2
+
+**Defined:** 2026-03-19
+**Core Value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform.
+
+## v2.2 Requirements
+
+Requirements for Live Dashboard & Search History milestone. Each maps to roadmap phases.
+
+### Dashboard Stats
+
+- [x] **DASH-01**: User sees live observable count stat cards from OpenCTI (no fake deltas/sparklines)
+- [x] **DASH-02**: User sees recent indicators table with real observables from OpenCTI
+- [x] **DASH-03**: User sees attack categories bar chart from OpenCTI label distribution
+- [x] **DASH-04**: User sees threat map widget using existing snapshot endpoint
+- [x] **DASH-05**: Clicking an attack category filters the recent indicators table by that category
+- [x] **DASH-06**: Dashboard auto-refreshes stats every 5 minutes
+
+### Dashboard Widgets
+
+- [ ] **WIDG-01**: User sees their remaining daily credit balance on dashboard
+- [ ] **WIDG-02**: User sees their recent searches on dashboard
+
+### Search History
+
+- [x] **HIST-01**: Backend stores search queries (query + type + module, no response data) -- already exists
+- [x] **HIST-02**: Backend provides auth-only endpoint to retrieve user's recent searches
+- [ ] **HIST-03**: Recent searches displayed on Threat Search page when no search is active
+- [ ] **HIST-04**: Clicking a recent search re-runs the query on Threat Search page
+- [ ] **HIST-05**: Search type badge (IP, Domain, Hash, etc.) shown next to each history entry
+
+### Cleanup
+
+- [ ] **CLEAN-01**: All mock data imports removed from DashboardPage
+- [ ] **CLEAN-02**: Unused mock data exports removed from mock-data.js
+
+## Future Requirements
+
+### Dashboard Enhancements
+
+- **DASH-F01**: Sparkline trend charts on stat cards (requires historical snapshot infrastructure)
+- **DASH-F02**: Delta percentages ("vs last week") on stat cards (requires historical data)
+- **DASH-F03**: Quick search input on dashboard
+- **DASH-F04**: Custom dashboard widget builder
+
+### Search History Enhancements
+
+- **HIST-F01**: Full search history page with pagination
+- **HIST-F02**: Search analytics/aggregation dashboard
+- **HIST-F03**: Guest search history (privacy considerations)
+- **HIST-F04**: Search history retention policy (90-day cleanup)
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Real-time WebSocket dashboard updates | SSE + auto-refresh sufficient; WebSocket adds complexity |
+| Guest search history | Privacy leak risk via shared IPs; auth-only for now |
+| Historical trend data infrastructure | Requires snapshot storage jobs; defer to future milestone |
+| Dashboard SSE streaming | Snapshot endpoint sufficient for dashboard map widget |
+| Custom widget builder | Premature; fixed layout sufficient for v2.2 |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DASH-01 | Phase 18 | Complete |
+| DASH-02 | Phase 18 | Complete |
+| DASH-03 | Phase 18 | Complete |
+| DASH-04 | Phase 18 | Complete |
+| DASH-05 | Phase 20 | Complete |
+| DASH-06 | Phase 18 | Complete |
+| WIDG-01 | Phase 20 | Pending |
+| WIDG-02 | Phase 20 | Pending |
+| HIST-01 | Phase 19 | Complete |
+| HIST-02 | Phase 19 | Complete |
+| HIST-03 | Phase 21 | Pending |
+| HIST-04 | Phase 21 | Pending |
+| HIST-05 | Phase 21 | Pending |
+| CLEAN-01 | Phase 20 | Pending |
+| CLEAN-02 | Phase 20 | Pending |
+
+**Coverage:**
+- v2.2 requirements: 15 total
+- Mapped to phases: 15
+- Unmapped: 0
+
+---
+*Requirements defined: 2026-03-19*
+*Last updated: 2026-03-19 after roadmap creation*
