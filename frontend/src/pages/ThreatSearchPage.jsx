@@ -7,6 +7,7 @@ import {
 import { CreditBadge } from '../components/shared/CreditBadge';
 import { searchThreat, fetchCredits } from '../api/threat-search';
 import { useAuth } from '../contexts/AuthContext';
+import { apiClient } from '../api/client';
 
 /* ── Entity type → color mapping for D3 graph ── */
 const ENTITY_COLORS = {
@@ -26,6 +27,20 @@ const DEFAULT_ENTITY_COLOR = '#5A6173';
 
 function entityColor(entityType) {
   return ENTITY_COLORS[entityType] || DEFAULT_ENTITY_COLOR;
+}
+
+function formatRelativeTime(dateStr) {
+  if (!dateStr) return '';
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'Just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  return `${diffDay}d ago`;
 }
 
 const TYPE_BADGE_COLORS = {
@@ -403,6 +418,90 @@ function RawTab({ result }) {
   );
 }
 
+/* ── Recent Search History Section ── */
+
+function RecentSearchesSection({ isAuthenticated, history, historyLoading, historyError, onSelect }) {
+  // Guest CTA
+  if (!isAuthenticated) {
+    return (
+      <div className="glass-card p-5 flex flex-col items-center justify-center text-center py-8">
+        <div className="w-12 h-12 rounded-xl bg-violet/10 flex items-center justify-center text-violet mb-4">
+          <LogIn size={24} />
+        </div>
+        <p className="text-sm text-text-secondary mb-4 font-mono">Sign in to track your search history</p>
+        <Link to="/login" className="btn-primary text-sm">Sign In</Link>
+      </div>
+    );
+  }
+
+  // Loading skeleton
+  if (historyLoading) {
+    return (
+      <div className="glass-card p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan"><Clock size={18} /></div>
+          <h3 className="font-heading font-semibold text-sm">Recent Searches</h3>
+        </div>
+        <div className="space-y-2">
+          {[1, 2, 3].map(i => <div key={i} className="h-6 bg-surface-2 rounded animate-pulse" />)}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state -- silent fallback, just don't show history
+  if (historyError) {
+    return null;
+  }
+
+  // Empty state
+  if (history.length === 0) {
+    return (
+      <div className="glass-card p-5 flex flex-col items-center justify-center text-center py-8">
+        <div className="w-12 h-12 rounded-xl bg-cyan/10 flex items-center justify-center text-cyan mb-4">
+          <Clock size={24} />
+        </div>
+        <p className="text-sm text-text-secondary font-mono">No searches yet -- try searching an IP, domain, or hash above</p>
+      </div>
+    );
+  }
+
+  // History list (up to 10 entries)
+  const items = history.slice(0, 10);
+  return (
+    <div className="glass-card p-5">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan"><Clock size={18} /></div>
+        <h3 className="font-heading font-semibold text-sm">Recent Searches</h3>
+      </div>
+      <div className="space-y-1">
+        {items.map((s) => {
+          const badge = TYPE_BADGE_COLORS[s.type] || { bg: '#7A44E425', text: '#7A44E4' };
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => onSelect(s)}
+              className="w-full flex items-center justify-between gap-3 py-2 px-2 rounded-lg hover:bg-surface-2/50 transition-colors cursor-pointer text-left"
+            >
+              <span className="font-mono text-xs text-text-primary truncate max-w-[300px]">{s.query}</span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span
+                  className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-semibold"
+                  style={{ backgroundColor: badge.bg, color: badge.text }}
+                >
+                  {s.type}
+                </span>
+                <span className="text-[10px] text-text-muted">{formatRelativeTime(s.created_at)}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page Component ── */
 
 export default function ThreatSearchPage() {
@@ -413,6 +512,10 @@ export default function ThreatSearchPage() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
   const { isAuthenticated } = useAuth();
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(null);
+  const inputRef = useRef(null);
 
   const isExhausted = credits.remaining === 0 && credits.limit > 0;
 
@@ -422,6 +525,18 @@ export default function ThreatSearchPage() {
       .then((data) => setCredits(data))
       .catch(() => {});
   }, []);
+
+  // Fetch search history on mount (auth-only, once)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    setHistoryLoading(true);
+    apiClient.get('/api/search-history')
+      .then(res => { if (!cancelled) { setHistory(res.data || []); setHistoryError(null); } })
+      .catch(err => { if (!cancelled) setHistoryError(err); })
+      .finally(() => { if (!cancelled) setHistoryLoading(false); });
+    return () => { cancelled = true; };
+  }, [isAuthenticated]);
 
   // Build dynamic tabs from result
   const tabs = useMemo(() => {
@@ -486,6 +601,12 @@ export default function ThreatSearchPage() {
     }
   }
 
+  function handleHistoryClick(entry) {
+    setQuery(entry.query);
+    inputRef.current?.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   const level = result?.found ? threatLevel(result.score) : null;
   const ringColor = result?.found ? scoreRingColor(result.score) : null;
   const circumference = 2 * Math.PI * 26; // r=26
@@ -506,6 +627,7 @@ export default function ThreatSearchPage() {
         <div className="flex gap-3">
           <div className="flex-1">
             <input
+              ref={inputRef}
               type="text"
               placeholder="e.g., 185.220.101.34, example.com, d41d8cd98f00b204e9800998ecf8427e"
               className="input-mono w-full py-3"
@@ -719,6 +841,17 @@ export default function ThreatSearchPage() {
 
           {activeTab === 'raw' && <RawTab result={result} />}
         </>
+      )}
+
+      {/* Recent Search History -- shown when no search result is active */}
+      {result === null && (
+        <RecentSearchesSection
+          isAuthenticated={isAuthenticated}
+          history={history}
+          historyLoading={historyLoading}
+          historyError={historyError}
+          onSelect={handleHistoryClick}
+        />
       )}
     </div>
   );
