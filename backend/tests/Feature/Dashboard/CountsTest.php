@@ -8,8 +8,8 @@ function fakeDashboardCounts(): array
     return [
         ['entity_type' => 'IPv4-Addr', 'label' => 'IP Addresses', 'count' => 1234],
         ['entity_type' => 'Domain-Name', 'label' => 'Domains', 'count' => 567],
-        ['entity_type' => 'Url', 'label' => 'URLs', 'count' => 890],
-        ['entity_type' => 'Email-Addr', 'label' => 'Email Addresses', 'count' => 123],
+        ['entity_type' => 'Hostname', 'label' => 'Hostnames', 'count' => 890],
+        ['entity_type' => 'X509-Certificate', 'label' => 'Certificates', 'count' => 123],
     ];
 }
 
@@ -70,5 +70,5 @@ test('GET /api/dashboard/counts returns correct entity types', function () {
 
     $entityTypes = array_column($response->json('data'), 'entity_type');
 
-    expect($entityTypes)->toBe(['IPv4-Addr', 'Domain-Name', 'Url', 'Email-Addr']);
+    expect($entityTypes)->toBe(['IPv4-Addr', 'Domain-Name', 'Hostname', 'X509-Certificate']);
 });

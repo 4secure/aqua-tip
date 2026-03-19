@@ -11,6 +11,7 @@ function fakeDashboardIndicators(): array
         'entity_type' => 'IPv4-Addr',
         'score' => rand(10, 100),
         'created_at' => "2026-03-19T10:0{$i}:00Z",
+        'labels' => ['Phishing', 'Malware'],
     ], range(1, 10));
 }
 
@@ -34,7 +35,7 @@ test('GET /api/dashboard/indicators returns 200 with correct structure', functio
     $response->assertStatus(200)
         ->assertJsonStructure([
             'data' => [
-                ['id', 'value', 'entity_type', 'score', 'created_at'],
+                ['id', 'value', 'entity_type', 'score', 'created_at', 'labels'],
             ],
         ]);
 });
@@ -60,6 +61,16 @@ test('GET /api/dashboard/indicators returns 502 on OpenCTI connection failure', 
 
     $response->assertStatus(502)
         ->assertJsonPath('message', 'Unable to load dashboard indicators. Please try again.');
+});
+
+test('GET /api/dashboard/indicators includes labels array for each indicator', function () {
+    mockDashboardIndicators();
+
+    $response = $this->getJson('/api/dashboard/indicators');
+
+    $firstIndicator = $response->json('data.0');
+    expect($firstIndicator)->toHaveKey('labels');
+    expect($firstIndicator['labels'])->toBeArray();
 });
 
 test('GET /api/dashboard/indicators returns up to 10 indicators', function () {

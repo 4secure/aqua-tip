@@ -47,8 +47,8 @@ test('getCounts returns 4 entity type counts from OpenCTI', function () {
 
     expect($result[0])->toMatchArray(['entity_type' => 'IPv4-Addr', 'label' => 'IP Addresses', 'count' => 100]);
     expect($result[1])->toMatchArray(['entity_type' => 'Domain-Name', 'label' => 'Domains', 'count' => 200]);
-    expect($result[2])->toMatchArray(['entity_type' => 'Url', 'label' => 'URLs', 'count' => 300]);
-    expect($result[3])->toMatchArray(['entity_type' => 'Email-Addr', 'label' => 'Email Addresses', 'count' => 400]);
+    expect($result[2])->toMatchArray(['entity_type' => 'Hostname', 'label' => 'Hostnames', 'count' => 300]);
+    expect($result[3])->toMatchArray(['entity_type' => 'X509-Certificate', 'label' => 'Certificates', 'count' => 400]);
 });
 
 test('getCounts returns stale cache when OpenCTI fails', function () {
@@ -92,6 +92,10 @@ test('getIndicators returns normalized observable array', function () {
                             'observable_value' => '1.2.3.4',
                             'x_opencti_score' => 75,
                             'created_at' => '2026-03-19T10:00:00Z',
+                            'objectLabel' => [
+                                ['value' => 'Malware'],
+                                ['value' => 'C2'],
+                            ],
                         ],
                     ],
                 ],
@@ -108,6 +112,7 @@ test('getIndicators returns normalized observable array', function () {
         'entity_type' => 'IPv4-Addr',
         'score' => 75,
         'created_at' => '2026-03-19T10:00:00Z',
+        'labels' => ['Malware', 'C2'],
     ]);
 });
 
