@@ -12,7 +12,7 @@ class DashboardService
     ) {}
 
     /**
-     * Get observable counts by entity type (IPv4-Addr, Domain-Name, Url, Email-Addr).
+     * Get observable counts by entity type (IPv4-Addr, Domain-Name, Hostname, X509-Certificate).
      *
      * Uses 5-min cache with stale-cache fallback when OpenCTI is unreachable.
      *
@@ -44,7 +44,7 @@ class DashboardService
      *
      * Uses 5-min cache with stale-cache fallback when OpenCTI is unreachable.
      *
-     * @return array<int, array{id: string, value: string, entity_type: string, score: int|null, created_at: string}>
+     * @return array<int, array{id: string, value: string, entity_type: string, score: int|null, created_at: string, labels: array<int, string>}>
      *
      * @throws OpenCtiConnectionException When OpenCTI is unreachable and no cached data exists
      */
@@ -105,8 +105,8 @@ class DashboardService
         $entityTypes = [
             'IPv4-Addr' => 'IP Addresses',
             'Domain-Name' => 'Domains',
-            'Url' => 'URLs',
-            'Email-Addr' => 'Email Addresses',
+            'Hostname' => 'Hostnames',
+            'X509-Certificate' => 'Certificates',
         ];
 
         $graphql = <<<'GRAPHQL'
@@ -153,7 +153,7 @@ class DashboardService
     /**
      * Fetch 10 most recent observables from OpenCTI.
      *
-     * @return array<int, array{id: string, value: string, entity_type: string, score: int|null, created_at: string}>
+     * @return array<int, array{id: string, value: string, entity_type: string, score: int|null, created_at: string, labels: array<int, string>}>
      */
     private function fetchIndicators(): array
     {
@@ -167,6 +167,9 @@ class DashboardService
                         observable_value
                         x_opencti_score
                         created_at
+                        objectLabel {
+                            value
+                        }
                     }
                 }
             }
@@ -182,6 +185,10 @@ class DashboardService
             'entity_type' => $edge['node']['entity_type'],
             'score' => $edge['node']['x_opencti_score'] ?? null,
             'created_at' => $edge['node']['created_at'],
+            'labels' => array_map(
+                fn (array $label) => $label['value'],
+                $edge['node']['objectLabel'] ?? [],
+            ),
         ], $edges);
     }
 
