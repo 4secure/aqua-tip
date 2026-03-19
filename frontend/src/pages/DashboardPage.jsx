@@ -142,12 +142,7 @@ function AttackChart({ categories, activeFilter, onFilterChange }) {
 }
 
 function IndicatorsTable({ indicators, activeFilter, onClearFilter }) {
-  const displayed = useMemo(() => {
-    const filtered = activeFilter
-      ? indicators.filter(ind => (ind.labels || []).includes(activeFilter))
-      : indicators;
-    return filtered.slice(0, 8);
-  }, [indicators, activeFilter]);
+  const displayed = indicators.slice(0, 8);
 
   return (
     <div>
@@ -376,16 +371,19 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // Fetch indicators
+  // Fetch indicators (re-fetches when category filter changes)
   useEffect(() => {
     let cancelled = false;
     setIndicatorsLoading(true);
-    apiClient.get('/api/dashboard/indicators')
+    const url = activeFilter
+      ? `/api/dashboard/indicators?label=${encodeURIComponent(activeFilter)}`
+      : '/api/dashboard/indicators';
+    apiClient.get(url)
       .then(res => { if (!cancelled) { setIndicators(res.data); setIndicatorsError(null); } })
       .catch(err => { if (!cancelled) setIndicatorsError(err); })
       .finally(() => { if (!cancelled) setIndicatorsLoading(false); });
     return () => { cancelled = true; };
-  }, []);
+  }, [activeFilter]);
 
   // Fetch categories
   useEffect(() => {
