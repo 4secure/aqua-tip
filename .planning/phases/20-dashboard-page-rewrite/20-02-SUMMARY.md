@@ -26,7 +26,7 @@ key-files:
 
 key-decisions:
   - "Each widget has independent loading/error state instead of single global loading"
-  - "Category filtering is client-side only -- no re-fetch on filter change"
+  - "Category filtering re-fetches indicators from API with label param"
   - "Auto-refresh only targets public endpoints (counts, indicators, categories) to avoid 401 errors"
 
 patterns-established:
@@ -48,7 +48,7 @@ completed: 2026-03-20
 - **Duration:** 4 min
 - **Started:** 2026-03-19T20:05:07Z
 - **Completed:** 2026-03-19T20:09:00Z
-- **Tasks:** 2 of 2 auto tasks completed (1 checkpoint pending)
+- **Tasks:** 3 of 3 completed
 - **Files modified:** 2
 
 ## Accomplishments
@@ -65,7 +65,7 @@ Each task was committed atomically:
 
 1. **Task 1: Rewrite DashboardPage.jsx with live API calls and all widgets** - `48f72ad` (feat)
 2. **Task 2: Remove unused mock data exports from mock-data.js** - `c789fd1` (chore)
-3. **Task 3: Visual verification of live dashboard** - checkpoint (pending human-verify)
+3. **Task 3: Visual verification of live dashboard** - `2924339`, `6cb1396`, `0d2cde8`, `d239e9f` (fixes during verification)
 
 ## Files Created/Modified
 - `frontend/src/pages/DashboardPage.jsx` - Complete rewrite with 6 API integrations, 6 sub-components, auth-gated widgets
@@ -79,10 +79,16 @@ Each task was committed atomically:
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+- OpenCTI GraphQL rejects empty `variables` array — fixed in OpenCtiService to omit key when empty
+- Category filtering changed from client-side to server-side (re-fetch with label param) because 10 loaded indicators rarely matched categories aggregated from 500
+- Dashboard map made public (snapshot route moved outside auth group) while stream stays auth-gated
+- useLeaflet hook fixed to reactively update markers on async data load
+- Map minZoom raised to 3 with dark background to prevent white edges
+- Removed "OpenCTI" branding from stat card labels
 
 ## Issues Encountered
-None
+- OpenCTI 400 error on empty variables array (fixed)
+- useLeaflet markers not rendering due to stale closure (fixed)
 
 ## User Setup Required
 None - no external service configuration required.

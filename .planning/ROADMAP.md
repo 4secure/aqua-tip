@@ -123,10 +123,10 @@ Plans:
   1. Threat Search page displays recent searches when no search result is active
   2. Each history entry shows a search type badge (IP, Domain, Hash, etc.) next to the query
   3. Clicking a recent search entry re-runs that query and displays results
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 21-01: TBD
+- [ ] 21-01-PLAN.md — Add search history section to ThreatSearchPage with guest CTA, empty state, and click-to-prefill
 
 ## Progress
 
@@ -157,4 +157,4 @@ Phases execute in numeric order: 18 → 19 → 20 → 21
 | 18. Dashboard Stats Backend | 2/2 | Complete    | 2026-03-18 | - |
 | 19. Search History Backend | 1/1 | Complete    | 2026-03-18 | - |
 | 20. Dashboard Page Rewrite | 2/2 | Complete   | 2026-03-19 | - |
-| 21. Threat Search History | v2.2 | 0/? | Not started | - |
+| 21. Threat Search History | v2.2 | 0/1 | Not started | - |
