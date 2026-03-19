@@ -62,8 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/threat-news', ThreatNewsIndexController::class);
     Route::get('/threat-news/labels', ThreatNewsLabelsController::class);
 
-    // Threat map (live streaming, no credit gating)
-    Route::get('/threat-map/snapshot', ThreatMapSnapshotController::class);
+    // Threat map stream (authenticated, no credit gating)
     Route::get('/threat-map/stream', ThreatMapStreamController::class);
 
     // Search history (authenticated, no credit gating)
@@ -78,6 +77,9 @@ Route::post('/threat-search', ThreatSearchController::class)->middleware('deduct
 
 // Credit status (read-only, no deduction)
 Route::get('/credits', CreditStatusController::class);
+
+// Threat map snapshot (public, used by dashboard map)
+Route::get('/threat-map/snapshot', ThreatMapSnapshotController::class);
 
 // Dashboard stats (public, no auth, no credit gating)
 Route::get('/dashboard/counts', DashboardCountsController::class);

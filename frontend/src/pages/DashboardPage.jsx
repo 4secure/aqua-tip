@@ -75,7 +75,7 @@ function StatCard({ label, count, color, loading, error }) {
       )}
       <div className="flex items-center gap-1.5">
         <div className={`w-2 h-2 rounded-full bg-green animate-pulse`} />
-        <span className="text-[10px] text-text-muted">Live from OpenCTI</span>
+        <span className="text-[10px] text-text-muted">Live</span>
       </div>
     </div>
   );
@@ -456,7 +456,7 @@ export default function DashboardPage() {
       popup: `<div style="font-family:'Space Grotesk',sans-serif;color:#E8EAED;background:#161822;padding:8px 12px;border-radius:8px;border:1px solid #2A2D3E;min-width:150px;"><div style="font-weight:600;font-size:13px;margin-bottom:4px;">${e.city || e.ip}</div><div style="font-size:11px;color:#9AA0AD;">${e.type} -- ${e.country || ''}</div></div>`,
     }));
   }, [mapData]);
-  const mapRef = useLeaflet({ center: [25, 10], zoom: 2.3, markers });
+  const mapRef = useLeaflet({ center: [25, 10], zoom: 3, markers });
 
   // Filter handler
   const handleFilterChange = (label) => {
