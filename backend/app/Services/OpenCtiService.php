@@ -35,10 +35,10 @@ class OpenCtiService
             ])
                 ->timeout(15)
                 ->retry(2, 500, fn (\Exception $e) => $e instanceof ConnectionException)
-                ->post($baseUrl . '/graphql', [
-                    'query' => $graphql,
-                    'variables' => $variables,
-                ]);
+                ->post($baseUrl . '/graphql', empty($variables)
+                    ? ['query' => $graphql]
+                    : ['query' => $graphql, 'variables' => $variables],
+                );
 
             $response->throw();
         } catch (ConnectionException $e) {
