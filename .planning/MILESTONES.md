@@ -1,0 +1,94 @@
+# Milestones
+
+## v2.2 Live Dashboard & Search History (Shipped: 2026-03-20)
+
+**Phases completed:** 4 phases, 6 plans, 13 tasks
+**Timeline:** 2 days (2026-03-18 → 2026-03-20)
+**Requirements:** 15/15 complete
+**Files modified:** 23 (+2,627 / -198 lines)
+
+**Key accomplishments:**
+1. DashboardService aggregating live OpenCTI stats (counts, indicators, categories) with stale-cache fallback
+2. 19 Pest PHP tests covering all dashboard endpoints and cache behavior
+3. Auth-only search history endpoint exposing recent queries with module filtering
+4. Full DashboardPage rewrite with 6 live API integrations, auth-gated widgets, zero mock data
+5. Search history section on ThreatSearchPage with type badges and click-to-prefill
+6. Category-click filtering on indicators table with server-side label queries
+
+---
+
+## v2.1 Threat Search & UI Refresh (Shipped: 2026-03-18)
+
+**Phases completed:** 6 phases, 8 plans
+**Timeline:** 2 days (2026-03-17 → 2026-03-19)
+**Requirements:** 18/18 complete
+**Files modified:** 35 (+3,219 / -390 lines)
+
+**Key accomplishments:**
+1. Threat Actors UI refresh — 4-col dense card grid, removed descriptions, clean subheading without "OpenCTI"
+2. Threat News UI refresh — row-based layout replacing card grid, entity tags, inline pagination, no confidence
+3. Backend search generalization — ThreatSearchService supporting all 9 observable types (IPv4/IPv6/Domain/URL/Email/MD5/SHA-1/SHA-256/Hostname) with auto-detection
+4. Frontend Threat Search — unified search page with detected-type badge, route migration from /ip-search to /threat-search
+5. Threat Actors UX polish — removed motivation filter and sort toggle, added inline pagination toolbar matching Threat News pattern
+6. Threat News UX polish — label-based category chips from OpenCTI, dynamic category filter dropdown, date-first column
+
+---
+
+## v2.0 OpenCTI Integration (Shipped: 2026-03-16)
+
+**Phases completed:** 4 phases, 9 plans
+**Timeline:** 3 days (2026-03-14 → 2026-03-16)
+**Requirements:** 24/24 complete
+
+**Key accomplishments:**
+1. OpenCTI service layer with GraphQL proxy, Bearer token auth, 15s timeout + 2x retry, server-side caching
+2. IP Search integration — real threat data from OpenCTI observables with geo enrichment, credit gating, and refund on failure
+3. Threat Actors page — paginated intrusion sets with detail modals, search, sort, targeted countries/sectors
+4. Threat News page — paginated reports with entity chip filtering, confidence levels, related entities
+5. Live Threat Map — SSE streaming from OpenCTI, pulse-and-fade markers, real-time counters, click-to-pan feed
+6. Code review hardening — lazy MaxMind init, exception message leak fix, SSE spec compliance, 5-min runtime guard
+
+---
+
+## v1.1 PostgreSQL Migration & Railway Deployment (Shipped: 2026-03-14)
+
+**Phases completed:** 2 phases, 4 plans
+**Timeline:** 1 day (2026-03-13 → 2026-03-14)
+**Git range:** `0287625..44811f8` — 10 source files changed, +79/-14 lines
+
+**Key accomplishments:**
+1. Switched Laravel from MySQL to PostgreSQL — config, 6 migration fixes for cross-database compatibility
+2. All 92 Pest tests (309 assertions) pass on both SQLite and PostgreSQL without modification
+3. Dockerfile fixed for PostgreSQL (pdo_pgsql + libpq-dev), startup script with auto-migration
+4. Backend deployed to Railway with PostgreSQL addon, migrations auto-run on deploy
+5. Frontend SPA deployed to Railway with Express static server
+6. Both services live at public `.up.railway.app` domains
+
+---
+
+## v1.0 Authentication System (Shipped: 2026-03-14)
+
+**Phases completed:** 6 phases, 13 plans
+**Lines of code:** ~5,490 JS/JSX + ~7,684 PHP = ~13,174 LOC
+**Timeline:** 2 days (2026-03-13 → 2026-03-14)
+
+**Key accomplishments:**
+1. Laravel 12 backend with Sanctum SPA cookie-based auth (register, login, logout, 19 Pest tests)
+2. Google + GitHub OAuth via Socialite, email verification with 6-digit code + signed link, password reset
+3. Credit-based rate limiting — 1/day guests (IP), 10/day auth (user ID) — lazy midnight UTC reset, 24 tests
+4. Frontend auth integration — AuthContext, 3-step route guards, login/signup/verify/onboard pages
+5. Layout redesign — collapsible glassmorphism sidebar, auth-aware nav, mobile responsive drawer
+6. Dark Web breach search — Laravel proxy to provider API, credit gating, BreachCard + CreditBadge components
+
+### Known Gaps
+
+| ID | Description | Notes |
+|----|-------------|-------|
+| RATE-04 | Guest "Sign in for more lookups" CTA | Backend sends is_guest in 429 but no frontend reads it |
+| RATE-05 | Signed-in "Daily limit reached" for IOC search | Works on Dark Web page only, missing for IOC search |
+| FEND-05 | /ip-search publicly accessible + rate-limited | Route is public but search button has no API integration |
+
+These will be addressed in a future milestone.
+
+---
+

@@ -6,7 +6,7 @@
 - ✅ **v1.1 PostgreSQL Migration & Railway Deployment** — Phases 6-7 (shipped 2026-03-14)
 - ✅ **v2.0 OpenCTI Integration** — Phases 8-11 (shipped 2026-03-16)
 - ✅ **v2.1 Threat Search & UI Refresh** — Phases 12-17 (shipped 2026-03-18)
-- 🚧 **v2.2 Live Dashboard & Search History** — Phases 18-21 (in progress)
+- ✅ **v2.2 Live Dashboard & Search History** — Phases 18-21 (shipped 2026-03-20)
 
 ## Phases
 
@@ -60,79 +60,19 @@ Full details: `.planning/milestones/v2.1-ROADMAP.md`
 
 </details>
 
-### 🚧 v2.2 Live Dashboard & Search History (In Progress)
+<details>
+<summary>✅ v2.2 Live Dashboard & Search History (Phases 18-21) — SHIPPED 2026-03-20</summary>
 
-**Milestone Goal:** Replace all dashboard mock data with live OpenCTI data, add search history tracking, and show recent searches on the Threat Search page.
+- [x] Phase 18: Dashboard Stats Backend (2/2 plans) — completed 2026-03-18
+- [x] Phase 19: Search History Backend (1/1 plan) — completed 2026-03-18
+- [x] Phase 20: Dashboard Page Rewrite (2/2 plans) — completed 2026-03-19
+- [x] Phase 21: Threat Search History (1/1 plan) — completed 2026-03-19
 
-- [x] **Phase 18: Dashboard Stats Backend** - DashboardService aggregating OpenCTI stats into a single cached endpoint (completed 2026-03-18)
-- [x] **Phase 19: Search History Backend** - Auth-only endpoint exposing existing search_logs for recent queries (completed 2026-03-18)
-- [x] **Phase 20: Dashboard Page Rewrite** - Replace all mock data with live API calls, add credit and search widgets (completed 2026-03-19)
-- [ ] **Phase 21: Threat Search History** - Recent searches empty state on Threat Search page with click-to-rerun
+Full details: `.planning/milestones/v2.2-ROADMAP.md`
 
-## Phase Details
-
-### Phase 18: Dashboard Stats Backend
-**Goal**: Users get live threat statistics from the dashboard API instead of hardcoded numbers
-**Depends on**: Phase 17 (existing OpenCtiService infrastructure)
-**Requirements**: DASH-01, DASH-02, DASH-03, DASH-04, DASH-06
-**Success Criteria** (what must be TRUE):
-  1. GET /api/dashboard/stats returns real observable counts, recent indicators, and attack category distribution from OpenCTI
-  2. Response is cached (5-min TTL) with stale-cache fallback when OpenCTI is unreachable
-  3. Dashboard map widget data is available via existing snapshot endpoint (no new SSE connection)
-  4. Stats auto-refresh capability is supported by the endpoint (frontend can poll every 5 minutes)
-**Plans**: 2 plans
-
-Plans:
-- [ ] 18-01-PLAN.md — DashboardService + 3 controllers + public routes
-- [ ] 18-02-PLAN.md — Feature and unit tests for all dashboard endpoints
-
-### Phase 19: Search History Backend
-**Goal**: Authenticated users can retrieve their recent search history through a dedicated API endpoint
-**Depends on**: Nothing (independent of Phase 18; uses existing search_logs table)
-**Requirements**: HIST-01, HIST-02
-**Success Criteria** (what must be TRUE):
-  1. GET /api/search-history returns the authenticated user's recent searches (query, type, module, timestamp)
-  2. Endpoint requires auth:sanctum -- guests receive 401, not IP-based history
-  3. Results are ordered by most recent first with a reasonable limit
-**Plans**: 1 plan
-
-Plans:
-- [ ] 19-01-PLAN.md — TDD: feature tests + SearchHistory controller + route
-
-### Phase 20: Dashboard Page Rewrite
-**Goal**: Users see a fully live dashboard with real threat data, their credit balance, and recent searches -- zero mock data
-**Depends on**: Phase 18, Phase 19
-**Requirements**: DASH-05, WIDG-01, WIDG-02, CLEAN-01, CLEAN-02
-**Success Criteria** (what must be TRUE):
-  1. Dashboard stat cards display real observable counts from OpenCTI (no fake deltas or sparklines)
-  2. Recent indicators table shows real observables and clicking an attack category filters the table
-  3. Attack categories bar chart renders real label distribution from OpenCTI
-  4. Dashboard shows user's remaining daily credit balance and their recent searches
-  5. Zero mock data imports remain in DashboardPage and unused dashboard exports are removed from mock-data.js
-**Plans**: 2 plans
-
-Plans:
-- [ ] 20-01-PLAN.md — Backend fixes: update entity types (Hostname, X509-Certificate) and add labels to indicators
-- [ ] 20-02-PLAN.md — Frontend DashboardPage rewrite with live API calls + mock data cleanup
-
-### Phase 21: Threat Search History
-**Goal**: Users see their recent searches on the Threat Search page when no search is active, with one-click re-run
-**Depends on**: Phase 19 (search history endpoint), Phase 20 (shared RecentSearches component)
-**Requirements**: HIST-03, HIST-04, HIST-05
-**Success Criteria** (what must be TRUE):
-  1. Threat Search page displays recent searches when no search result is active
-  2. Each history entry shows a search type badge (IP, Domain, Hash, etc.) next to the query
-  3. Clicking a recent search entry re-runs that query and displays results
-**Plans**: 1 plan
-
-Plans:
-- [ ] 21-01-PLAN.md — Add search history section to ThreatSearchPage with guest CTA, empty state, and click-to-prefill
+</details>
 
 ## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 18 → 19 → 20 → 21
-(Phases 18 and 19 are independent and could execute in parallel)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -154,7 +94,7 @@ Phases execute in numeric order: 18 → 19 → 20 → 21
 | 15. Frontend Threat Search + Route Migration | v2.1 | 1/1 | Complete | 2026-03-18 |
 | 16. Threat Actors UX Polish | v2.1 | 1/1 | Complete | 2026-03-18 |
 | 17. Threat News UX Polish | v2.1 | 2/2 | Complete | 2026-03-18 |
-| 18. Dashboard Stats Backend | 2/2 | Complete    | 2026-03-18 | - |
-| 19. Search History Backend | 1/1 | Complete    | 2026-03-18 | - |
-| 20. Dashboard Page Rewrite | 2/2 | Complete   | 2026-03-19 | - |
-| 21. Threat Search History | v2.2 | 0/1 | Not started | - |
+| 18. Dashboard Stats Backend | v2.2 | 2/2 | Complete | 2026-03-18 |
+| 19. Search History Backend | v2.2 | 1/1 | Complete | 2026-03-18 |
+| 20. Dashboard Page Rewrite | v2.2 | 2/2 | Complete | 2026-03-19 |
+| 21. Threat Search History | v2.2 | 1/1 | Complete | 2026-03-19 |
