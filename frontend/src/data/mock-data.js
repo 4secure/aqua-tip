@@ -1,54 +1,5 @@
 // All mock data — frozen objects for immutability
 
-export const THREAT_STATS = Object.freeze({
-  malwareIPs: 14283,
-  malwareDomains: 8741,
-  cvesToday: 47,
-  newIPs: 2319,
-  malwareIPsDelta: 12.4,
-  malwareDomainsDelta: -3.2,
-  cvesTodayDelta: 8.1,
-  newIPsDelta: 24.7,
-});
-
-export const RECENT_IPS = Object.freeze([
-  { type: 'IP', value: '185.220.101.34', threat: 'C2 Server', confidence: 95, source: 'AlienVault OTX', time: '2m ago', severity: 'critical' },
-  { type: 'Domain', value: 'malware-c2.evil.ru', threat: 'Phishing', confidence: 88, source: 'PhishTank', time: '5m ago', severity: 'high' },
-  { type: 'Hash', value: 'a1b2c3d4e5f6...', threat: 'Ransomware', confidence: 92, source: 'VirusTotal', time: '8m ago', severity: 'critical' },
-  { type: 'IP', value: '103.224.182.251', threat: 'Scanner', confidence: 76, source: 'AbuseIPDB', time: '12m ago', severity: 'medium' },
-  { type: 'URL', value: 'hxxps://login-verify[.]com/auth', threat: 'Credential Harvester', confidence: 84, source: 'URLhaus', time: '15m ago', severity: 'high' },
-  { type: 'Domain', value: 'api-update[.]download', threat: 'Malware Distribution', confidence: 91, source: 'Spamhaus', time: '18m ago', severity: 'critical' },
-  { type: 'IP', value: '45.33.32.156', threat: 'Brute Force', confidence: 68, source: 'Shodan', time: '22m ago', severity: 'medium' },
-  { type: 'Hash', value: 'f7a8b9c0d1e2...', threat: 'Trojan', confidence: 97, source: 'Hybrid Analysis', time: '25m ago', severity: 'critical' },
-]);
-
-export const ATTACK_CATEGORIES = Object.freeze([
-  { name: 'Phishing', count: 4521, color: '#FF3B5C' },
-  { name: 'Ransomware', count: 2834, color: '#7A44E4' },
-  { name: 'DDoS', count: 2102, color: '#00E5FF' },
-  { name: 'Supply Chain', count: 1876, color: '#FFB020' },
-  { name: 'Zero-Day', count: 1243, color: '#00C48C' },
-  { name: 'Insider Threat', count: 987, color: '#9B6BF7' },
-]);
-
-export const THREAT_MAP_POINTS = Object.freeze([
-  { lat: 55.75, lng: 37.62, city: 'Moscow', attacks: 1243, type: 'C2' },
-  { lat: 39.91, lng: 116.40, city: 'Beijing', attacks: 987, type: 'APT' },
-  { lat: 35.68, lng: 139.69, city: 'Tokyo', attacks: 456, type: 'Scanning' },
-  { lat: 40.71, lng: -74.01, city: 'New York', attacks: 789, type: 'Phishing' },
-  { lat: 51.51, lng: -0.13, city: 'London', attacks: 654, type: 'Ransomware' },
-  { lat: -33.87, lng: 151.21, city: 'Sydney', attacks: 321, type: 'DDoS' },
-  { lat: 48.86, lng: 2.35, city: 'Paris', attacks: 543, type: 'Credential Stuffing' },
-  { lat: 37.57, lng: 126.98, city: 'Seoul', attacks: 876, type: 'Supply Chain' },
-  { lat: 1.35, lng: 103.82, city: 'Singapore', attacks: 432, type: 'Malware' },
-  { lat: 19.43, lng: -99.13, city: 'Mexico City', attacks: 298, type: 'Phishing' },
-  { lat: -23.55, lng: -46.63, city: 'São Paulo', attacks: 567, type: 'Banking Trojan' },
-  { lat: 28.61, lng: 77.23, city: 'New Delhi', attacks: 745, type: 'Scanning' },
-  { lat: 52.52, lng: 13.41, city: 'Berlin', attacks: 412, type: 'Ransomware' },
-  { lat: 25.20, lng: 55.27, city: 'Dubai', attacks: 189, type: 'BEC' },
-  { lat: -1.29, lng: 36.82, city: 'Nairobi', attacks: 156, type: 'Phishing' },
-]);
-
 export const IP_REPORT = Object.freeze({
   ip: '185.220.101.34',
   score: 87,
