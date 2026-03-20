@@ -77,7 +77,7 @@ Full details: `.planning/milestones/v2.2-ROADMAP.md`
 
 **Milestone Goal:** Expand onboarding with profile fields, enforce the 30-day trial with credit tiers, and build a subscription plan system with pricing page.
 
-- [ ] **Phase 22: Schema & Data Foundation** - Plans table, user columns, existing user trial migration, onboarding check fix
+- [x] **Phase 22: Schema & Data Foundation** - Plans table, user columns, existing user trial migration, onboarding check fix (completed 2026-03-20)
 - [ ] **Phase 23: CreditResolver & Plan-Aware Backend** - Extract shared credit logic, plan-aware limits, trial enforcement, plan selection and listing APIs
 - [ ] **Phase 24: Enhanced Onboarding** - Timezone auto-detect, organization, role fields on Get Started page with backend validation
 - [ ] **Phase 25: Pricing, Trial Banners & Timezone Display** - Pricing page, trial countdown/expired banners, plan-aware credit badge, timezone-aware timestamps
@@ -179,7 +179,7 @@ Phases execute in numeric order: 22 → 23 → 24 → 25
 | 19. Search History Backend | v2.2 | 1/1 | Complete | 2026-03-18 |
 | 20. Dashboard Page Rewrite | v2.2 | 2/2 | Complete | 2026-03-19 |
 | 21. Threat Search History | v2.2 | 1/1 | Complete | 2026-03-19 |
-| 22. Schema & Data Foundation | 1/2 | In Progress|  | - |
+| 22. Schema & Data Foundation | 2/2 | Complete   | 2026-03-20 | - |
 | 23. CreditResolver & Plan-Aware Backend | v3.0 | 0/3 | Not started | - |
 | 24. Enhanced Onboarding | v3.0 | 0/2 | Not started | - |
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 0/3 | Not started | - |

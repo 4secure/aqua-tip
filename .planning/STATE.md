@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Onboarding, Trial & Subscription Plans
 status: executing
-stopped_at: Completed 22-01-PLAN.md
-last_updated: "2026-03-20T20:30:44.148Z"
-last_activity: 2026-03-21 -- Completed 22-01 Schema & Data Foundation plan
+stopped_at: Completed 22-02-PLAN.md
+last_updated: "2026-03-20T20:36:47.721Z"
+last_activity: 2026-03-20 -- Roadmap created for v3.0 milestone
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 50
 ---
 
 # Project State
@@ -47,6 +47,7 @@ Progress: [█████░░░░░] 50% of v3.0 (1/2 plans)
 | v2.0 OpenCTI Integration | 4 | 9 | 3 days |
 | v2.1 Threat Search & UI Refresh | 6 | 8 | 2 days |
 | v2.2 Live Dashboard & Search History | 4 | 6 | 2 days |
+| Phase 22 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -60,6 +61,8 @@ Decisions logged in PROJECT.md Key Decisions table. Recent for v3.0:
 - Guest credit limit stays at 1/day (differentiation from Free tier)
 - nullOnDelete FK so deleting a plan nullifies user association instead of cascading
 - updateOrCreate seeder pattern for safe re-runs in production
+- [Phase 22]: Query builder over raw SQL for cross-DB compatibility in data migrations
+- [Phase 22]: One-way data migration with no-op down() for trial reset (values unrecoverable)
 
 ### Pending Todos
 
@@ -73,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21T20:30:22Z
-Stopped at: Completed 22-01-PLAN.md
-Resume file: .planning/phases/22-schema-data-foundation/22-01-SUMMARY.md
+Last session: 2026-03-20T20:36:47.698Z
+Stopped at: Completed 22-02-PLAN.md
+Resume file: None

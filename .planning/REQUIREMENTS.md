@@ -14,14 +14,14 @@ Requirements for Onboarding, Trial & Subscription Plans milestone. Each maps to 
 - [ ] **ONBD-03**: User can optionally select their role from a dropdown (Security Analyst, SOC Analyst, Threat Hunter, Incident Responder, CISO/Manager, Researcher, Student, Other)
 - [ ] **ONBD-04**: Backend validates and stores timezone, organization, and role fields on onboarding submission
 - [ ] **ONBD-05**: UserResource returns timezone, organization, and role fields
-- [ ] **ONBD-06**: Onboarding completion check uses `onboarding_completed_at` timestamp instead of fragile name/phone heuristic
+- [x] **ONBD-06**: Onboarding completion check uses `onboarding_completed_at` timestamp instead of fragile name/phone heuristic
 
 ### Trial Enforcement
 
 - [ ] **TRIAL-01**: New users start with a 30-day trial at 10 credits/day (existing behavior, now enforced)
 - [ ] **TRIAL-02**: When trial expires and user has no plan, credit limit drops to Free tier (3/day)
 - [ ] **TRIAL-03**: Trial expiry check happens during lazy credit reset (no separate scheduled task)
-- [ ] **TRIAL-04**: Existing users receive a fresh 30-day trial via data migration on v3.0 deploy
+- [x] **TRIAL-04**: Existing users receive a fresh 30-day trial via data migration on v3.0 deploy
 - [ ] **TRIAL-05**: User sees a trial countdown banner showing days remaining
 - [ ] **TRIAL-06**: User sees a "Trial expired -- upgrade" banner when trial ends without a plan
 
@@ -94,11 +94,11 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | ONBD-03 | Phase 24 | Pending |
 | ONBD-04 | Phase 24 | Pending |
 | ONBD-05 | Phase 23 | Pending |
-| ONBD-06 | Phase 22 | Pending |
+| ONBD-06 | Phase 22 | Complete |
 | TRIAL-01 | Phase 23 | Pending |
 | TRIAL-02 | Phase 23 | Pending |
 | TRIAL-03 | Phase 23 | Pending |
-| TRIAL-04 | Phase 22 | Pending |
+| TRIAL-04 | Phase 22 | Complete |
 | TRIAL-05 | Phase 25 | Pending |
 | TRIAL-06 | Phase 25 | Pending |
 | PLAN-01 | Phase 22 | Complete |
