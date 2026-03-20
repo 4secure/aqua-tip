@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.2
-milestone_name: Live Dashboard & Search History
-status: archived
-stopped_at: Milestone v2.2 archived
-last_updated: "2026-03-20T04:30:00.000Z"
-last_activity: 2026-03-20 -- Archived milestone v2.2
+milestone: v3.0
+milestone_name: Onboarding, Trial & Subscription Plans
+status: executing
+stopped_at: Completed 22-01-PLAN.md
+last_updated: "2026-03-20T20:30:44.148Z"
+last_activity: 2026-03-21 -- Completed 22-01 Schema & Data Foundation plan
 progress:
   total_phases: 4
-  completed_phases: 4
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 0
 ---
 
 # Project State
@@ -21,12 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform.
-**Current focus:** Planning next milestone
+**Current focus:** Phase 22 - Schema & Data Foundation (v3.0)
 
 ## Current Position
 
-Milestone v2.2 archived. All 5 milestones shipped (v1.0 → v2.2).
-Next step: `/gsd:new-milestone` to define next milestone.
+Phase: 22 of 25 (Schema & Data Foundation)
+Plan: 1 of 2 in current phase
+Status: Executing
+Last activity: 2026-03-20 -- Roadmap created for v3.0 milestone
+
+Progress: [█████░░░░░] 50% of v3.0 (1/2 plans)
 
 ## Performance Metrics
 
@@ -48,7 +52,14 @@ Next step: `/gsd:new-milestone` to define next milestone.
 
 ### Decisions
 
-Archived with milestone. See PROJECT.md Key Decisions table.
+Decisions logged in PROJECT.md Key Decisions table. Recent for v3.0:
+
+- Zero new dependencies -- existing stack covers all v3.0 requirements
+- CreditResolver extraction before any plan logic (prevent duplication pitfall)
+- Existing users get fresh 30-day trial via migration (prevent instant downgrade)
+- Guest credit limit stays at 1/day (differentiation from Free tier)
+- nullOnDelete FK so deleting a plan nullifies user association instead of cascading
+- updateOrCreate seeder pattern for safe re-runs in production
 
 ### Pending Todos
 
@@ -57,8 +68,11 @@ None.
 ### Blockers/Concerns
 
 - OpenCTI on private network (192.168.251.20) -- works locally but needs tunneling for Railway
+- Pricing amounts (dollar values) TBD -- does not block implementation but must be decided before production
+- Trial credit level (10/day vs 50/day reverse trial) -- product decision needed
 
 ## Session Continuity
 
-Last session: 2026-03-20
-Stopped at: Milestone v2.2 archived
+Last session: 2026-03-21T20:30:22Z
+Stopped at: Completed 22-01-PLAN.md
+Resume file: .planning/phases/22-schema-data-foundation/22-01-SUMMARY.md
