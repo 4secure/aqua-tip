@@ -21,7 +21,7 @@ class UserResource extends JsonResource
             'avatar_url' => $this->avatar_url,
             'phone' => $this->phone,
             'email_verified' => $this->email_verified_at !== null,
-            'onboarding_completed' => $this->name !== explode('@', $this->email)[0] && $this->phone !== null,
+            'onboarding_completed' => $this->onboarding_completed_at !== null,
         ];
     }
 }
