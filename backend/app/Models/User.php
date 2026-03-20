@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -41,6 +42,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'onboarding_completed_at',
         'trial_ends_at',
+        'plan_id',
+        'timezone',
+        'organization',
+        'role',
     ];
 
     /**
@@ -77,6 +82,11 @@ class User extends Authenticatable implements MustVerifyEmail
                 $user->trial_ends_at = now()->addDays(30);
             }
         });
+    }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
     }
 
     public function credit(): HasOne
