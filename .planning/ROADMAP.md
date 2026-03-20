@@ -97,8 +97,8 @@ Full details: `.planning/milestones/v2.2-ROADMAP.md`
 **Plans**: 2 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — Plans table, Plan model, PlanSeeder, user columns migration, User model updates
-- [ ] 22-02-PLAN.md — Trial reset data migration, credit pre-creation, UserResource onboarding fix
+- [x] 22-01-PLAN.md — Plans table, Plan model, PlanSeeder, user columns migration, User model updates
+- [x] 22-02-PLAN.md — Trial reset data migration, credit pre-creation, UserResource onboarding fix
 
 ### Phase 23: CreditResolver & Plan-Aware Backend
 **Goal**: Credit system derives limits from user plan, trial enforcement works automatically, and plan management APIs are operational
@@ -110,12 +110,11 @@ Plans:
   3. Selecting a plan via POST /api/plan immediately changes the user's credit limit and caps remaining balance on downgrade
   4. GET /api/plans returns all 4 plan tiers without requiring authentication
   5. GET /api/user returns plan object, trial_active boolean, trial_days_left, timezone, organization, and role fields
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 23-01: TBD
-- [ ] 23-02: TBD
-- [ ] 23-03: TBD
+- [ ] 23-01-PLAN.md — CreditResolver service extraction, pending plan migration, consumer rewiring
+- [ ] 23-02-PLAN.md — Plan listing/selection APIs, UserResource expansion with plan/trial fields
 
 ### Phase 24: Enhanced Onboarding
 **Goal**: Users provide timezone, organization, and role during onboarding with smart defaults
@@ -179,7 +178,7 @@ Phases execute in numeric order: 22 → 23 → 24 → 25
 | 19. Search History Backend | v2.2 | 1/1 | Complete | 2026-03-18 |
 | 20. Dashboard Page Rewrite | v2.2 | 2/2 | Complete | 2026-03-19 |
 | 21. Threat Search History | v2.2 | 1/1 | Complete | 2026-03-19 |
-| 22. Schema & Data Foundation | 2/2 | Complete   | 2026-03-20 | - |
-| 23. CreditResolver & Plan-Aware Backend | v3.0 | 0/3 | Not started | - |
+| 22. Schema & Data Foundation | v3.0 | 2/2 | Complete | 2026-03-20 |
+| 23. CreditResolver & Plan-Aware Backend | v3.0 | 0/2 | Not started | - |
 | 24. Enhanced Onboarding | v3.0 | 0/2 | Not started | - |
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 0/3 | Not started | - |
