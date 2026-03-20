@@ -43,6 +43,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'onboarding_completed_at',
         'trial_ends_at',
         'plan_id',
+        'pending_plan_id',
+        'plan_change_at',
         'timezone',
         'organization',
         'role',
@@ -71,6 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'onboarding_completed_at' => 'datetime',
             'trial_ends_at' => 'datetime',
+            'plan_change_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -87,6 +90,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function pendingPlan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'pending_plan_id');
     }
 
     public function credit(): HasOne
