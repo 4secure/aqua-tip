@@ -13,7 +13,7 @@ Requirements for Onboarding, Trial & Subscription Plans milestone. Each maps to 
 - [ ] **ONBD-02**: User can optionally enter their organization name during onboarding
 - [ ] **ONBD-03**: User can optionally select their role from a dropdown (Security Analyst, SOC Analyst, Threat Hunter, Incident Responder, CISO/Manager, Researcher, Student, Other)
 - [ ] **ONBD-04**: Backend validates and stores timezone, organization, and role fields on onboarding submission
-- [ ] **ONBD-05**: UserResource returns timezone, organization, and role fields
+- [x] **ONBD-05**: UserResource returns timezone, organization, and role fields
 - [x] **ONBD-06**: Onboarding completion check uses `onboarding_completed_at` timestamp instead of fragile name/phone heuristic
 
 ### Trial Enforcement
@@ -31,10 +31,10 @@ Requirements for Onboarding, Trial & Subscription Plans milestone. Each maps to 
 - [x] **PLAN-02**: User model has plan_id FK; null means no plan selected (trial or expired-trial/Free)
 - [ ] **PLAN-03**: Credit limits are derived from user's plan (not hardcoded) via a shared CreditResolver service
 - [ ] **PLAN-04**: Duplicated credit resolution logic in DeductCredit and CreditStatusController is extracted into CreditResolver
-- [ ] **PLAN-05**: User can select a plan via POST /api/plan (no payment processing -- stores choice in DB)
-- [ ] **PLAN-06**: Plan change immediately syncs credit limit and remaining balance (upgrade gives more, downgrade caps)
+- [x] **PLAN-05**: User can select a plan via POST /api/plan (no payment processing -- stores choice in DB)
+- [x] **PLAN-06**: Plan change immediately syncs credit limit and remaining balance (upgrade gives more, downgrade caps)
 - [ ] **PLAN-07**: Guest credit limit stays at 1/day (unchanged)
-- [ ] **PLAN-08**: GET /api/plans returns all active plans (public endpoint, no auth required)
+- [x] **PLAN-08**: GET /api/plans returns all active plans (public endpoint, no auth required)
 
 ### Pricing & UI
 
@@ -93,7 +93,7 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | ONBD-02 | Phase 24 | Pending |
 | ONBD-03 | Phase 24 | Pending |
 | ONBD-04 | Phase 24 | Pending |
-| ONBD-05 | Phase 23 | Pending |
+| ONBD-05 | Phase 23 | Complete |
 | ONBD-06 | Phase 22 | Complete |
 | TRIAL-01 | Phase 23 | Pending |
 | TRIAL-02 | Phase 23 | Pending |
@@ -105,10 +105,10 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | PLAN-02 | Phase 22 | Complete |
 | PLAN-03 | Phase 23 | Pending |
 | PLAN-04 | Phase 23 | Pending |
-| PLAN-05 | Phase 23 | Pending |
-| PLAN-06 | Phase 23 | Pending |
+| PLAN-05 | Phase 23 | Complete |
+| PLAN-06 | Phase 23 | Complete |
 | PLAN-07 | Phase 23 | Pending |
-| PLAN-08 | Phase 23 | Pending |
+| PLAN-08 | Phase 23 | Complete |
 | PRICE-01 | Phase 25 | Pending |
 | PRICE-02 | Phase 25 | Pending |
 | PRICE-03 | Phase 25 | Pending |
