@@ -180,5 +180,5 @@ Phases execute in numeric order: 22 → 23 → 24 → 25
 | 21. Threat Search History | v2.2 | 1/1 | Complete | 2026-03-19 |
 | 22. Schema & Data Foundation | v3.0 | 2/2 | Complete | 2026-03-20 |
 | 23. CreditResolver & Plan-Aware Backend | v3.0 | 2/2 | Complete    | 2026-03-22 |
-| 24. Enhanced Onboarding | v3.0 | 2/2 | Complete   | 2026-03-22 |
+| 24. Enhanced Onboarding | v3.0 | 2/2 | Complete    | 2026-03-22 |
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 0/3 | Not started | - |
