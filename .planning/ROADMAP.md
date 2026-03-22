@@ -79,7 +79,7 @@ Full details: `.planning/milestones/v2.2-ROADMAP.md`
 
 - [x] **Phase 22: Schema & Data Foundation** - Plans table, user columns, existing user trial migration, onboarding check fix (completed 2026-03-20)
 - [x] **Phase 23: CreditResolver & Plan-Aware Backend** - Extract shared credit logic, plan-aware limits, trial enforcement, plan selection and listing APIs (completed 2026-03-22)
-- [ ] **Phase 24: Enhanced Onboarding** - Timezone auto-detect, organization, role fields on Get Started page with backend validation
+- [x] **Phase 24: Enhanced Onboarding** - Timezone auto-detect, organization, role fields on Get Started page with backend validation (completed 2026-03-22)
 - [ ] **Phase 25: Pricing, Trial Banners & Timezone Display** - Pricing page, trial countdown/expired banners, plan-aware credit badge, timezone-aware timestamps
 
 ## Phase Details
@@ -129,7 +129,7 @@ Plans:
 
 Plans:
 - [x] 24-01-PLAN.md — OnboardingController validation expansion with tests for timezone, organization, role
-- [ ] 24-02-PLAN.md — SearchableDropdown, SimpleDropdown components, GetStartedPage form update, AuthContext timezone
+- [x] 24-02-PLAN.md — SearchableDropdown, SimpleDropdown components, GetStartedPage form update, AuthContext timezone
 
 ### Phase 25: Pricing, Trial Banners & Timezone Display
 **Goal**: Users can see plan options, understand their trial status, select a plan, and see all timestamps in their timezone
@@ -180,5 +180,5 @@ Phases execute in numeric order: 22 → 23 → 24 → 25
 | 21. Threat Search History | v2.2 | 1/1 | Complete | 2026-03-19 |
 | 22. Schema & Data Foundation | v3.0 | 2/2 | Complete | 2026-03-20 |
 | 23. CreditResolver & Plan-Aware Backend | v3.0 | 2/2 | Complete    | 2026-03-22 |
-| 24. Enhanced Onboarding | v3.0 | 1/2 | In Progress|  |
+| 24. Enhanced Onboarding | v3.0 | 2/2 | Complete   | 2026-03-22 |
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 0/3 | Not started | - |
