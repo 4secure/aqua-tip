@@ -2,19 +2,22 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Credit;
+use App\Services\CreditResolver;
 use Closure;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class DeductCredit
 {
+    public function __construct(private CreditResolver $creditResolver)
+    {
+    }
+
     public function handle(Request $request, Closure $next): Response
     {
-        $credit = $this->resolveCredit($request);
-        $this->lazyReset($credit);
+        $credit = $this->creditResolver->resolve($request);
+        $this->creditResolver->lazyReset($credit, $request->user());
 
         $affected = DB::table('credits')
             ->where('id', $credit->id)
@@ -39,54 +42,5 @@ class DeductCredit
         $request->attributes->set('credit', $credit);
 
         return $next($request);
-    }
-
-    private function resolveCredit(Request $request): Credit
-    {
-        $user = $request->user();
-
-        try {
-            if ($user !== null) {
-                return Credit::firstOrCreate(
-                    ['user_id' => $user->id],
-                    [
-                        'ip_address' => null,
-                        'remaining' => 10,
-                        'limit' => 10,
-                        'last_reset_at' => now('UTC')->startOfDay(),
-                    ]
-                );
-            }
-
-            return Credit::firstOrCreate(
-                ['ip_address' => $request->ip(), 'user_id' => null],
-                [
-                    'remaining' => 1,
-                    'limit' => 1,
-                    'last_reset_at' => now('UTC')->startOfDay(),
-                ]
-            );
-        } catch (QueryException) {
-            // Race condition on duplicate key -- re-fetch
-            if ($user !== null) {
-                return Credit::where('user_id', $user->id)->firstOrFail();
-            }
-
-            return Credit::where('ip_address', $request->ip())
-                ->whereNull('user_id')
-                ->firstOrFail();
-        }
-    }
-
-    private function lazyReset(Credit $credit): void
-    {
-        $todayStart = now('UTC')->startOfDay();
-
-        if ($credit->last_reset_at < $todayStart) {
-            $credit->update([
-                'remaining' => $credit->limit,
-                'last_reset_at' => $todayStart,
-            ]);
-        }
     }
 }
