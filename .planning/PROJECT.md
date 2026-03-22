@@ -92,10 +92,11 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 Shipped v2.2 with ~20,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
 21 phases (incl. 4.1), 40 plans completed across 5 milestones in 8 days.
-111+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history.
+140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
 Dashboard fully live with real OpenCTI stats, auth-gated credit/search widgets, and category filtering.
+Phase 23 complete — CreditResolver service, plan-aware credit limits, plan listing/selection APIs, expanded UserResource.
 
 ## Constraints
 
@@ -142,4 +143,4 @@ Dashboard fully live with real OpenCTI stats, auth-gated credit/search widgets, 
 | Silent history fetch fallback | History is non-critical UI — errors return null, no error card | ✓ Good |
 
 ---
-*Last updated: 2026-03-20 after v3.0 milestone start*
+*Last updated: 2026-03-22 after Phase 23 completion*
