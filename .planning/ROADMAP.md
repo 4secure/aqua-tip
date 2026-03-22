@@ -113,7 +113,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 23-01-PLAN.md — CreditResolver service extraction, pending plan migration, consumer rewiring
+- [x] 23-01-PLAN.md — CreditResolver service extraction, pending plan migration, consumer rewiring
 - [ ] 23-02-PLAN.md — Plan listing/selection APIs, UserResource expansion with plan/trial fields
 
 ### Phase 24: Enhanced Onboarding
@@ -179,6 +179,6 @@ Phases execute in numeric order: 22 → 23 → 24 → 25
 | 20. Dashboard Page Rewrite | v2.2 | 2/2 | Complete | 2026-03-19 |
 | 21. Threat Search History | v2.2 | 1/1 | Complete | 2026-03-19 |
 | 22. Schema & Data Foundation | v3.0 | 2/2 | Complete | 2026-03-20 |
-| 23. CreditResolver & Plan-Aware Backend | v3.0 | 0/2 | Not started | - |
+| 23. CreditResolver & Plan-Aware Backend | v3.0 | 1/2 | In Progress|  |
 | 24. Enhanced Onboarding | v3.0 | 0/2 | Not started | - |
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 0/3 | Not started | - |

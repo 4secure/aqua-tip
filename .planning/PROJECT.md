@@ -64,7 +64,16 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ### Active
 
-(No active requirements — next milestone not yet defined)
+**Current Milestone: v3.0 Onboarding, Trial & Subscription Plans**
+
+**Goal:** Expand onboarding with profile fields, enforce the 30-day trial with credit tiers, and build a subscription plan system with pricing page.
+
+**Target features:**
+- Enhanced onboarding (timezone, organization, role fields)
+- Trial enforcement (30-day trial → Free tier on expiry)
+- Subscription plan tiers (Free/Basic/Pro/Enterprise with escalating credits)
+- Pricing page with plan selection (no real payment processing yet)
+- Timezone-aware time display across the platform
 
 ### Out of Scope
 
@@ -133,4 +142,4 @@ Dashboard fully live with real OpenCTI stats, auth-gated credit/search widgets, 
 | Silent history fetch fallback | History is non-critical UI — errors return null, no error card | ✓ Good |
 
 ---
-*Last updated: 2026-03-20 after v2.2 milestone*
+*Last updated: 2026-03-20 after v3.0 milestone start*
