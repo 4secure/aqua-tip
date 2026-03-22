@@ -128,7 +128,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 24-01-PLAN.md — OnboardingController validation expansion with tests for timezone, organization, role
+- [x] 24-01-PLAN.md — OnboardingController validation expansion with tests for timezone, organization, role
 - [ ] 24-02-PLAN.md — SearchableDropdown, SimpleDropdown components, GetStartedPage form update, AuthContext timezone
 
 ### Phase 25: Pricing, Trial Banners & Timezone Display
@@ -180,5 +180,5 @@ Phases execute in numeric order: 22 → 23 → 24 → 25
 | 21. Threat Search History | v2.2 | 1/1 | Complete | 2026-03-19 |
 | 22. Schema & Data Foundation | v3.0 | 2/2 | Complete | 2026-03-20 |
 | 23. CreditResolver & Plan-Aware Backend | v3.0 | 2/2 | Complete    | 2026-03-22 |
-| 24. Enhanced Onboarding | v3.0 | 0/2 | Not started | - |
+| 24. Enhanced Onboarding | v3.0 | 1/2 | In Progress|  |
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 0/3 | Not started | - |

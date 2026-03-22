@@ -12,7 +12,7 @@ Requirements for Onboarding, Trial & Subscription Plans milestone. Each maps to 
 - [ ] **ONBD-01**: User sees timezone field on Get Started page, auto-detected from browser, editable via dropdown
 - [ ] **ONBD-02**: User can optionally enter their organization name during onboarding
 - [ ] **ONBD-03**: User can optionally select their role from a dropdown (Security Analyst, SOC Analyst, Threat Hunter, Incident Responder, CISO/Manager, Researcher, Student, Other)
-- [ ] **ONBD-04**: Backend validates and stores timezone, organization, and role fields on onboarding submission
+- [x] **ONBD-04**: Backend validates and stores timezone, organization, and role fields on onboarding submission
 - [x] **ONBD-05**: UserResource returns timezone, organization, and role fields
 - [x] **ONBD-06**: Onboarding completion check uses `onboarding_completed_at` timestamp instead of fragile name/phone heuristic
 
@@ -92,7 +92,7 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | ONBD-01 | Phase 24 | Pending |
 | ONBD-02 | Phase 24 | Pending |
 | ONBD-03 | Phase 24 | Pending |
-| ONBD-04 | Phase 24 | Pending |
+| ONBD-04 | Phase 24 | Complete |
 | ONBD-05 | Phase 23 | Complete |
 | ONBD-06 | Phase 22 | Complete |
 | TRIAL-01 | Phase 23 | Pending |

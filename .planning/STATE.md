@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Onboarding, Trial & Subscription Plans
 status: unknown
-stopped_at: Completed 23-02-PLAN.md
-last_updated: "2026-03-22T13:13:43.519Z"
+stopped_at: Completed 24-01-PLAN.md
+last_updated: "2026-03-22T22:51:15.493Z"
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform.
-**Current focus:** Phase 23 — creditresolver-plan-aware-backend
+**Current focus:** Phase 24 — enhanced-onboarding
 
 ## Current Position
 
-Phase: 24
-Plan: Not started
+Phase: 24 (enhanced-onboarding) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -44,6 +44,7 @@ Plan: Not started
 | v2.2 Live Dashboard & Search History | 4 | 6 | 2 days |
 | Phase 22 P02 | 3min | 2 tasks | 3 files |
 | Phase 23 P02 | 11min | 2 tasks | 8 files |
+| Phase 24-01 P01 | 7min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,7 @@ Decisions logged in PROJECT.md Key Decisions table. Recent for v3.0:
 - [Phase 22]: One-way data migration with no-op down() for trial reset (values unrecoverable)
 - [Phase 23]: Enterprise plan excluded via validation rule (in:free,basic,pro) for simplicity
 - [Phase 23]: Credit boost on upgrade capped with min(remaining+diff, newLimit)
+- [Phase 24-01]: Used Laravel built-in timezone:all validation rule for IANA timezone validation
 
 ### Pending Todos
 
@@ -74,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T13:08:29.957Z
-Stopped at: Completed 23-02-PLAN.md
+Last session: 2026-03-22T22:51:15.486Z
+Stopped at: Completed 24-01-PLAN.md
 Resume file: None
