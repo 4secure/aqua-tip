@@ -125,11 +125,11 @@ Plans:
   2. Submitting the onboarding form stores timezone, organization, and role in the database
   3. AuthContext exposes the user's stored timezone for frontend consumption
   4. Existing onboarded users are not forced back to the onboarding flow (new fields are optional)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 24-01: TBD
-- [ ] 24-02: TBD
+- [ ] 24-01-PLAN.md — OnboardingController validation expansion with tests for timezone, organization, role
+- [ ] 24-02-PLAN.md — SearchableDropdown, SimpleDropdown components, GetStartedPage form update, AuthContext timezone
 
 ### Phase 25: Pricing, Trial Banners & Timezone Display
 **Goal**: Users can see plan options, understand their trial status, select a plan, and see all timestamps in their timezone
