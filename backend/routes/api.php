@@ -24,6 +24,8 @@ use App\Http\Controllers\ThreatNews\LabelsController as ThreatNewsLabelsControll
 use App\Http\Controllers\Dashboard\CountsController as DashboardCountsController;
 use App\Http\Controllers\Dashboard\IndicatorsController as DashboardIndicatorsController;
 use App\Http\Controllers\Dashboard\CategoriesController as DashboardCategoriesController;
+use App\Http\Controllers\Plan\PlanIndexController;
+use App\Http\Controllers\Plan\PlanSelectionController;
 use App\Http\Controllers\SearchHistory\IndexController as SearchHistoryIndexController;
 use Illuminate\Support\Facades\Route;
 
@@ -67,7 +69,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Search history (authenticated, no credit gating)
     Route::get('/search-history', SearchHistoryIndexController::class);
+
+    // Plan selection (authenticated)
+    Route::post('/plan', PlanSelectionController::class);
 });
+
+// Plan listing (public, no auth required)
+Route::get('/plans', PlanIndexController::class);
 
 // IP search (guests + authenticated users, credit-gated)
 Route::post('/ip-search', SearchController::class)->middleware('deduct-credit');
