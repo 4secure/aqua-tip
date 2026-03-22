@@ -43,7 +43,7 @@ export async function resetPassword({ token, email, password, password_confirmat
   return apiClient.post('/api/reset-password', { token, email, password, password_confirmation });
 }
 
-export async function completeOnboarding({ name, phone }) {
+export async function completeOnboarding({ name, phone, timezone, organization, role }) {
   await csrfCookie();
-  return apiClient.post('/api/onboarding', { name, phone });
+  return apiClient.post('/api/onboarding', { name, phone, timezone, organization, role });
 }

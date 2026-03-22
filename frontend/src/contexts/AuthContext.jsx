@@ -60,6 +60,7 @@ export function AuthProvider({ children }) {
     emailVerified: user?.email_verified ?? false,
     onboardingCompleted: user?.onboarding_completed ?? false,
     userInitials: getInitials(user?.name),
+    timezone: user?.timezone ?? 'UTC',
     login,
     register,
     logout,

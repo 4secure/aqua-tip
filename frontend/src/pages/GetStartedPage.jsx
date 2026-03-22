@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { User, Building2 } from 'lucide-react';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { GradientButton } from '../components/ui/GradientButton';
 import ParticleBackground from '../components/ui/ParticleBackground';
+import SearchableDropdown from '../components/ui/SearchableDropdown';
+import SimpleDropdown from '../components/ui/SimpleDropdown';
 import { useAuth } from '../contexts/AuthContext';
 import { completeOnboarding } from '../api/auth';
 
@@ -17,15 +19,63 @@ function getDefaultName(user) {
   return user.name;
 }
 
+function detectTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
+
+function getUtcOffset(timeZone) {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      timeZoneName: 'shortOffset',
+    });
+    const parts = formatter.formatToParts(new Date());
+    const offsetPart = parts.find((p) => p.type === 'timeZoneName');
+    return offsetPart?.value || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
+
+const ROLE_OPTIONS = [
+  'Security Analyst',
+  'SOC Analyst',
+  'Threat Hunter',
+  'Incident Responder',
+  'CISO/Manager',
+  'Researcher',
+  'Student',
+  'Other',
+];
+
 export default function GetStartedPage() {
   const navigate = useNavigate();
   const { user, isAuthenticated, emailVerified, onboardingCompleted, refreshUser } = useAuth();
 
   const [name, setName] = useState(getDefaultName(user));
   const [phone, setPhone] = useState('');
+  const [organization, setOrganization] = useState('');
+  const [role, setRole] = useState('');
+  const [customRole, setCustomRole] = useState('');
+  const [timezone, setTimezone] = useState(detectTimezone);
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const timezoneOptions = useMemo(() => {
+    try {
+      return Intl.supportedValuesOf('timeZone').map((tz) => ({
+        value: tz,
+        label: `${tz} (${getUtcOffset(tz)})`,
+      }));
+    } catch {
+      return [{ value: 'UTC', label: 'UTC (UTC)' }];
+    }
+  }, []);
 
   // Auth guards
   if (!isAuthenticated) {
@@ -45,7 +95,14 @@ export default function GetStartedPage() {
     setSubmitting(true);
 
     try {
-      await completeOnboarding({ name: name.trim(), phone: phone || null });
+      const finalRole = role === 'Other' ? (customRole.trim() || null) : (role || null);
+      await completeOnboarding({
+        name: name.trim(),
+        phone: phone || null,
+        timezone,
+        organization: organization.trim() || null,
+        role: finalRole,
+      });
       await refreshUser();
       navigate('/dashboard', { replace: true });
     } catch (err) {
@@ -120,7 +177,7 @@ export default function GetStartedPage() {
             </Link>
             <h1 className="font-display text-2xl font-bold text-text-primary">Complete your profile</h1>
             <p className="font-mono text-sm text-text-secondary mt-1">
-              Just a few more details to get started
+              Tell us about yourself and your work
             </p>
           </div>
 
@@ -171,6 +228,69 @@ export default function GetStartedPage() {
               />
               {errors.phone && (
                 <p className="mt-1 text-xs text-red font-mono">{errors.phone[0]}</p>
+              )}
+            </div>
+
+            {/* Organization */}
+            <div>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">Organization</label>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <input
+                  type="text"
+                  value={organization}
+                  onChange={(e) => {
+                    setOrganization(e.target.value);
+                    setErrors((prev) => ({ ...prev, organization: undefined }));
+                  }}
+                  className="input-field pl-10"
+                  placeholder="Your company or team"
+                />
+              </div>
+              {errors.organization && (
+                <p className="mt-1 text-xs text-red font-mono">{errors.organization[0]}</p>
+              )}
+            </div>
+
+            {/* Role */}
+            <div>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">Role</label>
+              <SimpleDropdown
+                options={ROLE_OPTIONS}
+                value={role}
+                onChange={(val) => {
+                  setRole(val);
+                  if (val !== 'Other') setCustomRole('');
+                  setErrors((prev) => ({ ...prev, role: undefined }));
+                }}
+                placeholder="Select your role"
+                error={errors.role?.[0]}
+                otherValue={customRole}
+                onOtherChange={(val) => {
+                  setCustomRole(val);
+                  setErrors((prev) => ({ ...prev, role: undefined }));
+                }}
+              />
+              {errors.role && (
+                <p className="mt-1 text-xs text-red font-mono">{errors.role[0]}</p>
+              )}
+            </div>
+
+            {/* Timezone */}
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Timezone</label>
+              <SearchableDropdown
+                options={timezoneOptions}
+                value={timezone}
+                onChange={(val) => {
+                  setTimezone(val);
+                  setErrors((prev) => ({ ...prev, timezone: undefined }));
+                }}
+                placeholder="Search timezone..."
+                error={errors.timezone?.[0]}
+              />
+              {errors.timezone && (
+                <p className="mt-1 text-xs text-red font-mono">{errors.timezone[0]}</p>
               )}
             </div>
 
