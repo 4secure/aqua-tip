@@ -62,6 +62,11 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Recent searches displayed on Threat Search page with click-to-prefill — v2.2
 - ✓ All mock data removed from dashboard — v2.2
 
+- ✓ Enhanced onboarding with timezone (required IANA), organization, role fields — v3.0 Phase 24
+- ✓ Custom PhoneNumberInput with SVG flag-icons and country auto-detection — v3.0 Phase 24
+- ✓ SearchableDropdown and SimpleDropdown reusable components — v3.0 Phase 24
+- ✓ AuthContext exposes user timezone — v3.0 Phase 24
+
 ### Active
 
 **Current Milestone: v3.0 Onboarding, Trial & Subscription Plans**
@@ -97,6 +102,7 @@ Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
 Dashboard fully live with real OpenCTI stats, auth-gated credit/search widgets, and category filtering.
 Phase 23 complete — CreditResolver service, plan-aware credit limits, plan listing/selection APIs, expanded UserResource.
+Phase 24 complete — Enhanced onboarding with timezone auto-detect, custom phone input with SVG flags, organization/role fields, AuthContext timezone exposure.
 
 ## Constraints
 
@@ -143,4 +149,4 @@ Phase 23 complete — CreditResolver service, plan-aware credit limits, plan lis
 | Silent history fetch fallback | History is non-critical UI — errors return null, no error card | ✓ Good |
 
 ---
-*Last updated: 2026-03-22 after Phase 23 completion*
+*Last updated: 2026-03-23 after Phase 24 completion*
