@@ -1,12 +1,11 @@
 import { useState, useMemo } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { User, Building2 } from 'lucide-react';
-import PhoneInput from 'react-phone-number-input';
-import 'react-phone-number-input/style.css';
 import { GradientButton } from '../components/ui/GradientButton';
 import ParticleBackground from '../components/ui/ParticleBackground';
 import SearchableDropdown from '../components/ui/SearchableDropdown';
 import SimpleDropdown from '../components/ui/SimpleDropdown';
+import PhoneNumberInput from '../components/ui/PhoneNumberInput';
 import { useAuth } from '../contexts/AuthContext';
 import { completeOnboarding } from '../api/auth';
 
@@ -128,43 +127,6 @@ export default function GetStartedPage() {
     >
       <ParticleBackground />
 
-      {/* Phone input dark theme overrides */}
-      <style>{`
-        .PhoneInput {
-          --PhoneInputCountryFlag-height: 1em;
-          --PhoneInput-color--focus: #7A44E4;
-        }
-        .PhoneInputInput {
-          background: #161822 !important;
-          border: 1px solid #1E2030 !important;
-          border-radius: 0.5rem !important;
-          color: #E2E8F0 !important;
-          padding: 0.625rem 0.75rem !important;
-          font-family: 'JetBrains Mono', monospace !important;
-          font-size: 0.875rem !important;
-          outline: none !important;
-          transition: border-color 0.2s !important;
-        }
-        .PhoneInputInput:focus {
-          border-color: #7A44E4 !important;
-        }
-        .PhoneInputCountry {
-          background: #161822 !important;
-          border: 1px solid #1E2030 !important;
-          border-radius: 0.5rem !important;
-          padding: 0 0.5rem !important;
-          margin-right: 0.5rem !important;
-        }
-        .PhoneInputCountrySelect {
-          background: #0F1117 !important;
-          color: #E2E8F0 !important;
-        }
-        .PhoneInputCountrySelectArrow {
-          border-color: #E2E8F0 !important;
-          opacity: 0.5 !important;
-        }
-      `}</style>
-
       <div className="w-full max-w-md relative z-10">
         <div className="bg-surface border border-border rounded-xl p-8">
           {/* Header */}
@@ -216,15 +178,14 @@ export default function GetStartedPage() {
               <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Phone Number
               </label>
-              <PhoneInput
-                defaultCountry="US"
-                value={phone || undefined}
+              <PhoneNumberInput
+                defaultCountry="PH"
+                value={phone}
                 onChange={(val) => {
                   setPhone(val || '');
                   setErrors((prev) => ({ ...prev, phone: undefined }));
                 }}
-                international
-                countryCallingCodeEditable={false}
+                error={errors.phone?.[0]}
               />
               {errors.phone && (
                 <p className="mt-1 text-xs text-red font-mono">{errors.phone[0]}</p>

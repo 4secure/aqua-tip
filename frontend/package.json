@@ -13,6 +13,7 @@
     "autoprefixer": "^10.4.27",
     "chart.js": "^4.5.1",
     "d3": "^7.9.0",
+    "flag-icons": "^7.5.0",
     "framer-motion": "^12.35.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.577.0",

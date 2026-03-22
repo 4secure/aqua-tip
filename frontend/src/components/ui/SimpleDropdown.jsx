@@ -11,7 +11,9 @@ export default function SimpleDropdown({
   onOtherChange,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -23,12 +25,22 @@ export default function SimpleDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  function handleToggle() {
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setOpenUpward(spaceBelow < 260);
+    }
+    setIsOpen((prev) => !prev);
+  }
+
   return (
     <div ref={containerRef} className="relative">
       <button
+        ref={buttonRef}
         type="button"
         className="input-field text-left flex items-center justify-between w-full"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={handleToggle}
       >
         <span className={value ? 'text-text-primary' : 'text-text-muted'}>
           {value || placeholder}
@@ -39,7 +51,11 @@ export default function SimpleDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-surface-2 border border-border rounded-lg shadow-lg">
+        <div
+          className={`absolute z-50 w-full max-h-60 overflow-y-auto bg-surface-2 border border-border rounded-lg shadow-lg ${
+            openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+          }`}
+        >
           {options.map((opt) => (
             <button
               key={opt}
