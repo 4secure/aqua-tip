@@ -148,6 +148,16 @@ Plans:
 - [x] 25-02-PLAN.md — useFormatDate hook, trial countdown/expiry banners, CreditBadge extension with plan name, sidebar and AppLayout wiring
 - [x] 25-03-PLAN.md — Replace 5 duplicated formatDate functions with useFormatDate hook, plan-aware credit exhaustion messages
 
+### Phase 26: Remove raw tab from threat search frontend
+
+**Goal:** Remove the Raw JSON debug tab from the Threat Search results page, cleaning up dead UI code
+**Requirements**: CLEANUP-01
+**Depends on:** Phase 25
+**Plans:** 1 plan
+
+Plans:
+- [ ] 26-01-PLAN.md — Remove RawTab component, tab entry, rendering conditional, and unused Code icon import
+
 ## Progress
 
 **Execution Order:**

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   LogIn, Clock, Shield, ShieldCheck, AlertTriangle,
-  Network, FileText, Eye, StickyNote, Code, ExternalLink, Globe,
+  Network, FileText, Eye, StickyNote, ExternalLink, Globe,
 } from 'lucide-react';
 import { CreditBadge } from '../components/shared/CreditBadge';
 import { searchThreat, fetchCredits } from '../api/threat-search';
@@ -401,16 +401,6 @@ function NotesTab({ notes }) {
   );
 }
 
-function RawTab({ result }) {
-  return (
-    <div className="glass-card p-5">
-      <pre className="bg-primary rounded-lg p-4 text-xs font-mono text-text-secondary overflow-auto max-h-[500px] border border-border">
-        {JSON.stringify(result.raw || result, null, 2)}
-      </pre>
-    </div>
-  );
-}
-
 /* ── Recent Search History Section ── */
 
 function RecentSearchesSection({ isAuthenticated, history, historyLoading, historyError, onSelect }) {
@@ -551,7 +541,6 @@ export default function ThreatSearchPage() {
     if (result.notes?.length > 0) {
       t.push({ key: 'notes', label: 'Notes', icon: StickyNote });
     }
-    t.push({ key: 'raw', label: 'Raw', icon: Code });
     return t;
   }, [result]);
 
@@ -843,7 +832,6 @@ export default function ThreatSearchPage() {
             <NotesTab notes={result.notes} />
           )}
 
-          {activeTab === 'raw' && <RawTab result={result} />}
         </>
       )}
 

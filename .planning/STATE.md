@@ -81,6 +81,12 @@ None.
 - Pricing amounts (dollar values) TBD -- does not block implementation but must be decided before production
 - Trial credit level (10/day vs 50/day reverse trial) -- product decision needed
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260324-plb | Refactor sidebar to group pages by categories | 2026-03-24 | 8e14bec | [260324-plb-refactor-sidebar-to-group-pages-by-categ](./quick/260324-plb-refactor-sidebar-to-group-pages-by-categ/) |
+
 ## Session Continuity
 
 Last session: 2026-03-24T13:29:59Z
