@@ -148,6 +148,7 @@ export const NAV_ITEMS = Object.freeze([
   { label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false },
   { label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false },
   { label: 'Threat News', icon: 'rss', href: '/threat-news', public: false },
+  { label: 'Pricing', icon: 'pricing', href: '/pricing', public: true },
 ]);
 
 export const IP_RELATIONS = Object.freeze([
