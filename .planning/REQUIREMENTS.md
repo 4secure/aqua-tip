@@ -44,7 +44,7 @@ Requirements for Onboarding, Trial & Subscription Plans milestone. Each maps to 
 - [x] **PRICE-04**: Enterprise plan shows "Contact Us" CTA instead of selection button
 - [x] **PRICE-05**: User's current plan is indicated on the pricing page
 - [x] **PRICE-06**: CreditBadge shows plan name alongside remaining/limit (e.g., "Pro: 42/50")
-- [ ] **PRICE-07**: Credit exhaustion message is plan-aware with upgrade suggestion to next tier
+- [x] **PRICE-07**: Credit exhaustion message is plan-aware with upgrade suggestion to next tier
 - [x] **PRICE-08**: Pricing page is accessible from sidebar navigation
 
 ### Timezone Display
@@ -115,7 +115,7 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | PRICE-04 | Phase 25 | Complete |
 | PRICE-05 | Phase 25 | Complete |
 | PRICE-06 | Phase 25 | Complete |
-| PRICE-07 | Phase 25 | Pending |
+| PRICE-07 | Phase 25 | Complete |
 | PRICE-08 | Phase 25 | Complete |
 | TZ-01 | Phase 25 | Complete |
 | TZ-02 | Phase 24 | Pending |
