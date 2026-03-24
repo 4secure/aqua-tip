@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Icon } from '../data/icons';
 import { useChartJs } from '../hooks/useChartJs';
 import { useLeaflet } from '../hooks/useLeaflet';
+import { useFormatDate } from '../hooks/useFormatDate';
 import { CreditBadge } from '../components/shared/CreditBadge';
 
 const STAT_CARD_CONFIG = [
@@ -49,12 +50,6 @@ function formatRelativeTime(dateStr) {
   if (diffHr < 24) return `${diffHr}h ago`;
   const diffDay = Math.floor(diffHr / 24);
   return `${diffDay}d ago`;
-}
-
-function formatResetDate(dateStr) {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 /* ---------- Sub-components ---------- */
@@ -195,6 +190,7 @@ function IndicatorsTable({ indicators, activeFilter, onClearFilter }) {
 }
 
 function CreditWidget({ credits, loading, error }) {
+  const { formatDateTime } = useFormatDate();
   if (loading) {
     return (
       <div className="glass-card p-5">
@@ -242,7 +238,7 @@ function CreditWidget({ credits, loading, error }) {
       </div>
       {credits.resets_at && (
         <div className="text-[10px] text-text-muted mt-2">
-          Resets: {formatResetDate(credits.resets_at)}
+          Resets: {formatDateTime(credits.resets_at)}
         </div>
       )}
     </div>

@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
+import { useFormatDate } from '../hooks/useFormatDate';
 
 const CATEGORY_COLORS = [
   { bg: 'bg-violet/20', text: 'text-violet' },
@@ -28,19 +29,6 @@ function categoryColor(labelValue) {
     hash |= 0;
   }
   return CATEGORY_COLORS[Math.abs(hash) % CATEGORY_COLORS.length];
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  try {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
 }
 
 const PAGE_SIZE = 20;
@@ -341,6 +329,7 @@ export default function ThreatNewsPage() {
 /* -- Report Row -- */
 
 function ReportRow({ report, onClick, onCategoryClick }) {
+  const { formatDate } = useFormatDate();
   const labels = report.labels || [];
   const visibleLabels = labels.slice(0, MAX_VISIBLE_CATEGORIES);
   const overflowCount = labels.length - MAX_VISIBLE_CATEGORIES;
@@ -389,6 +378,7 @@ function ReportRow({ report, onClick, onCategoryClick }) {
 /* -- Report Modal -- */
 
 function ReportModal({ report, onClose, onCategoryClick }) {
+  const { formatDate } = useFormatDate();
   const labels = report.labels || [];
 
   useEffect(() => {

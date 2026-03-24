@@ -3,20 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchThreatActors } from '../api/threat-actors';
+import { useFormatDate } from '../hooks/useFormatDate';
 import SkeletonCard from '../components/shared/SkeletonCard';
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  try {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
-}
 
 const PAGE_SIZE = 24;
 
@@ -242,6 +230,7 @@ export default function ThreatActorsPage() {
 /* ── Threat Actor Card ── */
 
 function ThreatActorCard({ actor, onClick }) {
+  const { formatDate } = useFormatDate();
   return (
     <div
       onClick={onClick}
@@ -329,6 +318,7 @@ function ThreatActorCard({ actor, onClick }) {
 /* ── Threat Actor Modal ── */
 
 function ThreatActorModal({ actor, onClose }) {
+  const { formatDate } = useFormatDate();
   const isMitre = (ref) =>
     ref.source_name?.toLowerCase().includes('mitre') ||
     ref.url?.includes('attack.mitre.org');

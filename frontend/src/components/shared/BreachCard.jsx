@@ -1,18 +1,6 @@
 import { useState } from 'react';
 import { Mail, KeyRound, Database, Calendar, ChevronDown, ChevronUp, Globe } from 'lucide-react';
-
-function formatDate(dateStr) {
-  if (!dateStr) return 'Unknown';
-  try {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
-}
+import { useFormatDate } from '../../hooks/useFormatDate';
 
 function FieldRow({ icon: IconComponent, label, value }) {
   if (!value) return null;
@@ -26,6 +14,7 @@ function FieldRow({ icon: IconComponent, label, value }) {
 }
 
 export function BreachCard({ breach }) {
+  const { formatDate } = useFormatDate();
   const [expanded, setExpanded] = useState(false);
 
   const extraFields = [
