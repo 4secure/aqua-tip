@@ -141,12 +141,12 @@ Plans:
   3. Trial users see a countdown banner showing days remaining; expired-trial users see an upgrade prompt banner
   4. CreditBadge in the sidebar shows plan name alongside remaining/limit (e.g., "Pro: 42/50")
   5. All timestamps across the app render in the authenticated user's stored timezone; unauthenticated users see UTC
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 25-01: TBD
-- [ ] 25-02: TBD
-- [ ] 25-03: TBD
+- [ ] 25-01-PLAN.md — Pricing page with 4-card layout, plan selection with confirmation modal, route and sidebar nav entry
+- [ ] 25-02-PLAN.md — useFormatDate hook, trial countdown/expiry banners, CreditBadge extension with plan name, sidebar and AppLayout wiring
+- [ ] 25-03-PLAN.md — Replace 5 duplicated formatDate functions with useFormatDate hook, plan-aware credit exhaustion messages
 
 ## Progress
 

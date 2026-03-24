@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Onboarding, Trial & Subscription Plans
 status: unknown
-stopped_at: Completed 24-01-PLAN.md
-last_updated: "2026-03-22T23:25:49.548Z"
+stopped_at: Phase 25 context gathered
+last_updated: "2026-03-24T11:25:05.355Z"
 progress:
   total_phases: 4
   completed_phases: 3
@@ -76,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T22:51:15.486Z
-Stopped at: Completed 24-01-PLAN.md
-Resume file: None
+Last session: 2026-03-24T11:25:05.347Z
+Stopped at: Phase 25 context gathered
+Resume file: .planning/phases/25-pricing-trial-banners-timezone-display/25-CONTEXT.md
