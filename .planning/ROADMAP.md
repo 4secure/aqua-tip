@@ -153,10 +153,10 @@ Plans:
 **Goal:** Remove the Raw JSON debug tab from the Threat Search results page, cleaning up dead UI code
 **Requirements**: CLEANUP-01
 **Depends on:** Phase 25
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 26-01-PLAN.md — Remove RawTab component, tab entry, rendering conditional, and unused Code icon import
+- [x] 26-01-PLAN.md — Remove RawTab component, tab entry, rendering conditional, and unused Code icon import
 
 ## Progress
 

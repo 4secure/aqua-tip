@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Onboarding, Trial & Subscription Plans
 status: unknown
-stopped_at: Completed 25-03-PLAN.md
-last_updated: "2026-03-24T12:06:02.363Z"
+stopped_at: Completed 26-01-PLAN.md
+last_updated: "2026-03-24T15:32:10.584Z"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 5
+  completed_phases: 5
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform.
-**Current focus:** Phase 25 — pricing-trial-banners-timezone-display
+**Current focus:** Phase 26 — remove-raw-tab-from-threat-search-frontend
 
 ## Current Position
 
-Phase: 25
-Plan: Not started
+Phase: 26 (remove-raw-tab-from-threat-search-frontend) — EXECUTING
+Plan: 1 of 1
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Plan: Not started
 | Phase 25 P02 | 2min | 2 tasks | 5 files |
 | Phase 25 P01 | 2min | 2 tasks | 6 files |
 | Phase 25 P03 | 4min | 2 tasks | 5 files |
+| Phase 26 P01 | 1min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,11 @@ Decisions logged in PROJECT.md Key Decisions table. Recent for v3.0:
 - [Phase 25]: sessionStorage for banner dismiss (resets per browser session)
 - [Phase 25]: Pricing page as public route (accessible without auth)
 - [Phase 25]: Each sub-component calls useFormatDate() independently (hook per component, not prop drilling)
+- [Phase 26]: No decisions needed - straightforward dead code removal
+
+### Roadmap Evolution
+
+- Phase 26 added: Remove raw tab from threat search frontend
 
 ### Pending Todos
 
@@ -89,6 +95,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-24T13:29:59Z
-Stopped at: Completed quick task 260324-plb (sidebar category grouping)
+Last session: 2026-03-24T15:32:10.579Z
+Stopped at: Completed 26-01-PLAN.md
 Resume file: None
