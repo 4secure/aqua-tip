@@ -22,8 +22,8 @@ Requirements for Onboarding, Trial & Subscription Plans milestone. Each maps to 
 - [ ] **TRIAL-02**: When trial expires and user has no plan, credit limit drops to Free tier (3/day)
 - [ ] **TRIAL-03**: Trial expiry check happens during lazy credit reset (no separate scheduled task)
 - [x] **TRIAL-04**: Existing users receive a fresh 30-day trial via data migration on v3.0 deploy
-- [ ] **TRIAL-05**: User sees a trial countdown banner showing days remaining
-- [ ] **TRIAL-06**: User sees a "Trial expired -- upgrade" banner when trial ends without a plan
+- [x] **TRIAL-05**: User sees a trial countdown banner showing days remaining
+- [x] **TRIAL-06**: User sees a "Trial expired -- upgrade" banner when trial ends without a plan
 
 ### Subscription Plans
 
@@ -43,15 +43,15 @@ Requirements for Onboarding, Trial & Subscription Plans milestone. Each maps to 
 - [ ] **PRICE-03**: Pro plan is highlighted as "Most Popular"
 - [ ] **PRICE-04**: Enterprise plan shows "Contact Us" CTA instead of selection button
 - [ ] **PRICE-05**: User's current plan is indicated on the pricing page
-- [ ] **PRICE-06**: CreditBadge shows plan name alongside remaining/limit (e.g., "Pro: 42/50")
+- [x] **PRICE-06**: CreditBadge shows plan name alongside remaining/limit (e.g., "Pro: 42/50")
 - [ ] **PRICE-07**: Credit exhaustion message is plan-aware with upgrade suggestion to next tier
 - [ ] **PRICE-08**: Pricing page is accessible from sidebar navigation
 
 ### Timezone Display
 
-- [ ] **TZ-01**: All timestamps across the app render in the user's stored timezone
+- [x] **TZ-01**: All timestamps across the app render in the user's stored timezone
 - [ ] **TZ-02**: AuthContext exposes user timezone for frontend consumption
-- [ ] **TZ-03**: Unauthenticated users see UTC timestamps (default behavior)
+- [x] **TZ-03**: Unauthenticated users see UTC timestamps (default behavior)
 
 ## Future Requirements
 
@@ -99,8 +99,8 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | TRIAL-02 | Phase 23 | Pending |
 | TRIAL-03 | Phase 23 | Pending |
 | TRIAL-04 | Phase 22 | Complete |
-| TRIAL-05 | Phase 25 | Pending |
-| TRIAL-06 | Phase 25 | Pending |
+| TRIAL-05 | Phase 25 | Complete |
+| TRIAL-06 | Phase 25 | Complete |
 | PLAN-01 | Phase 22 | Complete |
 | PLAN-02 | Phase 22 | Complete |
 | PLAN-03 | Phase 23 | Pending |
@@ -114,12 +114,12 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | PRICE-03 | Phase 25 | Pending |
 | PRICE-04 | Phase 25 | Pending |
 | PRICE-05 | Phase 25 | Pending |
-| PRICE-06 | Phase 25 | Pending |
+| PRICE-06 | Phase 25 | Complete |
 | PRICE-07 | Phase 25 | Pending |
 | PRICE-08 | Phase 25 | Pending |
-| TZ-01 | Phase 25 | Pending |
+| TZ-01 | Phase 25 | Complete |
 | TZ-02 | Phase 24 | Pending |
-| TZ-03 | Phase 25 | Pending |
+| TZ-03 | Phase 25 | Complete |
 
 **Coverage:**
 - v3.0 requirements: 31 total
