@@ -1,16 +1,24 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Lock, Settings, LogOut, ChevronDown, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { NAV_ITEMS } from '../../data/mock-data';
 import { Icon } from '../../data/icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiClient } from '../../api/client';
+import { CreditBadge } from '../shared/CreditBadge';
 
 export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }) {
   const [hovered, setHovered] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [credits, setCredits] = useState(null);
   const { isAuthenticated, user, userInitials, logout } = useAuth();
   const navigate = useNavigate();
   const hoverTimerRef = useRef(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    apiClient.get('/api/credits').then(setCredits).catch(() => {});
+  }, [isAuthenticated]);
 
   const handleMouseEnter = useCallback(() => {
     if (!collapsed) return;
@@ -183,6 +191,18 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
             </div>
           )}
         </nav>
+
+        {/* Credit badge - authenticated only */}
+        {isAuthenticated && credits && (
+          <div className="px-3 py-2 border-t border-border/50">
+            <CreditBadge
+              remaining={credits.remaining}
+              limit={credits.limit}
+              planName={user?.plan?.name ?? (user?.trial_active ? 'Trial' : 'Free')}
+              compact={collapsed && !hovered}
+            />
+          </div>
+        )}
 
         {/* Collapse toggle - desktop only */}
         <div className="p-3 border-t border-border/50 max-lg:hidden">
