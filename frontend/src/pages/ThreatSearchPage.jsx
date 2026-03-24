@@ -7,6 +7,7 @@ import {
 import { CreditBadge } from '../components/shared/CreditBadge';
 import { searchThreat, fetchCredits } from '../api/threat-search';
 import { useAuth } from '../contexts/AuthContext';
+import { useFormatDate } from '../hooks/useFormatDate';
 import { apiClient } from '../api/client';
 
 /* ── Entity type → color mapping for D3 graph ── */
@@ -165,17 +166,6 @@ function scoreRingColor(score) {
   return '#00C48C';
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '--';
-  try {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
 function countryFlag(code) {
   if (!code || code.length !== 2) return '';
   const codePoints = [...code.toUpperCase()].map(c => 0x1F1E6 - 65 + c.charCodeAt(0));
@@ -293,6 +283,7 @@ function ExternalRefsTab({ refs }) {
 }
 
 function IndicatorsTab({ indicators }) {
+  const { formatDate } = useFormatDate();
   return (
     <div className="space-y-3">
       {indicators.map((ind, i) => (
@@ -349,6 +340,7 @@ function IndicatorsTab({ indicators }) {
 }
 
 function SightingsTab({ sightings }) {
+  const { formatDate } = useFormatDate();
   return (
     <div className="space-y-3">
       {sightings.map((s, i) => (
@@ -372,6 +364,7 @@ function SightingsTab({ sightings }) {
 }
 
 function NotesTab({ notes }) {
+  const { formatDate } = useFormatDate();
   return (
     <div className="space-y-3">
       {notes.map((note, i) => (
@@ -511,7 +504,8 @@ export default function ThreatSearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const { formatDate } = useFormatDate();
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState(null);
@@ -660,17 +654,27 @@ export default function ThreatSearchPage() {
           </div>
         )}
 
-        {/* Auth exhausted CTA */}
+        {/* Auth exhausted CTA -- plan-aware */}
         {isExhausted && isAuthenticated && (
           <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-amber/10 border border-amber/20">
             <Clock size={16} className="text-amber shrink-0" />
             <span className="text-sm font-mono text-text-secondary">
-              Daily limit reached. Your 10 searches refuel at midnight UTC.
-              {credits.resets_at && (
-                <span className="ml-1 text-text-muted">
-                  (Resets: {formatDate(credits.resets_at)})
-                </span>
-              )}
+              {(() => {
+                const planSlug = user?.plan?.slug;
+                const limit = credits.limit;
+                switch (planSlug) {
+                  case 'free':
+                    return <>Daily limit reached (0/{limit}). <Link to="/pricing" className="text-violet underline">Upgrade to Basic for 15/day</Link></>;
+                  case 'basic':
+                    return <>Daily limit reached (0/{limit}). <Link to="/pricing" className="text-violet underline">Upgrade to Pro for 50/day</Link></>;
+                  case 'pro':
+                    return <>Daily limit reached (0/{limit}). Resets tomorrow at midnight {credits.resets_at && <span className="text-text-muted">({formatDate(credits.resets_at)})</span>}</>;
+                  case 'enterprise':
+                    return <>Daily limit reached (0/{limit}). Resets tomorrow at midnight {credits.resets_at && <span className="text-text-muted">({formatDate(credits.resets_at)})</span>}</>;
+                  default:
+                    return <>Daily limit reached (0/{limit}). <Link to="/pricing" className="text-violet underline">View plans for more searches</Link></>;
+                }
+              })()}
             </span>
           </div>
         )}
