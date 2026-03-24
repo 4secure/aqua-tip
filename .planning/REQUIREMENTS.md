@@ -38,14 +38,14 @@ Requirements for Onboarding, Trial & Subscription Plans milestone. Each maps to 
 
 ### Pricing & UI
 
-- [ ] **PRICE-01**: Pricing page displays 4 plan tiers in a card comparison layout
-- [ ] **PRICE-02**: Each plan card shows name, daily credit limit, feature list, and selection button
-- [ ] **PRICE-03**: Pro plan is highlighted as "Most Popular"
-- [ ] **PRICE-04**: Enterprise plan shows "Contact Us" CTA instead of selection button
-- [ ] **PRICE-05**: User's current plan is indicated on the pricing page
+- [x] **PRICE-01**: Pricing page displays 4 plan tiers in a card comparison layout
+- [x] **PRICE-02**: Each plan card shows name, daily credit limit, feature list, and selection button
+- [x] **PRICE-03**: Pro plan is highlighted as "Most Popular"
+- [x] **PRICE-04**: Enterprise plan shows "Contact Us" CTA instead of selection button
+- [x] **PRICE-05**: User's current plan is indicated on the pricing page
 - [x] **PRICE-06**: CreditBadge shows plan name alongside remaining/limit (e.g., "Pro: 42/50")
 - [ ] **PRICE-07**: Credit exhaustion message is plan-aware with upgrade suggestion to next tier
-- [ ] **PRICE-08**: Pricing page is accessible from sidebar navigation
+- [x] **PRICE-08**: Pricing page is accessible from sidebar navigation
 
 ### Timezone Display
 
@@ -109,14 +109,14 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | PLAN-06 | Phase 23 | Complete |
 | PLAN-07 | Phase 23 | Pending |
 | PLAN-08 | Phase 23 | Complete |
-| PRICE-01 | Phase 25 | Pending |
-| PRICE-02 | Phase 25 | Pending |
-| PRICE-03 | Phase 25 | Pending |
-| PRICE-04 | Phase 25 | Pending |
-| PRICE-05 | Phase 25 | Pending |
+| PRICE-01 | Phase 25 | Complete |
+| PRICE-02 | Phase 25 | Complete |
+| PRICE-03 | Phase 25 | Complete |
+| PRICE-04 | Phase 25 | Complete |
+| PRICE-05 | Phase 25 | Complete |
 | PRICE-06 | Phase 25 | Complete |
 | PRICE-07 | Phase 25 | Pending |
-| PRICE-08 | Phase 25 | Pending |
+| PRICE-08 | Phase 25 | Complete |
 | TZ-01 | Phase 25 | Complete |
 | TZ-02 | Phase 24 | Pending |
 | TZ-03 | Phase 25 | Complete |

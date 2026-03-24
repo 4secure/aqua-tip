@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Onboarding, Trial & Subscription Plans
 status: unknown
-stopped_at: Completed 25-02-PLAN.md
-last_updated: "2026-03-24T11:53:27.048Z"
+stopped_at: Completed 25-01-PLAN.md
+last_updated: "2026-03-24T11:53:34.617Z"
 progress:
   total_phases: 4
   completed_phases: 3
@@ -46,6 +46,7 @@ Plan: 3 of 3
 | Phase 23 P02 | 11min | 2 tasks | 8 files |
 | Phase 24-01 P01 | 7min | 2 tasks | 2 files |
 | Phase 25 P02 | 2min | 2 tasks | 5 files |
+| Phase 25 P01 | 2min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,7 @@ Decisions logged in PROJECT.md Key Decisions table. Recent for v3.0:
 - [Phase 24-01]: Used Laravel built-in timezone:all validation rule for IANA timezone validation
 - [Phase 25]: Native Intl.DateTimeFormat for zero-dependency timezone formatting
 - [Phase 25]: sessionStorage for banner dismiss (resets per browser session)
+- [Phase 25]: Pricing page as public route (accessible without auth)
 
 ### Pending Todos
 
@@ -79,6 +81,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-24T11:53:11.942Z
-Stopped at: Completed 25-02-PLAN.md
+Last session: 2026-03-24T11:53:34.613Z
+Stopped at: Completed 25-01-PLAN.md
 Resume file: None
