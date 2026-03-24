@@ -4,7 +4,7 @@ milestone: v3.0
 milestone_name: Onboarding, Trial & Subscription Plans
 status: unknown
 stopped_at: Completed 25-03-PLAN.md
-last_updated: "2026-03-24T12:00:07.118Z"
+last_updated: "2026-03-24T12:06:02.363Z"
 progress:
   total_phases: 4
   completed_phases: 4
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 ## Current Position
 
-Phase: 25 (pricing-trial-banners-timezone-display) — EXECUTING
-Plan: 3 of 3
+Phase: 25
+Plan: Not started
 
 ## Performance Metrics
 

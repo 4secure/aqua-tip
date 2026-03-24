@@ -141,15 +141,37 @@ export const NOTIFICATIONS = Object.freeze([
   { id: 6, type: 'info', title: 'Weekly Report Ready', message: 'Your threat intelligence summary is available', time: '5h ago', read: true },
 ]);
 
-export const NAV_ITEMS = Object.freeze([
-  { label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false },
-  { label: 'Threat Search', icon: 'search', href: '/threat-search', public: true },
-  { label: 'Threat Map', icon: 'globe', href: '/threat-map', public: false },
-  { label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false },
-  { label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false },
-  { label: 'Threat News', icon: 'rss', href: '/threat-news', public: false },
-  { label: 'Pricing', icon: 'pricing', href: '/pricing', public: true },
+export const NAV_CATEGORIES = Object.freeze([
+  {
+    label: 'Overview',
+    items: [
+      { label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false },
+    ],
+  },
+  {
+    label: 'Intelligence',
+    items: [
+      { label: 'Threat Search', icon: 'search', href: '/threat-search', public: true },
+      { label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false },
+      { label: 'Threat News', icon: 'rss', href: '/threat-news', public: false },
+    ],
+  },
+  {
+    label: 'Monitoring',
+    items: [
+      { label: 'Threat Map', icon: 'globe', href: '/threat-map', public: false },
+      { label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { label: 'Pricing', icon: 'pricing', href: '/pricing', public: true },
+    ],
+  },
 ]);
+
+export const NAV_ITEMS = Object.freeze(NAV_CATEGORIES.flatMap(c => c.items));
 
 export const IP_RELATIONS = Object.freeze([
   { source: '185.220.101.34', target: 'malware-c2.evil.ru', type: 'resolves_to' },
