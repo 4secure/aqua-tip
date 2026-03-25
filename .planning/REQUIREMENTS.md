@@ -10,7 +10,7 @@ Requirements for Font & UI Polish milestone.
 ### Typography
 
 - [x] **TYPO-01**: Website uses Outfit font for all headings (replacing Syne and Space Grotesk)
-- [ ] **TYPO-02**: Website uses Outfit font for all body/UI text (replacing Inter)
+- [x] **TYPO-02**: Website uses Outfit font for all body/UI text (replacing Inter)
 - [x] **TYPO-03**: JetBrains Mono retained for code/data displays
 - [x] **TYPO-04**: Google Fonts import updated to load Outfit with appropriate weights
 
@@ -44,7 +44,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | TYPO-01 | Phase 27 | Complete |
-| TYPO-02 | Phase 27 | Pending |
+| TYPO-02 | Phase 27 | Complete |
 | TYPO-03 | Phase 27 | Complete |
 | TYPO-04 | Phase 27 | Complete |
 | SIDE-01 | Phase 28 | Pending |
