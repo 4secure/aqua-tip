@@ -8,6 +8,7 @@
 - ✅ **v2.1 Threat Search & UI Refresh** — Phases 12-17 (shipped 2026-03-18)
 - ✅ **v2.2 Live Dashboard & Search History** — Phases 18-21 (shipped 2026-03-20)
 - ✅ **v3.0 Onboarding, Trial & Subscription Plans** — Phases 22-26 (shipped 2026-03-25)
+- 🚧 **v3.1 Font & UI Polish** — Phases 27-28 (in progress)
 
 ## Phases
 
@@ -86,7 +87,50 @@ Full details: `.planning/milestones/v3.0-ROADMAP.md`
 
 </details>
 
+### 🚧 v3.1 Font & UI Polish (In Progress)
+
+**Milestone Goal:** Switch to Outfit font and polish sidebar/topbar for a cleaner, more professional look.
+
+- [ ] **Phase 27: Outfit Font Migration** - Replace Syne, Space Grotesk, and Inter with Outfit across all pages
+- [ ] **Phase 28: Sidebar & Topbar Polish** - Remove clutter, add plan chip and upgrade button to topbar
+
+## Phase Details
+
+### Phase 27: Outfit Font Migration
+**Goal**: All text renders in Outfit (headings, body, UI) with JetBrains Mono preserved for code/data
+**Depends on**: Nothing (standalone change)
+**Requirements**: TYPO-01, TYPO-02, TYPO-03, TYPO-04
+**Success Criteria** (what must be TRUE):
+  1. All headings across every page render in Outfit (no Syne or Space Grotesk visible)
+  2. All body and UI text renders in Outfit (no Inter visible)
+  3. Code blocks, data tables, and monospace displays still render in JetBrains Mono
+  4. Google Fonts link in index.html loads Outfit with correct weight range and no longer loads Syne, Space Grotesk, or Inter
+**Plans**: 2 plans
+Plans:
+- [ ] 27-01-PLAN.md — Font config foundation (Google Fonts, Tailwind, base CSS)
+- [ ] 27-02-PLAN.md — Bulk class replacement, hardcoded fixes, docs update
+**UI hint**: yes
+
+### Phase 28: Sidebar & Topbar Polish
+**Goal**: Sidebar and topbar are decluttered with plan visibility added to the topbar
+**Depends on**: Phase 27
+**Requirements**: SIDE-01, TOP-01, TOP-02, TOP-03, TOP-04
+**Success Criteria** (what must be TRUE):
+  1. Pricing tab no longer appears in sidebar navigation
+  2. Notification bell button no longer appears in topbar
+  3. Authenticated user sees their current plan name as a chip in the topbar
+  4. "Upgrade" button appears beside the plan chip and navigates to /pricing when clicked
+  5. Plan chip and upgrade button are not visible to unauthenticated users
+**Plans**: 2 plans
+Plans:
+- [ ] 27-01-PLAN.md — Font config foundation (Google Fonts, Tailwind, base CSS)
+- [ ] 27-02-PLAN.md — Bulk class replacement, hardcoded fixes, docs update
+**UI hint**: yes
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 27 → 28
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -117,3 +161,5 @@ Full details: `.planning/milestones/v3.0-ROADMAP.md`
 | 24. Enhanced Onboarding | v3.0 | 2/2 | Complete | 2026-03-22 |
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 3/3 | Complete | 2026-03-24 |
 | 26. Remove Raw Tab | v3.0 | 1/1 | Complete | 2026-03-24 |
+| 27. Outfit Font Migration | v3.1 | 0/2 | Planned    |  |
+| 28. Sidebar & Topbar Polish | v3.1 | 0/0 | Not started | - |

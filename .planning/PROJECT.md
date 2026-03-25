@@ -76,7 +76,15 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ### Active
 
-(No active milestone — planning next milestone)
+## Current Milestone: v3.1 Font & UI Polish
+
+**Goal:** Switch to Outfit font and polish sidebar/topbar for a cleaner, more professional look.
+
+**Target features:**
+- Replace Syne, Space Grotesk, Inter with Outfit (keep JetBrains Mono for code/data)
+- Remove Pricing tab from sidebar
+- Remove notification button from topbar
+- Add current plan chip + "Upgrade" button to topbar (links to /pricing)
 
 ### Out of Scope
 
@@ -159,4 +167,4 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Hook per component for useFormatDate | Independent calls, not prop drilling | ✓ Good |
 
 ---
-*Last updated: 2026-03-25 after v3.0 milestone*
+*Last updated: 2026-03-25 after v3.1 milestone started*
