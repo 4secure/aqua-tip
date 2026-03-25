@@ -81,7 +81,7 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 **Goal:** Switch to Outfit font and polish sidebar/topbar for a cleaner, more professional look.
 
 **Target features:**
-- Replace Syne, Space Grotesk, Inter with Outfit (keep JetBrains Mono for code/data)
+- ✓ Replace Syne, Space Grotesk, Inter with Outfit (keep JetBrains Mono for code/data) — Phase 27 complete
 - Remove Pricing tab from sidebar
 - Remove notification button from topbar
 - Add current plan chip + "Upgrade" button to topbar (links to /pricing)
@@ -167,4 +167,4 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Hook per component for useFormatDate | Independent calls, not prop drilling | ✓ Good |
 
 ---
-*Last updated: 2026-03-25 after v3.1 milestone started*
+*Last updated: 2026-03-25 after Phase 27 (Outfit font migration) complete*
