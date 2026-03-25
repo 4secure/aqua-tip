@@ -43,10 +43,8 @@ export default {
         'border-light': '#2A2D3E',
       },
       fontFamily: {
-        display: ['Syne', 'sans-serif'],
-        heading: ['Space Grotesk', 'sans-serif'],
+        sans: ['Outfit', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
-        body: ['Inter', 'sans-serif'],
       },
       borderRadius: {
         xl: '1rem',
