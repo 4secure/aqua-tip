@@ -7,7 +7,7 @@
 - ✅ **v2.0 OpenCTI Integration** — Phases 8-11 (shipped 2026-03-16)
 - ✅ **v2.1 Threat Search & UI Refresh** — Phases 12-17 (shipped 2026-03-18)
 - ✅ **v2.2 Live Dashboard & Search History** — Phases 18-21 (shipped 2026-03-20)
-- 🚧 **v3.0 Onboarding, Trial & Subscription Plans** — Phases 22-25 (in progress)
+- ✅ **v3.0 Onboarding, Trial & Subscription Plans** — Phases 22-26 (shipped 2026-03-25)
 
 ## Phases
 
@@ -73,96 +73,20 @@ Full details: `.planning/milestones/v2.2-ROADMAP.md`
 
 </details>
 
-### v3.0 Onboarding, Trial & Subscription Plans (In Progress)
+<details>
+<summary>✅ v3.0 Onboarding, Trial & Subscription Plans (Phases 22-26) — SHIPPED 2026-03-25</summary>
 
-**Milestone Goal:** Expand onboarding with profile fields, enforce the 30-day trial with credit tiers, and build a subscription plan system with pricing page.
+- [x] Phase 22: Schema & Data Foundation (2/2 plans) — completed 2026-03-20
+- [x] Phase 23: CreditResolver & Plan-Aware Backend (2/2 plans) — completed 2026-03-22
+- [x] Phase 24: Enhanced Onboarding (2/2 plans) — completed 2026-03-22
+- [x] Phase 25: Pricing, Trial Banners & Timezone Display (3/3 plans) — completed 2026-03-24
+- [x] Phase 26: Remove Raw Tab (1/1 plan) — completed 2026-03-24
 
-- [x] **Phase 22: Schema & Data Foundation** - Plans table, user columns, existing user trial migration, onboarding check fix (completed 2026-03-20)
-- [x] **Phase 23: CreditResolver & Plan-Aware Backend** - Extract shared credit logic, plan-aware limits, trial enforcement, plan selection and listing APIs (completed 2026-03-22)
-- [x] **Phase 24: Enhanced Onboarding** - Timezone auto-detect, organization, role fields on Get Started page with backend validation (completed 2026-03-22)
-- [x] **Phase 25: Pricing, Trial Banners & Timezone Display** - Pricing page, trial countdown/expired banners, plan-aware credit badge, timezone-aware timestamps (completed 2026-03-24)
+Full details: `.planning/milestones/v3.0-ROADMAP.md`
 
-## Phase Details
-
-### Phase 22: Schema & Data Foundation
-**Goal**: Database schema supports plans, enhanced user profiles, and clean trial state for all users
-**Depends on**: Phase 21 (v2.2 complete)
-**Requirements**: PLAN-01, PLAN-02, TRIAL-04, ONBD-06
-**Success Criteria** (what must be TRUE):
-  1. Plans table exists with 4 seeded tiers (Free/Basic/Pro/Enterprise) containing slug, daily credit limit, price, and features
-  2. Users table has nullable plan_id FK, timezone, organization, and role columns
-  3. All existing users have trial_ends_at reset to 30 days from deploy (not backdated)
-  4. UserResource uses onboarding_completed_at timestamp (not name/phone heuristic) to determine onboarding status
-  5. All existing Pest tests pass without modification (schema is additive only)
-**Plans**: 2 plans
-
-Plans:
-- [x] 22-01-PLAN.md — Plans table, Plan model, PlanSeeder, user columns migration, User model updates
-- [x] 22-02-PLAN.md — Trial reset data migration, credit pre-creation, UserResource onboarding fix
-
-### Phase 23: CreditResolver & Plan-Aware Backend
-**Goal**: Credit system derives limits from user plan, trial enforcement works automatically, and plan management APIs are operational
-**Depends on**: Phase 22
-**Requirements**: PLAN-03, PLAN-04, PLAN-05, PLAN-06, PLAN-07, PLAN-08, TRIAL-01, TRIAL-02, TRIAL-03, ONBD-05
-**Success Criteria** (what must be TRUE):
-  1. A user on the Pro plan gets 50 credits/day; a user on Free gets 3/day; credit limits are never hardcoded outside CreditResolver
-  2. A user whose trial expired with no plan selected is automatically limited to Free tier (3/day) on next credit check
-  3. Selecting a plan via POST /api/plan immediately changes the user's credit limit and caps remaining balance on downgrade
-  4. GET /api/plans returns all 4 plan tiers without requiring authentication
-  5. GET /api/user returns plan object, trial_active boolean, trial_days_left, timezone, organization, and role fields
-**Plans**: 2 plans
-
-Plans:
-- [x] 23-01-PLAN.md — CreditResolver service extraction, pending plan migration, consumer rewiring
-- [x] 23-02-PLAN.md — Plan listing/selection APIs, UserResource expansion with plan/trial fields
-
-### Phase 24: Enhanced Onboarding
-**Goal**: Users provide timezone, organization, and role during onboarding with smart defaults
-**Depends on**: Phase 22
-**Requirements**: ONBD-01, ONBD-02, ONBD-03, ONBD-04, TZ-02
-**Success Criteria** (what must be TRUE):
-  1. Get Started page shows timezone dropdown pre-filled with browser-detected timezone, plus optional organization and role fields
-  2. Submitting the onboarding form stores timezone, organization, and role in the database
-  3. AuthContext exposes the user's stored timezone for frontend consumption
-  4. Existing onboarded users are not forced back to the onboarding flow (new fields are optional)
-**Plans**: 2 plans
-
-Plans:
-- [x] 24-01-PLAN.md — OnboardingController validation expansion with tests for timezone, organization, role
-- [x] 24-02-PLAN.md — SearchableDropdown, SimpleDropdown components, GetStartedPage form update, AuthContext timezone
-
-### Phase 25: Pricing, Trial Banners & Timezone Display
-**Goal**: Users can see plan options, understand their trial status, select a plan, and see all timestamps in their timezone
-**Depends on**: Phase 23, Phase 24
-**Requirements**: PRICE-01, PRICE-02, PRICE-03, PRICE-04, PRICE-05, PRICE-06, PRICE-07, PRICE-08, TRIAL-05, TRIAL-06, TZ-01, TZ-03
-**Success Criteria** (what must be TRUE):
-  1. Pricing page displays 4 plan cards with name, daily credit limit, feature list, and selection button (Pro highlighted as "Most Popular", Enterprise shows "Contact Us")
-  2. User's current plan is visually indicated on pricing page; selecting a different plan updates it immediately
-  3. Trial users see a countdown banner showing days remaining; expired-trial users see an upgrade prompt banner
-  4. CreditBadge in the sidebar shows plan name alongside remaining/limit (e.g., "Pro: 42/50")
-  5. All timestamps across the app render in the authenticated user's stored timezone; unauthenticated users see UTC
-**Plans**: 3 plans
-
-Plans:
-- [x] 25-01-PLAN.md — Pricing page with 4-card layout, plan selection with confirmation modal, route and sidebar nav entry
-- [x] 25-02-PLAN.md — useFormatDate hook, trial countdown/expiry banners, CreditBadge extension with plan name, sidebar and AppLayout wiring
-- [x] 25-03-PLAN.md — Replace 5 duplicated formatDate functions with useFormatDate hook, plan-aware credit exhaustion messages
-
-### Phase 26: Remove raw tab from threat search frontend
-
-**Goal:** Remove the Raw JSON debug tab from the Threat Search results page, cleaning up dead UI code
-**Requirements**: CLEANUP-01
-**Depends on:** Phase 25
-**Plans:** 1/1 plans complete
-
-Plans:
-- [x] 26-01-PLAN.md — Remove RawTab component, tab entry, rendering conditional, and unused Code icon import
+</details>
 
 ## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 22 → 23 → 24 → 25
-(Note: Phase 24 depends on Phase 22 only, so it could run in parallel with Phase 23 if needed.)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -189,6 +113,7 @@ Phases execute in numeric order: 22 → 23 → 24 → 25
 | 20. Dashboard Page Rewrite | v2.2 | 2/2 | Complete | 2026-03-19 |
 | 21. Threat Search History | v2.2 | 1/1 | Complete | 2026-03-19 |
 | 22. Schema & Data Foundation | v3.0 | 2/2 | Complete | 2026-03-20 |
-| 23. CreditResolver & Plan-Aware Backend | v3.0 | 2/2 | Complete    | 2026-03-22 |
-| 24. Enhanced Onboarding | v3.0 | 2/2 | Complete    | 2026-03-22 |
-| 25. Pricing, Trial Banners & Timezone Display | v3.0 | 3/3 | Complete    | 2026-03-24 |
+| 23. CreditResolver & Plan-Aware Backend | v3.0 | 2/2 | Complete | 2026-03-22 |
+| 24. Enhanced Onboarding | v3.0 | 2/2 | Complete | 2026-03-22 |
+| 25. Pricing, Trial Banners & Timezone Display | v3.0 | 3/3 | Complete | 2026-03-24 |
+| 26. Remove Raw Tab | v3.0 | 1/1 | Complete | 2026-03-24 |

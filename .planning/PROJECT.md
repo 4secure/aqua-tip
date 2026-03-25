@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A threat intelligence platform with a React 19 + Vite 7 frontend (dark glassmorphism design) and a Laravel 12 PHP backend. The platform connects to a live OpenCTI instance for real threat data: universal Threat Search across all 9 observable types with auto-detection, Threat Actors listing intrusion sets in a dense card grid, Threat News listing reports in a scannable row layout with label-based category filtering, a live Threat Map with SSE streaming, and a live dashboard with real stats, indicators, attack categories, credit balance, and recent searches. Authentication supports email/password, Google OAuth, and GitHub OAuth with credit-based rate limiting.
+A threat intelligence platform with a React 19 + Vite 7 frontend (dark glassmorphism design) and a Laravel 12 PHP backend. The platform connects to a live OpenCTI instance for real threat data: universal Threat Search across all 9 observable types with auto-detection, Threat Actors listing intrusion sets in a dense card grid, Threat News listing reports in a scannable row layout with label-based category filtering, a live Threat Map with SSE streaming, and a live dashboard with real stats, indicators, attack categories, credit balance, and recent searches. Authentication supports email/password, Google OAuth, and GitHub OAuth with credit-based rate limiting. Users onboard with timezone, organization, and role fields. A subscription plan system (Free/Basic/Pro/Enterprise) with pricing page, trial countdown banners, and timezone-aware date rendering is fully built.
 
 ## Core Value
 
-Users get real threat intelligence from OpenCTI — searchable across all observable types (IPs, domains, URLs, emails, file hashes, hostnames), threat actor profiles, intelligence reports with category filtering, a live geographic threat map, and a live dashboard with search history — all through a secure, credit-gated platform.
+Users get real threat intelligence from OpenCTI — searchable across all observable types (IPs, domains, URLs, emails, file hashes, hostnames), threat actor profiles, intelligence reports with category filtering, a live geographic threat map, and a live dashboard with search history — all through a secure, credit-gated platform with subscription plan tiers.
 
 ## Requirements
 
@@ -55,30 +55,28 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Threat News row-based layout with inline pagination — v2.1
 - ✓ Threat News label-based category chips and filter dropdown — v2.1
 - ✓ Threat Actors inline pagination toolbar, no motivation filter — v2.1
-
 - ✓ Dashboard populated with live OpenCTI data (stat cards, recent indicators, attack categories, threat map) — v2.2
 - ✓ Credit balance and recent searches widgets on dashboard — v2.2
 - ✓ Search history endpoint (stores query + type, auth-only retrieval) — v2.2
 - ✓ Recent searches displayed on Threat Search page with click-to-prefill — v2.2
 - ✓ All mock data removed from dashboard — v2.2
-
-- ✓ Enhanced onboarding with timezone (required IANA), organization, role fields — v3.0 Phase 24
-- ✓ Custom PhoneNumberInput with SVG flag-icons and country auto-detection — v3.0 Phase 24
-- ✓ SearchableDropdown and SimpleDropdown reusable components — v3.0 Phase 24
-- ✓ AuthContext exposes user timezone — v3.0 Phase 24
+- ✓ Enhanced onboarding with timezone (required IANA), organization, role fields — v3.0
+- ✓ Custom PhoneNumberInput with SVG flag-icons and country auto-detection — v3.0
+- ✓ SearchableDropdown and SimpleDropdown reusable components — v3.0
+- ✓ AuthContext exposes user timezone — v3.0
+- ✓ Plans table with 4 subscription tiers (Free/Basic/Pro/Enterprise) — v3.0
+- ✓ CreditResolver service with plan-aware credit limits and trial enforcement — v3.0
+- ✓ Plan listing and selection APIs (GET /api/plans, POST /api/plan) — v3.0
+- ✓ Trial expiry auto-downgrade to Free tier — v3.0
+- ✓ Pricing page with 4-card plan comparison layout and plan selection modal — v3.0
+- ✓ Trial countdown/expiry banners with 3-tier urgency escalation — v3.0
+- ✓ useFormatDate hook for timezone-aware date rendering across all pages — v3.0
+- ✓ CreditBadge extended with plan name in sidebar — v3.0
+- ✓ Plan-aware credit exhaustion messages with tier-specific upgrade CTAs — v3.0
 
 ### Active
 
-**Current Milestone: v3.0 Onboarding, Trial & Subscription Plans**
-
-**Goal:** Expand onboarding with profile fields, enforce the 30-day trial with credit tiers, and build a subscription plan system with pricing page.
-
-**Target features:**
-- Enhanced onboarding (timezone, organization, role fields)
-- Trial enforcement (30-day trial → Free tier on expiry)
-- Subscription plan tiers (Free/Basic/Pro/Enterprise with escalating credits)
-- Pricing page with plan selection (no real payment processing yet)
-- Timezone-aware time display across the platform
+(No active milestone — planning next milestone)
 
 ### Out of Scope
 
@@ -91,18 +89,19 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - Admin panel or user management dashboard — future milestone
 - SAML/LDAP enterprise SSO — premature without paying customers
 - CI/CD pipeline — Railway auto-deploys from GitHub, sufficient for now
+- Real payment processing (Stripe/LemonSqueezy/Paddle) — no validated demand yet
+- Per-feature gating (Dark Web for Pro only, etc.) — credit-only gating is simpler
+- Role-based access control — requires admin panel, invitation system, team management
+- Email drip campaigns for trial — defer to marketing automation milestone
 
 ## Context
 
-Shipped v2.2 with ~20,000+ LOC (JS/JSX + PHP).
+Shipped v3.0 with ~22,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-21 phases (incl. 4.1), 40 plans completed across 5 milestones in 8 days.
-140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs.
+26 phases (incl. 4.1), 50 plans completed across 6 milestones in 12 days.
+140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
-Dashboard fully live with real OpenCTI stats, auth-gated credit/search widgets, and category filtering.
-Phase 23 complete — CreditResolver service, plan-aware credit limits, plan listing/selection APIs, expanded UserResource.
-Phase 24 complete — Enhanced onboarding with timezone auto-detect, custom phone input with SVG flags, organization/role fields, AuthContext timezone exposure.
 
 ## Constraints
 
@@ -147,6 +146,17 @@ Phase 24 complete — Enhanced onboarding with timezone auto-detect, custom phon
 | Independent widget loading states | No global spinner — each widget loads independently | ✓ Good |
 | Server-side category re-fetch | Client-side filtering insufficient — 10 loaded vs 500 aggregated | ✓ Good |
 | Silent history fetch fallback | History is non-critical UI — errors return null, no error card | ✓ Good |
+| Zero new deps for v3.0 | Existing stack covers all onboarding, trial, and plan requirements | ✓ Good |
+| CreditResolver extraction before plan logic | Prevent duplication pitfall in credit system | ✓ Good |
+| Fresh 30-day trial via data migration | Prevent instant downgrade for existing users | ✓ Good |
+| nullOnDelete FK for plans | Deleting a plan nullifies user association instead of cascading | ✓ Good |
+| updateOrCreate seeder pattern | Safe re-runs in production without duplicates | ✓ Good |
+| Query builder over raw SQL in migrations | Cross-DB compatibility for data migrations | ✓ Good |
+| Enterprise plan excluded via validation rule | in:free,basic,pro for simplicity | ✓ Good |
+| Native Intl.DateTimeFormat for timezone | Zero-dependency timezone formatting | ✓ Good |
+| sessionStorage for banner dismiss | Resets per browser session, no server round-trip | ✓ Good |
+| Pricing page as public route | Accessible without auth for marketing | ✓ Good |
+| Hook per component for useFormatDate | Independent calls, not prop drilling | ✓ Good |
 
 ---
-*Last updated: 2026-03-23 after Phase 24 completion*
+*Last updated: 2026-03-25 after v3.0 milestone*

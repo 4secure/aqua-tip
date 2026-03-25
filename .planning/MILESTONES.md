@@ -1,5 +1,24 @@
 # Milestones
 
+## v3.0 Onboarding, Trial & Subscription Plans (Shipped: 2026-03-25)
+
+**Phases completed:** 5 phases, 10 plans, 21 tasks
+
+**Key accomplishments:**
+
+- Plans table with 4 subscription tiers (Free/Basic/Pro/Enterprise) and User model plan FK + profile columns
+- Data migration resets all users to 30-day trial and pre-creates credit rows; UserResource onboarding check switched from name/phone heuristic to onboarding_completed_at timestamp
+- Shared CreditResolver service with plan-aware credit limits, trial expiry auto-downgrade, and pending downgrade support
+- Plan listing, upgrade/downgrade selection, and expanded UserResource with plan/trial/pending state
+- Expanded OnboardingController with timezone (required, IANA via timezone:all), organization (nullable), and role (nullable) validation and storage, with 11 Pest tests covering all scenarios
+- Enhanced Get Started page with timezone auto-detect, searchable country phone input with SVG flags, organization field, and role dropdown with "Other" reveal
+- 4-card pricing page with plan comparison, violet-highlighted Pro card, enterprise mailto, confirmation modal with credit/price diff, and sidebar navigation
+- useFormatDate hook with Intl.DateTimeFormat timezone formatting, TrialBanner with 3-tier urgency escalation, and CreditBadge extended with plan name in sidebar
+- Replaced all 5 inline formatDate functions with useFormatDate hook for timezone-aware rendering, and added plan-tier-specific credit exhaustion messages with upgrade CTAs linking to /pricing
+- Removed RawTab debug component, its tab entry, render conditional, and unused Code icon import from ThreatSearchPage.jsx
+
+---
+
 ## v2.2 Live Dashboard & Search History (Shipped: 2026-03-20)
 
 **Phases completed:** 4 phases, 6 plans, 13 tasks
@@ -8,6 +27,7 @@
 **Files modified:** 23 (+2,627 / -198 lines)
 
 **Key accomplishments:**
+
 1. DashboardService aggregating live OpenCTI stats (counts, indicators, categories) with stale-cache fallback
 2. 19 Pest PHP tests covering all dashboard endpoints and cache behavior
 3. Auth-only search history endpoint exposing recent queries with module filtering
@@ -25,6 +45,7 @@
 **Files modified:** 35 (+3,219 / -390 lines)
 
 **Key accomplishments:**
+
 1. Threat Actors UI refresh — 4-col dense card grid, removed descriptions, clean subheading without "OpenCTI"
 2. Threat News UI refresh — row-based layout replacing card grid, entity tags, inline pagination, no confidence
 3. Backend search generalization — ThreatSearchService supporting all 9 observable types (IPv4/IPv6/Domain/URL/Email/MD5/SHA-1/SHA-256/Hostname) with auto-detection
@@ -41,6 +62,7 @@
 **Requirements:** 24/24 complete
 
 **Key accomplishments:**
+
 1. OpenCTI service layer with GraphQL proxy, Bearer token auth, 15s timeout + 2x retry, server-side caching
 2. IP Search integration — real threat data from OpenCTI observables with geo enrichment, credit gating, and refund on failure
 3. Threat Actors page — paginated intrusion sets with detail modals, search, sort, targeted countries/sectors
@@ -57,6 +79,7 @@
 **Git range:** `0287625..44811f8` — 10 source files changed, +79/-14 lines
 
 **Key accomplishments:**
+
 1. Switched Laravel from MySQL to PostgreSQL — config, 6 migration fixes for cross-database compatibility
 2. All 92 Pest tests (309 assertions) pass on both SQLite and PostgreSQL without modification
 3. Dockerfile fixed for PostgreSQL (pdo_pgsql + libpq-dev), startup script with auto-migration
@@ -73,6 +96,7 @@
 **Timeline:** 2 days (2026-03-13 → 2026-03-14)
 
 **Key accomplishments:**
+
 1. Laravel 12 backend with Sanctum SPA cookie-based auth (register, login, logout, 19 Pest tests)
 2. Google + GitHub OAuth via Socialite, email verification with 6-digit code + signed link, password reset
 3. Credit-based rate limiting — 1/day guests (IP), 10/day auth (user ID) — lazy midnight UTC reset, 24 tests
@@ -91,4 +115,3 @@
 These will be addressed in a future milestone.
 
 ---
-

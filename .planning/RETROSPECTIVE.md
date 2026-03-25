@@ -189,6 +189,50 @@
 
 ---
 
+## Milestone: v3.0 — Onboarding, Trial & Subscription Plans
+
+**Shipped:** 2026-03-25
+**Phases:** 5 | **Plans:** 10
+
+### What Was Built
+- Plans table with 4 subscription tiers (Free/Basic/Pro/Enterprise) and schema foundation
+- CreditResolver service extracting shared credit logic with plan-aware limits and trial enforcement
+- Enhanced onboarding with timezone auto-detect, custom phone input with SVG flags, organization/role fields
+- Pricing page with 4-card plan comparison, confirmation modal, and live plan selection
+- Trial countdown/expiry banners with 3-tier urgency escalation
+- useFormatDate hook replacing 5 inline formatDate functions for timezone-aware rendering
+- Plan-aware credit exhaustion messages with tier-specific upgrade CTAs
+- Dead code cleanup removing raw JSON debug tab from Threat Search
+
+### What Worked
+- CreditResolver extraction before any plan logic prevented the duplication pitfall seen in v2.x credit code
+- Backend-first phases (22-23) before frontend phases (24-25) allowed stable API consumption
+- Zero new dependencies — existing Laravel + React stack covered all requirements
+- updateOrCreate seeder pattern enabled safe re-runs in production
+- useFormatDate hook pattern (independent calls per component, not prop drilling) kept timezone logic clean
+- Pricing page as public route enabled marketing access without auth complexity
+
+### What Was Inefficient
+- 11 requirement checkboxes in REQUIREMENTS.md fell out of sync with actual completion (all 31 satisfied per audit, but tracking lagged)
+- Nyquist VALIDATION.md files stayed in draft status across all phases — never enforced during execution
+- Phase 24 had 4 human verification items that were never manually checked (visual/interactive items)
+- TRIAL-06 race condition between CreditResolver lazy reset and TrialBanner evaluation was only caught at audit time, not during phase execution
+
+### Patterns Established
+- CreditResolver service pattern: centralized credit limit derivation from user plan
+- Confirmation modal with before/after comparison for plan changes
+- sessionStorage for UI dismiss state (banner dismissal resets per browser session)
+- Hook-per-component pattern for useFormatDate (each component calls independently)
+- IANA timezone validation via Laravel's built-in `timezone:all` rule
+
+### Key Lessons
+1. Service extraction should happen before feature code — CreditResolver was the right call before plan selection logic
+2. Requirement checkbox tracking drifts when phases are executed rapidly — consider automated status syncing
+3. Integration race conditions (like TRIAL-06) are only visible at audit time — budget integration testing between dependent phases
+4. Nyquist validation needs enforcement gates or should be disabled — draft-only files add noise without value
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -200,6 +244,7 @@
 | v2.0 | 4 | 9 | OpenCTI integration — proxy pattern, SSE streaming, browse pages |
 | v2.1 | 6 | 8 | Search generalization + UI polish — clean-break rename, inline pagination pattern |
 | v2.2 | 4 | 6 | Live dashboard + search history — stale-cache fallback, auth-gated widgets |
+| v3.0 | 5 | 10 | Onboarding, trial & plans — CreditResolver extraction, pricing page, timezone formatting |
 
 ### Cumulative Quality
 
@@ -210,6 +255,7 @@
 | v2.0 | 92 Pest | Backend only | 0 new |
 | v2.1 | 92 Pest | Backend only | 0 new |
 | v2.2 | 111+ Pest | Backend only | 0 new |
+| v3.0 | 140+ Pest | Backend only | 1 (TRIAL-06 race condition) |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -220,3 +266,5 @@
 5. Verify external API schemas before writing queries — don't assume connection vs flat array patterns
 6. Plan for server-side filtering when aggregation dataset > loaded dataset — client-side filtering fails silently
 7. Visual verification tasks catch real bugs — budget time for them in frontend phases
+8. Service extraction before feature code prevents duplication — centralize shared logic first
+9. Integration race conditions are only visible at audit time — budget cross-phase integration testing
