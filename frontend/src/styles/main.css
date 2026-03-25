@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -29,12 +29,12 @@
   }
 
   body {
-    @apply bg-primary text-text-primary font-body antialiased;
+    @apply bg-primary text-text-primary font-sans antialiased;
     min-height: 100vh;
   }
 
   h1, h2, h3 {
-    @apply font-heading;
+    @apply font-sans font-semibold;
   }
 
   code, .mono {
@@ -52,7 +52,7 @@
   }
 
   .section-title {
-    @apply text-lg font-heading font-semibold text-text-primary mb-4;
+    @apply text-lg font-sans font-semibold text-text-primary mb-4;
   }
 
   .btn-primary {
