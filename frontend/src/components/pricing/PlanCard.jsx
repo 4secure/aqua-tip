@@ -21,19 +21,19 @@ export default function PlanCard({ plan, currentPlanSlug, onSelect, isTrialUser 
     >
       {/* Most Popular badge */}
       {isPopular && (
-        <span className="absolute -top-0 left-1/2 -translate-x-1/2 px-3 py-1 bg-violet text-white text-xs font-display rounded-b-full">
+        <span className="absolute -top-0 left-1/2 -translate-x-1/2 px-3 py-1 bg-violet text-white text-xs font-sans rounded-b-full">
           Most Popular
         </span>
       )}
 
       {/* Plan name */}
-      <h3 className={`font-display text-lg font-bold text-white ${isPopular ? 'mt-4' : ''}`}>
+      <h3 className={`font-sans text-lg font-bold text-white ${isPopular ? 'mt-4' : ''}`}>
         {plan.name}
       </h3>
 
       {/* Price */}
       <div className="mt-3">
-        <span className="font-display text-3xl font-bold text-white">{priceDisplay}</span>
+        <span className="font-sans text-3xl font-bold text-white">{priceDisplay}</span>
         {plan.price_cents > 0 && (
           <span className="text-sm text-text-muted font-mono">/mo</span>
         )}
@@ -63,14 +63,14 @@ export default function PlanCard({ plan, currentPlanSlug, onSelect, isTrialUser 
         ) : isEnterprise ? (
           <a
             href="mailto:sales@aquasecure.ai"
-            className="block w-full text-center border border-violet text-violet hover:bg-violet/10 font-display font-semibold py-2.5 px-6 rounded-lg transition-colors"
+            className="block w-full text-center border border-violet text-violet hover:bg-violet/10 font-sans font-semibold py-2.5 px-6 rounded-lg transition-colors"
           >
             Contact Us
           </a>
         ) : (
           <button
             onClick={() => onSelect(plan)}
-            className="w-full bg-gradient-to-r from-violet to-cyan text-white font-display font-semibold py-2.5 px-6 rounded-lg hover:opacity-90 transition-opacity"
+            className="w-full bg-gradient-to-r from-violet to-cyan text-white font-sans font-semibold py-2.5 px-6 rounded-lg hover:opacity-90 transition-opacity"
           >
             {hasCurrentPlan ? 'Upgrade' : 'Select Plan'}
           </button>

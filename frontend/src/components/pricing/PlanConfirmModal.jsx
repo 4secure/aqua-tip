@@ -51,7 +51,7 @@ export default function PlanConfirmModal({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
           >
-            <h2 className="font-display text-xl font-bold text-white mb-4">
+            <h2 className="font-sans text-xl font-bold text-white mb-4">
               Switch to {selectedPlan.name}?
             </h2>
 
@@ -88,14 +88,14 @@ export default function PlanConfirmModal({
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className="flex-1 text-text-muted hover:text-white font-display font-semibold py-2.5 px-4 rounded-lg transition-colors"
+                className="flex-1 text-text-muted hover:text-white font-sans font-semibold py-2.5 px-4 rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={onConfirm}
                 disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-violet to-cyan text-white font-display font-semibold py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 bg-gradient-to-r from-violet to-cyan text-white font-sans font-semibold py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isLoading ? (
                   <>

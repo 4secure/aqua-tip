@@ -38,9 +38,9 @@ export default function DomainReportPage() {
         {activeTab === 'overview' && (
           <>
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Registrar</div><div className="text-lg font-heading font-semibold">{DOMAIN_REPORT.registrar}</div></div>
-              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Created</div><div className="text-lg font-heading font-semibold">{DOMAIN_REPORT.created}</div></div>
-              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Expires</div><div className="text-lg font-heading font-semibold text-green">{DOMAIN_REPORT.expires}</div></div>
+              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Registrar</div><div className="text-lg font-sans font-semibold">{DOMAIN_REPORT.registrar}</div></div>
+              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Created</div><div className="text-lg font-sans font-semibold">{DOMAIN_REPORT.created}</div></div>
+              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Expires</div><div className="text-lg font-sans font-semibold text-green">{DOMAIN_REPORT.expires}</div></div>
             </div>
             <div className="glass-card p-5">
               <h3 className="section-title">Nameservers</h3>
@@ -154,7 +154,7 @@ x-frame-options: DENY`}</code></pre>
             </svg>
             <div className="score-value text-3xl text-green">{DOMAIN_REPORT.score}</div>
           </div>
-          <div className="text-sm font-heading font-semibold text-green mb-0.5">Low Risk</div>
+          <div className="text-sm font-sans font-semibold text-green mb-0.5">Low Risk</div>
           <div className="text-xs text-text-muted">Domain Score</div>
         </div>
         <div className="glass-card p-4 space-y-2">

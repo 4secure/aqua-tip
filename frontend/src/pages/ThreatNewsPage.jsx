@@ -173,7 +173,7 @@ export default function ThreatNewsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-text-primary mb-1">
+        <h1 className="font-sans text-2xl font-bold text-text-primary mb-1">
           Threat News
         </h1>
         <p className="font-mono text-sm text-text-muted">
@@ -264,7 +264,7 @@ export default function ThreatNewsPage() {
             <p className="font-mono text-sm text-red">{error}</p>
             <button
               onClick={loadData}
-              className="mt-2 flex items-center gap-2 text-sm font-display text-cyan hover:text-cyan/80 transition-colors"
+              className="mt-2 flex items-center gap-2 text-sm font-sans text-cyan hover:text-cyan/80 transition-colors"
             >
               <RotateCcw size={14} /> Retry
             </button>
@@ -289,7 +289,7 @@ export default function ThreatNewsPage() {
       {!loading && !error && items.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20">
           <Newspaper size={48} className="text-text-muted mb-4" />
-          <p className="font-display text-lg text-text-muted">
+          <p className="font-sans text-lg text-text-muted">
             No reports available
           </p>
           <p className="font-mono text-sm text-text-muted mt-1">
@@ -345,7 +345,7 @@ function ReportRow({ report, onClick, onCategoryClick }) {
       </span>
 
       {/* Title - flexible */}
-      <h3 className="font-display text-sm font-semibold text-text-primary truncate flex-1 min-w-0">
+      <h3 className="font-sans text-sm font-semibold text-text-primary truncate flex-1 min-w-0">
         {report.name}
       </h3>
 
@@ -421,7 +421,7 @@ function ReportModal({ report, onClose, onCategoryClick }) {
         </button>
 
         {/* Title */}
-        <h2 className="font-display text-2xl font-bold text-text-primary leading-tight pr-10 mb-2">
+        <h2 className="font-sans text-2xl font-bold text-text-primary leading-tight pr-10 mb-2">
           {report.name}
         </h2>
 
@@ -444,7 +444,7 @@ function ReportModal({ report, onClose, onCategoryClick }) {
         {/* Description */}
         {report.description && (
           <div className="mb-5">
-            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
               Description
             </h3>
             <p className="font-mono text-sm text-text-primary whitespace-pre-line leading-relaxed">
@@ -456,7 +456,7 @@ function ReportModal({ report, onClose, onCategoryClick }) {
         {/* Categories */}
         {labels.length > 0 && (
           <div className="mb-5">
-            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
               Categories
             </h3>
             <div className="flex flex-wrap gap-1.5">
@@ -482,7 +482,7 @@ function ReportModal({ report, onClose, onCategoryClick }) {
         {/* External References */}
         {report.external_references?.length > 0 && (
           <div>
-            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
               External References
             </h3>
             <ul className="space-y-1.5">

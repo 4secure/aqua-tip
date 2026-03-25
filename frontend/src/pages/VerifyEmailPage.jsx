@@ -85,7 +85,7 @@ export default function VerifyEmailPage() {
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-4">
               <img src="/logo.png" alt="Aqua Tip" className="w-6 h-6" />
-              <span className="font-display text-xl font-bold text-text-primary tracking-tight">
+              <span className="font-sans text-xl font-bold text-text-primary tracking-tight">
                 AQUA TIP
               </span>
             </Link>
@@ -97,7 +97,7 @@ export default function VerifyEmailPage() {
               </div>
             </div>
 
-            <h1 className="font-display text-2xl font-bold text-text-primary">Verify your email</h1>
+            <h1 className="font-sans text-2xl font-bold text-text-primary">Verify your email</h1>
             <p className="font-mono text-sm text-cyan mt-2">{user?.email}</p>
             <p className="font-mono text-xs text-text-secondary mt-1">
               Enter the 6-digit code we sent to your inbox

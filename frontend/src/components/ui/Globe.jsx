@@ -333,7 +333,7 @@ export const Globe = memo(function Globe({ width = 600, height = 700, className 
     return (
       <div className={className}>
         <div style={{ textAlign: "center" }}>
-          <p className="text-red font-display font-semibold mb-2">
+          <p className="text-red font-sans font-semibold mb-2">
             Error loading Earth visualization
           </p>
           <p className="text-text-secondary text-sm font-mono">{error}</p>

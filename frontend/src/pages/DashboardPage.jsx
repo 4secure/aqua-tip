@@ -64,7 +64,7 @@ function StatCard({ label, count, color, loading, error }) {
       ) : error ? (
         <div className="text-sm text-red">Failed to load</div>
       ) : (
-        <div className="text-2xl font-heading font-bold text-text-primary mb-2">
+        <div className="text-2xl font-sans font-bold text-text-primary mb-2">
           {(count || 0).toLocaleString()}
         </div>
       )}
@@ -123,7 +123,7 @@ function AttackChart({ categories, activeFilter, onFilterChange }) {
         },
         scales: {
           x: { grid: { color: '#1E203020', drawBorder: false }, ticks: { color: '#5A6173', font: { size: 11 } } },
-          y: { grid: { display: false }, ticks: { color: '#9AA0AD', font: { size: 12, family: 'Space Grotesk' } } },
+          y: { grid: { display: false }, ticks: { color: '#9AA0AD', font: { size: 12, family: 'Outfit' } } },
         },
       },
     };
@@ -196,7 +196,7 @@ function CreditWidget({ credits, loading, error }) {
       <div className="glass-card p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-green/10 flex items-center justify-center text-green"><Icon name="activity" /></div>
-          <h3 className="font-heading font-semibold text-sm">Credit Balance</h3>
+          <h3 className="font-sans font-semibold text-sm">Credit Balance</h3>
         </div>
         <div className="h-4 w-32 bg-surface-2 rounded animate-pulse" />
       </div>
@@ -207,7 +207,7 @@ function CreditWidget({ credits, loading, error }) {
       <div className="glass-card p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-green/10 flex items-center justify-center text-green"><Icon name="activity" /></div>
-          <h3 className="font-heading font-semibold text-sm">Credit Balance</h3>
+          <h3 className="font-sans font-semibold text-sm">Credit Balance</h3>
         </div>
         <div className="text-sm text-red">Failed to load</div>
       </div>
@@ -223,7 +223,7 @@ function CreditWidget({ credits, loading, error }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-green/10 flex items-center justify-center text-green"><Icon name="activity" /></div>
-          <h3 className="font-heading font-semibold text-sm">Credit Balance</h3>
+          <h3 className="font-sans font-semibold text-sm">Credit Balance</h3>
         </div>
         <CreditBadge remaining={credits.remaining} limit={credits.limit} />
       </div>
@@ -251,7 +251,7 @@ function RecentSearchesWidget({ searches, loading, error }) {
       <div className="glass-card p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan"><Icon name="clock" /></div>
-          <h3 className="font-heading font-semibold text-sm">Recent Searches</h3>
+          <h3 className="font-sans font-semibold text-sm">Recent Searches</h3>
         </div>
         <div className="space-y-2">
           {[1, 2, 3].map(i => <div key={i} className="h-6 bg-surface-2 rounded animate-pulse" />)}
@@ -264,7 +264,7 @@ function RecentSearchesWidget({ searches, loading, error }) {
       <div className="glass-card p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan"><Icon name="clock" /></div>
-          <h3 className="font-heading font-semibold text-sm">Recent Searches</h3>
+          <h3 className="font-sans font-semibold text-sm">Recent Searches</h3>
         </div>
         <div className="text-sm text-red">Failed to load</div>
       </div>
@@ -277,7 +277,7 @@ function RecentSearchesWidget({ searches, loading, error }) {
     <div className="glass-card p-5">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan"><Icon name="clock" /></div>
-        <h3 className="font-heading font-semibold text-sm">Recent Searches</h3>
+        <h3 className="font-sans font-semibold text-sm">Recent Searches</h3>
       </div>
       {items.length === 0 ? (
         <div className="text-sm text-text-muted text-center py-4">No searches yet</div>
@@ -449,7 +449,7 @@ export default function DashboardPage() {
     return mapData.events.map(e => ({
       lat: e.lat, lng: e.lng, size: 10,
       html: '<div class="map-marker"><div class="threat-pulse" style="background:rgba(255,59,92,0.3);width:20px;height:20px;border-radius:50%;position:absolute;inset:-5px;"></div></div>',
-      popup: `<div style="font-family:'Space Grotesk',sans-serif;color:#E8EAED;background:#161822;padding:8px 12px;border-radius:8px;border:1px solid #2A2D3E;min-width:150px;"><div style="font-weight:600;font-size:13px;margin-bottom:4px;">${e.city || e.ip}</div><div style="font-size:11px;color:#9AA0AD;">${e.type} -- ${e.country || ''}</div></div>`,
+      popup: `<div style="font-family:'Outfit',sans-serif;color:#E8EAED;background:#161822;padding:8px 12px;border-radius:8px;border:1px solid #2A2D3E;min-width:150px;"><div style="font-weight:600;font-size:13px;margin-bottom:4px;">${e.city || e.ip}</div><div style="font-size:11px;color:#9AA0AD;">${e.type} -- ${e.country || ''}</div></div>`,
     }));
   }, [mapData]);
   const mapRef = useLeaflet({ center: [25, 10], zoom: 3, markers });
@@ -469,7 +469,7 @@ export default function DashboardPage() {
       <div className="glass-card p-0 overflow-hidden" style={{ height: '40vh', minHeight: '320px' }}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <h2 className="font-heading font-semibold text-sm">Global Threat Map</h2>
+            <h2 className="font-sans font-semibold text-sm">Global Threat Map</h2>
             <div className="live-dot live-dot-green" />
           </div>
         </div>

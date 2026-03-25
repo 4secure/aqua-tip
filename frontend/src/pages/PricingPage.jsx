@@ -86,7 +86,7 @@ export default function PricingPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="font-display text-2xl font-bold text-white mb-2">
+        <h1 className="font-sans text-2xl font-bold text-white mb-2">
           Choose Your Plan
         </h1>
         <p className="text-text-muted font-mono text-sm max-w-lg mx-auto">
@@ -108,7 +108,7 @@ export default function PricingPage() {
           <p className="text-red font-mono text-sm mb-4">{error}</p>
           <button
             onClick={fetchPlans}
-            className="bg-gradient-to-r from-violet to-cyan text-white font-display font-semibold py-2 px-6 rounded-lg hover:opacity-90 transition-opacity"
+            className="bg-gradient-to-r from-violet to-cyan text-white font-sans font-semibold py-2 px-6 rounded-lg hover:opacity-90 transition-opacity"
           >
             Retry
           </button>

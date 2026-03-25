@@ -11,7 +11,7 @@ export default function CtiSearchPage() {
     <div className="flex flex-col items-center justify-center min-h-[80vh] grid-bg">
       {/* Hero */}
       <div className="text-center mb-10">
-        <h1 className="font-display text-4xl font-bold mb-3 text-gradient">IP Threat Intelligence</h1>
+        <h1 className="font-sans text-4xl font-bold mb-3 text-gradient">IP Threat Intelligence</h1>
         <p className="text-text-secondary text-base max-w-md">Search any IP address to get threat intelligence, geolocation, blocklist status, and historical activity data.</p>
       </div>
 

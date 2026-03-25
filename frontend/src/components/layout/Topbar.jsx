@@ -127,7 +127,7 @@ export default function Topbar({ collapsed, onHamburgerClick, onNotifClick }) {
           </>
         ) : (
           <>
-            <Link to="/login" className="btn-ghost font-display text-sm">Log In</Link>
+            <Link to="/login" className="btn-ghost font-sans text-sm">Log In</Link>
             <Link to="/register">
               <GradientButton size="sm">Sign Up</GradientButton>
             </Link>

@@ -8,7 +8,7 @@ export default function ComponentsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-2xl font-bold text-gradient mb-1">Component Library</h1>
+        <h1 className="font-sans text-2xl font-bold text-gradient mb-1">Component Library</h1>
         <p className="text-sm text-text-muted">AquaSecure design system components</p>
       </div>
 
@@ -200,7 +200,7 @@ export default function ComponentsPage() {
         <h2 className="section-title">Empty State</h2>
         <div className="text-center py-12">
           <div className="text-5xl mb-4">&#128269;</div>
-          <div className="text-lg font-heading font-semibold mb-2">No Results Found</div>
+          <div className="text-lg font-sans font-semibold mb-2">No Results Found</div>
           <div className="text-sm text-text-muted mb-4">Try adjusting your search criteria or filters.</div>
           <button className="btn-primary">Clear Filters</button>
         </div>
@@ -210,11 +210,11 @@ export default function ComponentsPage() {
       <section className="glass-card p-6">
         <h2 className="section-title">Typography</h2>
         <div className="space-y-3">
-          <div className="font-display text-3xl font-bold">Syne Display — AquaSecure Threat Intel</div>
-          <div className="font-heading text-xl font-semibold">Space Grotesk Heading — Dashboard Overview</div>
-          <div className="font-body text-base">Inter Body — Regular paragraph text for descriptions and content.</div>
+          <div className="font-sans text-3xl font-bold">Outfit Display — AquaSecure Threat Intel</div>
+          <div className="font-sans text-xl font-semibold">Outfit Heading — Dashboard Overview</div>
+          <div className="font-sans text-base">Outfit Body — Regular paragraph text for descriptions and content.</div>
           <div className="font-mono text-sm">JetBrains Mono — 185.220.101.34 · CVE-2021-44228 · a1b2c3d4e5f6</div>
-          <div className="text-gradient font-display text-2xl font-bold">Gradient Text Effect</div>
+          <div className="text-gradient font-sans text-2xl font-bold">Gradient Text Effect</div>
         </div>
       </section>
 

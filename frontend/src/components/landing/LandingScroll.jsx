@@ -41,7 +41,7 @@ function FeatureCard({ icon: Icon, title, description }) {
         <Icon className="w-5 h-5 text-violet-light" />
       </div>
       <div>
-        <h3 className="font-display text-[15px] font-semibold text-text-primary mb-1">
+        <h3 className="font-sans text-[15px] font-semibold text-text-primary mb-1">
           {title}
         </h3>
         <p className="font-mono text-xs text-text-secondary leading-relaxed">
@@ -137,7 +137,7 @@ export function LandingScroll() {
                   Real-Time Threat Intelligence
                 </span>
               </div>
-              <h1 className="font-display text-[56px] font-extrabold text-text-primary text-center leading-[1.08] tracking-tight max-w-[750px]">
+              <h1 className="font-sans text-[56px] font-extrabold text-text-primary text-center leading-[1.08] tracking-tight max-w-[750px]">
                 Know Your Threats Before They Strike
               </h1>
               <p className="text-[15px] font-mono text-text-secondary text-center max-w-[600px] leading-relaxed">
@@ -168,11 +168,11 @@ export function LandingScroll() {
             >
               <div className="flex items-center gap-2 mb-6">
                 <GlobeIcon className="w-5 h-5 text-violet-light" />
-                <span className="font-display text-sm font-semibold text-violet-light uppercase tracking-wider">
+                <span className="font-sans text-sm font-semibold text-violet-light uppercase tracking-wider">
                   Intelligence
                 </span>
               </div>
-              <h2 className="font-display text-3xl font-bold text-text-primary mb-8">
+              <h2 className="font-sans text-3xl font-bold text-text-primary mb-8">
                 Global Threat Coverage
               </h2>
               {section2Cards.map((card) => (
@@ -194,7 +194,7 @@ export function LandingScroll() {
                 Real-Time Threat Intelligence
               </span>
             </div>
-            <h1 className="font-display text-4xl font-extrabold text-text-primary text-center leading-[1.1] tracking-tight">
+            <h1 className="font-sans text-4xl font-extrabold text-text-primary text-center leading-[1.1] tracking-tight">
               Know Your Threats Before They Strike
             </h1>
             <p className="text-sm font-mono text-text-secondary text-center max-w-md leading-relaxed">
@@ -222,11 +222,11 @@ export function LandingScroll() {
         <section className="px-6 py-16">
           <div className="flex items-center gap-2 mb-4">
             <GlobeIcon className="w-5 h-5 text-violet-light" />
-            <span className="font-display text-sm font-semibold text-violet-light uppercase tracking-wider">
+            <span className="font-sans text-sm font-semibold text-violet-light uppercase tracking-wider">
               Intelligence
             </span>
           </div>
-          <h2 className="font-display text-2xl font-bold text-text-primary mb-6">
+          <h2 className="font-sans text-2xl font-bold text-text-primary mb-6">
             Global Threat Coverage
           </h2>
           <div className="space-y-4">

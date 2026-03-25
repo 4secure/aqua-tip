@@ -159,7 +159,7 @@ export default function DarkWebPage() {
             className="flex flex-col items-center mb-8"
           >
             <span className="text-violet mb-4 [&_svg]:w-12 [&_svg]:h-12"><Icon name="incognito" /></span>
-            <h1 className="font-display text-3xl font-bold text-text-primary mb-2">
+            <h1 className="font-sans text-3xl font-bold text-text-primary mb-2">
               Dark Web Search
             </h1>
             <p className="font-mono text-sm text-text-muted text-center max-w-md">
@@ -173,7 +173,7 @@ export default function DarkWebPage() {
           <div className="flex rounded-lg overflow-hidden border border-border">
             <button
               onClick={() => setSearchType('email')}
-              className={`px-4 py-2 text-sm font-display transition-colors ${
+              className={`px-4 py-2 text-sm font-sans transition-colors ${
                 searchType === 'email'
                   ? 'bg-violet text-white'
                   : 'bg-surface text-text-muted hover:text-text-primary'
@@ -183,7 +183,7 @@ export default function DarkWebPage() {
             </button>
             <button
               onClick={() => setSearchType('domain')}
-              className={`px-4 py-2 text-sm font-display transition-colors ${
+              className={`px-4 py-2 text-sm font-sans transition-colors ${
                 searchType === 'domain'
                   ? 'bg-violet text-white'
                   : 'bg-surface text-text-muted hover:text-text-primary'
@@ -310,7 +310,7 @@ export default function DarkWebPage() {
                 {error.refunded && (
                   <button
                     onClick={() => handleSearch()}
-                    className="mt-3 flex items-center gap-2 text-sm font-display text-cyan hover:text-cyan/80 transition-colors"
+                    className="mt-3 flex items-center gap-2 text-sm font-sans text-cyan hover:text-cyan/80 transition-colors"
                   >
                     <RotateCcw size={14} /> Retry
                   </button>

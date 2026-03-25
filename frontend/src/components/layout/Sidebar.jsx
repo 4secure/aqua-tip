@@ -91,7 +91,7 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
           />
           {showLabels && (
             <div className="min-w-0">
-              <div className="font-display font-bold text-base text-text-primary tracking-tight">Aqua-Tip</div>
+              <div className="font-sans font-bold text-base text-text-primary tracking-tight">Aqua-Tip</div>
               <div className="text-[10px] text-text-muted tracking-wider uppercase">Threat Intel Platform</div>
             </div>
           )}

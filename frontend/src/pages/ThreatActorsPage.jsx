@@ -114,7 +114,7 @@ export default function ThreatActorsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-text-primary mb-1">
+        <h1 className="font-sans text-2xl font-bold text-text-primary mb-1">
           Threat Actors
         </h1>
         <p className="font-mono text-sm text-text-muted">
@@ -171,7 +171,7 @@ export default function ThreatActorsPage() {
             <p className="font-mono text-sm text-red">{error}</p>
             <button
               onClick={loadData}
-              className="mt-2 flex items-center gap-2 text-sm font-display text-cyan hover:text-cyan/80 transition-colors"
+              className="mt-2 flex items-center gap-2 text-sm font-sans text-cyan hover:text-cyan/80 transition-colors"
             >
               <RotateCcw size={14} /> Retry
             </button>
@@ -190,7 +190,7 @@ export default function ThreatActorsPage() {
       {!loading && !error && items.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20">
           <Shield size={48} className="text-text-muted mb-4" />
-          <p className="font-display text-lg text-text-muted">
+          <p className="font-sans text-lg text-text-muted">
             No threat actors found
           </p>
           <p className="font-mono text-sm text-text-muted mt-1">
@@ -236,7 +236,7 @@ function ThreatActorCard({ actor, onClick }) {
       onClick={onClick}
       className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-5 cursor-pointer hover:border-violet/40 transition-colors"
     >
-      <h3 className="font-display text-lg font-bold text-text-primary mb-1">
+      <h3 className="font-sans text-lg font-bold text-text-primary mb-1">
         {actor.name}
       </h3>
 
@@ -363,7 +363,7 @@ function ThreatActorModal({ actor, onClose }) {
         </button>
 
         {/* Name */}
-        <h2 className="font-display text-2xl font-bold text-text-primary mb-1 pr-10">
+        <h2 className="font-sans text-2xl font-bold text-text-primary mb-1 pr-10">
           {actor.name}
         </h2>
 
@@ -406,7 +406,7 @@ function ThreatActorModal({ actor, onClose }) {
         {/* Description */}
         {actor.description && (
           <div className="mb-5">
-            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
               Description
             </h3>
             <p className="font-mono text-sm text-text-primary whitespace-pre-line leading-relaxed">
@@ -418,7 +418,7 @@ function ThreatActorModal({ actor, onClose }) {
         {/* Goals */}
         {actor.goals?.length > 0 && (
           <div className="mb-5">
-            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
               Goals
             </h3>
             <ul className="space-y-1">
@@ -435,7 +435,7 @@ function ThreatActorModal({ actor, onClose }) {
         {/* Targeted Countries */}
         {actor.targeted_countries?.length > 0 && (
           <div className="mb-5">
-            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <Globe size={12} />
               Targeted Countries
             </h3>
@@ -455,7 +455,7 @@ function ThreatActorModal({ actor, onClose }) {
         {/* Targeted Sectors */}
         {actor.targeted_sectors?.length > 0 && (
           <div className="mb-5">
-            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <Crosshair size={12} />
               Targeted Sectors
             </h3>
@@ -475,7 +475,7 @@ function ThreatActorModal({ actor, onClose }) {
         {/* External References */}
         {actor.external_references?.length > 0 && (
           <div>
-            <h3 className="text-xs font-display text-text-muted uppercase tracking-wider mb-1.5">
+            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
               External References
             </h3>
             <ul className="space-y-1.5">

@@ -26,7 +26,7 @@ export default function VulnScannerPage() {
     <div className="space-y-6">
       {/* Scan Input */}
       <div className="glass-card p-6">
-        <h1 className="font-heading text-xl font-bold mb-4">Vulnerability Scanner</h1>
+        <h1 className="font-sans text-xl font-bold mb-4">Vulnerability Scanner</h1>
         <div className="flex gap-3 mb-4">
           <input type="text" placeholder="Enter target (domain, IP, or URL)" className="input-mono flex-1 py-3" defaultValue="api.company.com" />
           <div className="flex items-center gap-3 px-4 border border-border rounded-lg bg-surface-2">
@@ -51,16 +51,16 @@ export default function VulnScannerPage() {
 
       {/* Severity Summary */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="glass-card p-4 border-l-2 border-l-red"><div className="text-2xl font-heading font-bold text-red">2</div><div className="text-xs text-text-muted">Critical</div></div>
-        <div className="glass-card p-4 border-l-2 border-l-[#FF873B]"><div className="text-2xl font-heading font-bold text-[#FF873B]">1</div><div className="text-xs text-text-muted">High</div></div>
-        <div className="glass-card p-4 border-l-2 border-l-amber"><div className="text-2xl font-heading font-bold text-amber">2</div><div className="text-xs text-text-muted">Medium</div></div>
-        <div className="glass-card p-4 border-l-2 border-l-green"><div className="text-2xl font-heading font-bold text-green">1</div><div className="text-xs text-text-muted">Low</div></div>
+        <div className="glass-card p-4 border-l-2 border-l-red"><div className="text-2xl font-sans font-bold text-red">2</div><div className="text-xs text-text-muted">Critical</div></div>
+        <div className="glass-card p-4 border-l-2 border-l-[#FF873B]"><div className="text-2xl font-sans font-bold text-[#FF873B]">1</div><div className="text-xs text-text-muted">High</div></div>
+        <div className="glass-card p-4 border-l-2 border-l-amber"><div className="text-2xl font-sans font-bold text-amber">2</div><div className="text-xs text-text-muted">Medium</div></div>
+        <div className="glass-card p-4 border-l-2 border-l-green"><div className="text-2xl font-sans font-bold text-green">1</div><div className="text-xs text-text-muted">Low</div></div>
       </div>
 
       {/* Results Table */}
       <div className="glass-card p-0 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-          <h3 className="font-heading font-semibold text-sm">Scan Results</h3>
+          <h3 className="font-sans font-semibold text-sm">Scan Results</h3>
           <div className="flex gap-2">
             <button className="btn-ghost text-xs"><Icon name="download" /> Export CSV</button>
             <button className="btn-ghost text-xs"><Icon name="filter" /> Filter</button>

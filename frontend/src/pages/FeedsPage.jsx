@@ -14,7 +14,7 @@ export default function FeedsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-xl font-bold">Threat Feeds</h1>
+          <h1 className="font-sans text-xl font-bold">Threat Feeds</h1>
           <p className="text-sm text-text-muted mt-1">Manage and monitor your threat intelligence feeds</p>
         </div>
         <button className="btn-primary flex items-center gap-2">
@@ -27,19 +27,19 @@ export default function FeedsPage() {
       <div className="grid grid-cols-4 gap-4">
         <div className="glass-card p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-green/10 flex items-center justify-center"><div className="live-dot live-dot-green"></div></div>
-          <div><div className="text-xl font-heading font-bold">8</div><div className="text-xs text-text-muted">Active Feeds</div></div>
+          <div><div className="text-xl font-sans font-bold">8</div><div className="text-xs text-text-muted">Active Feeds</div></div>
         </div>
         <div className="glass-card p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-violet/10 flex items-center justify-center text-violet"><Icon name="rss" /></div>
-          <div><div className="text-xl font-heading font-bold">419.7K</div><div className="text-xs text-text-muted">Total Indicators</div></div>
+          <div><div className="text-xl font-sans font-bold">419.7K</div><div className="text-xs text-text-muted">Total Indicators</div></div>
         </div>
         <div className="glass-card p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-amber/10 flex items-center justify-center"><div className="live-dot live-dot-amber"></div></div>
-          <div><div className="text-xl font-heading font-bold">1</div><div className="text-xs text-text-muted">Paused</div></div>
+          <div><div className="text-xl font-sans font-bold">1</div><div className="text-xs text-text-muted">Paused</div></div>
         </div>
         <div className="glass-card p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-red/10 flex items-center justify-center"><div className="live-dot live-dot-red"></div></div>
-          <div><div className="text-xl font-heading font-bold">1</div><div className="text-xs text-text-muted">Errors</div></div>
+          <div><div className="text-xl font-sans font-bold">1</div><div className="text-xs text-text-muted">Errors</div></div>
         </div>
       </div>
 
@@ -85,14 +85,14 @@ export default function FeedsPage() {
       <div className="drawer glass-panel border-l border-border" style={{width:'480px', right: drawerOpen ? 0 : '-480px'}}>
         <div className="h-full flex flex-col">
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-            <h3 className="font-heading font-semibold text-lg">{drawerTitle}</h3>
+            <h3 className="font-sans font-semibold text-lg">{drawerTitle}</h3>
             <button className="text-text-muted hover:text-text-primary" onClick={closeDrawer}><Icon name="close" /></button>
           </div>
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div className="space-y-3">
               <div className="flex justify-between text-sm"><span className="text-text-muted">Type</span><span className="font-mono text-xs">STIX/TAXII</span></div>
               <div className="flex justify-between text-sm"><span className="text-text-muted">Status</span><span className="feed-status active"><span className="dot"></span>Active</span></div>
-              <div className="flex justify-between text-sm"><span className="text-text-muted">Total Indicators</span><span className="font-heading font-semibold">45,200</span></div>
+              <div className="flex justify-between text-sm"><span className="text-text-muted">Total Indicators</span><span className="font-sans font-semibold">45,200</span></div>
               <div className="flex justify-between text-sm"><span className="text-text-muted">Update Interval</span><span>5 minutes</span></div>
             </div>
             <div>

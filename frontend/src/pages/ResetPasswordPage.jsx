@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
           <div className="bg-surface border border-border rounded-xl p-8 text-center">
             <Link to="/" className="inline-flex items-center gap-2 mb-4">
               <img src="/logo.png" alt="Aqua Tip" className="w-6 h-6" />
-              <span className="font-display text-xl font-bold text-text-primary tracking-tight">
+              <span className="font-sans text-xl font-bold text-text-primary tracking-tight">
                 AQUA TIP
               </span>
             </Link>
@@ -106,11 +106,11 @@ export default function ResetPasswordPage() {
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-4">
               <img src="/logo.png" alt="Aqua Tip" className="w-6 h-6" />
-              <span className="font-display text-xl font-bold text-text-primary tracking-tight">
+              <span className="font-sans text-xl font-bold text-text-primary tracking-tight">
                 AQUA TIP
               </span>
             </Link>
-            <h1 className="font-display text-2xl font-bold text-text-primary">Reset your password</h1>
+            <h1 className="font-sans text-2xl font-bold text-text-primary">Reset your password</h1>
             <p className="font-mono text-sm text-text-secondary mt-1">{email}</p>
           </div>
 

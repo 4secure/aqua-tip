@@ -19,12 +19,12 @@ export default function CveDetailPage() {
               <span className="font-mono text-2xl font-bold text-text-primary">{CVE_DETAIL.id}</span>
               <span className="severity-critical">CRITICAL</span>
             </div>
-            <div className="text-lg font-heading text-text-secondary mt-1">{CVE_DETAIL.name} — Apache Log4j Remote Code Execution</div>
+            <div className="text-lg font-sans text-text-secondary mt-1">{CVE_DETAIL.name} — Apache Log4j Remote Code Execution</div>
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2"><span className="text-xs text-text-muted">CVSS</span><span className="text-xl font-heading font-bold text-red">{CVE_DETAIL.cvss}</span></div>
-          <div className="flex items-center gap-2"><span className="text-xs text-text-muted">EPSS</span><span className="text-xl font-heading font-bold text-red">{(CVE_DETAIL.epss * 100).toFixed(1)}%</span></div>
+          <div className="flex items-center gap-2"><span className="text-xs text-text-muted">CVSS</span><span className="text-xl font-sans font-bold text-red">{CVE_DETAIL.cvss}</span></div>
+          <div className="flex items-center gap-2"><span className="text-xs text-text-muted">EPSS</span><span className="text-xl font-sans font-bold text-red">{(CVE_DETAIL.epss * 100).toFixed(1)}%</span></div>
           <div className="flex items-center gap-2"><span className="text-xs text-text-muted">Published</span><span className="text-sm font-mono">{CVE_DETAIL.published}</span></div>
           <div className="flex items-center gap-2"><span className="text-xs text-text-muted">Modified</span><span className="text-sm font-mono">{CVE_DETAIL.modified}</span></div>
           <div className="ml-auto flex gap-2">
@@ -64,7 +64,7 @@ export default function CveDetailPage() {
               {['Confidentiality', 'Integrity', 'Availability'].map(label => (
                 <div key={label} className="p-3 rounded-lg bg-red/5 border border-red/10 text-center">
                   <div className="text-xs text-text-muted mb-1">{label}</div>
-                  <div className="text-lg font-heading font-bold text-red">HIGH</div>
+                  <div className="text-lg font-sans font-bold text-red">HIGH</div>
                 </div>
               ))}
             </div>

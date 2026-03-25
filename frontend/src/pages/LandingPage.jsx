@@ -17,7 +17,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="Aqua Tip" className="w-[22px] h-[22px]" />
-            <span className="font-display text-lg font-bold text-text-primary tracking-tight">
+            <span className="font-sans text-lg font-bold text-text-primary tracking-tight">
               AQUA TIP
             </span>
           </Link>
@@ -33,7 +33,7 @@ export default function LandingPage() {
             <>
               <Link
                 to="/login"
-                className="font-display text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                className="font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
               >
                 Log In
               </Link>
@@ -61,7 +61,7 @@ export default function LandingPage() {
           }}
         />
         <div className="relative z-10 text-center max-w-2xl mx-auto">
-          <h2 className="font-display text-3xl font-bold text-text-primary mb-4">
+          <h2 className="font-sans text-3xl font-bold text-text-primary mb-4">
             Ready to Secure Your Infrastructure?
           </h2>
           <p className="font-mono text-[15px] text-text-secondary mb-8">
@@ -92,7 +92,7 @@ export default function LandingPage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <img src="/logo.png" alt="Aqua Tip" className="w-5 h-5" />
-                <span className="font-display text-lg font-bold text-text-primary tracking-tight">
+                <span className="font-sans text-lg font-bold text-text-primary tracking-tight">
                   AQUA TIP
                 </span>
               </div>
@@ -104,13 +104,13 @@ export default function LandingPage() {
             <div className="flex flex-col items-end gap-2 pt-1">
               <Link
                 to="/contact"
-                className="font-display text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                className="font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
               >
                 Contact Us
               </Link>
               <Link
                 to="/threat-search"
-                className="font-display text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                className="font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
               >
                 Pricing Plan
               </Link>

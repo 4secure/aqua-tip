@@ -261,7 +261,7 @@ function ExternalRefsTab({ refs }) {
         <div key={i} className="glass-card p-5">
           <div className="flex items-center gap-2 mb-2">
             <ExternalLink size={14} className="text-cyan" />
-            <span className="font-heading font-semibold text-sm">{ref.source_name}</span>
+            <span className="font-sans font-semibold text-sm">{ref.source_name}</span>
           </div>
           {ref.url && (
             <a
@@ -290,7 +290,7 @@ function IndicatorsTab({ indicators }) {
         <div key={i} className="glass-card p-5">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <Shield size={14} className="text-violet" />
-            <span className="font-heading font-semibold text-sm">{ind.name || 'Unnamed Indicator'}</span>
+            <span className="font-sans font-semibold text-sm">{ind.name || 'Unnamed Indicator'}</span>
             {ind.score != null && (
               <span
                 className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium"
@@ -347,7 +347,7 @@ function SightingsTab({ sightings }) {
         <div key={i} className="glass-card p-5">
           <div className="flex items-center gap-2 mb-2">
             <Eye size={14} className="text-amber" />
-            <span className="font-heading font-semibold text-sm">
+            <span className="font-sans font-semibold text-sm">
               {s.from?.name || s.from?.observable_value || 'Unknown'} → {s.to?.name || s.to?.observable_value || 'Unknown'}
             </span>
           </div>
@@ -372,7 +372,7 @@ function NotesTab({ notes }) {
           <div className="flex items-center gap-2 mb-2">
             <StickyNote size={14} className="text-green" />
             {note.abstract && (
-              <span className="font-heading font-semibold text-sm">{note.abstract}</span>
+              <span className="font-sans font-semibold text-sm">{note.abstract}</span>
             )}
             <span className="ml-auto text-xs text-text-muted font-mono">{formatDate(note.created)}</span>
           </div>
@@ -423,7 +423,7 @@ function RecentSearchesSection({ isAuthenticated, history, historyLoading, histo
       <div className="glass-card p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan"><Clock size={18} /></div>
-          <h3 className="font-heading font-semibold text-sm">Recent Searches</h3>
+          <h3 className="font-sans font-semibold text-sm">Recent Searches</h3>
         </div>
         <div className="space-y-2">
           {[1, 2, 3].map(i => <div key={i} className="h-6 bg-surface-2 rounded animate-pulse" />)}
@@ -455,7 +455,7 @@ function RecentSearchesSection({ isAuthenticated, history, historyLoading, histo
     <div className="glass-card p-5">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan"><Clock size={18} /></div>
-        <h3 className="font-heading font-semibold text-sm">Recent Searches</h3>
+        <h3 className="font-sans font-semibold text-sm">Recent Searches</h3>
       </div>
       <div className="space-y-1">
         {items.map((s) => {
@@ -603,7 +603,7 @@ export default function ThreatSearchPage() {
       <div className="glass-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="font-heading text-xl font-bold">Threat Search</h1>
+            <h1 className="font-sans text-xl font-bold">Threat Search</h1>
             <p className="text-sm text-text-muted mt-1">Search IPs, domains, hostnames, emails, etc ...</p>
           </div>
         </div>
@@ -677,7 +677,7 @@ export default function ThreatSearchPage() {
               <AlertTriangle size={20} className="text-red" />
             </div>
             <div>
-              <div className="font-heading font-semibold text-red">Search failed -- credit refunded</div>
+              <div className="font-sans font-semibold text-red">Search failed -- credit refunded</div>
               <p className="text-sm text-text-secondary mt-1">{error.message}</p>
             </div>
           </div>
@@ -692,7 +692,7 @@ export default function ThreatSearchPage() {
               <AlertTriangle size={20} className="text-amber" />
             </div>
             <div>
-              <div className="font-heading font-semibold text-amber">Invalid input</div>
+              <div className="font-sans font-semibold text-amber">Invalid input</div>
               <p className="text-sm text-text-secondary mt-1">{error.message}</p>
             </div>
           </div>
@@ -721,7 +721,7 @@ export default function ThreatSearchPage() {
                     <div className={`score-value text-lg ${level.color}`}>{result.score}</div>
                   </div>
                   <div>
-                    <div className="font-heading font-semibold text-lg flex items-center gap-2">
+                    <div className="font-sans font-semibold text-lg flex items-center gap-2">
                       {result.query}
                       {result.detected_type && (
                         <span
@@ -742,19 +742,19 @@ export default function ThreatSearchPage() {
                 </div>
                 <div className="flex gap-6 ml-auto text-center">
                   <div>
-                    <div className="text-xl font-heading font-bold text-cyan">
+                    <div className="text-xl font-sans font-bold text-cyan">
                       {result.relationships?.length || 0}
                     </div>
                     <div className="text-[10px] text-text-muted uppercase">Relations</div>
                   </div>
                   <div>
-                    <div className="text-xl font-heading font-bold text-violet">
+                    <div className="text-xl font-sans font-bold text-violet">
                       {result.labels?.length || 0}
                     </div>
                     <div className="text-[10px] text-text-muted uppercase">Labels</div>
                   </div>
                   <div>
-                    <div className="text-xl font-heading font-bold text-amber">
+                    <div className="text-xl font-sans font-bold text-amber">
                       {result.indicators?.length || 0}
                     </div>
                     <div className="text-[10px] text-text-muted uppercase">Indicators</div>
@@ -769,7 +769,7 @@ export default function ThreatSearchPage() {
                   <ShieldCheck size={24} className="text-green" />
                 </div>
                 <div>
-                  <div className="font-heading font-semibold text-green">No threats found for {result.query}</div>
+                  <div className="font-sans font-semibold text-green">No threats found for {result.query}</div>
                   <p className="text-sm text-text-secondary mt-1">
                     No known threat intelligence found in our database.
                   </p>

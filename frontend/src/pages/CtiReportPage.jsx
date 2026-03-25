@@ -88,9 +88,9 @@ export default function CtiReportPage() {
         {activeTab === 'overview' && (
           <div>
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Total Reports</div><div className="text-xl font-heading font-bold text-red">{IP_REPORT.totalReports.toLocaleString()}</div></div>
-              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">First Seen</div><div className="text-xl font-heading font-bold">{IP_REPORT.firstSeen}</div></div>
-              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Last Seen</div><div className="text-xl font-heading font-bold text-green">{IP_REPORT.lastSeen}</div></div>
+              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Total Reports</div><div className="text-xl font-sans font-bold text-red">{IP_REPORT.totalReports.toLocaleString()}</div></div>
+              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">First Seen</div><div className="text-xl font-sans font-bold">{IP_REPORT.firstSeen}</div></div>
+              <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Last Seen</div><div className="text-xl font-sans font-bold text-green">{IP_REPORT.lastSeen}</div></div>
             </div>
             <div className="glass-card p-5 mb-6">
               <h3 className="section-title">Activity Timeline (30 days)</h3>
@@ -159,12 +159,12 @@ export default function CtiReportPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-surface-2 border border-border">
                 <div className="text-xs text-text-muted mb-1">Primary Classification</div>
-                <div className="text-lg font-heading font-semibold text-red">C2 Server</div>
+                <div className="text-lg font-sans font-semibold text-red">C2 Server</div>
                 <div className="text-xs text-text-secondary mt-1">Command & Control infrastructure used by threat actors to manage compromised systems.</div>
               </div>
               <div className="p-4 rounded-lg bg-surface-2 border border-border">
                 <div className="text-xs text-text-muted mb-1">Secondary Classification</div>
-                <div className="text-lg font-heading font-semibold text-amber">Botnet Node</div>
+                <div className="text-lg font-sans font-semibold text-amber">Botnet Node</div>
                 <div className="text-xs text-text-secondary mt-1">Part of a distributed botnet network used for various malicious activities.</div>
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function CtiReportPage() {
             </svg>
             <div className="score-value text-3xl text-red">{IP_REPORT.score}</div>
           </div>
-          <div className="text-sm font-heading font-semibold text-red mb-0.5">High Risk</div>
+          <div className="text-sm font-sans font-semibold text-red mb-0.5">High Risk</div>
           <div className="text-xs text-text-muted">Threat Score</div>
         </div>
         <div className="glass-card p-4 space-y-2">

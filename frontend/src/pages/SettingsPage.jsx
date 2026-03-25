@@ -50,7 +50,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-xl font-bold">Settings</h1>
+          <h1 className="font-sans text-xl font-bold">Settings</h1>
           <p className="text-sm text-text-muted mt-1">Manage API keys, webhooks, and account settings</p>
         </div>
       </div>
@@ -124,9 +124,9 @@ export default function SettingsPage() {
             <div style={{height:'300px'}}><UsageChart /></div>
           </div>
           <div className="grid grid-cols-3 gap-4 mt-4">
-            <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Total Requests</div><div className="text-2xl font-heading font-bold">742.3K</div></div>
-            <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Daily Average</div><div className="text-2xl font-heading font-bold">24.7K</div></div>
-            <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Rate Limit</div><div className="text-2xl font-heading font-bold text-green">35%</div></div>
+            <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Total Requests</div><div className="text-2xl font-sans font-bold">742.3K</div></div>
+            <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Daily Average</div><div className="text-2xl font-sans font-bold">24.7K</div></div>
+            <div className="glass-card p-4"><div className="text-xs text-text-muted mb-1">Rate Limit</div><div className="text-2xl font-sans font-bold text-green">35%</div></div>
           </div>
         </>
       )}
@@ -148,7 +148,7 @@ export default function SettingsPage() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 overlay-backdrop flex items-center justify-center" onClick={e => { if (e.target === e.currentTarget) setModalOpen(false); }}>
           <div className="glass-panel rounded-2xl w-[480px] p-6 animate-slide-in-up" onClick={e => e.stopPropagation()}>
-            <h3 className="font-heading font-semibold text-lg mb-4">Create API Key</h3>
+            <h3 className="font-sans font-semibold text-lg mb-4">Create API Key</h3>
             <div className="space-y-4">
               <div><label className="text-xs text-text-muted mb-1 block">Key Name</label><input type="text" className="input-field" placeholder="e.g., Production API Key" /></div>
               <div>

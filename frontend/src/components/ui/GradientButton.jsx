@@ -11,7 +11,7 @@ export const GradientButton = forwardRef(function GradientButton(
   ref
 ) {
   const base =
-    "inline-flex items-center justify-center gap-2 font-display font-bold text-white cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-light disabled:pointer-events-none disabled:opacity-50";
+    "inline-flex items-center justify-center gap-2 font-sans font-bold text-white cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-light disabled:pointer-events-none disabled:opacity-50";
   const variantClass =
     variant === "variant" ? "gradient-button-variant" : "gradient-button";
   const sizeClass = sizeClasses[size] || sizeClasses.md;

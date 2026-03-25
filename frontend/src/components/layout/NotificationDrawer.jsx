@@ -16,7 +16,7 @@ export default function NotificationDrawer({ open, onClose }) {
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <div>
-              <div className="font-heading font-semibold text-text-primary">Notifications</div>
+              <div className="font-sans font-semibold text-text-primary">Notifications</div>
               <div className="text-xs text-text-muted mt-0.5">{NOTIFICATIONS.filter(n => !n.read).length} unread</div>
             </div>
             <button className="text-text-muted hover:text-text-primary transition-colors" onClick={onClose}>
