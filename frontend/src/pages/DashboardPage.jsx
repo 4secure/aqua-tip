@@ -449,7 +449,7 @@ export default function DashboardPage() {
     return mapData.events.map(e => ({
       lat: e.lat, lng: e.lng, size: 10,
       html: '<div class="map-marker"><div class="threat-pulse" style="background:rgba(255,59,92,0.3);width:20px;height:20px;border-radius:50%;position:absolute;inset:-5px;"></div></div>',
-      popup: `<div style="font-family:'Outfit',sans-serif;color:#E8EAED;background:#161822;padding:8px 12px;border-radius:8px;border:1px solid #2A2D3E;min-width:150px;"><div style="font-weight:600;font-size:13px;margin-bottom:4px;">${e.city || e.ip}</div><div style="font-size:11px;color:#9AA0AD;">${e.type} -- ${e.country || ''}</div></div>`,
+      popup: `<div style="font-family:'Outfit',sans-serif;color:#E8EAED;background:#161822;padding:8px 12px;border-radius:8px;border:1px solid #2A2D3E;min-width:150px;"><div style="font-weight:600;font-size:13px;margin-bottom:4px;">${e.city || e.ip}-${e.ip}</div><div style="font-size:11px;color:#9AA0AD;">${e.type} -- ${e.country || ''} </div></div>`,
     }));
   }, [mapData]);
   const mapRef = useLeaflet({ center: [25, 10], zoom: 3, markers });
@@ -462,7 +462,7 @@ export default function DashboardPage() {
   const handleClearFilter = () => {
     setActiveFilter(null);
   };
-
+  console.log(mapData);
   return (
     <div className="space-y-6">
       {/* Threat Map */}
