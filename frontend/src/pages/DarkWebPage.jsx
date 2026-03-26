@@ -35,16 +35,10 @@ function BreachCard({ breach }) {
         </div>
       )}
       {contextHtml && (
-        <details className="group">
-          <summary className="flex items-center gap-1.5 cursor-pointer text-[11px] text-text-muted hover:text-text-secondary transition-colors">
-            <FileText size={12} />
-            Raw context
-          </summary>
-          <div
-            className="mt-2 font-mono text-[11px] text-text-secondary leading-relaxed [&_b]:text-text-muted [&_b]:font-semibold [&_code]:text-cyan [&_code]:bg-surface-2 [&_code]:px-1 [&_code]:rounded [&_a]:text-cyan [&_a]:hover:underline"
-            dangerouslySetInnerHTML={{ __html: contextHtml }}
-          />
-        </details>
+        <div
+          className="border-t border-border pt-2 font-mono text-[11px] text-text-secondary leading-relaxed [&_b]:text-text-muted [&_b]:font-semibold [&_code]:text-cyan [&_code]:bg-surface-2 [&_code]:px-1 [&_code]:rounded [&_a]:text-cyan [&_a]:hover:underline"
+          dangerouslySetInnerHTML={{ __html: contextHtml }}
+        />
       )}
     </div>
   );
