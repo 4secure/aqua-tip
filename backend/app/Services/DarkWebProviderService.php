@@ -4,58 +4,146 @@ namespace App\Services;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use RuntimeException;
 
 class DarkWebProviderService
 {
+    private string $baseUrl;
+    private string $apiKey;
+
+    public function __construct()
+    {
+        $this->baseUrl = rtrim(config('services.dark_web.base_url'), '/');
+        $this->apiKey = config('services.dark_web.api_key') ?? '';
+    }
+
     /**
-     * Search the dark web provider for breach data.
+     * Submit a search to LeaksCheck and return the task_id.
      *
      * @param string $query  Email or domain to search
-     * @param string $type   'email' or 'domain'
-     * @return array{found: int, results: array}
+     * @return string  The task_id for polling
      *
-     * @throws \Illuminate\Http\Client\RequestException
+     * @throws RuntimeException
      * @throws ConnectionException
      */
-    public function search(string $query, string $type): array
+    public function startSearch(string $query): string
     {
-        $baseUrl = config('services.dark_web.base_url');
-        $apiKey = config('services.dark_web.api_key');
-
-        $response = Http::withHeaders(['X-API-KEY' => $apiKey])
-            ->timeout(15)
+        $response = Http::timeout(15)
             ->retry(2, 500, fn (\Exception $e) => $e instanceof ConnectionException)
-            ->get($baseUrl . '/export', [
-                'q' => $query,
-                'limit' => 1000,
+            ->post($this->baseUrl . '/search', [
+                'api_key' => $this->apiKey,
+                'query' => $query,
+                'type' => 'general',
             ]);
 
         $response->throw();
 
         $body = $response->json();
 
-        return [
-            'found' => $body['total_in_db'] ?? 0,
-            'results' => $this->normalizeResults($body['results'] ?? []),
-        ];
+        if (empty($body['task_id'])) {
+            throw new RuntimeException(
+                'LeaksCheck did not return a task_id: ' . ($body['message'] ?? 'Unknown error')
+            );
+        }
+
+        return $body['task_id'];
     }
 
     /**
-     * Normalize raw provider results into a consistent format.
+     * Poll the status of a previously submitted search task.
+     *
+     * @param string $taskId
+     * @return array{status: string, found: int, results: array}
+     *
+     * @throws RuntimeException
+     * @throws ConnectionException
+     */
+    public function checkStatus(string $taskId): array
+    {
+        $response = Http::timeout(15)
+            ->retry(2, 500, fn (\Exception $e) => $e instanceof ConnectionException)
+            ->get($this->baseUrl . '/status/' . $taskId, [
+                'api_key' => $this->apiKey,
+            ]);
+
+        $response->throw();
+
+        $body = $response->json();
+
+        $status = $body['status'] ?? $body['state'] ?? 'UNKNOWN';
+
+        if ($status === 'SUCCESS' || $status === 'PROCESSING') {
+            $rawResults = $body['result'] ?? [];
+            return [
+                'status' => $status,
+                'found' => is_array($rawResults) ? count($rawResults) : 0,
+                'results' => $this->normalizeResults(is_array($rawResults) ? $rawResults : []),
+            ];
+        }
+
+        if ($status === 'PENDING') {
+            return [
+                'status' => 'PENDING',
+                'found' => 0,
+                'results' => [],
+            ];
+        }
+
+        // Any other status is treated as an error
+        throw new RuntimeException(
+            'LeaksCheck search failed with status: ' . $status
+            . ($body['message'] ?? '')
+        );
+    }
+
+    /**
+     * Synchronous convenience: submit + poll until SUCCESS or timeout.
+     * Kept for backward-compatibility if needed.
+     *
+     * @param string $query
+     * @param string $type  (unused with LeaksCheck, kept for interface compat)
+     * @return array{found: int, results: array}
+     */
+    public function search(string $query, string $type): array
+    {
+        $taskId = $this->startSearch($query);
+
+        $maxAttempts = 12; // 12 * 4s = 48s max
+        $attempt = 0;
+
+        while ($attempt < $maxAttempts) {
+            sleep(4);
+            $attempt++;
+
+            $result = $this->checkStatus($taskId);
+
+            if ($result['status'] === 'SUCCESS') {
+                return [
+                    'found' => $result['found'],
+                    'results' => $result['results'],
+                ];
+            }
+        }
+
+        throw new RuntimeException('LeaksCheck search timed out after ' . ($maxAttempts * 4) . ' seconds.');
+    }
+
+    /**
+     * Normalize raw LeaksCheck results into a consistent format.
      */
     private function normalizeResults(array $items): array
     {
         return array_map(fn (array $item) => [
-            'email' => $item['Email'] ?? null,
-            'password' => $this->maskPassword($item['Password'] ?? null),
-            'username' => $item['Username'] ?? null,
-            'source' => $item['TLD'] ?? $item['URL'] ?? null,
-            'url' => $item['URL'] ?? null,
-            'breach_date' => null,
-            'first_name' => $item['FirstName'] ?? null,
-            'last_name' => $item['LastName'] ?? null,
-            'phone' => $item['Phone'] ?? null,
-            'fields' => [],
+            'email' => $item['email'] ?? $item['Email'] ?? null,
+            'password' => $this->maskPassword($item['password'] ?? $item['Password'] ?? null),
+            'username' => $item['username'] ?? $item['Username'] ?? null,
+            'source' => $item['source'] ?? $item['TLD'] ?? $item['URL'] ?? null,
+            'url' => $item['url'] ?? $item['URL'] ?? null,
+            'breach_date' => $item['breach_date'] ?? $item['date'] ?? null,
+            'first_name' => $item['first_name'] ?? $item['FirstName'] ?? null,
+            'last_name' => $item['last_name'] ?? $item['LastName'] ?? null,
+            'phone' => $item['phone'] ?? $item['Phone'] ?? null,
+            'fields' => $item['fields'] ?? [],
         ], $items);
     }
 

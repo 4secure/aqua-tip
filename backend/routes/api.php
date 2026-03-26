@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dark web search (authenticated + credit-gated)
     Route::post('/dark-web/search', DarkWebSearchController::class)->middleware('deduct-credit');
+    Route::get('/dark-web/status/{taskId}', [DarkWebSearchController::class, 'status']);
 
     // OpenCTI health check
     Route::get('/opencti/health', OpenCtiHealthController::class);
