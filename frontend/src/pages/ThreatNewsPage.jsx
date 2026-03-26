@@ -10,6 +10,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from 'lucide-react';
 import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
 import { useFormatDate } from '../hooks/useFormatDate';
@@ -33,6 +34,120 @@ function categoryColor(labelValue) {
 
 const PAGE_SIZE = 20;
 const MAX_VISIBLE_CATEGORIES = 3;
+
+/* -- Searchable Category Dropdown -- */
+
+function CategoryDropdown({ categories, value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const selectedLabel = categories.find((c) => c.id === value)?.value || '';
+
+  const filtered = query
+    ? categories.filter((c) =>
+        c.value.toLowerCase().includes(query.toLowerCase())
+      )
+    : categories;
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+        setQuery('');
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (open && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [open]);
+
+  const handleSelect = (catId) => {
+    onChange(catId);
+    setOpen(false);
+    setQuery('');
+  };
+
+  return (
+    <div ref={dropdownRef} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center gap-1.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-xs px-3 py-2.5 focus:outline-none focus:border-violet transition-colors hover:border-violet/40 min-w-[160px]"
+      >
+        <span className="truncate">
+          {value ? selectedLabel : 'All categories'}
+        </span>
+        <ChevronDown
+          size={14}
+          className={`text-text-muted shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-50 w-64 bg-surface/90 border border-border backdrop-blur-md rounded-xl shadow-2xl overflow-hidden">
+          {/* Search input */}
+          <div className="p-2 border-b border-border">
+            <div className="relative">
+              <Search
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+              />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search categories..."
+                className="w-full pl-8 pr-3 py-1.5 bg-surface-2 border border-border text-text-primary rounded-lg font-mono text-xs placeholder:text-text-muted focus:outline-none focus:border-violet transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Options list */}
+          <div className="max-h-56 overflow-y-auto py-1">
+            <button
+              type="button"
+              onClick={() => handleSelect('')}
+              className={`w-full text-left px-3 py-2 font-mono text-xs transition-colors ${
+                !value
+                  ? 'text-violet bg-violet/10'
+                  : 'text-text-primary hover:bg-surface-2'
+              }`}
+            >
+              All categories
+            </button>
+            {filtered.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleSelect(cat.id)}
+                className={`w-full text-left px-3 py-2 font-mono text-xs transition-colors ${
+                  value === cat.id
+                    ? 'text-violet bg-violet/10'
+                    : 'text-text-primary hover:bg-surface-2'
+                }`}
+              >
+                {cat.value}
+              </button>
+            ))}
+            {filtered.length === 0 && (
+              <p className="px-3 py-2 font-mono text-xs text-text-muted">
+                No categories found
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ThreatNewsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -198,22 +313,15 @@ export default function ThreatNewsPage() {
           />
         </div>
 
-        <select
+        <CategoryDropdown
+          categories={categories}
           value={label}
-          onChange={(e) => {
-            const selected = categories.find((c) => c.id === e.target.value);
+          onChange={(catId) => {
+            const selected = categories.find((c) => c.id === catId);
             setCategoryFilterName(selected?.value || '');
-            updateParam('label', e.target.value);
+            updateParam('label', catId);
           }}
-          className="bg-surface border border-border text-text-primary rounded-lg font-mono text-xs px-2 py-2.5 focus:outline-none focus:border-violet transition-colors appearance-none shrink-0"
-        >
-          <option value="">All categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.value}
-            </option>
-          ))}
-        </select>
+        />
 
         {pagination && (
           <div className="flex items-center gap-2 shrink-0">
