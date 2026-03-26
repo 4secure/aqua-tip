@@ -80,9 +80,11 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260324-plb | Refactor sidebar to group pages by categories | 2026-03-24 | 8e14bec | [260324-plb-refactor-sidebar-to-group-pages-by-categ](./quick/260324-plb-refactor-sidebar-to-group-pages-by-categ/) |
+| 260326-seq | Decrease Recent Indicators table height to match Top Attack Categories | 2026-03-26 | e3d270c | [260326-seq-decrease-the-height-of-the-recent-indica](./quick/260326-seq-decrease-the-height-of-the-recent-indica/) |
 
 ## Session Continuity
 
+Last activity: 2026-03-26 - Completed quick task 260326-seq: Decrease Recent Indicators table height
 Last session: 2026-03-26T12:45:14.014Z
 Stopped at: Completed 28-01-PLAN.md - awaiting visual verification checkpoint
 Resume file: None
