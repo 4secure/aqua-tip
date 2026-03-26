@@ -7,17 +7,22 @@ import { GradientButton } from '../components/ui/GradientButton';
 
 function SkeletonCard() {
   return (
-    <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-6 animate-pulse">
-      <div className="h-5 bg-surface-2 rounded w-20 mb-4" />
-      <div className="h-8 bg-surface-2 rounded w-24 mb-2" />
-      <div className="h-4 bg-surface-2 rounded w-28 mb-6" />
-      <div className="space-y-2">
-        <div className="h-3 bg-surface-2 rounded w-full" />
-        <div className="h-3 bg-surface-2 rounded w-3/4" />
-        <div className="h-3 bg-surface-2 rounded w-5/6" />
-        <div className="h-3 bg-surface-2 rounded w-2/3" />
+    <div className="relative overflow-hidden bg-gradient-to-br from-surface via-surface-2/80 to-surface border border-border/80 rounded-xl p-6 animate-pulse">
+      <div className="absolute inset-0 bg-gradient-to-br from-violet/5 via-transparent to-cyan/5 opacity-20" />
+      <div className="relative z-10">
+        <div className="h-12 w-12 bg-surface-2 rounded-xl mb-4" />
+        <div className="h-5 bg-surface-2 rounded w-20 mb-4" />
+        <div className="h-8 bg-surface-2 rounded w-24 mb-2" />
+        <div className="h-4 bg-surface-2 rounded w-28 mb-4" />
+        <div className="h-px bg-border/50 mb-4" />
+        <div className="space-y-2.5">
+          <div className="h-3 bg-surface-2 rounded w-full" />
+          <div className="h-3 bg-surface-2 rounded w-3/4" />
+          <div className="h-3 bg-surface-2 rounded w-5/6" />
+          <div className="h-3 bg-surface-2 rounded w-2/3" />
+        </div>
+        <div className="h-10 bg-surface-2 rounded mt-6" />
       </div>
-      <div className="h-10 bg-surface-2 rounded mt-6" />
     </div>
   );
 }
