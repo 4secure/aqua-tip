@@ -7,18 +7,21 @@ use App\Http\Requests\DarkWebSearchRequest;
 use App\Models\SearchLog;
 use App\Services\DarkWebProviderService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SearchController extends Controller
 {
+    /**
+     * Start a dark web breach search (submit to LeaksCheck, return task_id).
+     */
     public function __invoke(DarkWebSearchRequest $request): JsonResponse
     {
         $credit = $request->attributes->get('credit');
 
         try {
-            $data = app(DarkWebProviderService::class)->search(
+            $taskId = app(DarkWebProviderService::class)->startSearch(
                 $request->validated('query'),
-                $request->validated('type'),
             );
         } catch (\Throwable) {
             // Refund the credit that was deducted by middleware
@@ -42,8 +45,39 @@ class SearchController extends Controller
         ]);
 
         return response()->json([
-            'data' => $data,
+            'task_id' => $taskId,
             'credits' => $this->creditsPayload($credit),
+        ]);
+    }
+
+    /**
+     * Check the status of a running dark web search task.
+     */
+    public function status(Request $request, string $taskId): JsonResponse
+    {
+        $validated = $request->validate([
+            // task_id comes from URL, just validate format
+        ]);
+
+        if (empty($taskId) || strlen($taskId) > 256) {
+            return response()->json(['message' => 'Invalid task ID.'], 422);
+        }
+
+        try {
+            $result = app(DarkWebProviderService::class)->checkStatus($taskId);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Failed to check search status.',
+                'status' => 'ERROR',
+            ], 502);
+        }
+
+        return response()->json([
+            'status' => $result['status'],
+            'data' => [
+                'found' => $result['found'],
+                'results' => $result['results'],
+            ],
         ]);
     }
 
