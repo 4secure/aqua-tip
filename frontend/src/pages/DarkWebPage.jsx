@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, AlertTriangle, ShieldCheck, RotateCcw, Radio } from 'lucide-react';
+import { Globe, Mail, Key, FileText } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { Icon } from '../data/icons';
 import { startDarkWebSearch, checkDarkWebStatus, fetchCredits } from '../api/dark-web';
@@ -8,15 +9,43 @@ import { CreditBadge } from '../components/shared/CreditBadge';
 
 function BreachCard({ breach }) {
   const title = (breach.title || 'Unknown Source').replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim();
-  const cleanHtml = DOMPurify.sanitize(breach.text_html || '', { ALLOWED_TAGS: ['b', 'br', 'code', 'a'], ALLOWED_ATTR: ['href', 'target', 'rel'] });
+
+  const fields = [
+    { icon: Globe, label: 'Source', value: breach.source },
+    { icon: Mail, label: 'Identity', value: breach.identity },
+    { icon: Key, label: 'Credential', value: breach.credential },
+  ].filter(f => f.value);
+
+  const contextHtml = breach.context
+    ? DOMPurify.sanitize(breach.context, { ALLOWED_TAGS: ['b', 'br', 'code', 'a'], ALLOWED_ATTR: ['href', 'target', 'rel'] })
+    : null;
 
   return (
     <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-4 space-y-3">
       <h3 className="font-sans text-sm font-semibold text-violet">{title}</h3>
-      <div
-        className="font-mono text-xs text-text-primary leading-relaxed [&_b]:text-text-muted [&_b]:font-semibold [&_code]:text-cyan [&_code]:bg-surface-2 [&_code]:px-1 [&_code]:rounded [&_a]:text-cyan [&_a]:hover:underline"
-        dangerouslySetInnerHTML={{ __html: cleanHtml }}
-      />
+      {fields.length > 0 && (
+        <div className="space-y-2">
+          {fields.map(({ icon: IconComp, label, value }) => (
+            <div key={label} className="flex items-start gap-2">
+              <IconComp size={13} className="text-text-muted shrink-0 mt-0.5" />
+              <span className="text-[11px] text-text-muted w-16 shrink-0">{label}</span>
+              <span className="font-mono text-xs text-text-primary break-all">{value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {contextHtml && (
+        <details className="group">
+          <summary className="flex items-center gap-1.5 cursor-pointer text-[11px] text-text-muted hover:text-text-secondary transition-colors">
+            <FileText size={12} />
+            Raw context
+          </summary>
+          <div
+            className="mt-2 font-mono text-[11px] text-text-secondary leading-relaxed [&_b]:text-text-muted [&_b]:font-semibold [&_code]:text-cyan [&_code]:bg-surface-2 [&_code]:px-1 [&_code]:rounded [&_a]:text-cyan [&_a]:hover:underline"
+            dangerouslySetInnerHTML={{ __html: contextHtml }}
+          />
+        </details>
+      )}
     </div>
   );
 }

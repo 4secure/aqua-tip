@@ -137,9 +137,12 @@ class DarkWebProviderService
     private function normalizeResults(array $items): array
     {
         return array_map(fn (mixed $item) => is_array($item) ? [
-            'title' => $item['title'] ?? $item['URL'] ?? $item['source'] ?? null,
-            'text_html' => $item['text_html'] ?? null,
-        ] : ['title' => (string) $item, 'text_html' => null], $items);
+            'title' => $item['title'] ?? null,
+            'source' => $item['URL'] ?? $item['url'] ?? $item['source'] ?? $item['TLD'] ?? null,
+            'identity' => $item['Email'] ?? $item['email'] ?? $item['login'] ?? $item['Username'] ?? null,
+            'credential' => $this->maskPassword($item['Password'] ?? $item['password'] ?? null),
+            'context' => $item['text_html'] ?? null,
+        ] : ['title' => null, 'source' => null, 'identity' => null, 'credential' => null, 'context' => (string) $item], $items);
     }
 
     /**
