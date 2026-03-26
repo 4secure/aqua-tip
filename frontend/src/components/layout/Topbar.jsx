@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
-import { NOTIFICATIONS } from '../../data/mock-data';
-import { Icon } from '../../data/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { GradientButton } from '../ui/GradientButton';
 
@@ -16,12 +14,11 @@ const PAGE_NAMES = {
   '/settings': 'Settings',
 };
 
-export default function Topbar({ collapsed, onHamburgerClick, onNotifClick }) {
+export default function Topbar({ collapsed, onHamburgerClick }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, userInitials, logout } = useAuth();
   const pageName = PAGE_NAMES[location.pathname] || 'Dashboard';
-  const unreadCount = NOTIFICATIONS.filter(n => !n.read).length;
 
   const [avatarDropdown, setAvatarDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -71,24 +68,17 @@ export default function Topbar({ collapsed, onHamburgerClick, onNotifClick }) {
       <div className="flex items-center gap-3">
         {isAuthenticated ? (
           <>
-            {/* PRO badge */}
-            <div className="premium-badge">
-              <Icon name="zap" />
-              PRO
-            </div>
+            {/* Plan chip */}
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-violet/10 text-violet-light border border-violet/20">
+              {user?.plan?.name || (user?.trial_active ? 'Trial' : 'Free')}
+            </span>
 
-            {/* Notifications */}
-            <button
-              className="relative p-2 text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-surface-2"
-              onClick={onNotifClick}
-            >
-              <Icon name="bell" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+            {/* Upgrade button (hidden for Enterprise) */}
+            {user?.plan?.name !== 'Enterprise' && (
+              <Link to="/pricing">
+                <GradientButton size="sm">Upgrade</GradientButton>
+              </Link>
+            )}
 
             {/* Avatar with dropdown */}
             <div className="relative" ref={dropdownRef}>

@@ -132,15 +132,6 @@ export const API_KEYS = Object.freeze([
   { id: 4, name: 'Legacy Key (deprecated)', key: 'ask_old_••••••••••••1a5f', scopes: ['read'], created: '2024-06-10', lastUsed: '2025-08-22', status: 'revoked' },
 ]);
 
-export const NOTIFICATIONS = Object.freeze([
-  { id: 1, type: 'critical', title: 'Critical CVE Detected', message: 'CVE-2025-0282 affects your monitored assets', time: '2m ago', read: false },
-  { id: 2, type: 'alert', title: 'Feed Sync Error', message: 'Shodan feed failed to sync — API key expired', time: '15m ago', read: false },
-  { id: 3, type: 'info', title: 'New IPs Available', message: '2,319 new indicators added from 7 feeds', time: '1h ago', read: false },
-  { id: 4, type: 'success', title: 'Scan Complete', message: 'Vulnerability scan of api.company.com finished', time: '2h ago', read: true },
-  { id: 5, type: 'alert', title: 'Blocklist Match', message: 'IP 103.224.182.251 matched on Spamhaus DROP', time: '3h ago', read: true },
-  { id: 6, type: 'info', title: 'Weekly Report Ready', message: 'Your threat intelligence summary is available', time: '5h ago', read: true },
-]);
-
 export const NAV_CATEGORIES = Object.freeze([
   {
     label: 'Overview',
@@ -161,12 +152,6 @@ export const NAV_CATEGORIES = Object.freeze([
     items: [
       { label: 'Threat Map', icon: 'globe', href: '/threat-map', public: false },
       { label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false },
-    ],
-  },
-  {
-    label: 'Account',
-    items: [
-      { label: 'Pricing', icon: 'pricing', href: '/pricing', public: true },
     ],
   },
 ]);
