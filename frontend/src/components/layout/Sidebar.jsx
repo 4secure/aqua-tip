@@ -72,7 +72,7 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
         <Link to="/" className="h-[60px] flex items-center gap-3 px-5 border-b border-border/50 shrink-0 hover:bg-surface-2 transition-colors">
           <img
             src="/logo.png"
-            alt="Aqua-Tip"
+            alt="Aqua-TIP"
             className="w-8 h-8 rounded-lg object-contain shrink-0"
           />
           {showLabels && (
