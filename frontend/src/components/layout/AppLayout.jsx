@@ -22,7 +22,7 @@ export default function AppLayout() {
         onHamburgerClick={() => setMobileOpen(true)}
       />
       <TrialBanner />
-      <main className={`flex-1 pt-[68px] p-4 transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-[260px]'} ml-0`}>
+      <main className={`flex-1 pt-[40px] p-6 transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-[260px]'} ml-0`}>
         <Outlet />
       </main>
     </>

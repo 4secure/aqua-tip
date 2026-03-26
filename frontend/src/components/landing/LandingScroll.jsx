@@ -75,7 +75,7 @@ export function LandingScroll() {
   const globeY = useTransform(
     scrollYProgress,
     [0, 0.5, 1.0],
-    ["5vh", "5vh", "13vh"]
+    ["5vh", "5vh", "10vh"]
   );
   const globeScale = useTransform(
     scrollYProgress,
