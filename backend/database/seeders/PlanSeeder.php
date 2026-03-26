@@ -13,13 +13,13 @@ class PlanSeeder extends Seeder
             [
                 'slug' => 'free',
                 'name' => 'Free',
-                'daily_credit_limit' => 3,
+                'daily_credit_limit' => 1,
                 'price_cents' => 0,
                 'is_popular' => false,
                 'sort_order' => 1,
                 'is_active' => true,
                 'features' => [
-                    '3 searches per day',
+                    '1 search per day',
                     'Basic threat lookups',
                     'Community data access',
                 ],

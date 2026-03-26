@@ -1,15 +1,13 @@
 import { Check } from 'lucide-react';
+import { GradientButton } from '../ui/GradientButton';
 
-export default function PlanCard({ plan, currentPlanSlug, onSelect, isTrialUser }) {
+export default function PlanCard({ plan, currentPlanSlug, onContact }) {
   const isPopular = plan.is_popular === true;
   const isCurrent = plan.slug === currentPlanSlug;
-  const isEnterprise = plan.slug === 'enterprise';
 
   const priceDisplay = plan.price_cents === 0
-    ? (isEnterprise ? 'Custom' : 'Free')
+    ? (plan.slug === 'enterprise' ? 'Custom' : 'Free')
     : `$${plan.price_cents / 100}`;
-
-  const hasCurrentPlan = currentPlanSlug !== null;
 
   return (
     <div
@@ -60,20 +58,14 @@ export default function PlanCard({ plan, currentPlanSlug, onSelect, isTrialUser 
           <div className="flex justify-center">
             <span className="chip chip-cyan">Current Plan</span>
           </div>
-        ) : isEnterprise ? (
-          <a
-            href="mailto:sales@aquasecure.ai"
-            className="block w-full text-center border border-violet text-violet hover:bg-violet/10 font-sans font-semibold py-2.5 px-6 rounded-lg transition-colors"
+        ) : (
+          <GradientButton
+            onClick={() => onContact(plan)}
+            size="sm"
+            className="w-full"
           >
             Contact Us
-          </a>
-        ) : (
-          <button
-            onClick={() => onSelect(plan)}
-            className="w-full bg-gradient-to-r from-violet to-cyan text-white font-sans font-semibold py-2.5 px-6 rounded-lg hover:opacity-90 transition-opacity"
-          >
-            {hasCurrentPlan ? 'Upgrade' : 'Select Plan'}
-          </button>
+          </GradientButton>
         )}
       </div>
     </div>

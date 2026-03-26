@@ -94,7 +94,7 @@ class CreditResolver
         }
 
         // No plan + trial expired -> fallback to Free tier limit
-        return Plan::where('slug', 'free')->value('daily_credit_limit') ?? 3;
+        return Plan::where('slug', 'free')->value('daily_credit_limit') ?? 1;
     }
 
     private function applyPendingDowngrade(User $user): void

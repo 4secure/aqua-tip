@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import TrialBanner from './TrialBanner';
+import ParticleBackground from '../ui/ParticleBackground';
 import { useSidebarCollapse } from '../../hooks/useSidebarCollapse';
 
 export default function AppLayout() {
@@ -11,6 +12,7 @@ export default function AppLayout() {
 
   return (
     <>
+      <ParticleBackground />
       <Sidebar
         collapsed={collapsed}
         toggle={toggle}
