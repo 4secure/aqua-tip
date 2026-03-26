@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Loader2, AlertTriangle, ShieldCheck, RotateCcw } from 'lucide-react';
+import { Search, Loader2, AlertTriangle, ShieldCheck, RotateCcw, Radio } from 'lucide-react';
 import { Icon } from '../data/icons';
-import { searchDarkWeb, fetchCredits } from '../api/dark-web';
+import { startDarkWebSearch, checkDarkWebStatus, fetchCredits } from '../api/dark-web';
 import { CreditBadge } from '../components/shared/CreditBadge';
 import { BreachCard } from '../components/shared/BreachCard';
 
@@ -10,6 +10,8 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DOMAIN_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
 const STORAGE_KEY = 'darkweb_recent_queries';
 const MAX_RECENT = 5;
+const POLL_INTERVAL_MS = 4000;
+const MAX_POLL_ATTEMPTS = 12;
 
 function loadRecentQueries() {
   try {
@@ -29,18 +31,101 @@ function saveRecentQuery(query, type, existing) {
   return updated;
 }
 
+const SCAN_PHASES = [
+  'Submitting query...',
+  'Scanning SMACK database...',
+  'Searching dark web sources...',
+  'Cross-referencing breach databases...',
+  'Analyzing leaked credentials...',
+  'Compiling results...',
+];
+
+function ScanningAnimation({ partialCount }) {
+  const [phaseIndex, setPhaseIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhaseIndex((prev) => (prev + 1) % SCAN_PHASES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="bg-surface/60 border border-violet/30 backdrop-blur-sm rounded-xl p-8"
+    >
+      <div className="flex flex-col items-center gap-6">
+        {/* Pulsing radar icon */}
+        <div className="relative">
+          <motion.div
+            className="absolute inset-0 rounded-full bg-violet/20"
+            animate={{ scale: [1, 2, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <div className="relative z-10 w-16 h-16 rounded-full bg-violet/10 border border-violet/30 flex items-center justify-center">
+            <Radio size={28} className="text-violet" />
+          </div>
+        </div>
+
+        {/* Status text */}
+        <div className="text-center space-y-2">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={phaseIndex}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="font-mono text-sm text-cyan"
+            >
+              {SCAN_PHASES[phaseIndex]}
+            </motion.p>
+          </AnimatePresence>
+
+          {partialCount > 0 && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="font-mono text-xs text-text-muted"
+            >
+              <span className="text-amber font-semibold">{partialCount}</span>{' '}
+              partial {partialCount === 1 ? 'result' : 'results'} found so far...
+            </motion.p>
+          )}
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full max-w-xs">
+          <div className="h-1 bg-surface-2 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-violet to-cyan rounded-full"
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ width: '50%' }}
+            />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function DarkWebPage() {
   const [searchType, setSearchType] = useState('email');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
   const [searchMeta, setSearchMeta] = useState(null);
   const [credits, setCredits] = useState({ remaining: 0, limit: 0, resets_at: '' });
-  const [loading, setLoading] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [partialCount, setPartialCount] = useState(0);
   const [recentQueries, setRecentQueries] = useState([]);
   const [showRecent, setShowRecent] = useState(false);
   const blurTimeoutRef = useRef(null);
+  const pollRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -49,6 +134,62 @@ export default function DarkWebPage() {
       .catch(() => {});
     setRecentQueries(loadRecentQueries());
   }, []);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearTimeout(pollRef.current);
+    };
+  }, []);
+
+  const pollForResults = useCallback(
+    (taskId, searchQuery, attempt = 0) => {
+      if (attempt >= MAX_POLL_ATTEMPTS) {
+        setError({ message: 'Search timed out. Please try again.' });
+        setScanning(false);
+        setHasSearched(true);
+        return;
+      }
+
+      pollRef.current = setTimeout(async () => {
+        try {
+          const response = await checkDarkWebStatus(taskId);
+          const { status, data } = response;
+
+          if (status === 'PROCESSING') {
+            // Show partial results
+            if (data?.results?.length > 0) {
+              setPartialCount(data.results.length);
+              setResults(data.results);
+              setSearchMeta({ found: data.found, query: searchQuery, partial: true });
+            }
+            // Continue polling
+            pollForResults(taskId, searchQuery, attempt + 1);
+          } else if (status === 'SUCCESS') {
+            // Final results
+            setResults(data?.results ?? []);
+            setSearchMeta({ found: data?.found ?? 0, query: searchQuery, partial: false });
+            setScanning(false);
+            setPartialCount(0);
+            setHasSearched(true);
+          } else if (status === 'PENDING') {
+            // Still waiting, continue polling
+            pollForResults(taskId, searchQuery, attempt + 1);
+          } else {
+            // ERROR or unknown
+            setError({ message: 'Search failed. No credit was deducted.' });
+            setScanning(false);
+            setHasSearched(true);
+          }
+        } catch (err) {
+          setError({ message: err.message || 'Failed to check search status.' });
+          setScanning(false);
+          setHasSearched(true);
+        }
+      }, POLL_INTERVAL_MS);
+    },
+    []
+  );
 
   const handleSearch = useCallback(
     async (overrideQuery, overrideType) => {
@@ -69,49 +210,52 @@ export default function DarkWebPage() {
         return;
       }
 
+      // Cancel any in-flight poll
+      if (pollRef.current) clearTimeout(pollRef.current);
+
       setError(null);
-      setLoading(true);
+      setScanning(true);
+      setResults(null);
+      setSearchMeta(null);
+      setPartialCount(0);
       setShowRecent(false);
 
       try {
-        const response = await searchDarkWeb({ query: q, type: t });
-        setResults(response.data?.results ?? []);
-        setSearchMeta({ found: response.data?.found ?? 0, query: q });
+        const response = await startDarkWebSearch({ query: q, type: t });
+
         if (response.credits) {
           setCredits(response.credits);
         }
+
         const updated = saveRecentQuery(q, t, recentQueries);
         setRecentQueries(updated);
-        setHasSearched(true);
+
+        // Start polling for results
+        pollForResults(response.task_id, q);
       } catch (err) {
         if (err.status === 429) {
           setError({ message: err.message || 'Daily limit reached.' });
           setCredits((prev) => ({ ...prev, remaining: 0 }));
-          setResults(null);
-          setSearchMeta(null);
         } else if (err.status === 502) {
           setError({
             message: 'Something went wrong. No credit was deducted.',
             refunded: true,
           });
-          setResults(null);
-          setSearchMeta(null);
         } else if (err.status === 422 && err.errors) {
           const msgs = Object.values(err.errors).flat().join(' ');
           setError({ message: msgs || 'Validation failed.' });
         } else {
           setError({ message: err.message || 'An unexpected error occurred.' });
         }
+        setScanning(false);
         setHasSearched(true);
-      } finally {
-        setLoading(false);
       }
     },
-    [query, searchType, recentQueries]
+    [query, searchType, recentQueries, pollForResults]
   );
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !loading && credits.remaining > 0) {
+    if (e.key === 'Enter' && !scanning && credits.remaining > 0) {
       handleSearch();
     }
   };
@@ -140,19 +284,20 @@ export default function DarkWebPage() {
   }, []);
 
   const isExhausted = credits.remaining === 0 && credits.limit > 0;
-  const searchDisabled = loading || isExhausted;
+  const searchDisabled = scanning || isExhausted;
+  const showStickyHeader = hasSearched || scanning;
 
   return (
     <div className="space-y-6">
       <motion.div
         layout
         className={
-          hasSearched
+          showStickyHeader
             ? 'sticky top-0 z-10 bg-primary/90 backdrop-blur-md pb-4 pt-2 -mx-6 px-6'
             : 'flex flex-col items-center justify-center min-h-[60vh]'
         }
       >
-        {!hasSearched && (
+        {!showStickyHeader && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -168,7 +313,7 @@ export default function DarkWebPage() {
           </motion.div>
         )}
 
-        <div className={hasSearched ? 'flex items-center gap-3' : 'flex flex-col items-center gap-4 w-full max-w-xl'}>
+        <div className={showStickyHeader ? 'flex items-center gap-3' : 'flex flex-col items-center gap-4 w-full max-w-xl'}>
           {/* Email/Domain Toggle */}
           <div className="flex rounded-lg overflow-hidden border border-border">
             <button
@@ -194,7 +339,7 @@ export default function DarkWebPage() {
           </div>
 
           {/* Search Input */}
-          <div className={`relative ${hasSearched ? 'flex-1' : 'w-full'}`}>
+          <div className={`relative ${showStickyHeader ? 'flex-1' : 'w-full'}`}>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <input
@@ -241,12 +386,12 @@ export default function DarkWebPage() {
                 disabled={searchDisabled}
                 className="btn-primary px-6 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? (
+                {scanning ? (
                   <Loader2 size={18} className="animate-spin" />
                 ) : (
                   <Search size={18} />
                 )}
-                {!hasSearched && 'Search'}
+                {!showStickyHeader && 'Search'}
               </button>
             </div>
           </div>
@@ -265,28 +410,41 @@ export default function DarkWebPage() {
 
       {/* Results Area */}
       <AnimatePresence mode="wait">
-        {loading && (
+        {scanning && !results && (
+          <ScanningAnimation key="scanning" partialCount={partialCount} />
+        )}
+
+        {scanning && results && results.length > 0 && (
           <motion.div
-            key="loading"
+            key="partial-results"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="space-y-4"
           >
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-surface/60 border border-border rounded-xl p-4 animate-pulse"
-              >
-                <div className="h-4 bg-surface-2 rounded w-2/3 mb-3" />
-                <div className="h-3 bg-surface-2 rounded w-1/2 mb-2" />
-                <div className="h-3 bg-surface-2 rounded w-1/3" />
-              </div>
-            ))}
+            <div className="flex items-center gap-3 mb-2">
+              <Loader2 size={16} className="animate-spin text-violet" />
+              <p className="font-mono text-sm text-text-muted">
+                <span className="text-amber font-semibold">{searchMeta?.found}</span>{' '}
+                partial {searchMeta?.found === 1 ? 'result' : 'results'} found &mdash; scanning for more...
+              </p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {results.map((breach, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <BreachCard breach={breach} />
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         )}
 
-        {!loading && error && (
+        {!scanning && error && (
           <motion.div
             key="error"
             initial={{ opacity: 0, y: 10 }}
@@ -320,7 +478,7 @@ export default function DarkWebPage() {
           </motion.div>
         )}
 
-        {!loading && !error && hasSearched && results && results.length === 0 && (
+        {!scanning && !error && hasSearched && results && results.length === 0 && (
           <motion.div
             key="safe"
             initial={{ opacity: 0, y: 10 }}
@@ -343,7 +501,7 @@ export default function DarkWebPage() {
           </motion.div>
         )}
 
-        {!loading && !error && hasSearched && results && results.length > 0 && (
+        {!scanning && !error && hasSearched && results && results.length > 0 && (
           <motion.div
             key="results"
             initial={{ opacity: 0 }}
