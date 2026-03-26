@@ -1,10 +1,48 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, AlertTriangle, ShieldCheck, RotateCcw, Radio } from 'lucide-react';
+import { Globe, Mail, User, Key, Calendar, Phone, ExternalLink } from 'lucide-react';
 import { Icon } from '../data/icons';
 import { startDarkWebSearch, checkDarkWebStatus, fetchCredits } from '../api/dark-web';
 import { CreditBadge } from '../components/shared/CreditBadge';
-import { BreachCard } from '../components/shared/BreachCard';
+
+function BreachCard({ breach }) {
+  const fields = [
+    { icon: Mail, label: 'Email', value: breach.email },
+    { icon: User, label: 'Username', value: breach.username },
+    { icon: Key, label: 'Password', value: breach.password },
+    { icon: User, label: 'Name', value: [breach.first_name, breach.last_name].filter(Boolean).join(' ') || null },
+    { icon: Phone, label: 'Phone', value: breach.phone },
+    { icon: Calendar, label: 'Breach Date', value: breach.breach_date },
+  ].filter(f => f.value);
+
+  return (
+    <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-4 space-y-3">
+      {/* Source header */}
+      <div className="flex items-center gap-2">
+        <Globe size={14} className="text-violet shrink-0" />
+        {breach.url ? (
+          <a href={breach.url} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-cyan hover:underline truncate">
+            {breach.source || breach.url}
+          </a>
+        ) : (
+          <span className="font-mono text-sm text-text-primary truncate">{breach.source || 'Unknown source'}</span>
+        )}
+      </div>
+
+      {/* Fields */}
+      <div className="space-y-1.5">
+        {fields.map(({ icon: IconComp, label, value }) => (
+          <div key={label} className="flex items-center gap-2">
+            <IconComp size={12} className="text-text-muted shrink-0" />
+            <span className="text-[11px] text-text-muted w-16 shrink-0">{label}</span>
+            <span className="font-mono text-xs text-text-primary truncate">{value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DOMAIN_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
