@@ -139,7 +139,7 @@ export default function ThreatActorsPage() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0 min-w-[180px] justify-end">
-          {pagination && (
+          {pagination ? (
             <>
               <span className="font-mono text-sm text-text-muted whitespace-nowrap">
                 {pagination.total != null
@@ -161,6 +161,12 @@ export default function ThreatActorsPage() {
                 <ChevronRight size={16} className="text-text-muted" />
               </button>
             </>
+          ) : loading && (
+            <div className="flex items-center gap-2 animate-pulse">
+              <div className="h-4 w-20 bg-surface-2 rounded" />
+              <div className="h-7 w-7 bg-surface-2 rounded-lg" />
+              <div className="h-7 w-7 bg-surface-2 rounded-lg" />
+            </div>
           )}
         </div>
       </div>
