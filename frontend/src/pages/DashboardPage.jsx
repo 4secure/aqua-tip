@@ -508,24 +508,26 @@ export default function DashboardPage() {
       </div>
 
       {/* 2-col: Indicators Table + Attack Chart */}
-      <div className="grid grid-cols-5 gap-4">
-        <div className="col-span-3 glass-card p-5">
-          <div className="flex items-center justify-between mb-4">
+      <div className="grid grid-cols-5 gap-4" style={{ height: '380px' }}>
+        <div className="col-span-3 glass-card p-5 flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between mb-4 shrink-0">
             <h3 className="section-title mb-0">Recent Indicators</h3>
           </div>
-          {indicatorsLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4].map(i => <div key={i} className="h-8 bg-surface-2 rounded animate-pulse" />)}
-            </div>
-          ) : indicatorsError ? (
-            <div className="text-sm text-red py-4">Failed to load indicators</div>
-          ) : (
-            <IndicatorsTable
-              indicators={indicators}
-              activeFilter={activeFilter}
-              onClearFilter={handleClearFilter}
-            />
-          )}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {indicatorsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-8 bg-surface-2 rounded animate-pulse" />)}
+              </div>
+            ) : indicatorsError ? (
+              <div className="text-sm text-red py-4">Failed to load indicators</div>
+            ) : (
+              <IndicatorsTable
+                indicators={indicators}
+                activeFilter={activeFilter}
+                onClearFilter={handleClearFilter}
+              />
+            )}
+          </div>
         </div>
         <div className="col-span-2 glass-card p-5">
           <h3 className="section-title">Top Attack Categories</h3>
