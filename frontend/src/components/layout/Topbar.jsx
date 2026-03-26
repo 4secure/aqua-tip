@@ -76,7 +76,7 @@ export default function Topbar({ collapsed, onHamburgerClick }) {
             {/* Upgrade button (hidden for Enterprise) */}
             {user?.plan?.name !== 'Enterprise' && (
               <Link to="/pricing">
-                <GradientButton size="sm">Upgrade</GradientButton>
+                <GradientButton size="xs">Upgrade</GradientButton>
               </Link>
             )}
 

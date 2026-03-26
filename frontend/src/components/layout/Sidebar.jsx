@@ -1,30 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Lock, Settings, LogOut, ChevronDown, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { NAV_CATEGORIES } from '../../data/mock-data';
 import { Icon } from '../../data/icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { apiClient } from '../../api/client';
-import { CreditBadge } from '../shared/CreditBadge';
 
 export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }) {
   const [hovered, setHovered] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [openCategories, setOpenCategories] = useState(() =>
-    Object.fromEntries(NAV_CATEGORIES.map(c => [c.label, true]))
-  );
-  const toggleCategory = useCallback((label) => {
-    setOpenCategories(prev => ({ ...prev, [label]: !prev[label] }));
-  }, []);
-  const [credits, setCredits] = useState(null);
   const { isAuthenticated, user, userInitials, logout } = useAuth();
   const navigate = useNavigate();
   const hoverTimerRef = useRef(null);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    apiClient.get('/api/credits').then(setCredits).catch(() => {});
-  }, [isAuthenticated]);
 
   const handleMouseEnter = useCallback(() => {
     if (!collapsed) return;
@@ -104,22 +90,14 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
               <div key={category.label}>
                 {/* Category header - only when labels visible */}
                 {showLabels && (
-                  <button
-                    onClick={() => toggleCategory(category.label)}
-                    className="px-4 py-1.5 mx-2 flex items-center justify-between cursor-pointer text-[10px] uppercase tracking-widest font-mono text-text-muted hover:text-text-secondary transition-colors w-[calc(100%-16px)]"
-                  >
-                    <span>{category.label}</span>
-                    {openCategories[category.label]
-                      ? <ChevronDown className="w-3 h-3 shrink-0" />
-                      : <ChevronRight className="w-3 h-3 shrink-0" />
-                    }
-                  </button>
+                  <div className="px-4 py-1.5 mx-2 text-[10px] uppercase tracking-widest font-mono text-text-muted">
+                    {category.label}
+                  </div>
                 )}
 
                 {/* Category items */}
-                {(!showLabels || openCategories[category.label]) && (
-                  <div className="space-y-0.5">
-                    {category.items.map(item => {
+                <div className="space-y-0.5">
+                  {category.items.map(item => {
                       const isAccessible = item.public || isAuthenticated;
 
                       if (!isAccessible) {
@@ -167,8 +145,7 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
                         </NavLink>
                       );
                     })}
-                  </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -220,18 +197,6 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
             </div>
           )}
         </nav>
-
-        {/* Credit badge - authenticated only */}
-        {isAuthenticated && credits && (
-          <div className="px-3 py-2 border-t border-border/50">
-            <CreditBadge
-              remaining={credits.remaining}
-              limit={credits.limit}
-              planName={user?.plan?.name ?? (user?.trial_active ? 'Trial' : 'Free')}
-              compact={collapsed && !hovered}
-            />
-          </div>
-        )}
 
         {/* Collapse toggle - desktop only */}
         <div className="p-3 border-t border-border/50 max-lg:hidden">

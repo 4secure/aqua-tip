@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 
 const sizeClasses = {
+  xs: "px-3 py-1 text-[11px] rounded-full",
   sm: "px-5 py-2.5 text-xs rounded-lg",
   md: "px-9 py-4 text-sm rounded-[11px]",
   lg: "px-10 py-4 text-base rounded-[11px]",
