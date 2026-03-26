@@ -153,7 +153,7 @@ export default function ParticleBackground() {
         height: '100%',
         zIndex: 0,
         pointerEvents: 'none',
-        opacity: 0.75,
+        opacity: 0.35,
       }}
     />
   );
