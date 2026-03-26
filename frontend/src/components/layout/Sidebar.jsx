@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Lock, Settings, LogOut, ChevronDown, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { NAV_CATEGORIES } from '../../data/mock-data';
 import { Icon } from '../../data/icons';
@@ -69,7 +69,7 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
         )}
 
         {/* Logo */}
-        <div className="h-[60px] flex items-center gap-3 px-5 border-b border-border/50 shrink-0">
+        <Link to="/" className="h-[60px] flex items-center gap-3 px-5 border-b border-border/50 shrink-0 hover:bg-surface-2 transition-colors">
           <img
             src="/logo.png"
             alt="Aqua-Tip"
@@ -81,7 +81,7 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
               <div className="text-[10px] text-text-muted tracking-wider uppercase">Threat Intel Platform</div>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4">
