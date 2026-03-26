@@ -24,6 +24,5 @@ Thumbs.db
 .playwright-mcp/
 
 # Local only
-.planning/
 .claude/
 CLAUDE.md

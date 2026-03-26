@@ -161,4 +161,4 @@ Phases execute in numeric order: 27 → 28
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 3/3 | Complete | 2026-03-24 |
 | 26. Remove Raw Tab | v3.0 | 1/1 | Complete | 2026-03-24 |
 | 27. Outfit Font Migration | v3.1 | 2/2 | Complete    | 2026-03-25 |
-| 28. Sidebar & Topbar Polish | v3.1 | 1/1 | Complete   | 2026-03-26 |
+| 28. Sidebar & Topbar Polish | v3.1 | 1/1 | Complete    | 2026-03-26 |
