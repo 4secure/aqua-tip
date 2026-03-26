@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LogIn, Clock, Shield, ShieldCheck, AlertTriangle,
-  Network, FileText, Eye, StickyNote, ExternalLink, Globe,
+  Network, FileText, Eye, StickyNote, ExternalLink, Globe, Search,
 } from 'lucide-react';
 import { CreditBadge } from '../components/shared/CreditBadge';
 import { searchThreat, fetchCredits } from '../api/threat-search';
@@ -597,42 +598,82 @@ export default function ThreatSearchPage() {
     ? circumference - (result.score / 100) * circumference
     : circumference;
 
+  const showStickyHeader = result !== null || loading || error !== null;
+
   return (
     <div className="space-y-6">
-      {/* Search Header */}
-      <div className="glass-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="font-sans text-xl font-bold">Threat Search</h1>
-            <p className="text-sm text-text-muted mt-1">Search IPs, domains, hostnames, emails, etc ...</p>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="e.g., 185.220.101.34, example.com, d41d8cd98f00b204e9800998ecf8427e"
-              className="input-mono w-full py-3"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={loading}
-            />
-          </div>
-          <button
-            className="btn-primary px-8"
-            disabled={isExhausted || loading || !query.trim()}
-            onClick={handleSearch}
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
-          <CreditBadge remaining={credits.remaining} limit={credits.limit} />
+      {/* Search Header — two-state layout */}
+      <div
+        className={
+          showStickyHeader
+            ? 'sticky top-0 z-10 bg-primary/90 backdrop-blur-md pb-4 pt-2 -mx-6 px-6'
+            : 'flex flex-col items-center justify-center min-h-[60vh]'
+        }
+      >
+        <div className="relative">
+          <AnimatePresence>
+            {!showStickyHeader && (
+              <motion.div
+                key="hero"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0, position: 'relative' }}
+                exit={{ opacity: 0, y: -30, position: 'absolute', left: 0, right: 0, transition: { duration: 0.3 } }}
+                className="flex flex-col items-center mb-8"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-violet/10 border border-violet/30 flex items-center justify-center text-violet mb-4">
+                  <Shield size={32} />
+                </div>
+                <h1 className="font-sans text-3xl font-bold text-text-primary mb-2">
+                  Threat Search
+                </h1>
+                <p className="font-mono text-sm text-text-muted text-center max-w-md">
+                  Search IPs, domains, hostnames, emails, hashes, and more
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Guest exhausted CTA */}
+        <motion.div
+          layout="position"
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className={showStickyHeader ? 'flex items-center gap-3' : 'flex flex-col items-center gap-4 w-full max-w-xl'}
+        >
+          <div className={`relative ${showStickyHeader ? 'flex-1' : 'w-full'}`}>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="e.g., 185.220.101.34, example.com, d41d8cd98f00b204e9800998ecf8427e"
+                  className="input-mono w-full py-3"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={loading}
+                />
+              </div>
+              <button
+                className="btn-primary px-6 flex items-center gap-2"
+                disabled={isExhausted || loading || !query.trim()}
+                onClick={handleSearch}
+              >
+                {loading ? (
+                  <span className="animate-spin"><Search size={18} /></span>
+                ) : (
+                  <Search size={18} />
+                )}
+                {!showStickyHeader && 'Search'}
+              </button>
+            </div>
+          </div>
+
+          <CreditBadge remaining={credits.remaining} limit={credits.limit} />
+        </motion.div>
+
+        {/* Exhausted CTAs — shown in both states */}
         {isExhausted && !isAuthenticated && (
-          <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-violet/10 border border-violet/20">
+          <div className={`flex items-center gap-2 p-3 rounded-lg bg-violet/10 border border-violet/20 ${showStickyHeader ? 'mt-2' : 'mt-4 max-w-xl w-full'}`}>
             <LogIn size={16} className="text-violet shrink-0" />
             <span className="text-sm font-mono text-text-secondary">
               You've used your free lookup.{' '}
@@ -643,9 +684,8 @@ export default function ThreatSearchPage() {
           </div>
         )}
 
-        {/* Auth exhausted CTA -- plan-aware */}
         {isExhausted && isAuthenticated && (
-          <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-amber/10 border border-amber/20">
+          <div className={`flex items-center gap-2 p-3 rounded-lg bg-amber/10 border border-amber/20 ${showStickyHeader ? 'mt-2' : 'mt-4 max-w-xl w-full'}`}>
             <Clock size={16} className="text-amber shrink-0" />
             <span className="text-sm font-mono text-text-secondary">
               {(() => {
@@ -668,6 +708,21 @@ export default function ThreatSearchPage() {
           </div>
         )}
       </div>
+
+      {/* Recent Search History — shown only in initial state */}
+      {!showStickyHeader && (
+        <div className="flex justify-center">
+          <div className="w-full max-w-xl">
+            <RecentSearchesSection
+              isAuthenticated={isAuthenticated}
+              history={history}
+              historyLoading={historyLoading}
+              historyError={historyError}
+              onSelect={handleHistoryClick}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Error State (502) */}
       {error?.status === 502 && (
@@ -833,17 +888,6 @@ export default function ThreatSearchPage() {
           )}
 
         </>
-      )}
-
-      {/* Recent Search History -- shown when no search result is active */}
-      {result === null && (
-        <RecentSearchesSection
-          isAuthenticated={isAuthenticated}
-          history={history}
-          historyLoading={historyLoading}
-          historyError={historyError}
-          onSelect={handleHistoryClick}
-        />
       )}
     </div>
   );
