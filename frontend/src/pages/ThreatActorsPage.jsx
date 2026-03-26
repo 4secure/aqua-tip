@@ -138,29 +138,31 @@ export default function ThreatActorsPage() {
           />
         </div>
 
-        {pagination && (
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="font-mono text-sm text-text-muted whitespace-nowrap">
-              {pagination.total != null
-                ? `${currentOffset + 1}\u2013${Math.min(currentOffset + PAGE_SIZE, pagination.total)} of ${pagination.total}`
-                : `${currentOffset + 1}\u2013${currentOffset + PAGE_SIZE}`}
-            </span>
-            <button
-              onClick={handlePrevious}
-              disabled={!pagination.has_previous}
-              className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft size={16} className="text-text-muted" />
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={!pagination.has_next}
-              className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <ChevronRight size={16} className="text-text-muted" />
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 shrink-0 min-w-[180px] justify-end">
+          {pagination && (
+            <>
+              <span className="font-mono text-sm text-text-muted whitespace-nowrap">
+                {pagination.total != null
+                  ? `${currentOffset + 1}\u2013${Math.min(currentOffset + PAGE_SIZE, pagination.total)} of ${pagination.total}`
+                  : `${currentOffset + 1}\u2013${currentOffset + PAGE_SIZE}`}
+              </span>
+              <button
+                onClick={handlePrevious}
+                disabled={!pagination.has_previous}
+                className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={16} className="text-text-muted" />
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!pagination.has_next}
+                className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={16} className="text-text-muted" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Error State */}
