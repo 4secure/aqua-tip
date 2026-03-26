@@ -50,8 +50,8 @@ return [
     ],
 
     'dark_web' => [
-        'api_key' => env('LEAKSCHECK_API_KEY'),
-        'base_url' => env('LEAKSCHECK_API_URL', 'https://leakscheck.com/api/v1'),
+        'api_key' => env('DARK_WEB_API_KEY'),
+        'base_url' => env('DARK_WEB_API_URL', 'https://leakscheck.com/api/v1'),
     ],
 
     'opencti' => [
