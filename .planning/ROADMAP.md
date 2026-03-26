@@ -87,12 +87,12 @@ Full details: `.planning/milestones/v3.0-ROADMAP.md`
 
 </details>
 
-### 🚧 v3.1 Font & UI Polish (In Progress)
+### v3.1 Font & UI Polish (In Progress)
 
 **Milestone Goal:** Switch to Outfit font and polish sidebar/topbar for a cleaner, more professional look.
 
 - [x] **Phase 27: Outfit Font Migration** - Replace Syne, Space Grotesk, and Inter with Outfit across all pages (completed 2026-03-25)
-- [ ] **Phase 28: Sidebar & Topbar Polish** - Remove clutter, add plan chip and upgrade button to topbar
+- [x] **Phase 28: Sidebar & Topbar Polish** - Remove clutter, add plan chip and upgrade button to topbar (completed 2026-03-26)
 
 ## Phase Details
 
@@ -121,10 +121,9 @@ Plans:
   3. Authenticated user sees their current plan name as a chip in the topbar
   4. "Upgrade" button appears beside the plan chip and navigates to /pricing when clicked
   5. Plan chip and upgrade button are not visible to unauthenticated users
-**Plans**: 2 plans
+**Plans**: 1 plan
 Plans:
-- [x] 27-01-PLAN.md — Font config foundation (Google Fonts, Tailwind, base CSS)
-- [x] 27-02-PLAN.md — Bulk class replacement, hardcoded fixes, docs update
+- [x] 28-01-PLAN.md — Restyle plan chip, conditional Upgrade, notification dead code cleanup
 **UI hint**: yes
 
 ## Progress
@@ -162,4 +161,4 @@ Phases execute in numeric order: 27 → 28
 | 25. Pricing, Trial Banners & Timezone Display | v3.0 | 3/3 | Complete | 2026-03-24 |
 | 26. Remove Raw Tab | v3.0 | 1/1 | Complete | 2026-03-24 |
 | 27. Outfit Font Migration | v3.1 | 2/2 | Complete    | 2026-03-25 |
-| 28. Sidebar & Topbar Polish | v3.1 | 0/0 | Not started | - |
+| 28. Sidebar & Topbar Polish | v3.1 | 1/1 | Complete   | 2026-03-26 |

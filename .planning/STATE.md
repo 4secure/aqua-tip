@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Font & UI Polish
-status: Ready to plan
-stopped_at: Completed 27-02-PLAN.md (pending Task 3 visual verification)
-last_updated: "2026-03-25T14:21:53.439Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 28-01-PLAN.md - awaiting visual verification checkpoint
+last_updated: "2026-03-26T12:45:14.019Z"
 progress:
   total_phases: 2
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 27 — outfit-font-migration
+**Current focus:** Phase 28 — sidebar-topbar-polish
 
 ## Current Position
 
-Phase: 28
-Plan: Not started
+Phase: 28 (sidebar-topbar-polish) — EXECUTING
+Plan: 1 of 1
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Plan: Not started
 | v3.0 Onboarding, Trial & Plans | 5 | 10 | 4 days |
 | Phase 27 P01 | 2min | 1 tasks | 2 files |
 | Phase 27 P02 | 5min | 2 tasks | 34 files |
+| Phase 28 P01 | 3min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -57,6 +58,7 @@ Recent decisions affecting current work:
 - v3.1: Outfit replaces Syne, Space Grotesk, and Inter; JetBrains Mono retained
 - [Phase 27]: Consolidated 4 font tokens to 2 (sans + mono); Outfit variable weight 100-900
 - [Phase 27]: Bulk sed replacement for 123 font class occurrences across 33 files
+- [Phase 28]: Violet pill plan chip with bg-violet/10 styling, natural case plan name, full notification dead code removal
 
 ### Roadmap Evolution
 
@@ -81,6 +83,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-25T14:12:58.081Z
-Stopped at: Completed 27-02-PLAN.md (pending Task 3 visual verification)
+Last session: 2026-03-26T12:45:14.014Z
+Stopped at: Completed 28-01-PLAN.md - awaiting visual verification checkpoint
 Resume file: None
