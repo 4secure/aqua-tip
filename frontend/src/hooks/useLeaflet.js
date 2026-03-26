@@ -10,16 +10,16 @@ export function useLeaflet({ center, zoom, markers, onReady }) {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    containerRef.current.style.background = '#0A0B10';
+    containerRef.current.style.background = '#262626';
 
     const map = L.map(containerRef.current, {
       center,
-      zoom: Math.max(zoom, 3),
+      zoom: Math.max(zoom, 2),
       zoomControl: false,
       attributionControl: false,
-      maxBounds: [[-85, -180], [85, 180]],
+      maxBounds: [[-90, -200], [90, 200]],
       maxBoundsViscosity: 1.0,
-      minZoom: 3,
+      minZoom: 2,
     });
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {

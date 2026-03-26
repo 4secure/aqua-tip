@@ -21,7 +21,7 @@ function BreachCard({ breach }) {
     : null;
 
   return (
-    <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-4 space-y-3">
+    <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-4 space-y-3 h-full flex flex-col">
       <h3 className="font-sans text-sm font-semibold text-violet">{title}</h3>
       {fields.length > 0 && (
         <div className="space-y-2">
@@ -36,7 +36,7 @@ function BreachCard({ breach }) {
       )}
       {contextHtml && (
         <div
-          className="border-t border-border pt-2 font-mono text-[11px] text-text-secondary leading-relaxed [&_b]:text-text-muted [&_b]:font-semibold [&_code]:text-cyan [&_code]:bg-surface-2 [&_code]:px-1 [&_code]:rounded [&_a]:text-cyan [&_a]:hover:underline"
+          className="border-t border-border pt-2 font-mono text-[11px] text-text-secondary leading-relaxed flex-1 [&_b]:text-text-muted [&_b]:font-semibold [&_code]:text-cyan [&_code]:bg-surface-2 [&_code]:px-1 [&_code]:rounded [&_a]:text-cyan [&_a]:hover:underline"
           dangerouslySetInnerHTML={{ __html: contextHtml }}
         />
       )}
@@ -327,31 +327,40 @@ export default function DarkWebPage() {
 
   return (
     <div className="space-y-6">
-      <motion.div
-        layout
+      <div
         className={
           showStickyHeader
             ? 'sticky top-0 z-10 bg-primary/90 backdrop-blur-md pb-4 pt-2 -mx-6 px-6'
             : 'flex flex-col items-center justify-center min-h-[60vh]'
         }
       >
-        {!showStickyHeader && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center mb-8"
-          >
-            <span className="text-violet mb-4 [&_svg]:w-12 [&_svg]:h-12"><Icon name="incognito" /></span>
-            <h1 className="font-sans text-3xl font-bold text-text-primary mb-2">
-              Dark Web Search
-            </h1>
-            <p className="font-mono text-sm text-text-muted text-center max-w-md">
-              Search for breached credentials across known data breaches
-            </p>
-          </motion.div>
-        )}
+        <div className="relative">
+          <AnimatePresence>
+            {!showStickyHeader && (
+              <motion.div
+                key="hero"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0, position: 'relative' }}
+                exit={{ opacity: 0, y: -30, position: 'absolute', left: 0, right: 0, transition: { duration: 0.3 } }}
+                className="flex flex-col items-center mb-8"
+              >
+                <span className="text-violet mb-4 [&_svg]:w-12 [&_svg]:h-12"><Icon name="incognito" /></span>
+                <h1 className="font-sans text-3xl font-bold text-text-primary mb-2">
+                  Dark Web Search
+                </h1>
+                <p className="font-mono text-sm text-text-muted text-center max-w-md">
+                  Search for breached credentials across known data breaches
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        <div className={showStickyHeader ? 'flex items-center gap-3' : 'flex flex-col items-center gap-4 w-full max-w-xl'}>
+        <motion.div
+          layout="position"
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className={showStickyHeader ? 'flex items-center gap-3' : 'flex flex-col items-center gap-4 w-full max-w-xl'}
+        >
           {/* Email/Domain Toggle */}
           <div className="flex rounded-lg overflow-hidden border border-border">
             <button
@@ -436,7 +445,7 @@ export default function DarkWebPage() {
 
           {/* Credit Badge */}
           <CreditBadge remaining={credits.remaining} limit={credits.limit} />
-        </div>
+        </motion.div>
 
         {/* Exhausted message */}
         {isExhausted && (
@@ -444,7 +453,7 @@ export default function DarkWebPage() {
             Daily limit reached. Your credits reset at 00:00 UTC.
           </p>
         )}
-      </motion.div>
+      </div>
 
       {/* Results Area */}
       <AnimatePresence mode="wait">
@@ -467,13 +476,14 @@ export default function DarkWebPage() {
                 partial {searchMeta?.found === 1 ? 'result' : 'results'} found &mdash; scanning for more...
               </p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
               {results.map((breach, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
+                  className="h-full"
                 >
                   <BreachCard breach={breach} />
                 </motion.div>
@@ -552,13 +562,14 @@ export default function DarkWebPage() {
               {searchMeta?.found === 1 ? 'breach' : 'breaches'} found for{' '}
               <span className="text-text-primary font-semibold">{searchMeta?.query}</span>
             </p>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
               {results.map((breach, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
+                  className="h-full"
                 >
                   <BreachCard breach={breach} />
                 </motion.div>
