@@ -73,11 +73,14 @@ class DarkWebProviderService
         $status = $body['status'] ?? $body['state'] ?? 'UNKNOWN';
 
         if ($status === 'SUCCESS' || $status === 'PROCESSING') {
-            $rawResults = $body['result'] ?? [];
+            $resultBlock = $body['result'] ?? [];
+            $rawResults = is_array($resultBlock) && isset($resultBlock['data'])
+                ? $resultBlock['data']
+                : (is_array($resultBlock) ? $resultBlock : []);
             return [
                 'status' => $status,
-                'found' => is_array($rawResults) ? count($rawResults) : 0,
-                'results' => $this->normalizeResults(is_array($rawResults) ? $rawResults : []),
+                'found' => count($rawResults),
+                'results' => $this->normalizeResults($rawResults),
             ];
         }
 
@@ -133,7 +136,7 @@ class DarkWebProviderService
      */
     private function normalizeResults(array $items): array
     {
-        return array_map(fn (array $item) => [
+        return array_map(fn (mixed $item) => is_array($item) ? [
             'email' => $item['email'] ?? $item['Email'] ?? null,
             'password' => $this->maskPassword($item['password'] ?? $item['Password'] ?? null),
             'username' => $item['username'] ?? $item['Username'] ?? null,
@@ -144,7 +147,7 @@ class DarkWebProviderService
             'last_name' => $item['last_name'] ?? $item['LastName'] ?? null,
             'phone' => $item['phone'] ?? $item['Phone'] ?? null,
             'fields' => $item['fields'] ?? [],
-        ], $items);
+        ] : ['email' => null, 'password' => null, 'username' => null, 'source' => (string) $item, 'url' => null, 'breach_date' => null, 'first_name' => null, 'last_name' => null, 'phone' => null, 'fields' => []], $items);
     }
 
     /**
