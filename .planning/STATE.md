@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Font & UI Polish
-status: Milestone complete
-stopped_at: Phase 29 context gathered
-last_updated: "2026-03-27T16:04:26.054Z"
-last_activity: "2026-03-26 - Completed quick task 260326-seq: Decrease Recent Indicators table height"
+status: v3.1 milestone complete
+stopped_at: Milestone v3.1 complete — all 3 phases done
+last_updated: "2026-03-27T16:11:00.117Z"
+last_activity: 2026-03-27
 progress:
-  total_phases: 3
+  total_phases: 2
   completed_phases: 2
   total_plans: 3
   completed_plans: 3
@@ -17,22 +17,22 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-25)
+See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 28 — sidebar-topbar-polish
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 28
-Plan: Not started
+Phase: 29 (complete)
+Plan: Done
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 50 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10)
-- Total milestones: 6 shipped in 12 days
+- Total plans completed: 53 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3)
+- Total milestones: 7 shipped in 15 days
 
 **By Milestone:**
 
@@ -44,26 +44,13 @@ Plan: Not started
 | v2.1 Threat Search & UI Refresh | 6 | 8 | 2 days |
 | v2.2 Live Dashboard & Search History | 4 | 6 | 2 days |
 | v3.0 Onboarding, Trial & Plans | 5 | 10 | 4 days |
-| Phase 27 P01 | 2min | 1 tasks | 2 files |
-| Phase 27 P02 | 5min | 2 tasks | 34 files |
-| Phase 28 P01 | 3min | 1 tasks | 4 files |
+| v3.1 Font & UI Polish | 3 | 3 | 3 days |
 
 ## Accumulated Context
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table (38 entries across 6 milestones).
-Recent decisions affecting current work:
-
-- v3.1: Pure frontend UI polish -- no backend changes needed
-- v3.1: Outfit replaces Syne, Space Grotesk, and Inter; JetBrains Mono retained
-- [Phase 27]: Consolidated 4 font tokens to 2 (sans + mono); Outfit variable weight 100-900
-- [Phase 27]: Bulk sed replacement for 123 font class occurrences across 33 files
-- [Phase 28]: Violet pill plan chip with bg-violet/10 styling, natural case plan name, full notification dead code removal
-
-### Roadmap Evolution
-
-- Phase 29 added: Home page fixes
+All decisions logged in PROJECT.md Key Decisions table (42 entries across 7 milestones).
 
 ### Pending Todos
 
@@ -85,7 +72,6 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-03-26 - Completed quick task 260326-seq: Decrease Recent Indicators table height
-Last session: 2026-03-27T16:04:26.050Z
-Stopped at: Phase 29 context gathered
-Resume file: .planning/phases/29-home-page-fixes/29-CONTEXT.md
+Last activity: 2026-03-27
+Last session: 2026-03-27
+Stopped at: Milestone v3.1 complete — all 3 phases done

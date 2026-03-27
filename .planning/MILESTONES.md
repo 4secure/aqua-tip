@@ -1,5 +1,20 @@
 # Milestones
 
+## v3.1 Font & UI Polish (Shipped: 2026-03-27)
+
+**Phases completed:** 3 phases, 3 plans, 5 tasks
+**Timeline:** 3 days (2026-03-25 → 2026-03-27)
+
+**Key accomplishments:**
+
+- Outfit font foundation — consolidated 4 font tokens to 2 (sans + mono), Google Fonts loads Outfit 100-900 + JetBrains Mono
+- Bulk font migration — zero legacy Syne/Space Grotesk/Inter references across 33 files
+- Violet pill plan chip in topbar with conditional Upgrade button (hidden for Enterprise users)
+- Notification dead code removal, Pricing tab removed from sidebar
+- Landing page content fixes, links, and standalone public pages (phase 29)
+
+---
+
 ## v3.0 Onboarding, Trial & Subscription Plans (Shipped: 2026-03-25)
 
 **Phases completed:** 5 phases, 10 plans, 21 tasks

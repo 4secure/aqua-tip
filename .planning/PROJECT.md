@@ -73,18 +73,19 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ useFormatDate hook for timezone-aware date rendering across all pages — v3.0
 - ✓ CreditBadge extended with plan name in sidebar — v3.0
 - ✓ Plan-aware credit exhaustion messages with tier-specific upgrade CTAs — v3.0
+- ✓ Outfit font for all headings and body text (replacing Syne, Space Grotesk, Inter) — v3.1
+- ✓ JetBrains Mono retained for code/data displays — v3.1
+- ✓ Google Fonts updated to load Outfit with weight range 100-900 — v3.1
+- ✓ Pricing tab removed from sidebar navigation — v3.1
+- ✓ Notification button removed from topbar — v3.1
+- ✓ Plan chip displayed in topbar showing current plan name — v3.1
+- ✓ Upgrade button beside plan chip, links to /pricing — v3.1
+- ✓ Plan chip and upgrade button auth-gated — v3.1
+- ✓ Landing page content, links, and standalone public pages fixed — v3.1
 
 ### Active
 
-## Current Milestone: v3.1 Font & UI Polish
-
-**Goal:** Switch to Outfit font and polish sidebar/topbar for a cleaner, more professional look.
-
-**Target features:**
-- ✓ Replace Syne, Space Grotesk, Inter with Outfit (keep JetBrains Mono for code/data) — Phase 27 complete
-- Remove Pricing tab from sidebar
-- Remove notification button from topbar
-- Add current plan chip + "Upgrade" button to topbar (links to /pricing)
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -104,9 +105,9 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ## Context
 
-Shipped v3.0 with ~22,000+ LOC (JS/JSX + PHP).
+Shipped v3.1 with ~22,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-26 phases (incl. 4.1), 50 plans completed across 6 milestones in 12 days.
+29 phases, 53 plans completed across 7 milestones in 15 days.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
@@ -165,6 +166,10 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | sessionStorage for banner dismiss | Resets per browser session, no server round-trip | ✓ Good |
 | Pricing page as public route | Accessible without auth for marketing | ✓ Good |
 | Hook per component for useFormatDate | Independent calls, not prop drilling | ✓ Good |
+| Consolidated 4 font tokens to 2 (sans + mono) | Simpler system, Outfit handles all weights | ✓ Good |
+| Bulk sed replacement for font migration | 123 occurrences across 33 files, fast and thorough | ✓ Good |
+| Violet pill plan chip in topbar | Consistent design system usage (bg-violet/10) | ✓ Good |
+| Full notification dead code removal | No notification system exists, clean slate | ✓ Good |
 
 ---
-*Last updated: 2026-03-25 after Phase 27 (Outfit font migration) complete*
+*Last updated: 2026-03-27 after v3.1 milestone (Font & UI Polish) complete*

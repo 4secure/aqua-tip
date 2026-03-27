@@ -233,6 +233,40 @@
 
 ---
 
+## Milestone: v3.1 — Font & UI Polish
+
+**Shipped:** 2026-03-27
+**Phases:** 3 | **Plans:** 3
+
+### What Was Built
+- Outfit font foundation — consolidated 4 font tokens to 2 (sans + mono), Google Fonts updated
+- Bulk font migration — zero legacy Syne/Space Grotesk/Inter references across 33 files
+- Violet plan chip in topbar with conditional Upgrade button (hidden for Enterprise)
+- Notification dead code removal, Pricing tab removed from sidebar
+- Landing page content fixes, links, and standalone public pages
+
+### What Worked
+- Two-token font system (sans + mono) is simpler and easier to maintain than 4 tokens
+- Bulk sed replacement was fast and thorough for 123 font class occurrences
+- Phase 29 (home page fixes) was done outside GSD as quick manual work — appropriate for small scope
+- Pure frontend milestone with no backend changes kept scope tight
+
+### What Was Inefficient
+- Phase 29 was added to roadmap but executed outside GSD workflow — created tracking overhead
+- SUMMARY.md files missing `one_liner` field (persisted from v1.0) — automated extraction still fails
+
+### Patterns Established
+- Two-token font system: `font-sans` (Outfit) for all text, `font-mono` (JetBrains Mono) for code only
+- Violet pill chip pattern: `bg-violet/10 + text-violet-light + border-violet/20`
+- Auth-conditional topbar elements: plan chip + upgrade button visible only when authenticated
+
+### Key Lessons
+1. Font migrations are best done in two phases — config foundation first, then bulk replacement
+2. Small polish milestones can be completed quickly but still benefit from formal tracking for history
+3. Dead code removal (notifications) should be done aggressively — if a feature doesn't exist, remove all traces
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -245,6 +279,7 @@
 | v2.1 | 6 | 8 | Search generalization + UI polish — clean-break rename, inline pagination pattern |
 | v2.2 | 4 | 6 | Live dashboard + search history — stale-cache fallback, auth-gated widgets |
 | v3.0 | 5 | 10 | Onboarding, trial & plans — CreditResolver extraction, pricing page, timezone formatting |
+| v3.1 | 3 | 3 | Font & UI polish — Outfit migration, topbar plan chip, dead code cleanup |
 
 ### Cumulative Quality
 
@@ -256,6 +291,7 @@
 | v2.1 | 92 Pest | Backend only | 0 new |
 | v2.2 | 111+ Pest | Backend only | 0 new |
 | v3.0 | 140+ Pest | Backend only | 1 (TRIAL-06 race condition) |
+| v3.1 | 140+ Pest | Backend only | 0 new (frontend-only milestone) |
 
 ### Top Lessons (Verified Across Milestones)
 
