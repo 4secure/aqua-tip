@@ -3,10 +3,11 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Font & UI Polish
 status: Milestone complete
-stopped_at: Completed 28-01-PLAN.md - awaiting visual verification checkpoint
-last_updated: "2026-03-26T13:49:34.532Z"
+stopped_at: Phase 29 context gathered
+last_updated: "2026-03-27T16:04:26.054Z"
+last_activity: "2026-03-26 - Completed quick task 260326-seq: Decrease Recent Indicators table height"
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
   total_plans: 3
   completed_plans: 3
@@ -62,7 +63,7 @@ Recent decisions affecting current work:
 
 ### Roadmap Evolution
 
-No pending roadmap changes.
+- Phase 29 added: Home page fixes
 
 ### Pending Todos
 
@@ -85,6 +86,6 @@ None.
 ## Session Continuity
 
 Last activity: 2026-03-26 - Completed quick task 260326-seq: Decrease Recent Indicators table height
-Last session: 2026-03-26T12:45:14.014Z
-Stopped at: Completed 28-01-PLAN.md - awaiting visual verification checkpoint
-Resume file: None
+Last session: 2026-03-27T16:04:26.050Z
+Stopped at: Phase 29 context gathered
+Resume file: .planning/phases/29-home-page-fixes/29-CONTEXT.md
