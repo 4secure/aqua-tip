@@ -11,19 +11,20 @@ import {
 } from "lucide-react";
 import { Globe } from "../ui/Globe";
 import { GradientButton } from "../ui/GradientButton";
+import { Icon as CustomIcon } from "../../data/icons";
 
 const section2Cards = [
   {
     icon: Search,
-    title: "Real-Time IP Lookup",
+    title: "Real-Time Threat Lookup",
     description:
-      "Query any IP address against global threat intelligence feeds for instant reputation scoring.",
+      "Query IPs, domains, CVEs, and threat actors against global intelligence feeds for instant risk assessment.",
   },
   {
-    icon: Shield,
-    title: "Threat Classification",
+    icon: "incognito",
+    title: "Dark Web Monitoring",
     description:
-      "Categorize threats by type — malware, botnet, scanner, brute-force — with confidence levels.",
+      "Search for breached credentials and exposed data across known dark web sources.",
   },
   {
     icon: BarChart3,
@@ -34,11 +35,11 @@ const section2Cards = [
 ];
 
 
-function FeatureCard({ icon: Icon, title, description }) {
+function FeatureCard({ icon, title, description }) {
   return (
     <div className="flex gap-4 p-5 rounded-xl bg-surface/60 border border-border backdrop-blur-sm">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-violet/15 flex items-center justify-center">
-        <Icon className="w-5 h-5 text-violet-light" />
+      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-violet/15 flex items-center justify-center text-violet-light [&_svg]:w-5 [&_svg]:h-5">
+        {typeof icon === "string" ? <CustomIcon name={icon} /> : (() => { const Icon = icon; return <Icon className="w-5 h-5" />; })()}
       </div>
       <div>
         <h3 className="font-sans text-[15px] font-semibold text-text-primary mb-1">
@@ -151,7 +152,7 @@ export function LandingScroll() {
                     Threat Lookup <ArrowRight className="w-4 h-4" />
                   </GradientButton>
                 </Link>
-                <Link to="/threat-search">
+                <Link to="/pricing">
                   <GradientButton variant="variant" size="lg">
                     View Pricing
                   </GradientButton>
@@ -207,7 +208,7 @@ export function LandingScroll() {
                   Get Started <ArrowRight className="w-4 h-4" />
                 </GradientButton>
               </Link>
-              <Link to="/threat-search">
+              <Link to="/pricing">
                 <GradientButton variant="variant" size="lg">
                   View Pricing
                 </GradientButton>

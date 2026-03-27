@@ -65,7 +65,7 @@ export default function LandingPage() {
             Ready to Secure Your Infrastructure?
           </h2>
           <p className="font-mono text-[15px] text-text-secondary mb-8">
-            Start with 1 free search per day. No credit card required.
+            Start with free trial credits. No credit card required.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link to="/threat-search">
@@ -73,7 +73,7 @@ export default function LandingPage() {
                 Threat Lookup <ArrowRight className="w-4 h-4" />
               </GradientButton>
             </Link>
-            <Link to="/threat-search">
+            <Link to="/pricing">
               <GradientButton variant="variant" size="lg">
                 View Pricing
               </GradientButton>
@@ -84,8 +84,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer
-        className="relative z-30 py-12 px-12 border-t border-border"
-        style={{ backgroundColor: "#0A0B10" }}
+        className="relative z-30 py-12 px-12 border-t border-border bg-primary"
       >
         <div className="max-w-6xl mx-auto">
           <div className="flex items-start justify-between mb-10">
@@ -97,8 +96,8 @@ export default function LandingPage() {
                 </span>
               </div>
               <p className="font-mono text-xs text-text-secondary max-w-xs leading-relaxed">
-                Real-time IP reputation intelligence powered by global threat
-                feeds. Identify and respond to threats before they strike.
+                Real-time threat intelligence across IPs, domains, CVEs, and
+                threat actors. Identify and respond to threats before they strike.
               </p>
             </div>
             <div className="flex flex-col items-end gap-2 pt-1">
@@ -109,7 +108,7 @@ export default function LandingPage() {
                 Contact Us
               </Link>
               <Link
-                to="/threat-search"
+                to="/pricing"
                 className="font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
               >
                 Pricing Plan

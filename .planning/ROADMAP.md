@@ -162,3 +162,13 @@ Phases execute in numeric order: 27 → 28
 | 26. Remove Raw Tab | v3.0 | 1/1 | Complete | 2026-03-24 |
 | 27. Outfit Font Migration | v3.1 | 2/2 | Complete    | 2026-03-25 |
 | 28. Sidebar & Topbar Polish | v3.1 | 1/1 | Complete    | 2026-03-26 |
+
+### Phase 29: Home page fixes
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 28
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 29 to break down)

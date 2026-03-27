@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import PlanCard from '../components/pricing/PlanCard';
@@ -58,7 +60,43 @@ export default function PricingPage() {
   }, [fetchPlans]);
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-primary">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 flex items-center justify-between px-12 h-16 bg-primary border-b border-border backdrop-blur-sm">
+        <div className="flex items-center gap-8">
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="Aqua Tip" className="w-[22px] h-[22px]" />
+            <span className="font-sans text-lg font-bold text-text-primary tracking-tight">
+              AQUA TIP
+            </span>
+          </Link>
+        </div>
+        <div className="flex items-center gap-4">
+          {user ? (
+            <Link to="/threat-search">
+              <GradientButton size="sm">
+                Threat Lookup <ArrowRight className="w-3.5 h-3.5" />
+              </GradientButton>
+            </Link>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+              >
+                Log In
+              </Link>
+              <Link to="/register">
+                <GradientButton size="sm">
+                  Sign Up <ArrowRight className="w-3.5 h-3.5" />
+                </GradientButton>
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
+
+      <div className="px-12 py-16 space-y-6">
       {/* Header */}
       <div className="text-center">
         <h1 className="font-sans text-2xl font-bold text-white mb-2">
@@ -117,6 +155,7 @@ export default function PricingPage() {
         onClose={() => setContactPlan(null)}
         planName={contactPlan?.name ?? ''}
       />
+      </div>
     </div>
   );
 }

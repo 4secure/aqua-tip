@@ -22,6 +22,7 @@ const DarkWebPage = lazy(() => import('./pages/DarkWebPage'));
 const ThreatActorsPage = lazy(() => import('./pages/ThreatActorsPage'));
 const ThreatNewsPage = lazy(() => import('./pages/ThreatNewsPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
+const ContactUsPage = lazy(() => import('./pages/ContactUsPage'));
 
 function LazyFallback() {
   return (
@@ -54,13 +55,14 @@ export default function App() {
             {/* Public placeholder pages */}
             <Route path="/eula" element={<EulaPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/contact" element={<ContactUsPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
 
             {/* All app routes with shared layout */}
             <Route element={<AppLayout />}>
               {/* Public route -- accessible without auth */}
               <Route path="/threat-search" element={<ThreatSearchPage />} />
               <Route path="/ip-search" element={<Navigate to="/threat-search" replace />} />
-              <Route path="/pricing" element={<PricingPage />} />
 
               {/* Protected routes -- auth + verified + onboarded */}
               <Route element={<ProtectedRoute />}>
