@@ -365,11 +365,11 @@ class ThreatMapService
         GRAPHQL;
 
         $data = $this->openCti->query($graphql);
-        dd($data);
+        // dd($data);
         $edges = $data['stixCyberObservables']['edges'] ?? [];
 
         $events = [];
-        dd($edges);
+        // dd($edges);
         foreach ($edges as $edge) {
             $node = $edge['node'] ?? null;
 

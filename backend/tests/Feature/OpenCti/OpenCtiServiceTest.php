@@ -32,7 +32,7 @@ class OpenCtiServiceTest extends TestCase
 
     public function test_query_throws_connection_exception_when_token_is_empty(): void
     {
-        config(['services.opencti.url' => 'http://localhost:8080']);
+        config(['services.opencti.url' => 'http://localhost:9731']);
         config(['services.opencti.token' => '']);
 
         $this->expectException(OpenCtiConnectionException::class);
