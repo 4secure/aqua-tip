@@ -9,8 +9,8 @@ last_activity: 2026-03-28
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 3
+  completed_plans: 3
   percent: 50
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 30 - Quick Wins (Dashboard, Map, Search fixes)
+**Current focus:** Phase 31 - Auto-Refresh Infrastructure (complete)
 
 ## Current Position
 
 Phase: 31 of 6 (auto refresh infrastructure)
-Plan: Not started
-Status: Executing phase 30
-Last activity: 2026-03-28
+Plan: 1/1 complete
+Status: Phase 31 complete
+Last activity: 2026-03-29
 
 Progress: [█████░░░░░] 50%
 
@@ -59,6 +59,7 @@ All decisions logged in PROJECT.md Key Decisions table (42 entries across 7 mile
 Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 
 - [Phase 30]: Used flexbox justify-center for 4+3 stat card layout instead of CSS grid
+- [Phase 31]: Separate silentRefresh callbacks per page to avoid setLoading flicker; ref-based fetchFn in useAutoRefresh to prevent interval restarts
 
 ### Pending Todos
 
@@ -81,6 +82,6 @@ None.
 ## Session Continuity
 
 Last activity: 2026-03-29
-Last session: 2026-03-28T22:47:31.474Z
-Stopped at: Phase 31 context gathered
-Resume file: .planning/phases/31-auto-refresh-infrastructure/31-CONTEXT.md
+Last session: 2026-03-28T23:03:49Z
+Stopped at: Completed 31-01-PLAN.md
+Resume file: .planning/phases/31-auto-refresh-infrastructure/31-01-SUMMARY.md

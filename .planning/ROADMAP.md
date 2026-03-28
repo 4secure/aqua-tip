@@ -20,7 +20,7 @@
 ### v3.2 App Layout Page Tweaks
 
 - [x] **Phase 30: Quick Wins** - Dashboard stat cards, map label, and search bug fixes (all frontend-only) (completed 2026-03-28)
-- [ ] **Phase 31: Auto-Refresh Infrastructure** - Reusable useAutoRefresh hook for Threat News and Threat Actors
+- [x] **Phase 31: Auto-Refresh Infrastructure** - Reusable useAutoRefresh hook for Threat News and Threat Actors (completed 2026-03-29)
 - [ ] **Phase 32: Date-Based News Browsing** - Date selector replacing pagination with timezone-aware backend filtering
 - [ ] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date
 - [ ] **Phase 34: Enriched Threat Actor Modal** - TTPs, tools, campaigns, and targeted sectors via fetch-on-open
@@ -54,7 +54,7 @@ Plans:
   3. Auto-refresh pauses when the browser tab is not visible and resumes when the user returns
 **Plans:** 1 plan
 Plans:
-- [ ] 31-01-PLAN.md -- useAutoRefresh hook + Threat News and Threat Actors integration
+- [x] 31-01-PLAN.md -- useAutoRefresh hook + Threat News and Threat Actors integration
 **UI hint**: yes
 
 ### Phase 32: Date-Based News Browsing
@@ -109,7 +109,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 30. Quick Wins | 1/2 | Complete    | 2026-03-28 |
-| 31. Auto-Refresh Infrastructure | 0/1 | Not started | - |
+| 31. Auto-Refresh Infrastructure | 1/1 | Complete | 2026-03-29 |
 | 32. Date-Based News Browsing | 0/? | Not started | - |
 | 33. Category Distribution Chart | 0/? | Not started | - |
 | 34. Enriched Threat Actor Modal | 0/? | Not started | - |

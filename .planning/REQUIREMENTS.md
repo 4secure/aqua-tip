@@ -20,7 +20,7 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 
 ### Threat News
 
-- [ ] **NEWS-01**: Threat news page auto-refreshes every 5 minutes silently
+- [x] **NEWS-01**: Threat news page auto-refreshes every 5 minutes silently
 - [ ] **NEWS-02**: User sees current date's threat news by default
 - [ ] **NEWS-03**: User can select a date to load that day's threat news (replaces pagination)
 - [ ] **NEWS-04**: User sees a category distribution chart filtered by the selected date
@@ -28,7 +28,7 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 ### Threat Actors
 
 - [ ] **ACTOR-01**: User sees enriched threat actor modal with TTPs, tools, campaigns, and targeted sectors
-- [ ] **ACTOR-02**: Threat actors page auto-refreshes every 5 minutes silently
+- [x] **ACTOR-02**: Threat actors page auto-refreshes every 5 minutes silently
 
 ### Threat Search
 
@@ -71,12 +71,12 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 | DASH-03 | Phase 30 | Complete |
 | MAP-01 | Phase 30 | Complete |
 | MAP-02 | Phase 30 | Complete |
-| NEWS-01 | Phase 31 | Pending |
+| NEWS-01 | Phase 31 | Complete |
 | NEWS-02 | Phase 32 | Pending |
 | NEWS-03 | Phase 32 | Pending |
 | NEWS-04 | Phase 33 | Pending |
 | ACTOR-01 | Phase 34 | Pending |
-| ACTOR-02 | Phase 31 | Pending |
+| ACTOR-02 | Phase 31 | Complete |
 | SEARCH-01 | Phase 30 | Pending |
 | SEARCH-02 | Phase 30 | Pending |
 | SEARCH-03 | Phase 30 | Pending |
