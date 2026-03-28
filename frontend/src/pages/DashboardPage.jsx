@@ -14,6 +14,9 @@ const STAT_CARD_CONFIG = [
   { entity_type: 'Domain-Name', label: 'Domains', color: 'violet' },
   { entity_type: 'Hostname', label: 'Hostnames', color: 'cyan' },
   { entity_type: 'X509-Certificate', label: 'Certificates', color: 'amber' },
+  { entity_type: 'Email-Addr', label: 'Email', color: 'amber' },
+  { entity_type: 'Cryptocurrency-Wallet', label: 'Crypto Wallet', color: 'green' },
+  { entity_type: 'Url', label: 'URL', color: 'violet' },
 ];
 
 const STAT_COLOR_MAP = {
@@ -21,6 +24,7 @@ const STAT_COLOR_MAP = {
   violet: { bg: 'bg-violet/10', text: 'text-violet', border: 'border-violet/20' },
   cyan: { bg: 'bg-cyan/10', text: 'text-cyan', border: 'border-cyan/20' },
   amber: { bg: 'bg-amber/10', text: 'text-amber', border: 'border-amber/20' },
+  green: { bg: 'bg-green/10', text: 'text-green', border: 'border-green/20' },
 };
 
 const TYPE_BADGE_COLORS = {
@@ -68,10 +72,6 @@ function StatCard({ label, count, color, loading, error }) {
           {(count || 0).toLocaleString()}
         </div>
       )}
-      <div className="flex items-center gap-1.5">
-        <div className={`w-2 h-2 rounded-full bg-green animate-pulse`} />
-        <span className="text-[10px] text-text-muted">Live</span>
-      </div>
     </div>
   );
 }
@@ -469,7 +469,7 @@ export default function DashboardPage() {
       <div className="glass-card p-0 overflow-hidden" style={{ height: '40vh', minHeight: '320px' }}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <h2 className="font-sans font-semibold text-sm">Global Threat Map</h2>
+            <h2 className="font-sans font-semibold text-sm">100 Latest Attacks</h2>
             <div className="live-dot live-dot-green" />
           </div>
         </div>
@@ -491,18 +491,20 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <h2 className="section-title">Threat Database</h2>
+      <div className="flex flex-wrap justify-center gap-4">
         {STAT_CARD_CONFIG.map(cfg => {
           const match = (counts || []).find(c => c.entity_type === cfg.entity_type);
           return (
-            <StatCard
-              key={cfg.entity_type}
-              label={cfg.label}
-              count={match ? match.count : 0}
-              color={cfg.color}
-              loading={countsLoading}
-              error={countsError}
-            />
+            <div key={cfg.entity_type} className="w-full sm:w-[calc(50%-8px)] lg:w-[calc(25%-12px)]">
+              <StatCard
+                label={cfg.label}
+                count={match ? match.count : 0}
+                color={cfg.color}
+                loading={countsLoading}
+                error={countsError}
+              />
+            </div>
           );
         })}
       </div>
