@@ -21,6 +21,12 @@ export function useFormatDate() {
       timeZone: timezone,
     });
 
+    const timeFormatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: timezone,
+    });
+
     const formatDate = (dateStr) => {
       if (!dateStr) return '--';
       try {
@@ -39,6 +45,15 @@ export function useFormatDate() {
       }
     };
 
-    return { formatDate, formatDateTime };
+    const formatTime = (dateStr) => {
+      if (!dateStr) return '--';
+      try {
+        return timeFormatter.format(new Date(dateStr));
+      } catch {
+        return String(dateStr);
+      }
+    };
+
+    return { formatDate, formatDateTime, formatTime };
   }, [timezone]);
 }

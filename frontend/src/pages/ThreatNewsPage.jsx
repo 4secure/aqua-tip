@@ -463,7 +463,7 @@ export default function ThreatNewsPage() {
 /* -- Report Row -- */
 
 function ReportRow({ report, onClick, onCategoryClick }) {
-  const { formatDate } = useFormatDate();
+  const { formatDate, formatTime } = useFormatDate();
   const labels = report.labels || [];
   const visibleLabels = labels.slice(0, MAX_VISIBLE_CATEGORIES);
   const overflowCount = labels.length - MAX_VISIBLE_CATEGORIES;
@@ -473,9 +473,9 @@ function ReportRow({ report, onClick, onCategoryClick }) {
       onClick={onClick}
       className="flex items-center gap-4 px-4 py-3 border-b border-border hover:bg-surface-2 cursor-pointer transition-colors"
     >
-      {/* Date - first column */}
-      <span className="font-mono text-xs text-text-muted shrink-0 w-24">
-        {formatDate(report.published)}
+      {/* Date + Time - first column */}
+      <span className="font-mono text-xs text-text-muted shrink-0">
+        {formatDate(report.published)} <span className="text-[10px]">{formatTime(report.published)}</span>
       </span>
 
       {/* Title - flexible */}
