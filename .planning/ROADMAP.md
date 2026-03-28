@@ -19,7 +19,7 @@
 
 ### v3.2 App Layout Page Tweaks
 
-- [ ] **Phase 30: Quick Wins** - Dashboard stat cards, map label, and search bug fixes (all frontend-only)
+- [x] **Phase 30: Quick Wins** - Dashboard stat cards, map label, and search bug fixes (all frontend-only) (completed 2026-03-28)
 - [ ] **Phase 31: Auto-Refresh Infrastructure** - Reusable useAutoRefresh hook for Threat News and Threat Actors
 - [ ] **Phase 32: Date-Based News Browsing** - Date selector replacing pagination with timezone-aware backend filtering
 - [ ] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date
@@ -38,7 +38,7 @@
   3. Dashboard does not display any "Live" label or pulsating green dot
   4. Threat map displays "100 Latest Attacks" label and tracks only the 100 most recent IPs
   5. Relation graph nodes on Threat Search are positioned correctly (not clustered top-left), search shows a proper loader, and search bar does not overlap topbar when logged out
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 30-01-PLAN.md -- Dashboard stat cards (4->7), heading, live label removal, map labels
 - [ ] 30-02-PLAN.md -- Search page bug fixes (D3 graph, skeleton loading, sticky header)
@@ -105,7 +105,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 30. Quick Wins | 1/2 | In progress | - |
+| 30. Quick Wins | 1/2 | Complete    | 2026-03-28 |
 | 31. Auto-Refresh Infrastructure | 0/? | Not started | - |
 | 32. Date-Based News Browsing | 0/? | Not started | - |
 | 33. Category Distribution Chart | 0/? | Not started | - |
