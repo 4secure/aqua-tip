@@ -1,503 +1,669 @@
 # Architecture Patterns
 
-**Domain:** Subscription plan tiers, trial enforcement, and extended onboarding for existing TIP (v3.0)
-**Researched:** 2026-03-20
-**Confidence:** HIGH (based on direct codebase analysis of existing patterns)
+**Domain:** App layout page tweaks -- date filtering, auto-refresh, enriched modals, time-series charts, settings page (v3.2)
+**Researched:** 2026-03-28
+**Confidence:** HIGH (based on direct codebase analysis of existing patterns and OpenCTI GraphQL capabilities)
 
 ## Existing Architecture Snapshot
 
-Before describing new components, here is what already exists and how the new features attach to it.
-
-### Current Data Model
+### Current Data Flow (relevant to v3.2)
 
 ```
-users
-  id, name, email, password, oauth_provider, oauth_id, avatar_url,
-  phone, email_verified_at, onboarding_completed_at, trial_ends_at,
-  remember_token, timestamps
-
-credits
-  id, user_id (FK, unique), ip_address, remaining, limit, last_reset_at,
-  timestamps
+Frontend Pages                     API Layer                          Backend Services              OpenCTI
++-----------------+    GET /api/   +------------------+   GraphQL    +-------------------+   POST   +----------+
+| DashboardPage   | ------------> | DashboardCtrl    | ----------> | DashboardService  | -------> | GraphQL  |
+| ThreatNewsPage  | ------------> | ThreatNewsCtrl   | ----------> | ThreatNewsService | -------> | endpoint |
+| ThreatActorsPage| ------------> | ThreatActorCtrl  | ----------> | ThreatActorService| -------> |          |
+| ThreatMapPage   | ------------> | ThreatMapCtrl    | ----------> | ThreatMapService  | -------> |          |
+| SettingsPage    |               |                  |             |                   |          |          |
++-----------------+               +------------------+             +-------------------+          +----------+
+                                                                         |
+                                                                    Cache::remember
+                                                                   (5-15 min TTL)
 ```
 
-### Current Auth Flow
+### Current Caching Strategy
 
-```
-Register/Login -> email_verified_at check -> onboarding_completed_at check -> AppLayout
-                  |                          |
-                  v                          v
-              VerifyEmailPage           GetStartedPage (name + phone)
-```
+| Endpoint | TTL | Strategy |
+|----------|-----|----------|
+| Dashboard counts | 5 min | Manual get/put with stale fallback |
+| Dashboard indicators | 5 min | Manual get/put with stale fallback |
+| Dashboard categories | 5 min | Manual get/put with stale fallback |
+| Threat actors | 15 min | Cache::remember per param hash |
+| Threat news | 5 min | Cache::remember per param hash |
+| Threat map snapshot | 15 min | Cache::remember |
+| Geo lookups | 1 hour | Cache::remember per IP |
 
-### Current Credit Flow
+### Current Frontend Data Fetching Pattern
 
-```
-Request -> DeductCredit middleware -> resolveCredit() -> lazyReset() -> atomic decrement
-                                     |
-                                     v
-                              firstOrCreate with hardcoded limits:
-                                guest: limit=1, remaining=1
-                                auth:  limit=10, remaining=10
-```
+All pages use the same pattern:
+1. `useState` for data, loading, error
+2. `useEffect` with `cancelled` flag for cleanup
+3. `apiClient.get()` with query string params
+4. Independent widget loading (no global spinner)
 
-**Key observation:** Credit limits are hardcoded in two places -- `DeductCredit` middleware (`resolveCredit()` method) and `CreditStatusController` (`resolveCredit()` method). There is no plan concept; every authenticated user gets 10/day. The `trial_ends_at` column exists on users and is set to `now + 30 days` in `User::booted()`, but nothing reads or enforces it yet.
+### Current AuthContext Shape
 
-### Current UserResource Response
-
-```php
-return [
-    'id', 'name', 'email', 'avatar_url', 'phone',
-    'email_verified'       => $this->email_verified_at !== null,
-    'onboarding_completed' => $this->name !== explode('@', $this->email)[0] && $this->phone !== null,
-];
+```js
+{ user, loading, error, isAuthenticated, emailVerified, onboardingCompleted,
+  userInitials, timezone, plan, trialActive, trialDaysLeft, login, register,
+  logout, refreshUser }
 ```
 
-**Note:** `onboarding_completed` is computed from name + phone presence -- not from the `onboarding_completed_at` timestamp. This is a minor inconsistency to address.
+### Current User Fields Available (from /api/user)
+
+```
+id, name, email, avatar_url, phone, timezone, organization, role,
+email_verified, onboarding_completed, plan { id, name, slug, daily_credits },
+trial_active, trial_days_left, trial_ends_at
+```
 
 ---
 
-## Recommended Architecture
-
-### New Components Overview
+## New Components Overview
 
 | Component | Type | New/Modified | Purpose |
 |-----------|------|--------------|---------|
-| `plans` table | Migration | NEW | Plan definitions (slug, name, daily_credits, price, features) |
-| `Plan` model | Model | NEW | Eloquent model for plan tiers |
-| `PlanSeeder` | Seeder | NEW | Seed Free/Basic/Pro/Enterprise rows |
-| `plan_id` + profile cols on users | Migration | NEW | FK to plans, plus timezone, organization, role |
-| `User` model | Model | MODIFIED | Add `plan()` relation, `isOnTrial()`, `isTrialExpired()`, `effectiveDailyCredits()` |
-| `UserResource` | Resource | MODIFIED | Expose plan, trial status, timezone, org, role |
-| `DeductCredit` middleware | Middleware | MODIFIED | Resolve limit from user's effective plan instead of hardcoded 10 |
-| `CreditStatusController` | Controller | MODIFIED | Same: derive limit from plan |
-| `CreditResolver` | Service | NEW | Shared credit-limit resolution logic (DRY extraction) |
-| `OnboardingController` | Controller | MODIFIED | Accept timezone, organization, role fields |
-| `PlanController` | Controller | NEW | List available plans (GET /api/plans, public) |
-| `SubscriptionController` | Controller | NEW | Select/change plan (POST /api/plan, auth) |
-| `GetStartedPage.jsx` | Page | MODIFIED | Add timezone, organization, role fields |
-| `PricingPage.jsx` | Page | NEW | Plan comparison grid + selection UI |
-| `TrialBanner.jsx` | Component | NEW | Trial countdown / expired upgrade prompt |
-| `PlanBadge.jsx` | Component | NEW | Current plan indicator in sidebar/topbar |
-| `AuthContext.jsx` | Context | MODIFIED | Expose plan, trial state |
-| `App.jsx` | Router | MODIFIED | Add /pricing route |
-| `api/plans.js` | API module | NEW | Plan listing + selection API calls |
-| `api/auth.js` | API module | MODIFIED | Update onboarding payload with new fields |
-
-### System Diagram
-
-```
-                    Frontend                                    Backend
-              +------------------+                    +---------------------+
-              |   AuthContext     |                    |   /api/user         |
-              | + user.plan {}   |<---GET /api/user---|   UserResource      |
-              | + trialActive    |                    |   + plan relation   |
-              | + trialDaysLeft  |                    |   + trial fields    |
-              +--------+---------+                    |   + profile fields  |
-                       |                              +---------------------+
-          +------------+------------+
-          |            |            |
-    ProtectedRoute  TrialBanner  PlanBadge
-          |
-          v
-    (trial expired && no plan -> TrialBanner shows upgrade CTA)
-    (NOT a hard block -- user stays on Free tier limits)
-
-              +------------------+                    +---------------------+
-              |  PricingPage     |---POST /api/plan-->| SubscriptionCtrl    |
-              |  (plan cards)    |                    | + update user.plan_id|
-              +------------------+                    | + sync credit limit |
-                                                      +---------------------+
-
-              +------------------+                    +---------------------+
-              |  ThreatSearch    |---POST /api/       | DeductCredit MW     |
-              |  (any search)    |  threat-search     | + CreditResolver    |
-              +------------------+                    |   (plan-aware)      |
-                                                      +---------------------+
-
-              +------------------+                    +---------------------+
-              | GetStartedPage   |---POST /api/       | OnboardingController|
-              | (extended fields)|  onboarding        | + timezone, org,    |
-              +------------------+                    |   role fields       |
-                                                      +---------------------+
-```
-
-### Component Boundaries
-
-| Component | Responsibility | Communicates With |
-|-----------|---------------|-------------------|
-| `plans` table + `Plan` model | Source of truth for tier definitions (4 rows) | User (belongsTo inverse), CreditResolver, PlanController, SubscriptionController |
-| `CreditResolver` service | Single place to compute effective daily credit limit for any user/guest | DeductCredit middleware, CreditStatusController |
-| `SubscriptionController` | Handle plan selection, sync credit limit on credits table | User model, Credit model, Plan model |
-| `DeductCredit` middleware | Gate searches by credit balance (delegates limit calc to CreditResolver) | CreditResolver, Credit model |
-| `OnboardingController` | Collect profile fields (name, phone, timezone, org, role) | User model |
-| `AuthContext` | Frontend auth state + plan/trial data derived from UserResource | /api/user endpoint |
-| `PricingPage` | Display plan comparison, handle selection | /api/plans (read), /api/plan (write) |
-| `TrialBanner` | Show trial countdown or expired upgrade prompt | AuthContext (reads trialActive, trialDaysLeft) |
+| Date filter params on ThreatNews API | Backend | MODIFIED | Accept `published_after`, `published_before` date range filters |
+| ThreatNews time-series endpoint | Backend | NEW | `GET /api/threat-news/chart` -- category distribution over time |
+| ThreatActors enriched query | Backend | MODIFIED | Extend GraphQL to include TTPs, tools, campaigns |
+| ThreatMap snapshot cap | Backend | MODIFIED | Already caps at 100 in `fetchSnapshot()` -- frontend label change only |
+| Dashboard stat cards config | Frontend | MODIFIED | Expand from 4 to 7 entity types, add heading |
+| Dashboard counts endpoint | Backend | MODIFIED | Add Email-Addr, Cryptocurrency-Wallet, Url counts |
+| Settings/Profile page | Frontend | REWRITE | Replace mock data with real user data from AuthContext |
+| Profile update endpoint | Backend | NEW | `PUT /api/profile` -- update name, phone, timezone, organization, role |
+| Password change endpoint | Backend | NEW | `PUT /api/password` -- change password for email-registered users |
+| `useAutoRefresh` hook | Frontend | NEW | Reusable interval-based refresh with visibility pause |
+| Date range picker component | Frontend | NEW | Reusable date range selector for Threat News |
+| Time-series chart component | Frontend | NEW | Category distribution over time (line/area chart) |
 
 ---
 
-## Database Schema Changes
+## Detailed Architecture Per Feature
 
-### New Table: `plans`
+### 1. Dashboard Stat Cards Expansion
 
-```sql
-CREATE TABLE plans (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,           -- "Free", "Basic", "Pro", "Enterprise"
-    slug VARCHAR(50) NOT NULL UNIQUE,    -- "free", "basic", "pro", "enterprise"
-    daily_credits INTEGER NOT NULL,       -- 3, 15, 50, 200
-    price_monthly DECIMAL(8,2) NOT NULL, -- 0.00, 9.99, 29.99, 99.99
-    features JSONB NOT NULL DEFAULT '[]', -- Feature list for pricing page display
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    is_active BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-```
+**Current:** 4 cards (IPv4-Addr, Domain-Name, Hostname, X509-Certificate) from `DashboardService::fetchCounts()` which runs 4 sequential GraphQL queries.
 
-### Seeder Data
+**Change:** Expand to 7 cards by adding Email-Addr, Cryptocurrency-Wallet, Url.
 
-| slug | name | daily_credits | price_monthly | sort_order |
-|------|------|---------------|---------------|------------|
-| free | Free | 3 | 0.00 | 0 |
-| basic | Basic | 15 | 9.99 | 1 |
-| pro | Pro | 50 | 29.99 | 2 |
-| enterprise | Enterprise | 200 | 99.99 | 3 |
-
-### New Columns on `users`
-
-```sql
-ALTER TABLE users ADD COLUMN plan_id BIGINT REFERENCES plans(id) ON DELETE SET NULL;
-ALTER TABLE users ADD COLUMN timezone VARCHAR(64) DEFAULT 'UTC';
-ALTER TABLE users ADD COLUMN organization VARCHAR(255);
-ALTER TABLE users ADD COLUMN role VARCHAR(100);
-```
-
-**Why `ON DELETE SET NULL` for plan_id:** If a plan row is ever removed, user falls back to "no plan" state (treated as Free tier). Defensive against accidental data loss.
-
-**Why `plan_id = NULL` means "no explicit plan":** During trial, users have no plan selected. When trial expires without plan selection, they get Free-tier limits. This avoids a separate `subscription_status` enum column and the state synchronization problems that come with it. The plan status is fully derivable:
-- `plan_id != null` = subscribed to that plan
-- `plan_id = null && trial_ends_at > now` = on trial (Basic-tier credits)
-- `plan_id = null && trial_ends_at <= now` = trial expired (Free-tier credits)
-
----
-
-## Data Flow Changes
-
-### 1. Credit Limit Resolution (Critical Change)
-
-**Before:** Hardcoded `limit=10` for auth users, `limit=1` for guests in two files.
-**After:** Centralized in `CreditResolver` service, derived from plan/trial state.
+**Backend modification** (`DashboardService::fetchCounts()`):
 
 ```php
-// app/Services/CreditResolver.php
-class CreditResolver
-{
-    private const GUEST_LIMIT = 3;       // Free tier equivalent
-    private const TRIAL_LIMIT = 15;      // Basic tier equivalent
-    private const FREE_FALLBACK = 3;     // Expired trial, no plan
-
-    public function resolveLimitFor(?User $user): int
-    {
-        if ($user === null) {
-            return self::GUEST_LIMIT;
-        }
-
-        // Has an explicit plan
-        if ($user->plan_id !== null) {
-            return $user->plan->daily_credits;
-        }
-
-        // On active trial
-        if ($user->trial_ends_at?->isFuture()) {
-            return self::TRIAL_LIMIT;
-        }
-
-        // Trial expired, no plan selected
-        return self::FREE_FALLBACK;
-    }
-}
-```
-
-**Where it is used:**
-1. `DeductCredit::resolveCredit()` -- uses `CreditResolver` to determine limit for `firstOrCreate` and `lazyReset`
-2. `CreditStatusController::resolveCredit()` -- same
-
-**DRY rationale:** Both `DeductCredit` and `CreditStatusController` currently have duplicate `resolveCredit()` and `lazyReset()` methods. Extracting to `CreditResolver` eliminates this duplication and ensures plan-aware logic lives in one place.
-
-### 2. Lazy Reset with Plan Sync
-
-When `lazyReset()` fires (credit row is stale from previous day), it re-derives the limit from the user's current plan. This ensures plan upgrades/downgrades take effect at the next daily reset without a separate sync mechanism.
-
-```php
-private function lazyReset(Credit $credit, int $currentPlanLimit): void
-{
-    $todayStart = now('UTC')->startOfDay();
-
-    if ($credit->last_reset_at < $todayStart) {
-        $credit->update([
-            'remaining' => $currentPlanLimit,
-            'limit' => $currentPlanLimit,
-            'last_reset_at' => $todayStart,
-        ]);
-    }
-}
-```
-
-### 3. Plan Selection Flow
-
-```
-User clicks plan on PricingPage
-  -> POST /api/plan { plan_slug: "pro" }
-  -> SubscriptionController:
-       1. Validate plan_slug exists in plans table
-       2. Update user.plan_id
-       3. Sync credits:
-          - If new limit > old limit: set remaining += (new_limit - old_limit), set limit = new_limit
-          - If new limit < old limit: set limit = new_limit, clamp remaining to new_limit
-          - Use atomic UPDATE to prevent race conditions
-       4. Return updated UserResource
-  -> Frontend refreshes AuthContext (plan data updates)
-```
-
-**Why immediate credit sync (not wait for next day):** Upgrades should give users more credits right away. Waiting until midnight feels broken. Downgrades should cap remaining immediately to prevent hoarding.
-
-### 4. Trial Enforcement Flow
-
-```
-User registers
-  -> User::booted() sets trial_ends_at = now + 30 days (ALREADY EXISTS)
-  -> plan_id remains NULL
-
-During trial (plan_id=null, trial_ends_at > now):
-  -> CreditResolver returns 15 (Basic-tier equivalent)
-  -> Frontend: AuthContext.trialActive = true, trialDaysLeft = N
-  -> TrialBanner shows "N days left in your trial"
-
-Trial expires (plan_id=null, trial_ends_at <= now):
-  -> CreditResolver returns 3 (Free-tier equivalent)
-  -> Frontend: AuthContext.trialActive = false
-  -> TrialBanner shows "Trial expired -- upgrade for more searches"
-  -> User is NOT locked out -- they still get 3 searches/day
-
-User selects a plan:
-  -> POST /api/plan sets plan_id
-  -> Trial status becomes irrelevant (plan_id != null = subscribed)
-  -> TrialBanner disappears
-```
-
-**Key design decision:** Trial expiry is a soft downgrade, not a hard block. Users retain Free-tier access. This avoids hostile UX and is more likely to convert users who see the value but need more time.
-
-### 5. Onboarding Extension
-
-**Before:** GetStartedPage collects name + phone -> POST /api/onboarding
-**After:** GetStartedPage collects name + phone + timezone + organization + role
-
-```
-GetStartedPage (single form, not multi-step)
-  Required: name, phone (unchanged)
-  New optional: timezone (auto-detected), organization (text), role (dropdown)
-  -> POST /api/onboarding { name, phone, timezone, organization, role }
-
-OnboardingController:
-  validate({
-    'name'         => ['required', 'string', 'min:2', 'max:255'],
-    'phone'        => ['required', 'string', 'min:5', 'max:20'],
-    'timezone'     => ['nullable', 'string', 'timezone:all'],   // NEW
-    'organization' => ['nullable', 'string', 'max:255'],        // NEW
-    'role'         => ['nullable', 'string', Rule::in([...])],  // NEW
-  })
-  update user with all fields
-  set onboarding_completed_at = now()
-```
-
-**Why single form (not multi-step wizard):** The onboarding has 2 required fields and 3 optional fields. A wizard for 5 fields is over-engineering. The new fields have sensible defaults (timezone auto-detected, org and role are optional). Users should be able to complete onboarding in one submit.
-
-**Timezone auto-detection:** Browser provides `Intl.DateTimeFormat().resolvedOptions().timeZone` (e.g., "Asia/Manila"). Pre-fill this value; let user override via a dropdown of IANA timezones.
-
-### 6. UserResource Extension
-
-```php
-// Updated UserResource::toArray()
-return [
-    'id' => $this->id,
-    'name' => $this->name,
-    'email' => $this->email,
-    'avatar_url' => $this->avatar_url,
-    'phone' => $this->phone,
-    'timezone' => $this->timezone,
-    'organization' => $this->organization,
-    'role' => $this->role,
-    'email_verified' => $this->email_verified_at !== null,
-    'onboarding_completed' => $this->onboarding_completed_at !== null,  // FIX: use timestamp
-    'plan' => $this->plan ? [
-        'id' => $this->plan->id,
-        'name' => $this->plan->name,
-        'slug' => $this->plan->slug,
-        'daily_credits' => $this->plan->daily_credits,
-    ] : null,
-    'trial_active' => $this->plan_id === null && $this->trial_ends_at?->isFuture(),
-    'trial_days_left' => $this->trial_ends_at
-        ? (int) max(0, now()->diffInDays($this->trial_ends_at, absolute: false))
-        : 0,
-    'trial_ends_at' => $this->trial_ends_at?->toIso8601String(),
+// Add 3 more entity types to the $entityTypes array
+$entityTypes = [
+    'IPv4-Addr'              => 'IP Addresses',
+    'Domain-Name'            => 'Domains',
+    'Hostname'               => 'Hostnames',
+    'X509-Certificate'       => 'Certificates',
+    'Email-Addr'             => 'Emails',         // NEW
+    'Cryptocurrency-Wallet'  => 'Crypto Wallets', // NEW
+    'Url'                    => 'URLs',            // NEW
 ];
 ```
 
-**Important fix:** Change `onboarding_completed` from the current heuristic (`name !== email_prefix && phone !== null`) to `onboarding_completed_at !== null`. The timestamp is already set by `OnboardingController`; the heuristic is fragile and breaks if a user has a pre-populated name from OAuth.
+**Performance concern:** Currently runs N sequential GraphQL queries. Going from 4 to 7 means 7 round trips. Consider batching into a single aliased query:
 
-### 7. Credit Status Extension
-
-```
-GET /api/credits response:
-
-// Before
-{ remaining, limit, resets_at, is_guest }
-
-// After
-{ remaining, limit, resets_at, is_guest, plan_name, trial_active, trial_days_left }
+```graphql
+query {
+  ipv4: stixCyberObservables(filters: $ipv4Filter, first: 1) { pageInfo { globalCount } }
+  domains: stixCyberObservables(filters: $domainFilter, first: 1) { pageInfo { globalCount } }
+  # ... etc
+}
 ```
 
-### 8. AuthContext Extension
+This is a single HTTP request returning all 7 counts. OpenCTI GraphQL supports aliased queries.
 
-```jsx
-// In AuthContext useMemo value:
-const value = useMemo(() => ({
-    user,
-    loading,
-    error,
-    isAuthenticated: user !== null,
-    emailVerified: user?.email_verified ?? false,
-    onboardingCompleted: user?.onboarding_completed ?? false,
-    userInitials: getInitials(user?.name),
-    // NEW
-    plan: user?.plan ?? null,
-    trialActive: user?.trial_active ?? false,
-    trialDaysLeft: user?.trial_days_left ?? 0,
-    // existing
-    login,
-    register,
-    logout,
-    refreshUser: checkAuth,
-}), [user, loading, error, login, register, logout, checkAuth]);
+**Frontend modification** (`DashboardPage.jsx`):
+
+```js
+// Expand STAT_CARD_CONFIG to 7 entries
+const STAT_CARD_CONFIG = [
+  { entity_type: 'IPv4-Addr', label: 'IP Addresses', color: 'red' },
+  { entity_type: 'Domain-Name', label: 'Domains', color: 'violet' },
+  { entity_type: 'Hostname', label: 'Hostnames', color: 'cyan' },
+  { entity_type: 'X509-Certificate', label: 'Certificates', color: 'amber' },
+  { entity_type: 'Email-Addr', label: 'Emails', color: 'green' },           // NEW
+  { entity_type: 'Cryptocurrency-Wallet', label: 'Crypto Wallets', color: 'amber' },  // NEW
+  { entity_type: 'Url', label: 'URLs', color: 'violet' },                   // NEW
+];
+
+// Add STAT_COLOR_MAP entries for green
 ```
+
+**Grid change:** `grid-cols-4` becomes a responsive layout for 7 cards. Use `grid-cols-4 lg:grid-cols-7` or keep 4-col with a second row. Recommendation: 7-col on desktop, 4-col on medium, wraps naturally.
+
+**Additional UI changes:**
+- Add "Threat Database" heading above stat cards
+- Remove `live-dot` and "Live" label from stat cards (keep on map only)
+
+### 2. Threat Map Cap and Label
+
+**Current state of ThreatMapService::fetchSnapshot():**
+- Already fetches `first: 100` observables (line 351 of ThreatMapService.php)
+- Already ordered by `created_at desc`
+- Frontend `useThreatStream.js` caps at `MAX_EVENTS = 50` for SSE events
+
+**Changes needed:**
+- Frontend label change only: Replace "Active Threats" with "100 Latest Attacks" in `ThreatMapCounters.jsx`
+- No backend change needed -- snapshot already caps at 100
+- Consider increasing `MAX_EVENTS` in `useThreatStream.js` from 50 to 100 to match snapshot
+
+### 3. Threat News: Date-Based Filtering
+
+**Current filtering:** search (text), label (category), cursor pagination.
+
+**New filtering:** Add `published_after` and `published_before` date range filters.
+
+**Backend: ThreatNewsService modification**
+
+Add date range parameters to `list()` method:
+
+```php
+public function list(
+    int $first = 20,
+    ?string $after = null,
+    ?string $search = null,
+    ?string $confidence = null,
+    ?string $labelId = null,
+    ?string $publishedAfter = null,    // NEW: ISO-8601 date
+    ?string $publishedBefore = null,   // NEW: ISO-8601 date
+    string $orderBy = 'published',
+    string $orderMode = 'desc',
+): array
+```
+
+OpenCTI `FilterGroup` supports date range on `published` field:
+
+```php
+if ($publishedAfter) {
+    $filterItems[] = [
+        'key'      => 'published',
+        'values'   => [$publishedAfter],
+        'operator' => 'gt',
+        'mode'     => 'or',
+    ];
+}
+if ($publishedBefore) {
+    $filterItems[] = [
+        'key'      => 'published',
+        'values'   => [$publishedBefore],
+        'operator' => 'lt',
+        'mode'     => 'or',
+    ];
+}
+```
+
+**Backend: ThreatNewsController modification**
+
+Accept new query params:
+
+```php
+$validated = $request->validate([
+    'after'            => 'nullable|string',
+    'search'           => 'nullable|string|max:255',
+    'label'            => 'nullable|string',
+    'published_after'  => 'nullable|date',
+    'published_before' => 'nullable|date',
+    'sort'             => 'nullable|in:published,name',
+    'order'            => 'nullable|in:asc,desc',
+]);
+```
+
+**Frontend: ThreatNewsPage modifications**
+
+Replace cursor-based pagination with date-based infinite scroll or date selector:
+
+```
+Current flow: pagination toolbar with prev/next cursors
+New flow:     date range selector replaces pagination
+              - Default: last 7 days
+              - Presets: Today, 7 days, 30 days, 90 days, Custom range
+              - Load all items within date range (may need higher first limit)
+```
+
+**Data flow:**
+
+```
+DateRangeSelector (state: {from, to})
+    |
+    v
+ThreatNewsPage (passes published_after, published_before to API)
+    |
+    v
+GET /api/threat-news?published_after=2026-03-21&published_before=2026-03-28
+    |
+    v
+ThreatNewsService -> OpenCTI GraphQL with date FilterGroup
+```
+
+**API module change** (`threat-news.js`):
+
+```js
+export function fetchThreatNews({ after, search, label, published_after, published_before, sort, order } = {}) {
+    const params = new URLSearchParams();
+    if (published_after) params.set('published_after', published_after);
+    if (published_before) params.set('published_before', published_before);
+    // ... existing params
+}
+```
+
+### 4. Threat News: Category Distribution Time-Series Chart
+
+**New endpoint:** `GET /api/threat-news/chart?days=30`
+
+Returns daily category counts for a time-series chart.
+
+**Backend: New method on ThreatNewsService**
+
+```php
+public function categoryTimeSeries(int $days = 30): array
+{
+    // Fetch reports from last N days with labels
+    // Group by day + label
+    // Return: { dates: [...], series: { "Malware": [...], "Phishing": [...] } }
+}
+```
+
+**GraphQL approach:**
+1. Query reports with `published` filter (gt: N days ago), fetch `first: 500` with `objectLabel`
+2. Server-side aggregation: bucket by date, count labels per bucket
+3. Cache for 5 min (same as news)
+
+**Response shape:**
+
+```json
+{
+    "dates": ["2026-03-01", "2026-03-02", "..."],
+    "series": [
+        { "label": "Malware", "data": [5, 3, 8, ...] },
+        { "label": "Phishing", "data": [2, 1, 4, ...] }
+    ]
+}
+```
+
+**Frontend: Time-series chart in ThreatNewsPage**
+
+Use existing `useChartJs` hook with Chart.js line chart:
+
+```js
+const chartConfig = {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: series.map(s => ({
+            label: s.label,
+            data: s.data,
+            borderColor: categoryColor(s.label),
+            fill: false,
+            tension: 0.3,
+        })),
+    },
+};
+```
+
+Place above the report list, below the toolbar. Collapsible panel recommended (glass-card with toggle).
+
+### 5. Threat News: Auto-Refresh
+
+**Pattern:** 5-minute interval refresh using a reusable hook.
+
+**New hook: `useAutoRefresh.js`**
+
+```js
+export function useAutoRefresh(callback, intervalMs = 300000) {
+    useEffect(() => {
+        // Skip when tab is hidden (save resources)
+        let timer = null;
+
+        function tick() {
+            if (!document.hidden) callback();
+        }
+
+        timer = setInterval(tick, intervalMs);
+        return () => clearInterval(timer);
+    }, [callback, intervalMs]);
+}
+```
+
+**Integration in ThreatNewsPage:**
+
+```js
+useAutoRefresh(loadData, 5 * 60 * 1000);
+```
+
+**Note:** Dashboard already has auto-refresh (lines 431-444 of DashboardPage.jsx). The new hook extracts this pattern for reuse across ThreatNews and ThreatActors pages.
+
+### 6. Threat Actors: Enriched Modal
+
+**Current GraphQL query fields per actor:**
+- id, name, description, aliases, primary_motivation, resource_level, modified, goals
+- targetedCountries (via stixCoreRelationships targets -> Country)
+- targetedSectors (via stixCoreRelationships targets -> Sector)
+- externalReferences
+
+**New fields needed for enriched modal:**
+
+```graphql
+# TTPs (Attack Patterns used by this actor)
+usedTTPs: stixCoreRelationships(
+    relationship_type: "uses"
+    toTypes: ["Attack-Pattern"]
+    first: 20
+) {
+    edges {
+        node {
+            to {
+                ... on AttackPattern {
+                    id
+                    name
+                    x_mitre_id
+                }
+            }
+        }
+    }
+}
+
+# Tools used
+usedTools: stixCoreRelationships(
+    relationship_type: "uses"
+    toTypes: ["Tool"]
+    first: 20
+) {
+    edges {
+        node {
+            to {
+                ... on Tool {
+                    id
+                    name
+                }
+            }
+        }
+    }
+}
+
+# Campaigns
+campaigns: stixCoreRelationships(
+    relationship_type: "attributed-to"
+    fromTypes: ["Campaign"]
+    first: 10
+) {
+    edges {
+        node {
+            from {
+                ... on Campaign {
+                    id
+                    name
+                    first_seen
+                    last_seen
+                }
+            }
+        }
+    }
+}
+```
+
+**Architecture decision: Fetch-on-open vs Batch-in-list**
+
+Two approaches:
+1. **Batch-in-list:** Add TTPs/tools/campaigns to the existing list query (all actors in one request)
+2. **Fetch-on-open:** Load enriched data when modal opens via separate API call
+
+**Recommendation: Fetch-on-open** because:
+- List query already includes relationships (countries, sectors, refs) -- adding TTPs/tools/campaigns per actor multiplies response size significantly (24 actors x 20 TTPs + 20 tools + 10 campaigns = enormous query)
+- Most users click 1-3 modals, not all 24
+- Modal can show a loading skeleton for 200-300ms while enrichment loads
+
+**New endpoint:** `GET /api/threat-actors/{id}`
+
+```php
+// ThreatActorService::getDetail(string $id): array
+// New method with enriched GraphQL query for a single actor
+// Cache for 15 min per actor ID
+```
+
+**Frontend flow:**
+
+```
+User clicks actor card
+  -> ThreatActorModal opens with basic data (already in list)
+  -> useEffect fires GET /api/threat-actors/{actor.id}
+  -> Modal enriches with TTPs, tools, campaigns (skeleton -> content)
+```
+
+**Frontend API addition** (`threat-actors.js`):
+
+```js
+export function fetchThreatActorDetail(id) {
+    return apiClient.get(`/api/threat-actors/${encodeURIComponent(id)}`);
+}
+```
+
+### 7. Threat Actors: Auto-Refresh
+
+Same pattern as Threat News. Use `useAutoRefresh` hook:
+
+```js
+useAutoRefresh(loadData, 5 * 60 * 1000);
+```
+
+### 8. Settings/Profile Page Rewrite
+
+**Current state:** Entirely mock data. Tabs: API Keys (mock), Webhooks (mock), Usage (random chart), Account (hardcoded "Acme Corp", "john.doe@acme.com").
+
+**New state:** Two meaningful tabs -- Profile and Account.
+
+**Tab structure:**
+
+| Tab | Content | Data Source |
+|-----|---------|-------------|
+| Profile | Name, email (read-only), phone, timezone, organization, role, avatar | AuthContext user data |
+| Account | Current plan + credits summary, change password, danger zone (future) | AuthContext + /api/credits |
+
+**Profile tab -- editable fields:**
+
+```
+Name         [text input, pre-filled from user.name]
+Email        [read-only, from user.email]
+Phone        [PhoneNumberInput component, from user.phone]
+Timezone     [SearchableDropdown, from user.timezone]
+Organization [text input, from user.organization]
+Role         [SimpleDropdown, from user.role]
+
+[Save Changes] button -> PUT /api/profile
+```
+
+**New backend endpoint:** `PUT /api/profile`
+
+```php
+// app/Http/Controllers/Auth/ProfileController.php
+class ProfileController extends Controller
+{
+    public function __invoke(Request $request): UserResource
+    {
+        $validated = $request->validate([
+            'name'         => ['required', 'string', 'min:2', 'max:255'],
+            'phone'        => ['nullable', 'string', 'min:5', 'max:20'],
+            'timezone'     => ['nullable', 'string', 'timezone:all'],
+            'organization' => ['nullable', 'string', 'max:255'],
+            'role'         => ['nullable', 'string', Rule::in([...])],
+        ]);
+
+        $request->user()->update($validated);
+
+        return new UserResource($request->user()->fresh());
+    }
+}
+```
+
+**Route:** Inside `auth:sanctum` group: `Route::put('/profile', ProfileController::class);`
+
+**Account tab -- password change:**
+
+Only for non-OAuth users (user.password is not null). OAuth users see "Managed by [Google/GitHub]" message.
+
+**New backend endpoint:** `PUT /api/password`
+
+```php
+class PasswordController extends Controller
+{
+    public function __invoke(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password'         => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $request->user()->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return response()->json(['message' => 'Password updated']);
+    }
+}
+```
+
+**Frontend data flow:**
+
+```
+SettingsPage
+  |-- useAuth() -> user data for Profile tab
+  |-- useState for form fields (initialized from user)
+  |-- handleSave -> apiClient.put('/api/profile', formData)
+  |-- on success -> refreshUser() to update AuthContext
+  |
+  |-- Account tab
+  |     |-- Credits display from /api/credits (or inline from AuthContext)
+  |     |-- Plan name from user.plan
+  |     |-- Password change form (conditionally rendered for non-OAuth)
+  |     |-- handlePasswordChange -> apiClient.put('/api/password', passwordData)
+```
+
+**Reusable components already available:**
+- `PhoneNumberInput` (from GetStartedPage)
+- `SearchableDropdown` (from GetStartedPage)
+- `SimpleDropdown` (from GetStartedPage)
+- `CreditBadge` (from shared components)
+
+These should be extracted to `components/shared/` if not already there.
+
+### 9. Threat Search Bug Fixes
+
+Three bugs identified:
+
+**a) Relation graph node positioning bug**
+- D3 force simulation in `D3Graph` component (ThreatSearchPage.jsx)
+- Nodes likely cluster or overlap due to force parameters
+- Fix: Adjust `forceCollide`, `forceManyBody` strength, `forceCenter` positioning
+
+**b) Search loader**
+- Currently no proper loading state during search API call
+- Fix: Add loading spinner/skeleton during `searchThreat()` execution
+
+**c) Search bar z-index when logged out**
+- The search bar in the topbar or page may be behind other elements for unauthenticated users
+- Fix: Adjust z-index on the search container, likely in ThreatSearchPage or Topbar
+
+These are CSS/component-level fixes, no architecture changes needed.
+
+---
+
+## Reusable Hook: useAutoRefresh
+
+Extract from existing DashboardPage pattern:
+
+```js
+// hooks/useAutoRefresh.js
+import { useEffect, useRef } from 'react';
+
+export function useAutoRefresh(callback, intervalMs = 300000) {
+    const callbackRef = useRef(callback);
+
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            if (!document.hidden) {
+                callbackRef.current();
+            }
+        }, intervalMs);
+
+        return () => clearInterval(timer);
+    }, [intervalMs]);
+}
+```
+
+**Usage locations:**
+1. ThreatNewsPage -- refresh reports every 5 min
+2. ThreatActorsPage -- refresh actors every 5 min
+3. DashboardPage -- refactor existing setInterval to use this hook
+
+---
+
+## Component Boundaries Summary
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| `useAutoRefresh` hook | Manage periodic data refresh with visibility awareness | Any page's loadData callback |
+| `DateRangeSelector` component | Date picker UI for filtering by date range | ThreatNewsPage state |
+| `ThreatNewsService` (modified) | Date-filtered report listing + time-series aggregation | OpenCTI GraphQL, Cache |
+| `ThreatActorService` (modified) | Enriched actor detail endpoint | OpenCTI GraphQL, Cache |
+| `ProfileController` (new) | Update user profile fields | User model |
+| `PasswordController` (new) | Change user password | User model, Hash |
+| `SettingsPage` (rewritten) | Profile editing + account management | AuthContext, /api/profile, /api/password, /api/credits |
+| `DashboardService` (modified) | Expanded entity type counts (4 -> 7) | OpenCTI GraphQL, Cache |
+| `ThreatNewsChartController` (new) | Serve time-series category data | ThreatNewsService |
 
 ---
 
 ## New API Routes
 
 ```php
-// Public -- pricing page needs this without auth
-Route::get('/plans', PlanController::class);
+// Public (no auth required)
+// None new
 
 // Inside auth:sanctum group
-Route::post('/plan', SubscriptionController::class);
+Route::put('/profile', ProfileController::class);
+Route::put('/password', PasswordController::class);
+Route::get('/threat-actors/{id}', ThreatActorDetailController::class);
+Route::get('/threat-news/chart', ThreatNewsChartController::class);
 ```
-
-**Why /api/plans is public:** The pricing page should render for unauthenticated visitors so they can see plan options before signing up. Plan data is not sensitive.
-
-**Why /api/plan (POST) requires auth:** It modifies user state (sets plan_id, syncs credits).
-
----
-
-## Patterns to Follow
-
-### Pattern 1: CreditResolver Service (DRY Extraction)
-
-**What:** Extract the duplicated `resolveCredit()` + `lazyReset()` logic from `DeductCredit` and `CreditStatusController` into a shared `CreditResolver` service.
-
-**Why:** Both files currently have identical private methods. Adding plan awareness would mean duplicating the plan logic in both places. A service class is the natural Laravel pattern.
-
-```php
-// app/Services/CreditResolver.php
-class CreditResolver
-{
-    public function resolve(Request $request): Credit { ... }
-    public function resolveLimitFor(?User $user): int { ... }
-    public function lazyReset(Credit $credit, int $planLimit): void { ... }
-}
-```
-
-### Pattern 2: Single-Invocable Controllers (Existing Pattern)
-
-**What:** Every controller in the codebase uses `__invoke()`. New controllers must follow this.
-
-```php
-// app/Http/Controllers/Plan/PlanController.php
-class PlanController extends Controller
-{
-    public function __invoke(): JsonResponse { ... }
-}
-
-// app/Http/Controllers/Plan/SubscriptionController.php
-class SubscriptionController extends Controller
-{
-    public function __invoke(Request $request): UserResource { ... }
-}
-```
-
-### Pattern 3: Timezone Auto-Detection on Frontend
-
-**What:** Pre-fill timezone from browser `Intl` API, allow override.
-
-```jsx
-const [timezone, setTimezone] = useState(
-    () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-);
-```
-
-### Pattern 4: Plan as Lookup Table with Aggressive Caching
-
-**What:** The `plans` table has exactly 4 rows. Cache the full list.
-
-```php
-// PlanController
-public function __invoke(): JsonResponse
-{
-    $plans = Cache::rememberForever('plans:active', function () {
-        return Plan::where('is_active', true)->orderBy('sort_order')->get();
-    });
-
-    return response()->json(['data' => $plans]);
-}
-```
-
-Invalidate on plan updates (rare/manual operation).
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Subscription Status Enum Column
+### Anti-Pattern 1: Client-Side Date Filtering
 
-**What:** Adding a `subscription_status` enum (trial, active, expired, cancelled) to users.
-**Why bad:** Redundant derivable state. Status is fully computable from `plan_id` + `trial_ends_at`. An enum creates synchronization risk -- what if `plan_id` is set but status still says "trial"?
-**Instead:** Derive status in code. Add helper methods on User model: `isOnTrial()`, `isTrialExpired()`, `hasActivePlan()`, `effectiveDailyCredits()`.
+**What:** Fetch all reports, then filter by date in JavaScript.
+**Why bad:** OpenCTI may have thousands of reports. Transferring all to filter client-side wastes bandwidth and memory. The 5-min server cache becomes useless since each date range is unique.
+**Instead:** Pass date range to backend, let OpenCTI filter via GraphQL FilterGroup, cache per param hash (existing pattern).
 
-### Anti-Pattern 2: Separate Trial Credits System
+### Anti-Pattern 2: Batch-Loading All Enrichment in Actor List
 
-**What:** Creating a separate credits table or column for trial vs plan credits.
-**Why bad:** The existing `credits` table already handles limits and remaining. The limit just needs to come from the plan instead of a hardcoded value.
-**Instead:** Single credits row per user. `credits.limit` is the cached version of the plan's daily_credits, synced on plan change and daily reset.
+**What:** Adding TTPs, tools, campaigns to the actors list query for all 24 actors.
+**Why bad:** Multiplies GraphQL payload (24 actors x 50+ relationships each). Response time increases from ~500ms to potentially 5+ seconds. Most modal data is never viewed.
+**Instead:** Fetch-on-open pattern. Load enriched data for a single actor when the modal opens. Show skeleton in modal for 200-300ms.
 
-### Anti-Pattern 3: Hard-Blocking on Trial Expiry
+### Anti-Pattern 3: Separate SSE Stream for Auto-Refresh
 
-**What:** Completely locking users out when trial expires (redirect to pricing, block all routes).
-**Why bad:** Users lose access to browse pages (threat actors, news, map) that do not cost credits. Creates hostile UX. Reduces conversion -- users who feel locked out are more likely to churn than upgrade.
-**Instead:** Soft downgrade to Free tier (3 searches/day). Show `TrialBanner` with upgrade CTA. All features remain accessible, just rate-limited. Browse pages (no credit cost) are fully available.
+**What:** Using Server-Sent Events for Threat News and Threat Actors auto-refresh.
+**Why bad:** SSE is justified for Threat Map (truly real-time, continuous events). News and actors update infrequently (hourly at most). SSE connections consume server resources and have 5-min lifetime limits already imposed.
+**Instead:** Simple `setInterval` polling every 5 minutes. The server-side cache (5 min for news) means most polls return cached data instantly.
 
-### Anti-Pattern 4: Payment Infrastructure Now
+### Anti-Pattern 4: Building Full Settings Infrastructure
 
-**What:** Building Stripe integration, webhooks, invoice tables, subscription lifecycle management.
-**Why bad:** Milestone says "no real payment processing yet." Payment infra is complex (webhooks, idempotency, failed payment handling, proration). Building it without real payments creates untestable dead code.
-**Instead:** Plan selection is a simple `POST /api/plan` that updates `users.plan_id`. When payment processing is added later, wrap that endpoint with Stripe checkout session validation. The plan model and credit resolver are payment-agnostic by design.
+**What:** API Keys, Webhooks, Usage analytics, 2FA toggle -- features that don't exist on the backend.
+**Why bad:** Current SettingsPage has mock API keys and webhooks that are purely decorative. Building backend infrastructure for features with zero demand is premature.
+**Instead:** Profile + Account tabs only. Remove mock API Keys, Webhooks, and Usage tabs entirely. Add them back when backend support exists.
 
-### Anti-Pattern 5: Multi-Step Onboarding Wizard
+### Anti-Pattern 5: Client-Side Time-Series Aggregation
 
-**What:** Breaking 5 fields across 3 wizard steps with progress bars, back buttons, skip logic.
-**Why bad:** Over-engineering for 2 required + 3 optional fields. The current onboarding is a single card with a form. Wizard complexity (step state, validation per step, browser back handling) is disproportionate to the benefit.
-**Instead:** Single form with a visual section separator. Required section: name, phone. Optional section: timezone (auto-detected), organization (text input), role (dropdown select). One submit button.
+**What:** Fetching all reports with dates, then bucketing by day in JavaScript.
+**Why bad:** Same as client-side date filtering -- requires transferring potentially thousands of records. Aggregation is compute-intensive in the browser.
+**Instead:** Server-side aggregation in `ThreatNewsService::categoryTimeSeries()`. Cache the result. Send only the aggregated dates + counts to the frontend.
 
 ---
 
@@ -507,92 +673,104 @@ Invalidate on plan updates (rare/manual operation).
 
 | File | Change | Risk |
 |------|--------|------|
-| `app/Models/User.php` | Add `plan()` relation, fillable fields (plan_id, timezone, organization, role), helper methods | LOW |
-| `app/Http/Resources/UserResource.php` | Add plan, trial, profile fields; fix onboarding_completed to use timestamp | LOW |
-| `app/Http/Middleware/DeductCredit.php` | Replace hardcoded limits with CreditResolver service | MEDIUM (core credit flow) |
-| `app/Http/Controllers/Credit/CreditStatusController.php` | Replace hardcoded limits with CreditResolver service | LOW |
-| `app/Http/Controllers/Auth/OnboardingController.php` | Accept timezone, organization, role fields | LOW |
-| `routes/api.php` | Add GET /plans (public), POST /plan (auth) | LOW |
+| `app/Services/DashboardService.php` | Add 3 entity types to `fetchCounts()`, batch into single aliased query | LOW |
+| `app/Services/ThreatNewsService.php` | Add `publishedAfter`/`publishedBefore` params, add `categoryTimeSeries()` | MEDIUM |
+| `app/Services/ThreatActorService.php` | Add `getDetail()` method with enriched GraphQL | LOW |
+| `app/Http/Controllers/ThreatNews/IndexController.php` | Accept date range query params | LOW |
+| `routes/api.php` | Add PUT /profile, PUT /password, GET /threat-actors/{id}, GET /threat-news/chart | LOW |
 
 ### Backend -- New
 
 | File | Purpose |
 |------|---------|
-| `app/Models/Plan.php` | Plan Eloquent model |
-| `app/Services/CreditResolver.php` | Shared credit limit resolution (plan-aware) |
-| `app/Http/Controllers/Plan/PlanController.php` | List plans (GET /api/plans) |
-| `app/Http/Controllers/Plan/SubscriptionController.php` | Select/change plan (POST /api/plan) |
-| `database/migrations/xxxx_create_plans_table.php` | Plans table schema |
-| `database/migrations/xxxx_add_plan_and_profile_to_users.php` | plan_id FK, timezone, organization, role |
-| `database/seeders/PlanSeeder.php` | Seed 4 plan tiers |
+| `app/Http/Controllers/Auth/ProfileController.php` | Update user profile (PUT /api/profile) |
+| `app/Http/Controllers/Auth/PasswordController.php` | Change password (PUT /api/password) |
+| `app/Http/Controllers/ThreatActor/DetailController.php` | Single actor enriched detail |
+| `app/Http/Controllers/ThreatNews/ChartController.php` | Time-series category chart data |
 
 ### Frontend -- Modified
 
 | File | Change | Risk |
 |------|--------|------|
-| `src/contexts/AuthContext.jsx` | Expose plan, trialActive, trialDaysLeft | LOW |
-| `src/pages/GetStartedPage.jsx` | Add timezone (auto-detect + dropdown), organization, role fields | LOW |
-| `src/components/shared/CreditBadge.jsx` | Optionally show plan name alongside remaining/limit | LOW |
-| `src/api/auth.js` | Update completeOnboarding payload with new fields | LOW |
-| `src/App.jsx` | Add /pricing route | LOW |
+| `src/pages/DashboardPage.jsx` | Expand stat cards to 7, add "Threat Database" heading, remove Live dots | LOW |
+| `src/pages/ThreatNewsPage.jsx` | Add date range selector, category chart, auto-refresh, remove pagination | MEDIUM |
+| `src/pages/ThreatActorsPage.jsx` | Add auto-refresh, enrich modal with fetch-on-open detail | LOW |
+| `src/pages/ThreatMapPage.jsx` | Label change only ("100 Latest Attacks") | LOW |
+| `src/pages/SettingsPage.jsx` | Full rewrite: real user data, Profile + Account tabs | HIGH (complete rewrite) |
+| `src/pages/ThreatSearchPage.jsx` | Bug fixes (D3 nodes, loader, z-index) | LOW |
+| `src/api/threat-news.js` | Add date range params, chart fetch function | LOW |
+| `src/api/threat-actors.js` | Add `fetchThreatActorDetail(id)` | LOW |
+| `src/components/threat-map/ThreatMapCounters.jsx` | Label text change | LOW |
 
 ### Frontend -- New
 
 | File | Purpose |
 |------|---------|
-| `src/pages/PricingPage.jsx` | Plan comparison grid with feature lists + selection buttons |
-| `src/components/shared/TrialBanner.jsx` | Trial countdown bar or expired upgrade prompt |
-| `src/components/shared/PlanBadge.jsx` | Current plan indicator chip |
-| `src/api/plans.js` | `fetchPlans()` and `selectPlan(slug)` API functions |
+| `src/hooks/useAutoRefresh.js` | Reusable interval refresh hook with visibility pause |
+| `src/api/profile.js` | `updateProfile()` and `changePassword()` API functions |
+| `src/components/shared/DateRangeSelector.jsx` | Date range picker with presets |
 
 ---
 
 ## Suggested Build Order
 
-Build order respects data dependencies: schema first, backend logic second, frontend consumption last.
+Ordered by dependencies: backend endpoints first, then frontend consumers. Independent features in parallel where possible.
 
 ```
-Phase 1: Schema + Models (additive, no behavior change)
-  1. Migration: create plans table
-  2. PlanSeeder: seed Free/Basic/Pro/Enterprise rows
-  3. Plan model with fillable, casts
-  4. Migration: add plan_id, timezone, organization, role to users
-  5. Update User model: plan() relation, new fillable, helper methods
-  => Existing tests still pass (no behavior change)
+Phase 1: Simple Backend Changes (no new endpoints, low risk)
+  1. DashboardService: expand entity types to 7, batch aliased query
+  2. DashboardPage: expand stat cards, add heading, remove Live dots
+  3. ThreatMapCounters: label change to "100 Latest Attacks"
+  => Quick wins, testable immediately
 
-Phase 2: CreditResolver + Plan-Aware Credits (behavior change, highest risk)
-  6. CreditResolver service
-  7. Modify DeductCredit middleware to use CreditResolver
-  8. Modify CreditStatusController to use CreditResolver
-  9. Tests: plan-aware credit limits, trial expiry downgrade, guest limits
-  => This is the riskiest change -- modify core credit flow
+Phase 2: Auto-Refresh Hook + Integration (reusable pattern)
+  4. Create useAutoRefresh hook
+  5. Integrate into ThreatNewsPage
+  6. Integrate into ThreatActorsPage
+  7. Refactor DashboardPage to use the hook
+  => Pattern established, 3 pages improved
 
-Phase 3: Backend API Endpoints (new endpoints)
-  10. PlanController (GET /api/plans)
-  11. SubscriptionController (POST /api/plan with credit sync)
-  12. Update OnboardingController (timezone, organization, role)
-  13. Update UserResource (plan, trial, profile fields, fix onboarding_completed)
-  14. Register routes in api.php
-  15. Tests: plan listing, plan selection, onboarding with new fields
-  => All endpoints operational, ready for frontend
+Phase 3: Date-Based Filtering for Threat News (backend + frontend)
+  8. ThreatNewsService: add date range params to list()
+  9. ThreatNewsController: accept published_after, published_before
+  10. Frontend: DateRangeSelector component
+  11. ThreatNewsPage: integrate date selector, replace pagination
+  => News page date filtering complete
 
-Phase 4: Frontend Integration
-  16. Update AuthContext (plan, trial derived state)
-  17. api/plans.js (fetchPlans, selectPlan)
-  18. Update api/auth.js (onboarding payload)
-  19. Update GetStartedPage.jsx (timezone auto-detect, org, role)
-  20. PricingPage.jsx (plan grid + selection)
-  21. TrialBanner.jsx + PlanBadge.jsx
-  22. Wire TrialBanner into AppLayout
-  23. Update CreditBadge.jsx (plan context)
-  24. Add /pricing route to App.jsx
+Phase 4: Threat News Category Chart (depends on Phase 3 backend pattern)
+  12. ThreatNewsService: add categoryTimeSeries() method
+  13. ThreatNewsChartController: new endpoint
+  14. ThreatNewsPage: add time-series chart component
+  => News page fully enhanced
+
+Phase 5: Enriched Threat Actor Modal (independent, parallel-safe with Phase 3-4)
+  15. ThreatActorService: add getDetail() with enriched GraphQL
+  16. ThreatActorDetailController: new endpoint
+  17. Frontend: fetchThreatActorDetail(id) API function
+  18. ThreatActorModal: fetch-on-open enrichment with loading skeleton
+  => Actor modals enriched with TTPs, tools, campaigns
+
+Phase 6: Settings/Profile Page (independent, parallel-safe)
+  19. ProfileController: PUT /api/profile endpoint
+  20. PasswordController: PUT /api/password endpoint
+  21. Frontend: api/profile.js module
+  22. SettingsPage: full rewrite with Profile + Account tabs
+  => Settings page functional with real data
+
+Phase 7: Threat Search Bug Fixes (independent, any time)
+  23. D3 force simulation parameter tuning
+  24. Search loading state during API call
+  25. Z-index fix for logged-out search bar
+  => Bug fixes complete
 ```
 
 **Why this order:**
-- Phase 1 is pure additive -- no breaking changes, all existing tests pass
-- Phase 2 is the riskiest change (core credit flow) -- stabilize before building on top
-- Phase 3 builds on Phase 1+2 models and requires Phase 2's CreditResolver
-- Phase 4 consumes all backend changes; each frontend component can be built independently once APIs are ready
+- Phase 1 is pure config changes with zero risk, delivers visible progress
+- Phase 2 creates the reusable hook before needing it in Phases 3-5
+- Phases 3-4 are sequential (chart depends on backend date filtering pattern)
+- Phases 5, 6, 7 are independent and can be parallelized with Phases 3-4
+- Settings page (Phase 6) has no dependencies on other features
+- Bug fixes (Phase 7) are isolated and can be done anytime
 
 ---
 
@@ -600,26 +778,27 @@ Phase 4: Frontend Integration
 
 | Concern | Current (100 users) | At 10K users | At 100K users |
 |---------|---------------------|--------------|---------------|
-| Plan lookups | Eager load `plan` on user fetch (1 JOIN) | Same (plans table = 4 rows) | Cache plans in memory, `Cache::rememberForever` |
-| Credit resolution | 1 query per credit-gated request | Same (indexed on user_id unique) | Consider Redis-cached credits if DB load is concern |
-| Trial expiry check | PHP timestamp comparison | Same (single column) | Same |
-| Plan changes | Direct DB update + credit sync | Same | Queue credit sync if batch plan migrations needed |
-| UserResource with plan | 1 extra JOIN or eager load | Same | Same (negligible) |
-
-The `plans` table is effectively a lookup table (4 rows, rarely changes). It can be cached aggressively.
+| Dashboard counts (7 queries) | Batch into 1 aliased query, 5-min cache | Same | Same (cached) |
+| Time-series aggregation | Server-side, 500 reports, 5-min cache | Same | Increase cache TTL to 15 min |
+| Enriched actor detail | Per-actor cache, 15 min | Same | Same (read-heavy, cache effective) |
+| Auto-refresh polling | 5 min interval, cache absorbs | Same | Same (cache hit rate > 99%) |
+| Profile updates | Direct DB update | Same | Same (rare operation) |
+| Date-range news queries | Cache per param hash | Cache may fragment heavily | Consider LRU eviction, limit date ranges |
 
 ---
 
 ## Sources
 
-- Direct codebase analysis: `backend/app/Http/Middleware/DeductCredit.php` (credit flow)
-- Direct codebase analysis: `backend/app/Http/Controllers/Credit/CreditStatusController.php` (duplicate logic)
-- Direct codebase analysis: `backend/app/Models/User.php` (trial_ends_at, existing relations)
-- Direct codebase analysis: `backend/app/Http/Resources/UserResource.php` (current response shape)
-- Direct codebase analysis: `backend/app/Http/Controllers/Auth/OnboardingController.php` (current fields)
-- Direct codebase analysis: `frontend/src/contexts/AuthContext.jsx` (current state shape)
-- Direct codebase analysis: `frontend/src/pages/GetStartedPage.jsx` (current form)
-- Direct codebase analysis: `frontend/src/components/auth/ProtectedRoute.jsx` (guard chain)
-- Direct codebase analysis: `backend/routes/api.php` (route structure)
-- Direct codebase analysis: `backend/database/migrations/` (all migration files)
-- All recommendations are integration-focused, building on verified patterns in the existing codebase (HIGH confidence)
+- Direct codebase analysis: `backend/app/Services/DashboardService.php` (current counts query pattern)
+- Direct codebase analysis: `backend/app/Services/ThreatNewsService.php` (current filtering, GraphQL FilterGroup pattern)
+- Direct codebase analysis: `backend/app/Services/ThreatActorService.php` (current GraphQL relationships pattern)
+- Direct codebase analysis: `backend/app/Services/ThreatMapService.php` (snapshot already caps at 100)
+- Direct codebase analysis: `frontend/src/pages/DashboardPage.jsx` (existing auto-refresh pattern, stat cards)
+- Direct codebase analysis: `frontend/src/pages/ThreatNewsPage.jsx` (current filtering, pagination)
+- Direct codebase analysis: `frontend/src/pages/ThreatActorsPage.jsx` (current modal, data loading)
+- Direct codebase analysis: `frontend/src/pages/SettingsPage.jsx` (mock data to replace)
+- Direct codebase analysis: `frontend/src/contexts/AuthContext.jsx` (user data shape)
+- Direct codebase analysis: `backend/routes/api.php` (current route structure)
+- Direct codebase analysis: `frontend/src/hooks/useThreatStream.js` (visibility-aware pattern)
+- OpenCTI GraphQL FilterGroup pattern verified from existing service implementations (HIGH confidence)
+- All recommendations build on verified patterns in the existing codebase (HIGH confidence)

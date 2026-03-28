@@ -1,260 +1,194 @@
-# Stack Research
+# Technology Stack
 
-**Domain:** Onboarding expansion, trial enforcement, subscription plans, pricing page
-**Researched:** 2026-03-20
-**Confidence:** HIGH
+**Project:** Aqua TIP v3.2 — App Layout Page Tweaks
+**Researched:** 2026-03-28
+**Scope:** Stack additions for date filtering, auto-refresh, time-series charts, enriched modals, and functional settings
 
-## Executive Assessment
+## Recommendation: Zero New Dependencies
 
-**Zero new dependencies required.** The existing stack (Laravel 12, Sanctum, React 19, Tailwind 3) handles every requirement for v3.0. This milestone is a data model + business logic + UI exercise, not a technology adoption exercise.
+The v3.2 features do NOT require any new npm packages or Composer packages. Every capability maps to existing stack or browser-native APIs. This continues the project's established pattern of minimizing dependencies (v2.1, v3.0, v3.1 all shipped with zero new deps).
 
-The critical insight: this milestone adds **no real payment processing**. Plans are stored in a database table, credits are already tracked per-user, and the pricing page is a static UI with plan selection that updates the user's plan. No Stripe, no Paddle, no billing library.
+## Feature-to-Stack Mapping
 
-## Recommended Stack (Additions Only)
+### 1. Date-Based Filtering (Threat News)
 
-### Backend: Zero New Packages
+| Need | Solution | Why |
+|------|----------|-----|
+| Date selector UI | Native `<input type="date">` | Zero bundle cost, works in all modern browsers. Simple from/to range, not a complex calendar widget. |
+| Dark mode styling | `[color-scheme:dark]` CSS property on input | Makes native date picker render dark in Chromium and Firefox. Combine with existing `input-field` class. |
+| Date formatting for API | `Date` constructor + `toISOString()` | Already used throughout codebase. |
+| Date display | Existing `useFormatDate` hook | Already timezone-aware via `Intl.DateTimeFormat`. |
 
-| What | How | Why Not a Package |
-|------|-----|-------------------|
-| Plans table | Laravel migration + Eloquent model + seeder | 4 static rows (Free/Basic/Pro/Enterprise) -- a seeded table is sufficient |
-| Trial enforcement | Middleware checking `trial_ends_at` | Single `now()->gt($user->trial_ends_at)` check -- Carbon is built into Laravel |
-| Credit tier sync | Modify `DeductCredit` middleware to read plan's `daily_limit` | Already does lazy reset with `$credit->limit`; just need to source limit from plan |
-| Onboarding fields | Migration adding `timezone`, `organization`, `role` to users | Standard `$table->string()` columns |
-| Timezone handling | PHP `DateTimeZone` + Carbon | Laravel ships Carbon; `timezone_identifiers_list()` is native PHP |
-| Plan selection endpoint | New controller + route | Standard REST: `POST /api/user/plan` |
+**Why NOT react-datepicker (v9.1.0, 40KB+):** A full calendar widget is overkill for a simple date range filter. The native HTML date input styled with `[color-scheme:dark]` matches the dark theme. If a custom calendar is later needed, revisit then.
 
-### Frontend: Zero New Packages
+### 2. Auto-Refresh (Threat News + Threat Actors)
 
-| What | How | Why Not a Package |
-|------|-----|-------------------|
-| Pricing page | React component with Tailwind | Static cards with plan comparison -- no interactive pricing calculator |
-| Timezone picker | Native `<select>` with `Intl.supportedValuesOf('timeZone')` | Browser API covers this; no library needed |
-| Organization/role fields | Standard `<input>` and `<select>` | Two form fields -- no form library needed |
-| Trial countdown/banner | Simple date math in JS | `Math.ceil((trialEnd - now) / 86400000)` -- no moment/dayjs needed |
-| Plan selection UI | Radio cards with glassmorphism | Already have card patterns and Framer Motion for transitions |
-| Timezone-aware display | `Intl.DateTimeFormat` with user timezone | Native browser API, zero deps |
+| Need | Solution | Why |
+|------|----------|-----|
+| 5-minute polling | `setInterval` + `useEffect` cleanup | Standard React pattern. Both pages already use `useCallback` for `loadData`. |
+| Tab visibility pause | `document.visibilityState` check inside interval | Prevents wasted API calls when tab is hidden. Native browser API. |
+| Refresh indicator | Existing `RotateCcw` icon from lucide-react | Already imported in both pages. Add `animate-spin` class during refresh. |
+| Countdown timer | `useState` counter, decrement with 1-second interval | Simple state, no library needed. |
 
-## Existing Stack (Already Installed, Relevant to v3.0)
-
-### Backend
-
-| Package | Version | v3.0 Use |
-|---------|---------|----------|
-| `laravel/framework` | ^12.0 | Migrations, Eloquent, middleware, Carbon, validation, seeder |
-| `laravel/sanctum` | ^4.0 | Auth context for plan/trial checks in middleware |
-| `pestphp/pest` | ^3.8 | Tests for trial enforcement, plan assignment, credit tier sync |
-
-### Frontend
-
-| Package | Version | v3.0 Use |
-|---------|---------|----------|
-| `react` | ^19.2.4 | Components, context, hooks |
-| `react-router-dom` | ^7.13.1 | `/pricing` route, plan-aware navigation |
-| `framer-motion` | ^12.35.2 | Pricing page animations, plan card hover/selection effects |
-| `lucide-react` | ^0.577.0 | Icons for plan feature lists (Check, X, Crown, Shield, Clock) |
-| `tailwindcss` | ^3.4.19 | Pricing cards, onboarding form styling, trial banner |
-| `react-phone-number-input` | ^3.4.16 | Already in onboarding -- stays |
-
-## Integration Points (Where Existing Code Changes)
-
-### 1. Credit System Needs Plan Awareness
-
-**Current state:** `DeductCredit` middleware hardcodes `remaining: 10, limit: 10` for authenticated users (line 53-54). Same hardcoding in `CreditStatusController` (line 32-33).
-
-**Required change:** Read `daily_limit` from the user's plan instead of hardcoding.
-
-```
-Current (DeductCredit::resolveCredit):
-  Credit::firstOrCreate(['user_id' => $user->id], ['remaining' => 10, 'limit' => 10, ...])
-
-After:
-  $dailyLimit = $user->plan?->daily_credit_limit ?? 3;  // Free tier default
-  Credit::firstOrCreate(['user_id' => $user->id], ['remaining' => $dailyLimit, 'limit' => $dailyLimit, ...])
+**Pattern:**
+```jsx
+useEffect(() => {
+  const id = setInterval(() => {
+    if (document.visibilityState === 'visible') loadData();
+  }, 5 * 60 * 1000);
+  return () => clearInterval(id);
+}, [loadData]);
 ```
 
-**Lazy reset also needs updating** -- when credits reset at midnight, the new limit should come from the current plan, not the stale `$credit->limit`:
+**Why NOT TanStack Query / react-query:** Would require refactoring ALL data fetching across the app. Overkill when only 2 pages need polling. The existing fetch-in-useEffect pattern is consistent across the codebase.
 
-```
-Current (lazyReset):
-  $credit->update(['remaining' => $credit->limit, ...])
+### 3. Time-Series Category Chart (Threat News)
 
-After:
-  $planLimit = $credit->user?->plan?->daily_credit_limit ?? $credit->limit;
-  $credit->update(['remaining' => $planLimit, 'limit' => $planLimit, ...])
-```
+| Need | Solution | Why |
+|------|----------|-----|
+| Line chart over time | Chart.js 4.5.1 (already installed) | `useChartJs` hook already exists and is used on DashboardPage and SettingsPage. |
+| X-axis with dates | **Category axis with string labels** | Backend returns pre-aggregated daily buckets (`{ date: "Mar 25", malware: 12, phishing: 8 }`). No date adapter needed. |
+| Multiple category lines | Multi-dataset Chart.js config | Each category is a dataset with its own color. Standard Chart.js pattern. |
+| Chart rendering | Existing `useChartJs` hook | Same pattern as other pages. |
 
-### 2. Trial Enforcement
+**Why NOT chartjs-adapter-date-fns (v3.0.0) + date-fns (v4.1.0):** The time scale adapter is needed when Chart.js must auto-compute axis tick intervals from raw timestamps. Here, the backend pre-buckets data by day, so a category x-axis with formatted date strings works identically. Avoids adding ~130KB of dependencies.
 
-**Current state:** `trial_ends_at` is set to `now()->addDays(30)` on user creation (User model `booted()` hook, line 76). Never checked anywhere.
+**If time scale is later needed:** `npm install date-fns@^4.1.0 chartjs-adapter-date-fns@^3.0.0` and `import 'chartjs-adapter-date-fns'` in the chart hook. But defer until a concrete need arises.
 
-**Required change:** New middleware or modification to existing flow:
-- Check if trial expired AND user has no paid plan
-- If expired: auto-assign Free plan, downgrade credit limit to 3/day
-- Return trial status in UserResource so frontend can show banners
+### 4. Enriched Threat Actor Modals
 
-**Key decision:** Trial enforcement should happen in `DeductCredit` middleware (not a separate middleware) because credit limits are the enforcement mechanism. When trial expires, credits downgrade. No need for hard blocking -- the user still has Free tier access.
+| Need | Solution | Why |
+|------|----------|-----|
+| TTPs, tools, sectors, campaigns | New Laravel endpoint expanding OpenCTI GraphQL query | Existing `Http::withToken()` + caching pattern. No new PHP packages. |
+| Tabbed modal UI | Existing glassmorphism modal + tab state | ThreatActorsPage already has a detail modal. Add tabs with `useState`. |
+| MITRE ATT&CK TTP display | Structured list with IDs | Format: `T1566 - Phishing`. Data from OpenCTI `attack-pattern` relationships. |
 
-### 3. Onboarding Controller Expansion
+**Backend approach:** New `/api/threat-actors/{id}/details` endpoint fetches:
+- `uses` relationships to `Attack-Pattern` (TTPs)
+- `uses` relationships to `Tool` and `Malware`
+- `targets` relationships to `Identity` (sectors)
+- Related `Campaign` entities
 
-**Current state:** `OnboardingController` validates `name` (required) + `phone` (required), sets `onboarding_completed_at`.
+Uses existing `Http` client, Bearer token auth, and 15-minute caching pattern.
 
-**Required change:** Add `timezone`, `organization`, `role` to validation. Make `organization` and `role` optional (not all users belong to organizations).
+### 5. Functional Settings/Profile Page
 
-**Timezone validation:** Use Laravel's `timezone` validation rule (built-in) -- validates against PHP's `DateTimeZone` list.
+| Need | Solution | Why |
+|------|----------|-----|
+| Read user data | Existing `useAuth` context | Already exposes user object with name, email, organization, role, timezone, plan. |
+| Update profile | New `PUT /api/profile` endpoint | Standard Laravel validation + `$user->update()`. Sanctum auth. |
+| Change password | New `POST /api/password` endpoint | `Hash::check()` for old password, `Hash::make()` for new. |
+| Form state | `useState` per field | At most 6 editable fields. No form library needed. |
+| Success/error feedback | Inline banner with existing chip classes | `chip-green` for success, `chip-red` for error. Existing design system. |
 
-### 4. UserResource Expansion
+**Why NOT react-hook-form or formik:** 5-6 fields max. Form libraries add value at 10+ fields with complex cross-field validation. `useState` per field is the pattern used everywhere in this codebase.
 
-**Current state:** Returns `id, name, email, avatar_url, phone, email_verified, onboarding_completed`.
+### 6. Dashboard Stat Card Expansion
 
-**Required change:** Add fields:
-- `trial_ends_at` -- ISO 8601 datetime
-- `trial_active` -- boolean (`trial_ends_at > now()`)
-- `trial_days_left` -- integer (0 if expired)
-- `plan` -- object `{ name, display_name, daily_credit_limit }` or null
-- `timezone` -- string (IANA timezone)
-- `organization` -- string or null
-- `role` -- string or null
+| Need | Solution | Why |
+|------|----------|-----|
+| 3 new stat cards (Email, Crypto Wallet, URL) | Extend `STAT_CARD_CONFIG` array | Add 3 entries. Backend already returns counts for all observable types. |
+| "Threat Database" heading | JSX markup | Pure UI change. |
+| Remove Live label/dot | Delete JSX | Pure UI change. |
 
-### 5. AuthContext Expansion (Frontend)
+### 7. Threat Map Capping
 
-**Current state:** Exposes `user, isAuthenticated, emailVerified, onboardingCompleted, userInitials`.
+| Need | Solution | Why |
+|------|----------|-----|
+| Cap to 100 IPs | Backend GraphQL `first: 100` or `LIMIT 100` | Existing SSE/snapshot endpoint. |
+| "100 Latest Attacks" label | JSX text swap | Pure UI change. |
 
-**Required change:** Add derived properties:
-- `trialActive` -- from `user.trial_active`
-- `trialDaysLeft` -- from `user.trial_days_left`
-- `plan` -- from `user.plan`
-- `userTimezone` -- from `user.timezone` (for timezone-aware display)
+### 8. Threat Search Bug Fixes
 
-## Data Model Design
+| Need | Solution | Why |
+|------|----------|-----|
+| Graph node positioning | Adjust D3 force simulation params | D3 7.9.0 already installed. Tune `forceCenter`, `forceCollide`. |
+| Search loader | Existing loading state pattern | Already in component. |
+| Z-index when logged out | Tailwind `z-` class fix | CSS-only. |
 
-### Plans Table (New)
+## Stack Summary: No Changes Required
 
-```sql
-CREATE TABLE plans (
-    id SERIAL PRIMARY KEY,
-    slug VARCHAR(50) NOT NULL UNIQUE,       -- 'free', 'basic', 'pro', 'enterprise'
-    display_name VARCHAR(100) NOT NULL,      -- 'Free', 'Basic', 'Pro', 'Enterprise'
-    daily_credit_limit INTEGER NOT NULL,     -- 3, 15, 50, 200
-    price_monthly INTEGER NOT NULL DEFAULT 0,-- cents: 0, 1900, 4900, 9900
-    features JSONB NOT NULL DEFAULT '[]',    -- feature list for pricing page display
-    is_active BOOLEAN NOT NULL DEFAULT true, -- soft-disable plans
-    sort_order INTEGER NOT NULL DEFAULT 0,   -- display ordering on pricing page
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-```
+| Category | Current | Change | Rationale |
+|----------|---------|--------|-----------|
+| **Frontend framework** | React 19.2.4 + Vite 7.3.1 | None | Sufficient for all features |
+| **Styling** | Tailwind CSS 3.4.19 | None | `[color-scheme:dark]` for native date inputs |
+| **Charts** | Chart.js 4.5.1 | None | Category axis with string labels for time-series |
+| **Visualization** | D3 7.9.0 | None | Fix force simulation params |
+| **Maps** | Leaflet 1.9.4 | None | Backend caps query, no map changes |
+| **Animation** | Framer Motion 12.35.2 | None | Existing modal animations |
+| **Icons** | Lucide React 0.577.0 | None | All icons available (Calendar, RefreshCw, etc.) |
+| **Routing** | React Router DOM 7.13.1 | None | No new routes |
+| **Backend** | Laravel 12 + Sanctum 4 | None | New endpoints only |
+| **Database** | PostgreSQL | None | No schema changes for these features |
+| **Date handling** | Native `Intl.DateTimeFormat` | None | `useFormatDate` hook + `<input type="date">` |
 
-**Why database table over config array:** The pricing page needs to fetch plans from an API endpoint (`GET /api/plans`). A table is queryable, seedable, and the single source of truth. Config arrays require a wrapper endpoint and duplicate data shapes.
+## New Backend Endpoints Needed
 
-### Users Table Changes (Migration)
+| Endpoint | Method | Auth | Purpose | Cache |
+|----------|--------|------|---------|-------|
+| `PUT /api/profile` | PUT | Sanctum | Update name, organization, role, timezone | None |
+| `POST /api/password` | POST | Sanctum | Change password (old + new) | None |
+| `GET /api/threat-actors/{id}/details` | GET | Public | Enriched actor: TTPs, tools, sectors, campaigns | 15min |
+| `GET /api/threat-news/timeline` | GET | Public | Category distribution by date for chart | 5min |
 
-```sql
-ALTER TABLE users ADD COLUMN plan_id INTEGER REFERENCES plans(id) DEFAULT NULL;
-ALTER TABLE users ADD COLUMN timezone VARCHAR(100) DEFAULT NULL;
-ALTER TABLE users ADD COLUMN organization VARCHAR(255) DEFAULT NULL;
-ALTER TABLE users ADD COLUMN role VARCHAR(100) DEFAULT NULL;
-```
-
-**`plan_id` NULL means "no plan selected yet"** -- during trial, users have trial-tier credits (same as Basic: 15/day). After trial expires with no plan, they get Free tier (3/day).
-
-### Seed Data
-
-```
-| slug       | display_name | daily_credit_limit | price_monthly | sort_order |
-|------------|-------------|--------------------:|-------------:|----------:|
-| free       | Free         |                  3 |            0 |         1 |
-| basic      | Basic        |                 15 |         1900 |         2 |
-| pro        | Pro          |                 50 |         4900 |         3 |
-| enterprise | Enterprise   |                200 |         9900 |         4 |
-```
-
-### Credit Resolution Logic (Updated)
-
-```
-if user is guest:
-    limit = 1/day (unchanged)
-else if trial is active (trial_ends_at > now):
-    limit = 15/day (trial gets Basic-tier credits)
-else if user has plan:
-    limit = plan.daily_credit_limit
-else:
-    limit = 3/day (Free tier fallback)
-```
-
-## New API Endpoints
-
-| Endpoint | Method | Auth | Purpose |
-|----------|--------|------|---------|
-| `GET /api/plans` | GET | None | List all active plans for pricing page |
-| `POST /api/user/plan` | POST | auth:sanctum | Select/change plan (no payment) |
-| `GET /api/user` | GET | auth:sanctum | Already exists -- add plan/trial/timezone fields |
-| `POST /api/onboarding` | POST | auth:sanctum | Already exists -- add timezone/org/role fields |
-
-## Timezone Strategy
-
-**Backend:**
-- Store IANA timezone string (e.g., `America/New_York`) in `users.timezone`
-- Validate with Laravel's built-in `timezone` rule
-- Use Carbon's `->setTimezone($user->timezone)` when formatting user-facing dates
-
-**Frontend:**
-- Auto-detect on onboarding: `Intl.DateTimeFormat().resolvedOptions().timeZone`
-- Display picker: `Intl.supportedValuesOf('timeZone')` (all modern browsers)
-- Format dates: `new Intl.DateTimeFormat(undefined, { timeZone: userTimezone, ...options })`
-- Group timezones by continent for UX (parse the IANA strings by `/` separator)
-
-## What NOT to Use
-
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| `laravel/cashier` | No payment processing needed; adds Stripe SDK, webhooks, subscription tables, invoice logic | Plain `plans` table + `plan_id` on users |
-| `spatie/laravel-permission` | Plans are credit tiers, not permission/role systems; adds 5 tables | `plan_id` foreign key on users |
-| `date-fns` / `dayjs` / `moment` | One date subtraction for trial countdown; timezone uses native `Intl` | Native `Date` math + `Intl.DateTimeFormat` |
-| `react-hook-form` / `formik` | Onboarding has 5-6 fields total; no dynamic forms | `useState` per field (existing pattern in GetStartedPage) |
-| `zod` / `yup` | Server validates all input via Laravel; client validation is UX sugar | Inline checks before submit (existing pattern) |
-| `react-select` | Timezone picker is a styled dropdown | Native `<select>` with Tailwind + grouped `<optgroup>` by continent |
-| `@headlessui/react` | Only needed for complex accessible modals/dropdowns | Native elements with Tailwind (existing pattern across all pages) |
-| `luxon` | Timezone-aware dates in JS | `Intl.DateTimeFormat` does this natively |
-| Any state management library | Plan/trial data comes from user object in AuthContext | Extend existing `AuthContext` (already works) |
+No new migrations needed. Profile uses existing `users` columns. Threat data from OpenCTI GraphQL.
 
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| Plans as database table | Plans as `config/plans.php` array | Never for this app -- pricing page needs API access; table is single source of truth |
-| `plan_id` on users table | Separate `subscriptions` pivot table | When adding billing history, plan change logs, or real payment processing (future) |
-| Trial enforcement in `DeductCredit` | Separate `TrialEnforcement` middleware | When trial blocking needs to happen on non-credit-consuming routes |
-| Timezone in `users.timezone` | Timezone in `user_preferences` JSON column | When there are 10+ user preferences; not justified for one field |
-| `Intl.supportedValuesOf('timeZone')` | Hardcoded timezone list | When supporting browsers older than 2022 (not our audience for a TIP) |
-| Credit limit derived from plan at reset time | Credit limit stored statically on credits table | Current approach; must change because plan changes need to take effect at next reset |
+| Feature | Recommended | Alternative | Why Not Alternative |
+|---------|-------------|-------------|---------------------|
+| Date picker | Native `<input type="date">` | react-datepicker v9.1.0 | 40KB+ for simple date range. Native with dark scheme is sufficient. |
+| Time axis | Category axis + string labels | chartjs-adapter-date-fns v3.0.0 + date-fns v4.1.0 | ~130KB for auto-ticking. Backend pre-aggregates, so strings work. |
+| Auto-refresh | `setInterval` + visibility API | TanStack Query v5 | Requires refactoring all data fetching. Overkill for 2 pages. |
+| Form handling | `useState` per field | react-hook-form v7 | 5-6 fields. Library adds complexity without benefit at this scale. |
+| State management | Existing AuthContext | Zustand/Redux | No new cross-component state needs. |
+| Refresh UI | Spinning `RotateCcw` icon | Toast notifications | Already have the icon imported. Toast library would be a new dep. |
+
+## What NOT to Add
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `react-datepicker` | Heavyweight for a date range filter | Native `<input type="date">` with `[color-scheme:dark]` |
+| `date-fns` / `dayjs` | No date manipulation beyond what `Date` and `Intl` provide | Native `Date` + `Intl.DateTimeFormat` (existing `useFormatDate`) |
+| `chartjs-adapter-date-fns` | Backend pre-aggregates data; category axis is sufficient | String labels on Chart.js category axis |
+| `react-query` / `TanStack Query` | Only 2 pages need auto-refresh; refactoring all fetches is disproportionate | `setInterval` + `document.visibilityState` |
+| `react-hook-form` / `formik` | Settings page has 5-6 fields max | `useState` per field |
+| `@tanstack/react-table` | No complex table needs | Existing HTML tables with Tailwind |
+| Any toast library | Inline feedback banners are sufficient for settings | Existing chip/banner CSS classes |
 
 ## Installation
 
 ```bash
-# Backend: No new packages to install
-# Create migrations, seeder, then run:
-cd backend && php artisan migrate && php artisan db:seed --class=PlanSeeder
+# No new packages to install.
+# Backend: create new controller methods and routes
+# Frontend: modify existing page components
 
-# Frontend: No new packages to install
-# Zero npm installs needed
+# Zero npm install commands needed
+# Zero composer require commands needed
 ```
+
+## Confidence Assessment
+
+| Claim | Confidence | Basis |
+|-------|------------|-------|
+| Native date input with `[color-scheme:dark]` works | HIGH | CSS standard, well-supported in Chromium/Firefox/Safari |
+| Chart.js category axis handles date strings | HIGH | Existing working pattern in DashboardPage, official docs |
+| `setInterval` + `visibilityState` sufficient for auto-refresh | HIGH | Standard browser APIs, used across industry |
+| No new packages needed | HIGH | Each feature maps to existing stack or native APIs |
+| chartjs-adapter-date-fns v3.0.0 is latest | MEDIUM | NPM shows v3.0.0, stable but last published ~3 years ago |
+| date-fns v4.1.0 is latest | MEDIUM | NPM shows v4.1.0, last published ~2 years ago |
+| Lucide has Calendar/RefreshCw icons | HIGH | Already importing from lucide-react across pages |
 
 ## Sources
 
-- **Codebase analysis (HIGH confidence):**
-  - `backend/app/Http/Middleware/DeductCredit.php` -- credit hardcoding at lines 53-58, lazy reset at lines 83-89
-  - `backend/app/Http/Controllers/Credit/CreditStatusController.php` -- duplicate hardcoding at lines 32-37
-  - `backend/app/Models/User.php` -- `trial_ends_at` set in `booted()` hook (line 76), never enforced
-  - `backend/app/Http/Controllers/Auth/OnboardingController.php` -- current 2-field onboarding
-  - `backend/app/Http/Resources/UserResource.php` -- current response shape, no plan/trial fields
-  - `frontend/src/pages/GetStartedPage.jsx` -- current onboarding UI (name + phone)
-  - `frontend/src/contexts/AuthContext.jsx` -- current auth state shape
-  - `backend/database/migrations/` -- existing schema for users, credits, search_logs
-  - `frontend/package.json` -- current dependency list (zero additions needed)
-  - `backend/composer.json` -- current dependency list (zero additions needed)
-- **Laravel docs (HIGH confidence):** `timezone` validation rule, Carbon timezone support, database seeding
-- **MDN Web Docs (HIGH confidence):** `Intl.supportedValuesOf('timeZone')`, `Intl.DateTimeFormat` timezone parameter
+- [Chart.js Time Series Axis](https://www.chartjs.org/docs/latest/axes/cartesian/timeseries.html) — time scale docs (considered and deferred)
+- [Chart.js Time Cartesian Axis](https://www.chartjs.org/docs/latest/axes/cartesian/time.html) — date adapter requirements
+- [chartjs-adapter-date-fns on npm](https://www.npmjs.com/package/chartjs-adapter-date-fns) — v3.0.0, compatible with Chart.js 4.x
+- [date-fns on npm](https://www.npmjs.com/package/date-fns) — v4.1.0
+- [react-datepicker on npm](https://www.npmjs.com/package/react-datepicker) — v9.1.0, considered and rejected
+- [React DayPicker](https://react-day-picker.js.org/) — alternative date picker, also rejected
+- Existing codebase: `useChartJs.js`, `useFormatDate.js`, `DashboardPage.jsx`, `ThreatNewsPage.jsx`, `ThreatActorsPage.jsx`, `SettingsPage.jsx`, `package.json`, `composer.json`
 
 ---
-*Stack research for: Aqua TIP v3.0 -- Onboarding, Trial & Subscription Plans*
-*Researched: 2026-03-20*
+*Stack research for: Aqua TIP v3.2 -- App Layout Page Tweaks*
+*Researched: 2026-03-28*

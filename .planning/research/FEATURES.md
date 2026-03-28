@@ -1,8 +1,8 @@
-# Feature Research: Onboarding, Trial Enforcement & Subscription Plans
+# Feature Research: App Layout Page Tweaks (v3.2)
 
-**Domain:** SaaS onboarding, trial management, and credit-based subscription tiers for a threat intelligence platform
-**Researched:** 2026-03-20
-**Confidence:** HIGH
+**Domain:** Threat Intelligence Platform — page enhancements, date-based browsing, enriched profiles, auto-refresh, functional settings
+**Researched:** 2026-03-28
+**Confidence:** HIGH (features grounded in existing codebase + OpenCTI data model)
 
 ## Existing System Inventory
 
@@ -10,249 +10,228 @@ Before defining new features, here is what already exists and what the new featu
 
 | Component | Current State | Relevant Detail |
 |-----------|--------------|-----------------|
-| Onboarding | Name + phone fields, sets `onboarding_completed_at` | No timezone, org, or role fields |
-| Trial | `trial_ends_at` auto-set to 30 days on user creation | Column exists but is never checked/enforced |
-| Credits table | `remaining`, `limit`, `last_reset_at` per user or IP | Hardcoded 10/day auth, 1/day guest |
-| CreditBadge | Shows remaining/limit in frontend | Needs to reflect plan tier |
-| Auth guard | 3-step: auth -> verified -> onboarded | Trial check would modify credit logic, not add a 4th gate |
-| UserResource | Returns `onboarding_completed` boolean | Needs `plan`, `trial_active`, `timezone` fields |
-| Credit model | `user_id`, `ip_address`, `remaining`, `limit`, `last_reset_at` | `limit` column already exists -- just needs plan-aware values |
+| Dashboard | 4 stat cards (IP, Domain, Hostname, Certificate), map, indicators table, attack chart, credits, recent searches | 5-min auto-refresh already on dashboard. Missing 3 observable types. "Live" dot on stat cards. |
+| Threat Map | SSE streaming, pulse markers, real-time counters, live feed, country/type donuts | No IP cap — all events rendered. Label says "Active Threats". |
+| Threat News | Row layout, cursor pagination, label-based category filter dropdown, search, detail modal | No auto-refresh. No date-based browsing. No category distribution chart. Pagination is cursor-based (after/before). |
+| Threat Actors | 4-col dense card grid, detail modal with description/aliases/countries/sectors/goals/refs, pagination | No auto-refresh. Modal lacks TTPs, tools, malware, campaigns. |
+| Threat Search | Universal search, 9 observable types, D3 relation graph, auto-detect | 3 bugs: graph node overlap, no search loader, search bar z-index when logged out. |
+| Settings | 4 tabs (API Keys, Webhooks, Usage, Account) — ALL mock data from `mock-data.js` | Hardcoded "Acme Corp", fabricated API keys, fake usage chart. No backend endpoints for any of it. |
+| Backend caching | News: 5-min, Actors: 15-min, Map snapshot: 15-min, Dashboard: 5-min | Auto-refresh intervals should match cache TTLs. |
+| ThreatActorService | GraphQL fetches: description, aliases, motivation, resource_level, goals, targeted countries/sectors, external refs | Uses `stixCoreRelationships(relationship_type: "targets")`. Missing `uses` relationships for TTPs/tools. |
+| ThreatNewsService | GraphQL fetches: name, description, published, confidence, report_types, labels, external refs | Filters by label and confidence. No date range filter. `published` field available for filtering. |
+| Auth/Profile | `GET /api/user` returns UserResource with plan, trial, timezone | No `PUT /api/user/profile` endpoint. Onboarding fields (timezone, org, role) collected but not editable after onboarding. |
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist in any SaaS with subscription tiers. Missing these creates confusion or distrust.
+Features users assume exist. Missing these = product feels incomplete.
 
-| Feature | Why Expected | Complexity | Dependencies |
-|---------|--------------|------------|--------------|
-| Trial countdown banner | Users need to know when trial expires; every SaaS with a trial shows this | LOW | `trial_ends_at` already exists on User model. Read from UserResource, display in Topbar or sidebar. Pure frontend after UserResource update. |
-| Trial expiration enforcement | Without enforcement, `trial_ends_at` is meaningless; expired trial users keep getting 10 credits/day forever | MEDIUM | Modify credit lazy-reset logic: if `trial_ends_at < now()` and `plan` is still `trial`, auto-downgrade to `free` plan and set `limit` to 3. Atomic check during existing credit reset flow. |
-| Plan-aware credit limits | Credits must match the user's plan tier, not a hardcoded 10 | MEDIUM | Add `plan` column to users (enum: trial/free/basic/pro/enterprise). Credit reset logic reads plan to set `limit`. Existing lazy-reset stays, only the limit source changes. |
-| Pricing page with tier comparison | Users need to see what each tier provides before choosing | MEDIUM | Static page with 4 cards (Free/Basic/Pro/Enterprise), feature comparison table, highlighted "Popular" plan on Pro. No payment processing -- plan selection only. |
-| Plan selection and storage | User must be able to pick a plan and have it recorded | LOW | API endpoint to set `plan` on user. For v3.0, no payment validation -- store the choice. Enterprise tier uses "Contact us" CTA. |
-| Graceful trial-to-free transition | Abrupt lockout creates churn; users expect a soft landing | LOW | On trial expiry, auto-set plan to `free` if no plan chosen. Show "Trial ended" message with CTA to pricing page. No data loss, no account lockout, all features remain accessible at reduced credits. |
-| Enhanced onboarding fields | Timezone needed for time display; org/role provide product context and future personalization | LOW | Add `timezone`, `organization`, `role` columns. Extend OnboardingController validation. Update frontend onboarding form. 3 fields added to existing flow. |
-| Timezone-aware time display | Timestamps should respect user's chosen timezone, not browser default or UTC | MEDIUM | Store IANA timezone in user profile (e.g., `America/New_York`). Frontend reads from auth context. Apply `Intl.DateTimeFormat` with user timezone to all displayed times. |
+| Feature | Why Expected | Complexity | Dependencies | Notes |
+|---------|--------------|------------|--------------|-------|
+| Functional settings/profile page | Current page is 100% mock data (API_KEYS, hardcoded "Acme Corp"); users see a broken page after onboarding | MEDIUM | `GET /api/user` exists, AuthContext has user data; needs `PUT /api/user/profile` endpoint | Replace 4 tabs (API Keys, Webhooks, Usage, Account) with 2 meaningful tabs: Profile + Account. API Keys/Webhooks are premature features. |
+| Dashboard "Threat Database" heading + 7 stat cards | 4 cards exist (IP, Domain, Hostname, Certificate); Email, Crypto Wallet, URL are missing observable types that OpenCTI tracks | LOW | `GET /api/dashboard/counts` already works; add 3 entity types to STAT_CARD_CONFIG | Purely frontend change — backend counts endpoint already aggregates by entity_type dynamically |
+| Threat Map 100-IP cap with updated label | Current map shows all IPs with "Active Threats" label; unbounded data creates performance issues on dense maps | LOW | `GET /api/threat-map/snapshot` backend; Leaflet map rendering | Backend slicing to 100 most recent + label text change |
+| Threat Search bug fixes (graph nodes, loader, z-index) | Broken UX in current shipped feature; graph nodes overlap, no loading indicator, search bar hidden behind content when logged out | MEDIUM | ThreatSearchPage.jsx D3 force graph, existing search flow | Three distinct bugs: (1) D3 force layout node positioning, (2) missing loading state during search, (3) CSS z-index stacking context |
+| Threat News 5-min auto-refresh | News page shows stale data unless user manually navigates away and back; inconsistent with dashboard which already auto-refreshes | LOW | ThreatNewsPage.jsx loadData callback exists | setInterval pattern already proven in DashboardPage.jsx (lines 431-444) |
+| Threat Actors 5-min auto-refresh | Same staleness problem as Threat News | LOW | ThreatActorsPage.jsx loadData callback exists | Same setInterval pattern as dashboard |
 
 ### Differentiators (Competitive Advantage)
 
-Features that make Aqua TIP feel more polished than competing TI platforms.
+Features that elevate AQUA TIP above a basic data viewer. Not required, but create meaningful analyst value.
 
-| Feature | Value Proposition | Complexity | Dependencies |
-|---------|-------------------|------------|--------------|
-| Reverse trial model | Give all new users Pro-level access (50 credits/day) during 30-day trial, then downgrade to Free (3/day). This is the highest-converting trial pattern in SaaS -- users experience full value before deciding. VirusTotal and Shodan do NOT do this; they offer weak free tiers with no trial of premium. | LOW | Already set up: `trial_ends_at` exists, credits exist. During trial, set credit limit to 50 (Pro equivalent). On expiry, drop to Free unless user selected a paid plan. No new infrastructure. |
-| Credit consumption transparency | Show exactly how many credits each action costs. ThreatIntelligencePlatform.com publishes per-action credit costs (1-10 credits). Builds trust and reduces confusion. | LOW | Small info table or tooltip on pricing page and search pages. Currently all searches cost 1 credit -- simple to document. |
-| Auto-detected timezone default | During onboarding, auto-detect timezone via browser `Intl.DateTimeFormat().resolvedOptions().timeZone` and pre-fill. User confirms or changes. Reduces friction vs empty dropdown. | LOW | Frontend-only: read browser timezone, set as default in onboarding form. No backend changes beyond storing the value. |
-| Plan indicator in CreditBadge | Existing CreditBadge shows remaining/limit. Add plan name and color coding (e.g., "Pro: 42/50" in violet, "Free: 2/3" in amber). Users always know their tier. | LOW | Extend CreditBadge component. Requires `plan` field in auth context. |
-| "Upgrade" CTA on credit exhaustion | When authenticated user hits daily limit, show plan-aware upgrade prompt: "You've used all 3 Free credits today. Upgrade to Basic for 15/day." | LOW | Modify existing "Daily limit reached" message to be plan-aware. Read current plan and show next tier suggestion. |
+| Feature | Value Proposition | Complexity | Dependencies | Notes |
+|---------|-------------------|------------|--------------|-------|
+| Date-based threat news browsing with date selector | Analysts browse reports by date, not arbitrary pagination pages. "What happened on March 15?" is a natural CTI workflow. Replaces cursor-based pagination with chronological browsing. | MEDIUM | OpenCTI `reports` GraphQL supports `filters` with `published` date range (gte/lte operators). Backend ThreatNewsService needs date filter params. Frontend needs date picker UI. | Replace pagination toolbar with a date selector control. Load reports for selected date. Category filter remains. Search remains. |
+| Category distribution time-series chart on Threat News | Visual trend of report categories over time lets analysts spot surges (e.g., ransomware reports spiking). Most TIP dashboards show aggregate charts but few embed them in the browse context. | HIGH | New backend endpoint needed to aggregate label counts by time bucket. Chart.js already available. Frontend needs new chart component above report list. | OpenCTI GraphQL can aggregate reports by published date with label grouping, but requires a dedicated aggregation query — not just reusing the list endpoint. |
+| Enriched threat actor modal (TTPs, tools, sectors, campaigns) | Current modal shows description, aliases, countries, sectors, goals, external refs. Missing ATT&CK TTPs, associated tools/malware, and campaigns — the core intelligence analysts need. | HIGH | OpenCTI GraphQL `intrusionSets` supports `stixCoreRelationships` for `uses` (tools, attack-patterns) and `campaigns`. Backend ThreatActorService.php GraphQL query needs expansion. | Add 3 new relationship queries to the GraphQL: (1) `uses` -> Attack-Pattern for TTPs, (2) `uses` -> Tool/Malware for tools, (3) related Campaigns. Display in tabbed or sectioned modal layout. |
+| Profile editing (name, organization, timezone, phone) | Users collected these during onboarding but cannot change them. Profile editing is expected in any SaaS product. | MEDIUM | Backend needs `PUT /api/user/profile` endpoint; OnboardingController validation logic can be reused. Frontend needs form with AuthContext refresh. | Reuse existing SearchableDropdown for timezone, PhoneNumberInput for phone. Validate same rules as onboarding. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good but create problems for this project scope.
+Features that seem good but create problems in the current project context.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Real payment processing (Stripe) | "Complete the subscription flow" | Premature -- no paying customers, Stripe integration is 2-3 days of work with webhooks, idempotency, error handling, PCI considerations. Railway costs near zero. Adding Stripe before validating demand wastes effort. | Store plan choice in DB. Add Stripe when users actually want to pay. "Contact us" for Enterprise is sufficient. |
-| Per-feature gating (not just credits) | "Pro users get Dark Web search, Free users don't" | Creates a permission matrix that grows with every new feature. Hard to maintain, confusing for users ("Why can't I click this?"). | Credit-only gating: all users access all features, they just get fewer daily searches. This is the model VirusTotal and similar TI platforms use. Simpler, more transparent. |
-| Role-based access control | "Enterprise needs admin/analyst/viewer roles" | Requires admin panel, invitation system, team management, permission middleware. Massive scope for zero enterprise customers. | Collect `role` during onboarding for analytics only. Defer RBAC to a future milestone when enterprise demand is validated. |
-| Monthly/annual billing toggle | "Industry standard on pricing pages" | No payment processing exists. A toggle with no functional billing is misleading and sets false expectations. | Show credit limits per tier without prices. When Stripe is added, add the toggle with real pricing. |
-| Free trial without signup | "Reduce friction to try" | Guest credits (1/day by IP) already serve this purpose. A formal "trial without account" creates ghost accounts and makes trial enforcement impossible. | Keep guest credits as the zero-commitment experience. Trial (30 days, Pro-level) starts on account creation. Clear value prop: "Sign up for 50 searches/day free for 30 days." |
-| Email drip campaign for trial | "Nudge users to convert during trial" | Requires transactional email service (Mailgun/SES), template management, unsubscribe handling, scheduling. Over-engineered for current scale. | Single trial-expiring notification: email at 3 days before expiry using Laravel's existing mail config. One email, not a campaign. Even this can be deferred to v3.x. |
-| Proration / mid-cycle plan changes | "Let users upgrade mid-month and pay the difference" | Without Stripe, there is no billing cycle to prorate against. And even with Stripe, proration adds significant complexity. | Immediate plan change: when user "upgrades," update `plan` column and credit limit instantly. No proration math needed since there are no charges yet. |
+| API key management in Settings | Power users expect API access | No public API exists; building key management UI for a non-existent API wastes effort and creates security surface area. API_KEYS mock data in current settings is misleading. | Remove API Keys tab entirely. Add it back when a public API milestone is planned. |
+| Webhook configuration in Settings | Integration-minded users want alerts | No webhook dispatch system exists in the backend. UI without backend is a broken promise. | Remove Webhooks tab. Defer to a dedicated notifications/integrations milestone. |
+| Real-time WebSocket for auto-refresh | "Why poll every 5 min when you could push?" | SSE is already used for threat map streaming. Adding WebSocket for news/actors introduces a second real-time protocol. 5-min polling on cached endpoints is cheap and simple. The data sources (OpenCTI caches) update on similar intervals anyway. | Keep 5-min setInterval polling. Backend caches already expire at 5-min (news) and 15-min (actors) intervals, so more frequent refresh yields no new data. |
+| Usage analytics chart in Settings | Current mock shows API usage chart | No usage tracking infrastructure exists. Chart would be fabricated data. | Remove Usage tab. Show credit balance (already on dashboard) and plan info in Account tab instead. |
+| Full MITRE ATT&CK Navigator integration in actor modal | "Map all TTPs visually" | ATT&CK Navigator is a complex SVG-based tool. Embedding it adds significant bundle size and complexity for a feature most users won't use in a browse context. | Display TTPs as a simple grouped list (Tactic -> Techniques) with links to attack.mitre.org. Let users open the Navigator externally if needed. |
+| Infinite scroll replacing pagination/date browsing | "Modern UX should be infinite scroll" | OpenCTI uses cursor-based pagination. Infinite scroll with date-based browsing creates conflicting mental models. Accumulating hundreds of DOM nodes degrades performance. | Date selector for browsing + "Load more" button within a single date's results if needed. |
 
 ## Feature Dependencies
 
 ```
-[Enhanced Onboarding Fields]
-    |
-    +-- timezone, organization, role columns added to users
-    |
-    +--enables--> [Timezone-Aware Time Display]
-    |                 (requires timezone stored in user profile)
-    |
-    +--enables--> [Auto-Detected Timezone Default]
-                      (frontend pre-fills, backend stores)
+[Dashboard stat card expansion]
+    (no dependencies, purely frontend config change)
 
-[Plan Column + Credit Tier Mapping]
-    |
-    +-- plan column on users, config map of plan -> daily limit
-    |
-    +--enables--> [Trial Expiration Enforcement]
-    |                 (enforcement sets plan to 'free' on expiry)
-    |
-    +--enables--> [Plan-Aware Credit Limits]
-    |                 (credit reset reads plan to determine limit)
-    |
-    +--enables--> [Pricing Page]
-    |                 (displays tier info from same config)
-    |
-    +--enables--> [Plan Selection API]
-    |                 (writes to plan column)
-    |
-    +--enables--> [Plan Indicator in CreditBadge]
-    |                 (reads plan from auth context)
-    |
-    +--enables--> [Upgrade CTA on Exhaustion]
-                      (reads current plan, suggests next tier)
+[Threat Map 100-IP cap]
+    (no dependencies, backend slice + frontend label)
 
-[Trial Countdown Banner]
-    +--requires--> UserResource exposes trial_ends_at (trivial change)
-    +--independent of--> plan system (just reads a date)
+[Threat News auto-refresh]
+    (no dependencies, frontend setInterval)
 
-[Graceful Trial-to-Free Transition]
-    +--requires--> [Trial Expiration Enforcement]
-    +--requires--> [Plan-Aware Credit Limits]
+[Threat Actors auto-refresh]
+    (no dependencies, frontend setInterval)
 
-[Reverse Trial Model]
-    +--requires--> [Plan Column + Credit Tier Mapping]
-    +--decision--> During trial, limit = 50 (Pro equivalent)
+[Threat Search bug fixes]
+    (no dependencies, isolated frontend fixes)
+
+[Date-based news browsing]
+    └──requires──> [Backend date filter support in ThreatNewsService]
+    └──enhances──> [Threat News auto-refresh] (auto-refresh reloads current date)
+
+[Category distribution chart]
+    └──requires──> [Backend aggregation endpoint for labels-by-time]
+    └──requires──> [Date-based news browsing] (chart should reflect selected date range context)
+
+[Enriched actor modal]
+    └──requires──> [Backend GraphQL query expansion in ThreatActorService]
+
+[Functional settings page]
+    └──requires──> [Backend PUT /api/user/profile endpoint]
+    └──depends on──> [AuthContext] (already exists, needs refresh after update)
+
+[Profile editing]
+    └──requires──> [Functional settings page] (settings page is the container)
 ```
 
 ### Dependency Notes
 
-- **Plan column must exist before enforcement:** The enforcement logic needs to know what plan to downgrade to. Migration first, logic second.
-- **Onboarding before timezone display:** The timezone value must be collected/stored before it can be applied to time rendering. Ship onboarding changes in an early phase.
-- **Trial countdown is independent:** Only reads `trial_ends_at` which already exists. Can ship immediately after UserResource exposes it.
-- **Pricing page requires plan definitions:** The tier names, credit limits, and descriptions must be defined in config before the pricing page can render them. Backend config first, frontend page second.
-- **Credit reset modification is the critical path:** The existing lazy-reset in CreditService is where plan-awareness must be injected. This is the most sensitive change -- it touches the core rate limiting system.
+- **Date-based news browsing requires backend date filter:** OpenCTI `reports` supports `published` field filtering via FilterGroup, but ThreatNewsService.php currently only filters by label and confidence. Need to add `startDate`/`endDate` params.
+- **Category distribution chart requires aggregation endpoint:** The existing `/api/dashboard/categories` aggregates all-time counts. A time-series chart needs bucketed counts (e.g., per-day or per-week) which requires a new GraphQL aggregation query or a new endpoint.
+- **Category chart enhances date-based browsing:** The chart should reflect the same time window the user is browsing, creating a unified "reports for this period" experience.
+- **Enriched actor modal requires expanded GraphQL:** Current query fetches `targets` relationships (countries, sectors). Need to add `uses` relationships (Attack-Pattern, Tool, Malware) and Campaign associations. This is purely a backend query expansion — frontend modal just renders new data fields.
+- **Functional settings conflicts with mock data:** Current SettingsPage.jsx imports `API_KEYS` from mock-data.js and displays hardcoded values. The entire page needs restructuring, not patching.
 
-## MVP Definition (v3.0 Scope)
+## Implementation Phases (Recommended Order)
 
-### Launch With (v3.0)
+### Phase 1: Quick Wins (no backend changes)
 
-- [x] Enhanced onboarding: timezone (auto-detect + dropdown), organization (text, optional), role (select, optional) -- extends existing controller
-- [x] Plan column on users: enum `trial`/`free`/`basic`/`pro`/`enterprise` with `trial` as default for new users
-- [x] Plan-to-credit config map: `{ trial: 50, free: 3, basic: 15, pro: 50, enterprise: 200 }`
-- [x] Trial enforcement: on credit reset, check `trial_ends_at`; if expired and plan is `trial`, set plan to `free`
-- [x] Credit reset respects plan: existing lazy-reset reads `plan` column to set `limit` value
-- [x] Trial countdown in Topbar: "X days left" badge with link to pricing page
-- [x] Pricing page: 4-tier card layout, feature comparison table, "Current plan" indicator, plan selection buttons
-- [x] Plan selection API: `POST /api/plan` sets plan column (no payment validation in v3.0)
-- [x] Timezone-aware time display: apply user timezone to all rendered timestamps
-- [x] UserResource updates: expose `plan`, `trial_ends_at`, `trial_active` (computed), `timezone`
-- [x] Plan indicator in CreditBadge: show plan name alongside remaining/limit
-- [x] Upgrade CTA on credit exhaustion: plan-aware messaging
+Low-risk, frontend-only changes that ship visible improvements fast.
 
-### Add After Validation (v3.x)
+- [ ] Dashboard: Add "Threat Database" heading, expand to 7 stat cards, remove Live label/dot
+- [ ] Threat Map: Cap to 100 IPs (backend slice), update "100 Latest Attacks" label
+- [ ] Threat News: Add 5-min auto-refresh
+- [ ] Threat Actors: Add 5-min auto-refresh
+- [ ] Threat Search: Fix graph node positioning, add search loader, fix z-index
 
-- [ ] Trial extension for active users (7 days if profile complete + 5+ searches) -- trigger: retention metric analysis
-- [ ] Single trial-expiry email at 3 days before expiration -- trigger: when email deliverability is confirmed reliable
-- [ ] Plan usage trend widget on dashboard -- trigger: after core subscription is stable
+### Phase 2: Date-Based News Browsing (backend + frontend)
 
-### Future Consideration (v4+)
+Medium complexity, changes the Threat News browsing paradigm.
 
-- [ ] Stripe payment processing -- trigger: validated demand from real users
-- [ ] Monthly/annual billing toggle -- trigger: Stripe integration
-- [ ] RBAC / team management -- trigger: enterprise customer requests
-- [ ] Email drip campaigns -- trigger: marketing automation need
-- [ ] Proration on plan changes -- trigger: Stripe billing cycles exist
+- [ ] Backend: Add startDate/endDate filter params to ThreatNewsService
+- [ ] Frontend: Replace pagination with date selector UI
+- [ ] Frontend: Wire date selection to API calls
+- [ ] Auto-refresh reloads reports for selected date
+
+### Phase 3: Enriched Threat Actor Modal (backend + frontend)
+
+High complexity, deepens the intelligence value.
+
+- [ ] Backend: Expand ThreatActorService GraphQL to fetch TTPs, tools/malware, campaigns
+- [ ] Frontend: Add TTP section to modal (grouped by tactic, linked to MITRE)
+- [ ] Frontend: Add tools/malware section with type badges
+- [ ] Frontend: Add campaigns section with timeline
+
+### Phase 4: Category Distribution Chart (backend + frontend)
+
+Highest complexity, requires new aggregation logic.
+
+- [ ] Backend: New endpoint or expanded logic for label-count-by-time-bucket
+- [ ] Frontend: Chart.js time-series chart component
+- [ ] Frontend: Integrate chart above report list, synced with date selection
+
+### Phase 5: Functional Settings Page (backend + frontend)
+
+Medium complexity, replaces mock data with real user data.
+
+- [ ] Backend: PUT /api/user/profile endpoint with validation
+- [ ] Frontend: Restructure SettingsPage tabs (Profile + Account, remove API Keys/Webhooks/Usage)
+- [ ] Frontend: Profile form with editable fields (name, org, timezone, phone)
+- [ ] Frontend: Account section showing plan, email, auth provider (read-only)
+- [ ] Frontend: AuthContext refresh after profile update
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority | Phase |
 |---------|------------|---------------------|----------|-------|
-| Plan column + credit tier mapping | HIGH | LOW | P1 | 1 (Backend schema) |
-| Enhanced onboarding fields | MEDIUM | LOW | P1 | 1 (Backend schema) |
-| Trial enforcement in credit reset | HIGH | MEDIUM | P1 | 2 (Backend logic) |
-| Plan-aware credit limits | HIGH | MEDIUM | P1 | 2 (Backend logic) |
-| UserResource updates | HIGH | LOW | P1 | 2 (Backend logic) |
-| Trial countdown banner | MEDIUM | LOW | P1 | 3 (Frontend) |
-| Onboarding form update | MEDIUM | LOW | P1 | 3 (Frontend) |
-| Pricing page | HIGH | MEDIUM | P1 | 3 (Frontend) |
-| Plan selection API + UI | HIGH | LOW | P1 | 3 (Frontend) |
-| Timezone-aware display | MEDIUM | MEDIUM | P1 | 4 (Frontend polish) |
-| Plan indicator in CreditBadge | MEDIUM | LOW | P2 | 3 (Frontend) |
-| Upgrade CTA on exhaustion | MEDIUM | LOW | P2 | 3 (Frontend) |
-| Credit consumption transparency | LOW | LOW | P2 | 3 (Frontend) |
-| Trial extension for engagement | LOW | LOW | P3 | Future |
-| Plan usage dashboard widget | MEDIUM | MEDIUM | P3 | Future |
+| Dashboard stat card expansion | MEDIUM | LOW | P1 | 1 |
+| Threat Map 100-IP cap | MEDIUM | LOW | P1 | 1 |
+| Threat News auto-refresh | MEDIUM | LOW | P1 | 1 |
+| Threat Actors auto-refresh | MEDIUM | LOW | P1 | 1 |
+| Threat Search bug fixes | HIGH | MEDIUM | P1 | 1 |
+| Date-based news browsing | HIGH | MEDIUM | P1 | 2 |
+| Enriched actor modal (TTPs/tools/campaigns) | HIGH | HIGH | P1 | 3 |
+| Category distribution chart | MEDIUM | HIGH | P2 | 4 |
+| Functional settings page | HIGH | MEDIUM | P1 | 5 |
 
 **Priority key:**
-- P1: Must have for v3.0 launch
-- P2: Should have, include if time allows
-- P3: Nice to have, defer to v3.x+
+- P1: Must have for this milestone
+- P2: Should have, valuable but most complex
 
 ## Competitor Feature Analysis
 
-| Feature | VirusTotal | Shodan | ThreatIntelligencePlatform.com | Our Approach (Aqua TIP) |
-|---------|------------|--------|-------------------------------|------------------------|
-| Free tier | 4 lookups/min, 500/day, 15.5K/month | Limited free searches | 100 free credits on signup (one-time) | 3/day Free, daily reset, unlimited features |
-| Credit model | Rate-limited API calls (requests/min + daily cap) | Credit-based monthly allotments | Per-request credit deduction (1-10 per action type) | 1 credit per search, daily lazy reset at midnight UTC |
-| Trial | No trial -- freemium only | No trial -- freemium only | 100 credits trial (one-time, no expiration) | 30-day reverse trial at Pro level (50/day) |
-| Paid tiers | Premium API with custom pricing (enterprise sales) | Membership $69/mo, Small Business, Corporate, Enterprise | Credit bundles (custom amounts, volume pricing) | 4 fixed tiers: Free (3), Basic (15), Pro (50), Enterprise (200) |
-| Pricing transparency | Public rate limits, hidden pricing for premium | Public pricing page with clear tiers | Per-action credit costs published | Public pricing page with daily credit limits per tier |
-| Onboarding | Minimal (email signup only) | Minimal (email signup only) | Minimal | Enhanced: timezone, org, role for personalization |
-| Trial-to-free transition | N/A | N/A | Credits deplete, no auto-renewal | Automatic soft downgrade to Free tier, all features remain |
+| Feature | OpenCTI Web UI | Recorded Future | AQUA TIP Approach |
+|---------|---------------|-----------------|-------------------|
+| Date-based report browsing | Calendar widget + date range filter on reports list | Date range picker with preset ranges (7d, 30d, 90d, custom) | Date selector replacing pagination; load all reports for selected date. Keep simple — single date, not range, since OpenCTI report volumes are manageable. |
+| Category/label distribution | Dashboard widgets with bar/pie charts aggregated by label | Trend lines over time per category | Time-series chart (line or stacked area) showing label counts per day/week. Placed above report list for context. |
+| Threat actor TTPs | Full ATT&CK matrix heatmap | ATT&CK matrix + technique details | Grouped list by tactic with technique names and MITRE links. Simple, scannable, no heavy visualization. |
+| Auto-refresh | Real-time via streaming | Configurable refresh intervals | 5-min setInterval matching existing dashboard pattern. Non-disruptive — silent refresh, no loading spinner on auto-refresh (only on manual load). |
+| Profile/settings | Full admin panel with user management | Enterprise SSO + profile management | Minimal profile editing (name, org, timezone, phone) + read-only account info (plan, email). No API keys, webhooks, or usage charts. |
 
-**Key insight:** Most TI platforms do NOT offer reverse trials. They either have weak free tiers (VirusTotal) or one-time credit allotments (ThreatIntelligencePlatform.com). A 30-day reverse trial at Pro level is a genuine differentiator in this space.
+## Technical Notes
 
-## Subscription Tier Specification
+### Auto-Refresh Pattern (shared across News + Actors)
 
-| Tier | Plan Value | Daily Credits | During Trial | Target User | CTA |
-|------|-----------|--------------|-------------|-------------|-----|
-| Trial | `trial` | 50 (Pro equivalent) | Yes, 30 days | All new signups | Auto-assigned |
-| Free | `free` | 3 | Post-trial default | Casual researchers, students | "Current Plan" or "Downgraded" |
-| Basic | `basic` | 15 | N/A | Individual analysts, freelancers | "Get Started" |
-| Pro | `pro` | 50 | N/A | Security teams, regular users | "Most Popular" (highlighted) |
-| Enterprise | `enterprise` | 200 | N/A | SOC teams, MSSPs, organizations | "Contact Us" |
+Use the same pattern already proven in DashboardPage.jsx:
+```javascript
+useEffect(() => {
+  const interval = setInterval(() => {
+    // Silent refresh — no setLoading(true), no spinner
+    fetchData().then(setData).catch(() => {});
+  }, 5 * 60 * 1000);
+  return () => clearInterval(interval);
+}, [dependencies]);
+```
 
-**Pricing:** Intentionally TBD for v3.0. The milestone scope is plan structure and credit enforcement, not monetization. Prices will be defined when Stripe is integrated.
+Key: Auto-refresh must NOT trigger loading states. Only manual user actions (search, filter, navigate) should show spinners.
 
-## Onboarding Field Specification
+### Date-Based Browsing vs Cursor Pagination
 
-| Field | Input Type | Required | Validation | How Used |
-|-------|-----------|----------|------------|----------|
-| Name | text | Yes (existing) | min:2, max:255 | Display in sidebar, topbar |
-| Phone | text | Yes (existing) | min:5, max:20 | Future contact/notifications |
-| Timezone | select dropdown | Yes (new) | Must be valid IANA timezone | All timestamp rendering across app |
-| Organization | text | No (new) | max:255 | Analytics, future team features |
-| Role | select dropdown | No (new) | Must be from allowed list | Analytics, onboarding personalization |
+Current ThreatNewsPage uses cursor-based pagination (after/before cursors from OpenCTI pageInfo). Date-based browsing replaces this with:
+- A date selector (native `<input type="date">` styled to match dark theme, or a custom date picker)
+- Backend filters on `published >= startOfDay` and `published < startOfNextDay`
+- OpenCTI FilterGroup supports `published` with `gte` and `lt` operators
+- If a single day returns more than 20 reports, retain a "Load more" button (keep cursor pagination as secondary, not primary navigation)
 
-**Role options:** Security Analyst, SOC Analyst, Threat Hunter, Incident Responder, CISO/Manager, Researcher, Student, Other
+### Enriched Actor Modal Data Sources
 
-**Timezone implementation:**
-- Auto-detect via `Intl.DateTimeFormat().resolvedOptions().timeZone` as pre-filled default
-- Populate dropdown with `Intl.supportedValuesOf('timeZone')` (returns ~400 IANA zones)
-- Group by region (America, Europe, Asia, etc.) for usability
-- Store raw IANA string (e.g., `Asia/Riyadh`, `America/New_York`)
-- Frontend applies via `new Date().toLocaleString('en-US', { timeZone: userTimezone })`
+OpenCTI `intrusionSets` GraphQL supports these relationship types needed for enrichment:
+- `stixCoreRelationships(relationship_type: "uses", toTypes: ["Attack-Pattern"])` — TTPs
+- `stixCoreRelationships(relationship_type: "uses", toTypes: ["Tool", "Malware"])` — Tools
+- Related campaigns via `stixCoreRelationships(relationship_type: "attributed-to", fromTypes: ["Campaign"])`
 
-## Credit System Modification Plan
+All queryable in a single expanded GraphQL query. No new endpoints needed — just expanding the existing ThreatActorService query.
 
-The existing credit system needs minimal changes. The core mechanism (lazy reset at midnight UTC, atomic deduction) stays identical. Only the `limit` source changes.
+### Settings Page Restructuring
 
-**Current flow:**
-1. Request comes in -> CreditService checks credit row
-2. If `last_reset_at` is before midnight UTC today -> reset `remaining` to `limit` (hardcoded 10)
-3. Deduct 1 credit atomically
-
-**New flow:**
-1. Request comes in -> CreditService checks credit row
-2. Load user's `plan` column
-3. If plan is `trial` and `trial_ends_at < now()` -> set plan to `free`, save user
-4. Look up daily limit from plan config: `{ trial: 50, free: 3, basic: 15, pro: 50, enterprise: 200 }`
-5. If `last_reset_at` is before midnight UTC today -> reset `remaining` to plan limit, update `limit` column
-6. Deduct 1 credit atomically
-
-**Key change:** Step 2-4 are new. Step 5 changes from hardcoded 10 to plan-derived value. Step 6 is unchanged. The `limit` column on the credits table gets updated on each reset to match the current plan, so CreditBadge always shows the correct denominator.
+Current tabs to remove: API Keys, Webhooks, Usage (all mock data, no backend)
+New tab structure:
+1. **Profile** — Editable: display name, organization, timezone, phone. Uses existing SearchableDropdown (timezone) and PhoneNumberInput components from onboarding.
+2. **Account** — Read-only: email, auth provider (email/Google/GitHub), plan name + upgrade CTA, credit balance, member since date.
 
 ## Sources
 
-- [SaaS Onboarding Best Practices 2026 - DesignRevision](https://designrevision.com/blog/saas-onboarding-best-practices)
-- [SaaS Onboarding Best Practices 2025 - Insaim](https://www.insaim.design/blog/saas-onboarding-best-practices-for-2025-examples)
-- [Reverse Trial Method - UserPilot](https://userpilot.com/blog/saas-reverse-trial/)
-- [SaaS Trial Strategies - Chargebee](https://www.chargebee.com/resources/guides/subscription-pricing-trial-strategy/saas-trial-plans/)
-- [Credit-Based SaaS Models - PricingSaaS Newsletter](https://newsletter.pricingsaas.com/p/how-to-use-credit-models-12-examples)
-- [Credit vs Time Trials - Inflection.io](https://www.inflection.io/post/time-based-trial-or-free-credits-choosing-the-right-trial-strategy)
-- [SaaS Pricing Page Design - Eleken](https://www.eleken.co/blog-posts/saas-pricing-page-design-8-best-practices-with-examples)
-- [SaaS Pricing Page Examples - Webstacks](https://www.webstacks.com/blog/saas-pricing-page-design)
-- [ThreatIntelligencePlatform.com Pricing](https://threatintelligenceplatform.com/pricing)
-- [VirusTotal Public vs Premium API](https://docs.virustotal.com/reference/public-vs-premium-api)
-- [Cancellation Flow Examples - UserPilot](https://userpilot.com/blog/cancellation-flow-examples/)
-- [SaaS Trial Expiration UX - Chargebee](https://www.chargebee.com/resources/guides/subscription-pricing-trial-strategy/saas-trial-plans/)
-- [Tiered Pricing Examples - Orb](https://www.withorb.com/blog/tiered-pricing-examples)
+- [ThreatConnect Dashboard Best Practices](https://threatconnect.com/blog/threatconnect-dashboards-best-practices/)
+- [Filigran/OpenCTI Dashboard Management](https://filigran.io/building-dashboards-manage-feed-deluge/)
+- [DarkOwl Threat Actor Profiling](https://www.darkowl.com/threat-actor-profiling/)
+- [EclecticIQ MITRE ATT&CK Mapping](https://www.eclecticiq.com/take-action-with-cti/how-to-use-mitre-attck-to-map-and-track-adversary-ttps)
+- [MITRE ATT&CK](https://attack.mitre.org/)
+- [Splunk Threat Intelligence Dashboards](https://help.splunk.com/en/splunk-enterprise-security-8/user-guide/8.2/analytics/threat-intelligence-dashboards)
+- Existing codebase: ThreatActorService.php, ThreatNewsService.php, DashboardPage.jsx, ThreatNewsPage.jsx, ThreatActorsPage.jsx, SettingsPage.jsx, api.php routes
 
 ---
-*Feature research for: Aqua TIP v3.0 Onboarding, Trial Enforcement & Subscription Plans*
-*Researched: 2026-03-20*
+*Feature research for: AQUA TIP v3.2 App Layout Page Tweaks*
+*Researched: 2026-03-28*

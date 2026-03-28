@@ -1,171 +1,177 @@
 # Project Research Summary
 
-**Project:** Aqua TIP v3.0 -- Onboarding, Trial & Subscription Plans
-**Domain:** SaaS subscription tiers, trial enforcement, and credit-based access control for a threat intelligence platform
-**Researched:** 2026-03-20
+**Project:** Aqua TIP v3.2 -- App Layout Page Tweaks
+**Domain:** Threat Intelligence Platform -- page enhancements across dashboard, news, actors, map, search, and settings
+**Researched:** 2026-03-28
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Aqua TIP v3.0 is a business logic milestone, not a technology adoption exercise. The existing stack (Laravel 12, Sanctum, React 19, Tailwind 3) handles every requirement with zero new dependencies on either backend or frontend. The work consists of four interlocking concerns: (1) a `plans` database table with 4 seeded tiers, (2) plan-aware credit limit resolution replacing hardcoded values, (3) trial enforcement leveraging the existing `trial_ends_at` column, and (4) frontend UI for pricing, trial banners, and enhanced onboarding. No payment processing is needed -- plan selection is a simple database write.
+AQUA TIP v3.2 is a refinement milestone that enhances existing app layout pages rather than adding new ones. The research confirms that every feature maps to the existing stack (React 19, Chart.js 4, D3 7, Laravel 12, OpenCTI GraphQL) with zero new dependencies required. This is a strong signal: the codebase is mature enough that incremental improvements require no new tooling. The work spans 8 distinct feature areas across 5 pages, with a clear split between frontend-only quick wins (dashboard stat cards, map label, search bug fixes) and backend-dependent features (date filtering, enriched actor modals, functional settings, category chart).
 
-The recommended approach is schema-first, logic-second, UI-last. The most critical insight from research is that existing users already have backdated `trial_ends_at` values, so enabling trial enforcement without a data migration will instantly downgrade every early adopter. The second critical insight is that credit limits are hardcoded identically in two files (`DeductCredit` middleware and `CreditStatusController`), which must be extracted into a shared `CreditResolver` service before any plan logic is added. Both issues are solvable with careful ordering.
+The recommended approach is to ship frontend-only changes first for immediate visible progress, then build a reusable `useAutoRefresh` hook before tackling the backend-dependent features. The critical architectural decision is fetch-on-open for enriched actor modals (not batch-in-list), which avoids hammering OpenCTI with 24 parallel relationship queries. Date-based news filtering requires timezone-aware UTC conversion on the backend -- the most subtle technical requirement in the milestone.
 
-The key differentiator opportunity is a reverse trial model: give new users Pro-level access (50 credits/day) for 30 days, then soft-downgrade to Free (3/day). Most competing TI platforms (VirusTotal, Shodan) offer only weak free tiers with no trial of premium features. Combined with credit-only gating (all features accessible, only search volume varies by tier), this creates a transparent, conversion-friendly model.
+The top risks are: (1) stale closure bugs in auto-refresh intervals when combined with date filters, (2) Chart.js flickering from destroy/recreate on data changes, (3) timezone mismatches between user-local dates and OpenCTI UTC timestamps, and (4) AuthContext not syncing after settings saves. All four have straightforward prevention strategies documented in PITFALLS.md, but each must be addressed during initial implementation -- not patched after.
 
 ## Key Findings
 
 ### Recommended Stack
 
-No new packages. Both `backend/composer.json` and `frontend/package.json` remain unchanged. Every capability needed -- migrations, Eloquent models, Carbon date handling, `Intl` browser APIs for timezone, Framer Motion for pricing page animations -- is already installed. See [STACK.md](./STACK.md) for the full analysis.
+No new packages. Every v3.2 feature maps to existing dependencies or browser-native APIs. This was validated against six common alternatives (react-datepicker, date-fns, chartjs-adapter-date-fns, TanStack Query, react-hook-form, toast libraries) -- all rejected with clear rationale. See [STACK.md](./STACK.md) for the full analysis.
 
-**Core technologies (all existing, all reused):**
-- **Laravel 12 + Eloquent** -- plans table, user relations, credit resolver service, middleware, validation rules (including built-in `timezone` rule)
-- **React 19 + Tailwind 3** -- pricing page cards, onboarding form extensions, trial banner, plan badges
-- **Native browser APIs** -- `Intl.supportedValuesOf('timeZone')` for timezone picker, `Intl.DateTimeFormat` for timezone-aware display, `Date` math for trial countdown
-- **Framer Motion (existing)** -- pricing card hover/selection animations
-- **Lucide React (existing)** -- icons for plan feature checklists (Check, X, Crown, Shield)
-
-**Explicitly avoid:** laravel/cashier, spatie/laravel-permission, date-fns/dayjs/moment, react-hook-form, zod/yup, react-select, any state management library. See STACK.md "What NOT to Use" table for full rationale on each.
+**Core technologies (unchanged):**
+- **React 19 + Vite 7:** Sufficient for all features; no framework-level changes needed
+- **Chart.js 4.5.1:** Category axis with string labels handles time-series without a date adapter (backend pre-aggregates)
+- **D3 7.9.0:** Force simulation parameter tuning fixes the node positioning bug
+- **Native `<input type="date">`:** With `[color-scheme:dark]` CSS, matches the dark theme without a third-party date picker
+- **`setInterval` + `document.visibilityState`:** Standard auto-refresh pattern; only 2 pages need it, making TanStack Query overkill
+- **Laravel 12 + Sanctum 4:** 4 new endpoints needed (profile, password, actor detail, news chart), all following existing patterns
 
 ### Expected Features
 
 See [FEATURES.md](./FEATURES.md) for complete feature landscape, dependency graph, and competitor analysis.
 
 **Must have (table stakes):**
-- Plan-aware credit limits replacing hardcoded 10/day for all authenticated users
-- Trial enforcement checking `trial_ends_at` and downgrading to Free tier on expiry
-- Trial countdown banner showing days remaining with link to pricing
-- Pricing page with 4-tier comparison grid (Free/Basic/Pro/Enterprise)
-- Plan selection API that updates `users.plan_id` and syncs credit limits immediately
-- Enhanced onboarding: timezone (auto-detected), organization, role fields
-- Graceful trial-to-free transition (soft downgrade, not hard lockout)
-- UserResource and AuthContext exposing plan, trial state, and timezone
+- Functional settings/profile page -- current page is 100% mock data, visibly broken
+- Dashboard stat card expansion to 7 types -- 3 observable types missing from OpenCTI data
+- Threat Map 100-IP cap with updated label -- prevents performance issues on dense maps
+- Threat Search bug fixes (D3 nodes, loader, z-index) -- broken UX in shipped feature
+- Auto-refresh on Threat News and Threat Actors -- inconsistent with dashboard which already refreshes
 
 **Should have (differentiators):**
-- Reverse trial model: Pro-level credits (50/day) during 30-day trial
-- Plan indicator in CreditBadge showing tier name alongside remaining/limit
-- Upgrade CTA on credit exhaustion with plan-aware messaging
-- Credit consumption transparency (per-action cost documentation)
-- Auto-detected timezone default during onboarding
+- Date-based threat news browsing -- replaces cursor pagination with chronological browsing
+- Enriched threat actor modal (TTPs, tools, campaigns) -- core intelligence analysts need
+- Category distribution time-series chart -- visual trend analysis embedded in browse context
+- Profile editing (name, org, timezone, phone) -- fields collected at onboarding but not editable after
 
-**Defer (v3.x / v4+):**
-- Stripe payment processing -- defer until validated demand
-- Monthly/annual billing toggle -- requires Stripe
-- RBAC / team management -- requires enterprise customer validation
-- Email drip campaigns -- over-engineered for current scale
-- Per-feature gating (vs credit-only gating) -- adds complexity, reduces transparency
-- Proration on mid-cycle plan changes -- requires billing cycles
+**Defer (v2+):**
+- API key management -- no public API exists
+- Webhook configuration -- no dispatch system exists
+- Usage analytics chart -- no tracking infrastructure exists
+- Full MITRE ATT&CK Navigator -- too heavy for modal context
+- Real-time WebSocket for news/actors -- SSE already used for map; 5-min polling is sufficient
 
 ### Architecture Approach
 
-The architecture extends the existing credit system with a plan-aware resolution layer. A new `CreditResolver` service extracts the duplicated `resolveCredit()` and `lazyReset()` logic from two files into a single shared class. Plan status is fully derivable from two columns (`plan_id` and `trial_ends_at`) with no redundant status enum. Trial enforcement is a soft mechanism embedded in credit resolution, not a hard route-blocking middleware. See [ARCHITECTURE.md](./ARCHITECTURE.md) for full system diagram, data flows, and build order.
+All features follow the existing Controller -> Service -> OpenCTI GraphQL -> Cache pipeline. The key new patterns are: (1) a reusable `useAutoRefresh` hook extracting the DashboardPage interval pattern, (2) fetch-on-open for enriched actor modals via a new `GET /api/threat-actors/{id}` endpoint with single aliased GraphQL query, (3) server-side time-series aggregation for the category chart, and (4) a Settings page rewrite from mock data to real AuthContext + new profile endpoints. See [ARCHITECTURE.md](./ARCHITECTURE.md) for full system diagram, data flows, and build order.
 
 **Major components:**
-1. **`plans` table + `Plan` model** -- source of truth for 4 tier definitions (slug, daily_credits, price, features JSONB). Cached aggressively (4 rows, rarely changes).
-2. **`CreditResolver` service** -- single place to compute effective daily credit limit for any user or guest. Replaces hardcoded values in both `DeductCredit` middleware and `CreditStatusController`. Handles trial expiry detection.
-3. **`SubscriptionController`** -- handles plan selection via `POST /api/plan`. Updates `users.plan_id` and atomically syncs credit limits (immediate effect for upgrades, capped for downgrades).
-4. **`PlanController`** -- public `GET /api/plans` endpoint for pricing page (no auth required).
-5. **Extended `UserResource`** -- exposes plan object, `trial_active`, `trial_days_left`, timezone, organization, role. Fixes `onboarding_completed` to use `onboarding_completed_at` timestamp instead of fragile heuristic.
-6. **`PricingPage.jsx`** -- plan comparison grid consuming `/api/plans`, with selection buttons calling `/api/plan`.
-7. **`TrialBanner.jsx`** -- trial countdown or expired upgrade prompt, reading from AuthContext.
+1. **`useAutoRefresh` hook** -- reusable 5-min interval with visibility pause and ref-based callback (prevents stale closures)
+2. **`DateRangeSelector` component** -- native date inputs wired to backend `published_after`/`published_before` filters
+3. **`ProfileController` + `PasswordController`** -- new Laravel endpoints for settings page
+4. **`ThreatActorService::getDetail()`** -- single aliased GraphQL query for TTPs, tools, campaigns (fetch-on-open)
+5. **`ThreatNewsService::categoryTimeSeries()`** -- server-side aggregation for Chart.js line chart
 
 ### Critical Pitfalls
 
-See [PITFALLS.md](./PITFALLS.md) for the full list with detection queries, phase warnings, and a "looks done but isn't" checklist.
+See [PITFALLS.md](./PITFALLS.md) for the full list with detection strategies, phase warnings, and a "looks done but isn't" checklist.
 
-1. **Retroactive trial expiry for existing users** -- All existing users have backdated `trial_ends_at`. Enabling enforcement without a data migration instantly downgrades every early adopter. **Prevent:** Run a migration to reset `trial_ends_at` to `NOW() + 30 days` for all existing users before any enforcement code ships.
-
-2. **Hardcoded credit limits in two files** -- `DeductCredit` middleware and `CreditStatusController` both hardcode `limit=10` independently. Updating one but missing the other causes the status widget and actual enforcement to disagree. **Prevent:** Extract both into `CreditResolver` service as the very first backend change.
-
-3. **Lazy reset preserves stale limits after plan change** -- The `credits.limit` column is set once at creation and never updated when plans change. **Prevent:** `lazyReset()` must re-derive limit from current plan. Plan changes must atomically sync credits using `LEAST(remaining, new_limit)`.
-
-4. **Onboarding validation change breaks existing users** -- `UserResource.onboarding_completed` uses a fragile heuristic instead of `onboarding_completed_at`. Adding required fields kicks existing users back to onboarding. **Prevent:** Fix `UserResource` to use `onboarding_completed_at !== null` before touching the onboarding form. Make new fields nullable.
-
-5. **Race condition on plan downgrade** -- Concurrent credit deduction and plan downgrade can leave a user with more credits than their new plan allows. **Prevent:** Plan changes must use atomic SQL: `UPDATE credits SET limit = :new, remaining = LEAST(remaining, :new)`.
+1. **Stale closure in auto-refresh** -- `setInterval` captures old filter state. Use `useRef` for current values inside the callback. Build the `useAutoRefresh` hook on the first page, reuse everywhere.
+2. **Chart.js destroy/recreate flickering** -- existing `useChartJs` hook triggers full chart rebuild on any config change. Use `chart.data = newData; chart.update('none')` for data-only updates on the time-series chart.
+3. **Timezone mismatch in date filtering** -- HTML date inputs produce bare strings; backend must convert using user's IANA timezone to UTC before querying OpenCTI. Default to UTC for unauthenticated users.
+4. **N+1 OpenCTI queries for actor enrichment** -- use single aliased GraphQL query with `first: N` limits per relationship type, not separate queries per entity type.
+5. **AuthContext not syncing after profile save** -- add `refreshUser()` method to AuthContext; call after successful save; do not use optimistic updates for timezone-sensitive fields.
 
 ## Implications for Roadmap
 
-Based on research, the milestone breaks cleanly into 4 phases ordered by data dependencies and risk.
+Based on research, suggested phase structure:
 
-### Phase 1: Schema and Data Migration
-**Rationale:** Everything depends on the `plans` table existing and existing users having clean data. This phase is purely additive -- no behavior changes, all existing functionality continues working identically.
-**Delivers:** `plans` table with 4 seeded tiers, `plan_id`/`timezone`/`organization`/`role` columns on users, `Plan` model with relations, data migration resetting `trial_ends_at` for existing users.
-**Addresses:** Plan column + credit tier mapping (P1), enhanced onboarding fields schema (P1)
-**Avoids:** Pitfall 1 (retroactive trial expiry), Pitfall 5 (null plan for existing users)
+### Phase 1: Quick Wins (frontend-only)
+**Rationale:** Zero backend changes, zero risk. Ships visible improvements immediately and builds momentum.
+**Delivers:** Dashboard with 7 stat cards + "Threat Database" heading, map label update, search bug fixes (D3 nodes, loader, z-index)
+**Addresses:** Dashboard stat expansion, Threat Map cap label, Threat Search bugs (3 fixes)
+**Avoids:** No pitfalls -- pure UI/config changes. Verify 7-card responsive layout at multiple breakpoints.
 
-### Phase 2: CreditResolver Service and Plan-Aware Credits
-**Rationale:** This is the highest-risk change -- modifying the core credit system that gates every search. Must be stabilized and tested before building any UI on top. Extracting the shared service eliminates the duplication pitfall and creates the foundation for all plan enforcement.
-**Delivers:** `CreditResolver` service, plan-aware `DeductCredit` middleware, plan-aware `CreditStatusController`, trial enforcement logic (soft downgrade on expiry), updated `UserResource` with plan/trial fields, `PlanController` (GET /api/plans), `SubscriptionController` (POST /api/plan) with atomic credit sync.
-**Addresses:** Trial enforcement (P1), plan-aware credit limits (P1), UserResource updates (P1), plan selection API (P1)
-**Avoids:** Pitfall 2 (duplicated logic), Pitfall 3 (stale lazy reset), Pitfall 6 (guest conflation), Pitfall 8 (race condition), Pitfall 9 (timezone mismatch)
+### Phase 2: Auto-Refresh Infrastructure
+**Rationale:** Creates the reusable `useAutoRefresh` hook before any page needs it. Prevents the stale-closure and memory-leak pitfalls by solving them once.
+**Delivers:** `useAutoRefresh` hook with ref-based callback and visibility pause, auto-refresh on Threat News + Threat Actors, DashboardPage refactored to use hook
+**Addresses:** News auto-refresh, Actors auto-refresh, code consistency across 3 pages
+**Avoids:** Stale closure pitfall (#1), memory leak pitfall (#7), background tab waste
 
-### Phase 3: Enhanced Onboarding
-**Rationale:** Independent of credit system changes but depends on schema from Phase 1. The `UserResource` fix (use `onboarding_completed_at` instead of heuristic) should ship here to prevent Pitfall 4 before any form changes.
-**Delivers:** Extended `OnboardingController` (timezone, organization, role), updated `GetStartedPage.jsx` with timezone auto-detect and new fields, updated `api/auth.js` onboarding payload.
-**Addresses:** Enhanced onboarding fields (P1), auto-detected timezone default (P2)
-**Avoids:** Pitfall 4 (onboarding validation break), Pitfall 13 (form data loss on re-submission)
+### Phase 3: Date-Based News Browsing
+**Rationale:** Backend date filter support is a prerequisite for the category chart (Phase 4). This phase establishes the server-side filtering pattern and the timezone conversion logic.
+**Delivers:** Date selector UI on Threat News replacing cursor pagination, backend `published_after`/`published_before` support with timezone-aware UTC conversion, URL-persisted date state via `useSearchParams`
+**Addresses:** Date-based news browsing feature
+**Avoids:** Timezone mismatch pitfall (#6) -- must implement UTC conversion from the start
 
-### Phase 4: Frontend Plan UI and Pricing
-**Rationale:** All backend APIs are operational. Frontend components can be built independently and wired to real endpoints. Shipping enforcement and UI together avoids Pitfall 10 (pricing page without enforcement).
-**Delivers:** Updated `AuthContext` with plan/trial state, `PricingPage.jsx` with plan comparison grid and selection, `TrialBanner.jsx` in AppLayout, `PlanBadge.jsx` in sidebar/topbar, updated `CreditBadge.jsx` with plan context, timezone-aware time display across the app, `/pricing` route.
-**Addresses:** Trial countdown banner (P1), pricing page (P1), plan indicator in CreditBadge (P2), upgrade CTA on exhaustion (P2), timezone-aware display (P1)
-**Avoids:** Pitfall 7 (missing frontend plan state), Pitfall 10 (UI without enforcement)
+### Phase 4: Category Distribution Chart
+**Rationale:** Depends on Phase 3's backend date filtering pattern. Requires new aggregation endpoint and careful Chart.js hook handling.
+**Delivers:** Time-series line chart above Threat News report list, new `/api/threat-news/chart` endpoint with server-side aggregation
+**Addresses:** Category distribution chart feature
+**Avoids:** Chart flickering pitfall (#2) -- build with in-place update pattern, not destroy/recreate. Fill zero-count dates explicitly.
+
+### Phase 5: Enriched Threat Actor Modal
+**Rationale:** Independent of Phases 3-4. High intelligence value. Backend is a single expanded GraphQL query with aliased relationship fields.
+**Delivers:** TTPs (with MITRE IDs), tools/malware, campaigns in actor modal with fetch-on-open loading skeleton
+**Addresses:** Enriched actor modal feature
+**Avoids:** N+1 query pitfall (#4) -- single aliased query from the start. Limit each alias with `first: N`.
+
+### Phase 6: Functional Settings Page
+**Rationale:** Independent of all other phases. Requires AuthContext modification (`refreshUser`), which should happen here to avoid unnecessary changes earlier.
+**Delivers:** Real profile editing (name, phone, timezone, org, role), password change for non-OAuth users, plan/account info display. Removes all mock data imports.
+**Addresses:** Functional settings, profile editing
+**Avoids:** AuthContext sync pitfall (#5) -- add `refreshUser` before building the form. Whitelist-only field updates to prevent privilege escalation.
 
 ### Phase Ordering Rationale
 
-- **Schema before logic** because migrations are additive and non-breaking. They create the data foundation without changing any behavior. All existing tests pass after Phase 1.
-- **Credit system before API endpoints and UI** because the `CreditResolver` is consumed by both the deduction middleware and the subscription controller. It must exist and be tested first.
-- **Onboarding independent but after schema** because it needs the `timezone`, `organization`, and `role` columns from Phase 1 but does not depend on the credit system changes.
-- **Frontend last** because every frontend component consumes a backend API. Building UI before APIs are stable creates throwaway work.
-- **Enforcement ships with pricing page** because the pricing page must never promise what the backend cannot deliver.
+- **Phase 1 first** because it has zero dependencies, zero risk, and builds visible progress
+- **Phase 2 before Phases 3-6** because the `useAutoRefresh` hook is needed by Phase 3 (auto-refresh interacts with date filters) and provides the modal-pause pattern used in Phase 5
+- **Phases 3 then 4 are sequential** -- the chart depends on the date filtering backend pattern and should reflect the same time window
+- **Phases 5 and 6 are independent** of each other and of Phases 3-4 -- they can be parallelized or reordered based on priority
+- Bug fixes grouped in Phase 1 keeps the quick-wins phase coherent and ships immediately
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 2 (CreditResolver + Plan-Aware Credits):** The credit deduction and lazy reset modifications touch the core rate-limiting system. Needs careful test coverage for all plan tiers, trial expiry edge cases, and plan change credit sync. Consider writing the test matrix before implementation. The atomic SQL pattern for plan downgrades (`LEAST(remaining, new_limit)`) should be validated against PostgreSQL.
+- **Phase 3 (Date-Based News Browsing):** OpenCTI FilterGroup date operators (`gt`/`lt` on `published` field) need validation against the specific GraphQL schema version in production. Timezone conversion logic should be tested with edge-case timezones (UTC+14, UTC-12).
+- **Phase 4 (Category Chart):** OpenCTI aggregation capabilities (`stixCoreObjectsDistribution` or manual bucketing via report fetch + PHP aggregation) need verification. Chart.js in-place update pattern requires a modified or new hook -- decide whether to extend `useChartJs` or create `useTimeSeriesChart`.
+- **Phase 5 (Enriched Actor Modal):** GraphQL relationship direction (`from` vs `to`) for "attributed-to" campaigns must be verified against live data. Some actors may have zero relationships, requiring empty-state handling in the modal.
 
 Phases with standard patterns (skip `/gsd:research-phase`):
-- **Phase 1 (Schema):** Standard Laravel migrations and seeders. Well-documented, zero ambiguity.
-- **Phase 3 (Enhanced Onboarding):** Standard controller field additions. Timezone auto-detect uses native browser API. Existing onboarding pattern is clear.
-- **Phase 4 (Frontend Plan UI):** Standard React components consuming REST APIs. Pricing page design patterns are well-documented. No new libraries.
+- **Phase 1 (Quick Wins):** Pure config changes and CSS fixes. Well-understood patterns.
+- **Phase 2 (Auto-Refresh):** Standard `setInterval` + `useRef` + `visibilityState` pattern. DashboardPage already proves it works.
+- **Phase 6 (Settings Page):** Standard CRUD form with Laravel validation. Reuses onboarding components (SearchableDropdown, PhoneNumberInput).
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Zero new dependencies. All recommendations verified against existing `composer.json` and `package.json`. Every technology is already installed and in use. |
-| Features | HIGH | Feature list derived from direct codebase analysis of existing credit system, competitor analysis (VirusTotal, Shodan, ThreatIntelligencePlatform.com), and SaaS best practice sources. Reverse trial model backed by multiple conversion studies. |
-| Architecture | HIGH | Architecture extends existing patterns (single-invocable controllers, Eloquent relations, AuthContext). All integration points verified by reading actual source files. No speculative components. |
-| Pitfalls | HIGH | Every pitfall identified from direct code inspection with specific file names and line numbers. The retroactive trial expiry and hardcoded credit duplication are verified bugs-in-waiting. |
+| Stack | HIGH | Every recommendation verified against existing codebase. Zero new deps is validated against 6 alternatives. |
+| Features | HIGH | Features grounded in existing codebase inventory + OpenCTI data model. Anti-features well-justified with clear rationale. |
+| Architecture | HIGH | All patterns derived from direct codebase analysis of services, controllers, hooks, and context. Fetch-on-open, aliased queries, hook extraction are proven approaches. |
+| Pitfalls | HIGH | All 7 pitfalls traced to specific code lines with file names and line numbers. Prevention strategies are concrete with code examples. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Pricing amounts:** Actual dollar amounts for Basic/Pro/Enterprise are TBD. STACK.md and FEATURES.md use placeholder prices. Does not block implementation (prices are seeder data) but must be decided before the pricing page ships to production.
-- **Trial credit level disagreement:** FEATURES.md recommends 50/day (Pro equivalent) for reverse trial. ARCHITECTURE.md uses 15/day (Basic equivalent) in `CreditResolver` constants. This is a product decision. **Recommendation:** Go with 50/day (Pro level) -- higher trial value drives higher conversion per SaaS reverse trial research.
-- **Enterprise tier CTA flow:** Enterprise plan uses "Contact Us" instead of self-service selection. The inquiry mechanism (email form, Calendly link, mailto) is unspecified. A simple mailto link is sufficient for v3.0.
-- **Existing test updates:** Multiple test files reference hardcoded credit limit of 10. These will break when plan-aware limits ship. Must inventory and update during Phase 2.
-- **Guest credit limit:** STACK.md says guest limit stays at 1/day. ARCHITECTURE.md `CreditResolver` sets `GUEST_LIMIT = 3` (Free tier equivalent). **Recommendation:** Keep guests at 1/day to maintain differentiation between anonymous and free-tier users.
+- **OpenCTI aggregation query support:** The time-series chart assumes server-side bucketing is feasible via GraphQL. If `stixCoreObjectsDistribution` does not support date bucketing, the backend must fetch raw reports and aggregate in PHP -- still viable but slower. Validate during Phase 4 planning.
+- **Chart.js hook modification scope:** Modifying `useChartJs` to support in-place updates may affect existing static charts (Dashboard AttackChart, Settings UsageChart). A separate `useTimeSeriesChart` hook may be safer. Decide during Phase 4 planning.
+- **OAuth user password change:** The password endpoint should be hidden for OAuth users (Google/GitHub). AuthContext already knows the auth provider, but the Settings UI must conditionally render the password form. Handle in Phase 6.
+- **Dashboard 7-card responsive layout:** Going from 4 to 7 stat cards changes the grid math. Needs visual testing at 1024px, 1280px, and 1920px breakpoints. Handle in Phase 1.
+- **DashboardService sequential queries:** Expanding from 4 to 7 GraphQL count queries means 7 sequential round trips. Consider batching into a single aliased query for performance. Handle in Phase 1.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Direct codebase analysis of all affected files: `DeductCredit.php`, `CreditStatusController.php`, `User.php`, `UserResource.php`, `OnboardingController.php`, `AuthContext.jsx`, `GetStartedPage.jsx`, `ProtectedRoute.jsx`, `Credit.php`, all database migrations
-- Laravel 12 documentation: `timezone` validation rule, Carbon timezone support, database seeding, middleware patterns
-- MDN Web Docs: `Intl.supportedValuesOf('timeZone')`, `Intl.DateTimeFormat` timezone parameter
+- Direct codebase analysis of all affected backend services: DashboardService, ThreatNewsService, ThreatActorService, ThreatMapService, OpenCtiService
+- Direct codebase analysis of all affected frontend pages: DashboardPage, ThreatNewsPage, ThreatActorsPage, ThreatMapPage, ThreatSearchPage, SettingsPage
+- Direct codebase analysis of hooks: useChartJs, useThreatStream, auto-refresh pattern in DashboardPage
+- Direct codebase analysis of AuthContext shape, UserResource, and user data model
+- Direct codebase analysis of routes/api.php, existing controller patterns, cache strategies
 
 ### Secondary (MEDIUM confidence)
-- SaaS reverse trial conversion data: UserPilot, Chargebee guides
-- SaaS pricing page design patterns: Eleken, Webstacks
-- Credit-based SaaS model examples: PricingSaaS Newsletter, Inflection.io
-- Competitor analysis: VirusTotal Public vs Premium API docs, ThreatIntelligencePlatform.com pricing page
+- [Chart.js Time Series Axis docs](https://www.chartjs.org/docs/latest/axes/cartesian/timeseries.html) -- time scale vs category axis tradeoffs
+- [chartjs-adapter-date-fns on npm](https://www.npmjs.com/package/chartjs-adapter-date-fns) -- v3.0.0 compatibility (considered and deferred)
+- [ThreatConnect Dashboard Best Practices](https://threatconnect.com/blog/threatconnect-dashboards-best-practices/)
+- [EclecticIQ MITRE ATT&CK Mapping](https://www.eclecticiq.com/take-action-with-cti/how-to-use-mitre-attck-to-map-and-track-adversary-ttps)
+- [DarkOwl Threat Actor Profiling](https://www.darkowl.com/threat-actor-profiling/)
+- [Filigran/OpenCTI Dashboard Management](https://filigran.io/building-dashboards-manage-feed-deluge/)
 
 ### Tertiary (LOW confidence)
-- VirusTotal premium pricing specifics (not publicly documented, inferred from API documentation)
-- Exact conversion lift from reverse trials (varies by domain, SaaS averages cited but TIP-specific data unavailable)
+- OpenCTI `stixCoreObjectsDistribution` aggregation capability -- inferred from schema patterns, not directly tested against production instance
+- date-fns v4.1.0 and chartjs-adapter-date-fns v3.0.0 latest versions -- NPM metadata checked but packages not installed or tested
 
 ---
-*Research completed: 2026-03-20*
+*Research completed: 2026-03-28*
 *Ready for roadmap: yes*

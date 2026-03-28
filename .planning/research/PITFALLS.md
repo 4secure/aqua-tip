@@ -1,263 +1,354 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Adding trial enforcement, subscription tiers, and enhanced onboarding to an existing credit-based threat intelligence platform
-**Project:** AQUA TIP v3.0 -- Onboarding, Trial & Subscription Plans
-**Researched:** 2026-03-20
-**Confidence:** HIGH (based on direct codebase analysis of all affected files and existing patterns)
+**Domain:** Adding auto-refresh, date filtering, time-series charts, enriched modals, and functional settings to existing React + Laravel + OpenCTI threat intelligence platform
+**Project:** AQUA TIP v3.2 -- App Layout Page Tweaks
+**Researched:** 2026-03-28
+**Confidence:** HIGH (based on direct codebase analysis of all affected files, existing patterns, and established React/Chart.js/D3 knowledge)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause data corruption, broken access for existing users, or require emergency rollbacks.
+### Pitfall 1: setInterval Stale Closure in Auto-Refresh
 
-### Pitfall 1: Existing Users Get Retroactive Trial Expiry
+**What goes wrong:**
+The 5-min auto-refresh `setInterval` captures stale closures over filter state. When users change date filters or category filters between refresh cycles, the interval callback fires with the old filter values, fetching wrong data and silently replacing the user's filtered view with unfiltered results.
 
-**What goes wrong:** The `trial_ends_at` column already exists and is set via `User::creating()` boot hook to `now()->addDays(30)`. All existing users already have `trial_ends_at` values backdated to their registration date. Users who registered more than 30 days ago already have an expired trial. Flipping on trial enforcement instantly locks out every early adopter.
+**Why it happens:**
+The existing DashboardPage.jsx (lines 432-443) already uses `setInterval` but with no dependencies -- it always fetches the same three endpoints with no parameters. Adding date-based filtering to Threat News means the interval callback must reference the current date/category state, but `setInterval` captures the closure at creation time. This is the most common React interval bug.
 
-**Why it happens:** Developers add a middleware check like `if (now() > $user->trial_ends_at)` without considering that `trial_ends_at` was set relative to original registration, not to the enforcement go-live date.
+**How to avoid:**
+Use a `useRef` to hold current filter values, and read from the ref inside the interval callback. The ref approach keeps the interval stable while always reading current values:
+```jsx
+const filtersRef = useRef({ date, category });
+useEffect(() => { filtersRef.current = { date, category }; }, [date, category]);
+useEffect(() => {
+  const id = setInterval(() => {
+    fetchNews(filtersRef.current);  // always reads current values
+  }, 5 * 60 * 1000);
+  return () => clearInterval(id);
+}, []);  // stable interval, no stale closure
+```
 
-**Consequences:** Every existing user older than 30 days gets downgraded to Free tier (3 credits/day) the moment enforcement goes live. Users who were happily using 10 credits/day suddenly lose access mid-workflow. Support flood, trust damage.
+**Warning signs:**
+After changing a date filter, the page reverts to showing all-dates data after 5 minutes. Users see a "flash" of different data periodically.
 
-**Prevention:**
-- Write a data migration that resets `trial_ends_at` for all existing users to `NOW() + 30 days` (or assigns them to a grandfathered plan) before enabling enforcement.
-- Gate enforcement behind a feature flag. Deploy the migration first, verify data, then flip the flag.
-- Add a `plan` column with a default value that existing users get assigned BEFORE any enforcement code runs.
-
-**Detection:** Before deploying, query `SELECT count(*) FROM users WHERE trial_ends_at < NOW()` -- if this returns anything, enforcement will break those users.
-
-**Phase to address:** Must be the very first phase (data migration), before any enforcement middleware exists.
-
----
-
-### Pitfall 2: Hardcoded Credits in Two Places Create Divergence
-
-**What goes wrong:** Credit limits are hardcoded as `10` in both `DeductCredit::resolveCredit()` (middleware, line 55) and `CreditStatusController::resolveCredit()` (controller, line 35). These are independent `firstOrCreate` calls with identical but duplicated logic. When you update one to be plan-aware but miss the other, the status endpoint reports wrong limits, or new credit rows get created with stale hardcoded values.
-
-**Why it happens:** The `resolveCredit` logic was copy-pasted across two files with no shared abstraction. Copy-paste code drifts silently when only one copy gets updated.
-
-**Consequences:** User sees "3/3 credits" on the status widget but the deduction middleware thinks they have 10. Or vice versa -- middleware enforces 3 but status shows 10, so users think they have credits but searches return 429.
-
-**Prevention:**
-- Extract `resolveCredit` and `lazyReset` into a shared `CreditService` class before touching any plan logic. Both the middleware and controller must delegate to the same service.
-- The service must resolve the user's plan to determine limits. Never hardcode limit values -- always derive from plan configuration.
-- Write a test that creates a user on each plan tier and asserts that both the status endpoint and a credit-gated search endpoint agree on limits.
-
-**Detection:** Grep for hardcoded `remaining.*10` and `limit.*10` across the codebase. Every occurrence is a bug waiting to happen. Currently found in: `DeductCredit.php:55`, `CreditStatusController.php:35`, and multiple test files.
-
-**Phase to address:** Must be the first backend change -- extract the shared service before adding plan awareness.
+**Phase to address:**
+Threat News phase (date filtering + auto-refresh must be implemented together). Build a reusable `useAutoRefresh` hook here for reuse on Threat Actors.
 
 ---
 
-### Pitfall 3: Lazy Reset Preserves Old Limits After Plan Change
+### Pitfall 2: useChartJs Hook Destroys and Recreates Chart on Every Data Change
 
-**What goes wrong:** The `lazyReset` method resets `remaining` to `$credit->limit`. But if a user's plan changes (trial expires, user upgrades/downgrades), the `credits.limit` column still holds the old value. The lazy reset faithfully restores credits to the stale limit.
+**What goes wrong:**
+The existing `useChartJs` hook (lines 10-17 of `useChartJs.js`) uses `[config]` as its sole useEffect dependency. Any new config object reference triggers full chart destruction and recreation -- visible as flickering, loss of animation state, and tooltip disappearance mid-hover.
 
-**Why it happens:** The `limit` column on the `credits` table is set once at `firstOrCreate` time and never updated when the user's plan changes. The lazy reset only fires once per day and has no awareness of plans.
+**Why it happens:**
+The current hook works fine for static charts (SettingsPage uses `useMemo(() => ..., [])` with empty deps). But the new time-series chart for Threat News needs dynamic data (date-filtered category counts). Every date filter change creates a new config object, triggering destroy+recreate. JavaScript reference equality means `{} !== {}` even with identical contents.
 
-**Consequences:** User downgrades from Pro (50/day) to Free (3/day) but continues getting 50 credits every day because `credits.limit` still says 50. Revenue leakage. Or user upgrades but keeps getting the old lower limit until the next day's reset.
+**How to avoid:**
+Chart.js supports in-place data updates via `chart.data = newData; chart.update()`. Either modify `useChartJs` to accept separate static config and dynamic data, or create a new `useTimeSeriesChart` hook:
+```jsx
+useEffect(() => {
+  if (!chartRef.current) {
+    chartRef.current = new Chart(canvas, initialConfig);
+  } else {
+    chartRef.current.data = newData;
+    chartRef.current.update('none'); // skip animation on data swap
+  }
+}, [dataVersion]); // only react to data changes, not full config
+```
+The existing static charts (Dashboard AttackChart, SettingsPage UsageChart) can continue using the current hook unchanged.
 
-**Prevention:**
-- `lazyReset` must check the user's current plan and update `credits.limit` before resetting `remaining`. The reset flow should be: resolve plan -> set limit from plan -> set remaining to limit.
-- Alternatively, do not store `limit` on the credits table at all. Derive it from the user's plan every time. The credits table only needs `remaining` and `last_reset_at`.
-- If keeping `limit` cached on the credits row, add a `syncLimitFromPlan()` call that runs both on lazy reset and on plan change events.
+**Warning signs:**
+Chart flickers on filter change. Tooltips disappear mid-hover. Animation replays from scratch on every data update instead of smoothly transitioning.
 
-**Detection:** Change a user's plan in the database manually, wait for next-day reset, check if limit updated. If not, bug confirmed.
-
-**Phase to address:** Must be addressed when building the plan-aware credit service. Cannot be deferred.
-
----
-
-### Pitfall 4: Onboarding Validation Change Breaks Existing Flow
-
-**What goes wrong:** Current onboarding requires only `name` and `phone`. Adding `timezone`, `organization`, and `role` as required fields changes the validation rules. But `UserResource::onboarding_completed` is computed as `$this->name !== explode('@', $this->email)[0] && $this->phone !== null` -- it is a heuristic with no knowledge of new fields. The `ProtectedRoute` component checks `onboardingCompleted` from this heuristic to gate access.
-
-**Consequences:** Two failure modes:
-1. **Existing onboarded users have null new fields.** Code that assumes timezone/org/role exist (e.g., timezone-aware display) throws errors or shows "undefined".
-2. **If you update the heuristic to require new fields,** existing onboarded users get kicked back to the onboarding screen, disrupting their workflow on an app they have been using for weeks.
-
-**Prevention:**
-- Use `onboarding_completed_at !== null` as the single source of truth for onboarding completion. It already exists in the database but is NOT used in `UserResource` (which uses the fragile heuristic instead).
-- Make new fields (`timezone`, `organization`, `role`) nullable in the database. Do NOT require them for the onboarding completion check.
-- If new fields should be collected from existing users, add a "profile completion" prompt (soft nudge banner) separate from the hard onboarding gate.
-- For timezone specifically, auto-detect from browser (`Intl.DateTimeFormat().resolvedOptions().timeZone`) and send it silently -- do not force a dropdown.
-
-**Detection:** Check `UserResource` line 24 -- if `onboarding_completed` uses anything other than `onboarding_completed_at`, the logic is fragile and will break when fields change.
-
-**Phase to address:** Fix `UserResource` to use `onboarding_completed_at` as the very first change before touching the onboarding form.
+**Phase to address:**
+Threat News phase (time-series chart implementation). Must decide on hook strategy before building the chart.
 
 ---
 
-## Moderate Pitfalls
+### Pitfall 3: D3 Force Graph Nodes Cluster at Origin (0,0)
 
-### Pitfall 5: Plan Column Without Default Leaves Existing Users Plan-less
+**What goes wrong:**
+The existing ThreatSearchPage.jsx D3 force graph (lines 105-147) has a known node positioning bug (explicitly listed in v3.2 targets). Nodes pile up at the top-left corner or overlap the center node on initial render.
 
-**What goes wrong:** Adding a `plan` column (e.g., string or enum: free/basic/pro/enterprise/trial) to the users table with `null` default means all existing users have no plan. Any code that does `$user->plan` to determine credit limits gets `null`, and depending on implementation, either crashes or falls through to unexpected behavior (0 credits, or infinite credits).
+**Why it happens:**
+D3's `forceSimulation` initializes node positions to (0,0) if `x` and `y` are not pre-set on data objects. The current code (line 105-109) creates the simulation without assigning initial positions. `forceCenter` shifts the center of mass but does not spread nodes apart. With `forceManyBody` strength of -400, nodes eventually separate after many simulation ticks, but the initial visual state is chaotic.
 
-**Prevention:**
-- Migration must set a sensible default: `$table->string('plan')->default('trial')` for new users.
-- The same migration must backfill: `DB::table('users')->whereNull('plan')->update(['plan' => 'trial'])`.
-- Add a plan configuration array/enum that defines credit limits per plan. Never use raw strings for plan comparisons -- centralize in a config file or PHP enum.
-- The plan resolver must have a fallback: if plan is null or unrecognized, treat as Free tier (safest restrictive default).
+**How to avoid:**
+Pre-assign initial positions in a circle around the center before starting the simulation:
+```jsx
+nodes.forEach((node, i) => {
+  if (node.id === centerQuery) {
+    node.x = width / 2;
+    node.y = height / 2;
+    node.fx = width / 2; // pin center node
+    node.fy = height / 2;
+  } else {
+    const angle = (2 * Math.PI * i) / (nodes.length - 1);
+    node.x = width / 2 + 120 * Math.cos(angle);
+    node.y = height / 2 + 120 * Math.sin(angle);
+  }
+});
+```
+Also clamp node positions to the SVG bounds in the tick handler to prevent escape.
 
-**Phase to address:** Data migration phase, simultaneous with Pitfall 1 fix.
+**Warning signs:**
+Nodes visually "explode" from top-left on load. Nodes overlap each other. Nodes escape the visible SVG area.
 
----
-
-### Pitfall 6: Guest Credits Conflated with Plan Logic
-
-**What goes wrong:** The credit system has two branches: authenticated (by `user_id`) and guest (by `ip_address`). Plan/subscription logic only applies to authenticated users, but developers accidentally add plan checks to the guest path, causing errors when `$credit->user` is null and `$credit->user->plan` throws.
-
-**Prevention:**
-- Keep guest credit logic completely separate. Guests always get 1 credit/day, period. No plan, no trial, no subscription.
-- In the shared `CreditService`, branch early: `if guest -> return guest pool with hardcoded limit of 1` before any plan resolution.
-- Add explicit tests: guest credit deduction must work identically before and after the plan system ships.
-
-**Phase to address:** CreditService extraction phase -- design the branch point correctly from the start.
-
----
-
-### Pitfall 7: Frontend Auth Context Missing Plan/Trial State
-
-**What goes wrong:** The `AuthContext` currently exposes `isAuthenticated`, `emailVerified`, and `onboardingCompleted`. After adding plans and trial enforcement, the frontend needs `plan`, `trialEndsAt`, `trialActive`, `trialDaysRemaining`, and `creditLimit` to render the correct UI (pricing CTAs, upgrade banners, limit displays, trial countdown). Without these, the frontend cannot differentiate user tiers.
-
-**Prevention:**
-- Update `UserResource` to include `plan`, `trial_ends_at`, `trial_active` (computed boolean), `trial_days_remaining` (computed int) in the JSON response.
-- Update `AuthContext` to derive `plan`, `isTrialActive`, `trialDaysRemaining` from the user object.
-- The `CreditBadge` component and dashboard credit widget must read limits from the API response, not from any hardcoded values on the frontend.
-- The `ProtectedRoute` component may need a new guard step for trial-expired users (redirect to pricing page).
-
-**Phase to address:** Frontend plan UI phase -- must be coordinated with backend `UserResource` changes.
+**Phase to address:**
+Threat Search bug fix phase.
 
 ---
 
-### Pitfall 8: Atomic Deduction Race with Plan Downgrade
+### Pitfall 4: OpenCTI N+1 Queries in Enriched Threat Actor Modal
 
-**What goes wrong:** The current atomic deduction (`UPDATE credits SET remaining = remaining - 1 WHERE remaining > 0`) is race-safe for concurrent searches. But if a plan downgrade runs concurrently (setting `limit` from 50 to 3 and `remaining` to 3), a race can occur: the deduction reads old remaining (50), the downgrade sets remaining to 3, the deduction decrements from 50 to 49 -- user now has 49 credits on a 3-credit plan.
+**What goes wrong:**
+Enriching threat actor modals with TTPs, tools, targeted sectors, and campaigns requires additional OpenCTI GraphQL queries per actor. If each relation type is fetched separately (4 queries per modal open), or if the page pre-fetches enrichment for all 24 visible actors on load, the OpenCTI instance gets hammered and responses slow dramatically.
 
-**Prevention:**
-- Plan changes must use an atomic pattern: `UPDATE credits SET "limit" = :new_limit, remaining = LEAST(remaining, :new_limit) WHERE user_id = :id`. This caps remaining to the new limit atomically.
-- Never do a read-then-write for plan changes. Always single-statement atomic updates.
-- The lazy reset already handles the next-day correction, but the same-day window matters for fairness.
+**Why it happens:**
+OpenCTI's GraphQL schema nests relationships behind `stixCoreRelationships` edges, and different entity types (AttackPattern, Tool, Identity-sector, Campaign) require different filter parameters. Developers naturally write one query per entity type. Combined with the 15-second timeout on `OpenCtiService` (line 38), slow queries cascade into visible timeouts.
 
-**Phase to address:** Plan-aware credit limits phase.
+**How to avoid:**
+Fetch enrichment lazily (only on modal open, not for all cards). Use a single GraphQL query with aliased fields to fetch all relation types in one round-trip:
+```graphql
+query ($id: String!) {
+  intrusionSet(id: $id) {
+    id name description
+    ttps: stixCoreRelationships(relationship_type: "uses", toTypes: ["Attack-Pattern"], first: 20) {
+      edges { node { to { ... on AttackPattern { name x_mitre_id } } } }
+    }
+    tools: stixCoreRelationships(relationship_type: "uses", toTypes: ["Tool"], first: 15) {
+      edges { node { to { ... on Tool { name } } } }
+    }
+    sectors: stixCoreRelationships(relationship_type: "targets", toTypes: ["Identity"], first: 15) {
+      edges { node { to { ... on Identity { name identity_class } } } }
+    }
+    campaigns: stixCoreRelationships(relationship_type: "attributed-to", fromTypes: ["Campaign"], first: 10) {
+      edges { node { from { ... on Campaign { name first_seen last_seen } } } }
+    }
+  }
+}
+```
+Cache enrichment per actor ID for 15 minutes (matching actor list cache TTL). Limit each alias with `first: N` to prevent massive payloads for heavily-mapped APT groups.
 
----
+**Warning signs:**
+Modal takes 3+ seconds to open. OpenCTI logs show burst of queries on each modal click. Timeout errors during high-traffic periods.
 
-### Pitfall 9: Trial Expiry Check Timezone Mismatch
-
-**What goes wrong:** `trial_ends_at` is set via `now()->addDays(30)` (uses app default timezone). The lazy credit reset uses `now('UTC')`. If the app timezone is not UTC, trial expiry and credit reset happen on different clock references, causing a window where a user's trial appears expired but credits have not yet reset (or vice versa).
-
-**Prevention:**
-- Standardize ALL server-side time operations on UTC. Verify `config('app.timezone')` is `'UTC'`.
-- The `now()->addDays(30)` call in the User model boot should be `now('UTC')->addDays(30)` for explicitness.
-- User timezone preference is purely a frontend display concern -- never use it for server-side enforcement decisions.
-
-**Phase to address:** Trial enforcement phase -- audit all time references.
-
----
-
-### Pitfall 10: Pricing Page Without Enforcement Creates False Promises
-
-**What goes wrong:** Building the pricing page before enforcement creates confusing UX. Users "select" a plan but nothing actually changes. They see "Pro - 50 searches/day" but still get 10 (or 3). Trust erodes when the UI promises something the backend does not deliver.
-
-**Prevention:**
-- Ship enforcement before (or simultaneously with) the pricing page. Never show plans you cannot enforce.
-- If the pricing page must ship first, clearly label it "Coming Soon" and disable plan selection buttons.
-- The plan selection flow (even without payment) must actually update `users.plan` and trigger a credit limit sync.
-
-**Phase to address:** Pricing page must ship in the same phase as or after enforcement.
-
----
-
-## Minor Pitfalls
-
-### Pitfall 11: Missing Index on Plan Column
-
-**What goes wrong:** Queries like `User::where('plan', 'pro')->count()` for admin analytics, or batch operations on trial-expired users, do full table scans on the users table.
-
-**Prevention:**
-- Add an index on the `plan` column in the migration.
-- Consider a composite index on `(plan, trial_ends_at)` if you will query trial-expired users by plan.
+**Phase to address:**
+Threat Actors enrichment phase. Backend service method must use the single-query aliased pattern from the start.
 
 ---
 
-### Pitfall 12: Credit Refund Exceeds Plan Limit
+### Pitfall 5: Auth Context Not Updated After Settings/Profile Save
 
-**What goes wrong:** The existing credit refund on OpenCTI API failure does `remaining + 1`. If a user is at their plan limit (e.g., 3/3 on Free), a search starts (2/3), OpenCTI fails, refund gives 3/3. That is fine. But if a concurrent refund pushes past the limit (rare race), the user has more credits than their plan allows.
+**What goes wrong:**
+The Settings/Profile page saves user data (name, timezone, organization, role) to the backend, but the `AuthContext` still holds the stale user object. The sidebar initials, topbar plan chip, and `useFormatDate` hook (which reads `user.timezone` from context) all display stale data until full page refresh.
 
-**Prevention:**
-- Refund should be `UPDATE credits SET remaining = LEAST(remaining + 1, "limit") WHERE id = :id`.
-- Or accept the minor over-credit as tolerable (user earned it by having a failed search). Document the decision either way.
+**Why it happens:**
+The current AuthContext (lines 36-48) only updates the user object on login/register via `fetchCurrentUser()`. There is no `refreshUser` or `updateUser` method exposed in the context value (line 55). The Settings page has no mechanism to signal "user data changed" to the context.
+
+**How to avoid:**
+Add a `refreshUser` method to AuthContext that re-fetches `/api/user` and updates state. Call it after successful profile save:
+```jsx
+// In AuthContext
+const refreshUser = useCallback(async () => {
+  const userData = await fetchCurrentUser();
+  setUser(userData);
+}, []);
+// Add to value: { ...existing, refreshUser }
+```
+Do NOT do optimistic-only updates -- if the save fails server-side but context is already updated, timezone-dependent features render with wrong timezone. Always confirm save succeeded before updating context.
+
+**Warning signs:**
+User changes timezone in settings, but dates on dashboard still show old timezone. User changes name, sidebar initials still show old name until page reload.
+
+**Phase to address:**
+Settings/Profile phase. Must modify AuthContext before building the settings form.
 
 ---
 
-### Pitfall 13: Onboarding Form Loses Existing Data on Re-submission
+### Pitfall 6: Date-Based Filtering Timezone Mismatch with OpenCTI
 
-**What goes wrong:** The current `OnboardingController` does `$user->update(['name' => ..., 'phone' => ..., 'onboarding_completed_at' => now()])`. If the enhanced form adds timezone/org/role but a validation error returns only partial data, the existing name and phone could get overwritten with stale form values on retry.
+**What goes wrong:**
+The date selector sends a date string (e.g., "2026-03-28") to the Laravel backend, which constructs a GraphQL date filter. But OpenCTI stores all timestamps in UTC. A user in Asia/Tokyo (UTC+9) filtering for "March 28" expects a different UTC range than a user in America/New_York (UTC-5). Without timezone conversion, reports appear under wrong dates.
 
-**Prevention:**
-- Use `$request->only()` with explicit field list, and only update fields that are present and validated.
-- Pre-populate the form with existing user data so re-submissions do not blank out previously saved fields.
+**Why it happens:**
+HTML `<input type="date">` produces bare date strings with no timezone. The backend receives "2026-03-28" and naively constructs `>= 2026-03-28T00:00:00Z` and `< 2026-03-29T00:00:00Z`. But "March 28 in Tokyo" starts at `2026-03-27T15:00:00Z`, not midnight UTC.
+
+**How to avoid:**
+The users table already stores IANA timezone from onboarding. Use it on the backend to convert date ranges:
+```php
+$tz = new DateTimeZone($request->user()?->timezone ?? 'UTC');
+$start = new DateTime($date, $tz);
+$end = (clone $start)->modify('+1 day');
+$start->setTimezone(new DateTimeZone('UTC'));
+$end->setTimezone(new DateTimeZone('UTC'));
+// Use $start and $end as UTC ISO-8601 strings in the GraphQL filter
+```
+For unauthenticated users (dashboard is public), default to UTC -- consistent with the existing credit reset behavior.
+
+**Warning signs:**
+Reports dated "March 28" do not appear when filtering for March 28. Reports from adjacent days bleed into the filtered view. Noticeable for users in UTC+12 or UTC-12.
+
+**Phase to address:**
+Threat News date filtering phase. Must be part of the backend endpoint design, not patched after.
 
 ---
+
+### Pitfall 7: Memory Leak from Unmounted Auto-Refresh Intervals
+
+**What goes wrong:**
+User navigates away from Threat News or Threat Actors while auto-refresh interval is active. If cleanup is missed, the interval continues firing API calls and calling `setState` on the unmounted component, causing React warnings and memory leaks over long sessions.
+
+**Why it happens:**
+The existing codebase correctly returns cleanup functions (e.g., DashboardPage line 443: `return () => clearInterval(interval)`). But when adding auto-refresh to two more pages, it is easy to forget cleanup in one, or have the interval stored in a ref that gets cleared in the wrong useEffect. Adding conditional logic (like "do not refresh while modal is open") creates more branches to miss.
+
+**How to avoid:**
+Create a reusable `useAutoRefresh(callback, intervalMs, enabled)` hook that encapsulates the interval + cleanup + ref pattern:
+```jsx
+function useAutoRefresh(callback, intervalMs, enabled = true) {
+  const callbackRef = useRef(callback);
+  useEffect(() => { callbackRef.current = callback; }, [callback]);
+  useEffect(() => {
+    if (!enabled) return;
+    const id = setInterval(() => callbackRef.current(), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs, enabled]);
+}
+```
+Use `enabled: false` when a modal is open. Use this hook on both Threat News and Threat Actors.
+
+**Warning signs:**
+React console warnings about state updates on unmounted components. Network tab shows periodic requests after navigating away.
+
+**Phase to address:**
+First page that implements auto-refresh. Build the hook once, reuse on the second page.
+
+---
+
+## Technical Debt Patterns
+
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Raw `setInterval` instead of shared hook | Faster per-page | Duplicated cleanup logic, inconsistent behavior, stale closure bugs | Never -- the hook is 10 lines and prevents the #1 pitfall |
+| Full Chart.js destroy/recreate on data change | Works with existing `useChartJs` hook | Flickering, poor UX, tooltip loss, animation replay | Only if chart type changes (line to bar), never for data-only updates |
+| Separate HTTP call per relation type in enriched modal | Simpler to write | 4x slower modal load, hammers OpenCTI, timeout cascades | Never -- single aliased query is straightforward |
+| Hardcoded UTC in date filter endpoint | Simpler backend | Wrong results for non-UTC users (majority of any global user base) | Only if all users are known to be UTC |
+| Optimistic-only profile update (no server confirmation) | Instant UI feedback | UI lies if save fails; timezone-dependent features break silently | Never for timezone or critical fields; acceptable for cosmetic-only fields |
+| Skipping `document.visibilityState` check in auto-refresh | Simpler interval logic | Wasteful API calls on hidden tabs from day one | Never -- 2 lines of code prevent unnecessary load |
 
 ## Integration Gotchas
 
-| Integration Point | Common Mistake | Correct Approach |
-|-------------------|----------------|------------------|
-| `DeductCredit` middleware + plans | Adding plan check inside middleware (bloats middleware) | Middleware calls `CreditService::deduct()` which internally resolves plan |
-| `CreditStatusController` + plans | Duplicating plan resolution logic | Controller calls `CreditService::status()` -- same service as middleware |
-| `UserResource` + trial state | Returning raw `trial_ends_at` without computed fields | Add `trial_active`, `trial_days_remaining` as computed fields in the resource |
-| `ProtectedRoute` + trial | Adding trial check in same guard as onboarding | Trial expiry should redirect to pricing page, not onboarding page. Separate guard step |
-| `AuthContext` + plan data | Not refreshing user after plan change | Call `refreshUser()` after any plan selection to update context |
-| Existing tests + new plans | Tests assume hardcoded limit of 10 | Update test helpers to accept plan parameter; add plan-specific test suites |
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| OpenCTI date filters | Using bare date strings ("2026-03-28") without timezone conversion | Convert user's local date to UTC start/end range using their IANA timezone |
+| OpenCTI `stixCoreRelationships` | Assuming `to` always holds the related entity | Check both `from` and `to` -- direction depends on relationship type (e.g., "attributed-to" has Campaign in `from`, not `to`) |
+| OpenCTI relationship queries | Separate query per relation type for enrichment | Single query with GraphQL aliases for all relation types + `first: N` limits |
+| OpenCTI report `published` field | Treating it as OpenCTI ingestion date | `published` is the report's stated publication date; `created_at` is ingestion time -- filter on `published` for user-facing date selectors |
+| OpenCTI label aggregation for chart | Client-side counting labels from loaded 20-item page | Server-side aggregation (e.g., `stixCoreObjectsDistribution`) -- client only sees current page, not the full dataset |
+| Chart.js responsive sizing | Setting explicit width/height on canvas element | Use `responsive: true` + `maintainAspectRatio: false` and control size via parent container CSS |
+| Laravel `Cache::remember` with OpenCTI | Default behavior deletes cache on exception | Already solved in codebase with manual get/put stale-cache pattern (Key Decision row) -- use same approach for new endpoints |
+| D3 force simulation in React | Not stopping simulation on unmount | Current code correctly calls `simulation.stop(); svg.remove()` in cleanup -- preserve this pattern when fixing node positions |
 
-## Phase-Specific Warnings
+## Performance Traps
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Data migration for existing users | Pitfall 1 (retroactive trial), Pitfall 5 (null plan) | Run migration to set plan + reset trial_ends_at BEFORE enabling enforcement. Feature-flag enforcement. |
-| CreditService extraction | Pitfall 2 (duplicated resolveCredit), Pitfall 6 (guest conflation) | Extract shared service first. Both middleware and controller must use it. Branch guest path early. |
-| Enhanced onboarding form | Pitfall 4 (validation change), Pitfall 13 (data loss) | Fix UserResource to use `onboarding_completed_at`. Make new fields nullable. Pre-populate form. |
-| Trial enforcement middleware | Pitfall 1 (retroactive expiry), Pitfall 9 (timezone) | Verify existing user data is migrated. Ensure all time ops use UTC. |
-| Plan-aware credit limits | Pitfall 3 (lazy reset stale limit), Pitfall 8 (race condition) | lazyReset must sync limit from plan. Plan changes use atomic LEAST(). |
-| Pricing page | Pitfall 10 (no enforcement) | Ship simultaneously with enforcement, or label "Coming Soon". |
-| Frontend plan UI | Pitfall 7 (missing context) | Update UserResource, AuthContext, CreditBadge in lockstep. |
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Auto-refresh firing on background/hidden tabs | Unnecessary API calls, wasted bandwidth, server load from idle users | Check `document.visibilityState === 'visible'` before fetch; pause interval on `visibilitychange` event | Immediately -- wastes resources from day one |
+| Time-series chart with 365+ data points + animations | Sluggish rendering, dropped frames, janky date range changes | Limit to 30-90 data points; aggregate by week/month for longer ranges; use `chart.update('none')` to skip animation on data swaps | >100 points with animation enabled |
+| Pre-fetching enrichment for all 24 visible threat actor cards | Page load takes 15+ seconds, 24 GraphQL queries fire simultaneously | Fetch enrichment lazily only when modal opens; cache per actor ID | Always -- 24 parallel queries is never acceptable |
+| Large enrichment payloads for heavily-mapped APT groups | Some groups have 200+ ATT&CK techniques; response exceeds 500KB | Add `first: 20` limit on each relationship alias in the GraphQL query | Any well-known APT group (APT28, APT29, Lazarus, etc.) |
+| Sidebar collapse/expand triggering chart resize cascade | Charts briefly render at wrong size, then snap to correct size | Use `ResizeObserver` or Chart.js built-in resize handling; avoid forcing re-render on sidebar toggle | Every time user collapses/expands sidebar |
 
-## Recommended Phase Order (Based on Pitfall Dependencies)
+## Security Mistakes
 
-1. **Data migration + CreditService extraction** -- Addresses Pitfalls 1, 2, 3, 5, 6. Everything else depends on clean data and a single credit resolution path.
-2. **Enhanced onboarding** -- Addresses Pitfalls 4, 13. Independent of credit system but needs UserResource fix first.
-3. **Trial enforcement + plan-aware limits** -- Addresses Pitfalls 3, 8, 9. Only safe after data migration.
-4. **Pricing page + frontend plan UI** -- Addresses Pitfalls 7, 10. Only meaningful after enforcement works.
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Settings endpoint accepting `plan_id`, `credits`, or `email_verified` fields | Privilege escalation -- user upgrades own plan or grants credits via crafted POST | Whitelist only updateable fields with `$request->only(['name', 'phone', 'timezone', 'organization', 'role'])` |
+| Allowing email change without re-verification | Account takeover by changing email to attacker-controlled address | Either require current password + new email verification, or defer email editing entirely (simplest for v3.2) |
+| Settings form CSRF gap if using raw fetch | Session hijacking via cross-site form submission | Already mitigated: `apiClient` reads XSRF-TOKEN cookie and sends it as header (client.js lines 17-19) |
+| Exposing user timezone in public API responses | Minor information leak (timezone reveals approximate location) | Return timezone only in the authenticated user's own `/api/user` response, never in public endpoints |
+
+## UX Pitfalls
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Auto-refresh with no visual indicator | User confused when data silently changes while reading | Show subtle "Updated X seconds ago" timestamp; pulse briefly on refresh |
+| Date picker resets on auto-refresh | User loses selected date every 5 minutes | Store date in URL params via `useSearchParams` (existing pattern in ThreatActorsPage) -- survives refresh and is shareable |
+| Time-series chart with gaps for zero-count dates | Confusing gaps in the line -- user thinks data is missing | Fill date range with explicit zero-value data points; show zero on y-axis, not a gap |
+| Modal blocks auto-refresh, data stale when closed | User closes modal to find outdated data underneath | Pause auto-refresh while modal is open (`useAutoRefresh` with `enabled: !modalOpen`); trigger immediate refresh on modal close |
+| Settings save with no loading/success feedback | User unsure if save worked, clicks save repeatedly | Disable save button during request; show inline success toast; re-enable on completion or error |
+| Profile form pre-filled with dummy/placeholder data from mock-data.js | User thinks placeholders are their actual data | The current SettingsPage imports `API_KEYS` from mock-data -- replace entirely with real user data from AuthContext. Show empty fields with placeholder text styling |
+| Search bar z-index hidden behind other elements when logged out | User cannot access the primary search functionality | Ensure search bar has `z-index` above any overlapping elements (topbar, modals, dropdowns) |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Existing user migration:** Verify ALL existing users have a non-null `plan` value and a `trial_ends_at` that is in the future (or are on a permanent plan)
-- [ ] **Credit limit consistency:** Verify `DeductCredit` middleware and `CreditStatusController` both return the same limit for the same user
-- [ ] **Lazy reset plan sync:** Verify that changing a user's plan and waiting for next-day reset updates both `limit` and `remaining` on the credits row
-- [ ] **Guest isolation:** Verify guest credit deduction works identically with plan system enabled -- no null reference errors
-- [ ] **Onboarding gate:** Verify existing onboarded users are NOT kicked back to onboarding after new fields are added
-- [ ] **UserResource fields:** Verify `plan`, `trial_active`, `trial_days_remaining` appear in the `/api/user` response
-- [ ] **Frontend context:** Verify `AuthContext` exposes plan and trial state to components
-- [ ] **Pricing page enforcement:** Verify selecting a plan actually changes the user's credit limit (not just UI state)
-- [ ] **Trial expiry redirect:** Verify trial-expired users see a pricing/upgrade page, not a broken dashboard
-- [ ] **Timezone consistency:** Verify `trial_ends_at` and credit reset both use UTC
+- [ ] **Auto-refresh:** Verify interval pauses when browser tab is hidden (check `document.visibilityState`)
+- [ ] **Auto-refresh:** Verify no React warnings in console after navigating away from page with active interval
+- [ ] **Auto-refresh:** Verify refresh pauses while enrichment modal or any modal is open
+- [ ] **Date filter:** Verify chart shows zero (not a gap) for dates with no reports
+- [ ] **Date filter:** Verify a user in UTC+9 sees correct reports for their selected date (test with timezone-shifted user)
+- [ ] **Date filter:** Verify date selection persists in URL params and survives browser refresh
+- [ ] **Time-series chart:** Verify chart does not flicker on data change (uses in-place update, not destroy/recreate)
+- [ ] **Time-series chart:** Verify chart resizes correctly when sidebar collapses/expands
+- [ ] **Enriched modal:** Verify skeleton/spinner shows while enrichment data loads (not just a blank modal)
+- [ ] **Enriched modal:** Verify graceful fallback when OpenCTI enrichment query fails or times out
+- [ ] **Enriched modal:** Verify relationship direction is correct (Campaign in `from` for "attributed-to", AttackPattern in `to` for "uses")
+- [ ] **D3 force graph:** Verify nodes start in visible positions (not clustered at 0,0)
+- [ ] **D3 force graph:** Verify nodes do not escape visible SVG boundaries
+- [ ] **Settings page:** Verify sidebar and topbar reflect saved changes without page reload (AuthContext synced)
+- [ ] **Settings page:** Verify server-side validation errors display inline on the form
+- [ ] **Settings page:** Verify OAuth users cannot change email (managed by provider)
+- [ ] **Settings page:** Verify ALL mock data imports removed -- no `mock-data.js` usage remains
+- [ ] **Dashboard stat cards:** Verify 7 cards render without layout breakage on narrow screens
+- [ ] **Threat Map:** Verify old markers are cleared when capping to 100 latest (no accumulation)
+
+## Recovery Strategies
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| Stale closure in auto-refresh | LOW | Replace raw setInterval with useRef-based `useAutoRefresh` hook; 15 min per page |
+| Chart flickering from full recreate | MEDIUM | Modify or create new chart hook supporting in-place updates; test all existing chart usages still work |
+| N+1 OpenCTI queries for enrichment | MEDIUM | Rewrite as single aliased query in ThreatActorService; update cache key; ~1 hour |
+| Timezone mismatch in date filter | LOW | Add timezone param to endpoint; Carbon/DateTime conversion in service; 30 min |
+| Auth context not syncing after save | LOW | Add `refreshUser` to AuthContext; call after save; 15 min if designed upfront |
+| D3 nodes at origin | LOW | Add initial circular position assignment; 20 min |
+| Memory leak from intervals | MEDIUM if discovered late | Build `useAutoRefresh` hook; audit all setInterval usages; refactor DashboardPage too for consistency |
+| Settings page still using mock data | LOW | Remove imports, wire to AuthContext + new profile API; 30-60 min |
+
+## Pitfall-to-Phase Mapping
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Stale closure in auto-refresh | Threat News (first auto-refresh page) | Change date filter, wait 5 min, confirm data matches current filter |
+| Chart destroy/recreate flickering | Threat News (time-series chart) | Change date range 5 times rapidly, confirm no flash/flicker |
+| D3 node positioning at origin | Threat Search bug fixes | Load search with 10+ relationships, confirm nodes start spread out |
+| N+1 OpenCTI enrichment queries | Threat Actors enrichment | Open modal, check Network tab shows exactly 1 additional request |
+| Auth context stale after save | Settings/Profile (modify AuthContext first) | Save timezone change, navigate to dashboard, confirm dates use new timezone |
+| Timezone mismatch in date filter | Threat News date filtering (backend endpoint) | Set user timezone to UTC+12, filter for today, confirm only today's reports |
+| Memory leak from intervals | Threat News (build useAutoRefresh hook first) | Navigate away, check Network tab for absence of periodic requests |
+| Background tab wasted requests | Threat News or Threat Actors (first auto-refresh) | Switch to another browser tab, verify no API calls during 5-min interval |
+| Settings page mock data | Settings/Profile phase | Grep for `mock-data` imports in SettingsPage -- must be zero |
+| Dashboard 7 stat cards layout | Dashboard stat card expansion | Resize browser to 1024px width, verify cards wrap gracefully |
 
 ## Sources
 
-- Direct codebase analysis: `DeductCredit.php` (middleware with duplicated resolveCredit, hardcoded limit 10)
-- Direct codebase analysis: `CreditStatusController.php` (controller with duplicated resolveCredit, hardcoded limit 10)
-- Direct codebase analysis: `Credit.php` (model with `limit` column that persists stale values)
-- Direct codebase analysis: `User.php` (boot hook setting `trial_ends_at` on creation, `plan` column not yet present)
-- Direct codebase analysis: `UserResource.php` (fragile onboarding heuristic on line 24)
-- Direct codebase analysis: `OnboardingController.php` (validates only name + phone)
-- Direct codebase analysis: `AuthContext.jsx` (no plan/trial state exposed)
-- Direct codebase analysis: `ProtectedRoute.jsx` (3-step guard with no trial check)
-- Database migrations: `create_credits_table`, `add_trial_ends_at_to_users_table`, `add_phone_and_onboarding_to_users_table`
+- Direct codebase analysis: `frontend/src/pages/DashboardPage.jsx` lines 430-444 (existing auto-refresh pattern with setInterval)
+- Direct codebase analysis: `frontend/src/hooks/useChartJs.js` lines 1-18 (chart hook with config-reference dependency)
+- Direct codebase analysis: `frontend/src/pages/ThreatSearchPage.jsx` lines 105-147 (D3 force simulation without initial positions)
+- Direct codebase analysis: `frontend/src/contexts/AuthContext.jsx` lines 55-68 (no refreshUser method)
+- Direct codebase analysis: `backend/app/Services/OpenCtiService.php` line 38 (15s timeout, 2 retries)
+- Direct codebase analysis: `backend/app/Services/ThreatActorService.php` (15-min cache, GraphQL query structure)
+- Direct codebase analysis: `backend/app/Services/ThreatNewsService.php` (5-min cache, label-based filtering)
+- Direct codebase analysis: `frontend/src/pages/SettingsPage.jsx` lines 1-4 (imports mock-data.js, no real API calls)
+- Direct codebase analysis: `frontend/src/api/client.js` (XSRF token handling, credentials: include)
+- React documentation: useEffect cleanup for intervals and subscriptions
+- Chart.js documentation: `chart.update()` for in-place data mutations vs destroy/recreate
+- D3 force simulation documentation: initial node positioning and boundary clamping
 - All findings are HIGH confidence based on direct code inspection of the existing system
 
 ---
-*Pitfalls research for: AQUA TIP v3.0 -- Onboarding, Trial & Subscription Plans*
-*Researched: 2026-03-20*
+*Pitfalls research for: AQUA TIP v3.2 -- App Layout Page Tweaks*
+*Researched: 2026-03-28*
