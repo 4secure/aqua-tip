@@ -66,8 +66,8 @@ function D3Graph({ relationships, centerQuery, detectedType }) {
     let cleanup = null;
 
     import('d3').then(d3 => {
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+      const width = container.clientWidth || 600;
+      const height = container.clientHeight || 450;
 
       // Build nodes from relationships
       // Use centerQuery as canonical ID for any entity matching the searched IP
@@ -94,6 +94,13 @@ function D3Graph({ relationships, centerQuery, detectedType }) {
 
       const resolveId = (id) => uuidToCanonical.get(id) || id;
       const nodes = Array.from(nodeMap.values());
+
+      // Seed initial node positions around center to prevent top-left clustering
+      nodes.forEach(n => {
+        n.x = width / 2 + (Math.random() - 0.5) * width * 0.5;
+        n.y = height / 2 + (Math.random() - 0.5) * height * 0.5;
+      });
+
       const links = relationships.map(rel => ({
         source: resolveId(rel.from?.id) || centerQuery,
         target: resolveId(rel.to?.id) || centerQuery,
@@ -606,7 +613,7 @@ export default function ThreatSearchPage() {
       <div
         className={
           showStickyHeader
-            ? 'sticky top-0 z-10 bg-primary/90 backdrop-blur-md pb-4 pt-2 -mx-6 px-6'
+            ? 'sticky top-[60px] z-10 bg-primary/90 backdrop-blur-md pb-4 pt-2 -mx-6 px-6'
             : 'flex flex-col items-center justify-center min-h-[60vh]'
         }
       >
@@ -658,11 +665,7 @@ export default function ThreatSearchPage() {
                 disabled={isExhausted || loading || !query.trim()}
                 onClick={handleSearch}
               >
-                {loading ? (
-                  <span className="animate-spin"><Search size={18} /></span>
-                ) : (
-                  <Search size={18} />
-                )}
+                <Search size={18} />
                 {!showStickyHeader && 'Search'}
               </button>
             </div>
@@ -754,8 +757,23 @@ export default function ThreatSearchPage() {
         </div>
       )}
 
+      {/* Skeleton Loading Cards */}
+      {loading && (
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="glass-card p-5 flex items-center gap-4 animate-pulse">
+              <div className="w-16 h-16 rounded-full bg-surface-2" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-32 bg-surface-2 rounded" />
+                <div className="h-3 w-48 bg-surface-2 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Results Summary */}
-      {result !== null && (
+      {result !== null && !loading && (
         <>
           {result.found ? (
             <div className="glass-card p-5">
