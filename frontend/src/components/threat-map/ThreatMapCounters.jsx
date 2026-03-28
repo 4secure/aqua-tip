@@ -18,7 +18,7 @@ export default function ThreatMapCounters({ counters, connected }) {
           <div className="text-lg font-sans font-bold text-red">
             {formatCount(counters.threats)}
           </div>
-          <div className="text-[10px] text-text-muted">Active Threats</div>
+          <div className="text-[10px] text-text-muted">100 Latest Attacks</div>
         </div>
         <div>
           <div className="text-lg font-sans font-bold text-amber">
