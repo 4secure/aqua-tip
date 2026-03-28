@@ -52,7 +52,7 @@ Plans:
   1. Threat News page silently refreshes data every 5 minutes without visible flicker or scroll reset
   2. Threat Actors page silently refreshes data every 5 minutes without visible flicker or scroll reset
   3. Auto-refresh pauses when the browser tab is not visible and resumes when the user returns
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [x] 31-01-PLAN.md -- useAutoRefresh hook + Threat News and Threat Actors integration
 **UI hint**: yes
@@ -109,7 +109,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 30. Quick Wins | 1/2 | Complete    | 2026-03-28 |
-| 31. Auto-Refresh Infrastructure | 1/1 | Complete | 2026-03-29 |
+| 31. Auto-Refresh Infrastructure | 1/1 | Complete    | 2026-03-28 |
 | 32. Date-Based News Browsing | 0/? | Not started | - |
 | 33. Category Distribution Chart | 0/? | Not started | - |
 | 34. Enriched Threat Actor Modal | 0/? | Not started | - |

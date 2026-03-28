@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
-status: executing
-stopped_at: Phase 31 context gathered
-last_updated: "2026-03-28T22:47:31.477Z"
+status: completed
+stopped_at: Completed 31-01-PLAN.md
+last_updated: "2026-03-28T23:08:33.220Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
   completed_plans: 3
   percent: 50
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Current Position
 
-Phase: 31 of 6 (auto refresh infrastructure)
-Plan: 1/1 complete
+Phase: 32 of 6 (date based news browsing)
+Plan: Not started
 Status: Phase 31 complete
-Last activity: 2026-03-29
+Last activity: 2026-03-28
 
 Progress: [█████░░░░░] 50%
 
