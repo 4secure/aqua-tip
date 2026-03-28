@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchThreatActors } from '../api/threat-actors';
 import { useFormatDate } from '../hooks/useFormatDate';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import SkeletonCard from '../components/shared/SkeletonCard';
 
 const PAGE_SIZE = 24;
@@ -43,6 +44,22 @@ export default function ThreatActorsPage() {
       setLoading(false);
     }
   }, [after, search]);
+
+  const silentRefresh = useCallback(async () => {
+    try {
+      const params = { sort: 'modified', order: 'desc' };
+      if (after) params.after = after;
+      if (search) params.search = search;
+      const response = await fetchThreatActors(params);
+      const data = response.data || response;
+      setItems(data.items || []);
+      setPagination(data.pagination || null);
+    } catch {
+      // D-07: Keep stale data visible, retry next interval
+    }
+  }, [after, search]);
+
+  useAutoRefresh(silentRefresh, 5 * 60 * 1000);
 
   useEffect(() => {
     loadData();

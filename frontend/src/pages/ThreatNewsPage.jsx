@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
 import { useFormatDate } from '../hooks/useFormatDate';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const CATEGORY_COLORS = [
   { bg: 'bg-violet/20', text: 'text-violet' },
@@ -197,6 +198,23 @@ export default function ThreatNewsPage() {
       setLoading(false);
     }
   }, [after, search, label]);
+
+  const silentRefresh = useCallback(async () => {
+    try {
+      const params = { sort: 'published', order: 'desc' };
+      if (after) params.after = after;
+      if (search) params.search = search;
+      if (label) params.label = label;
+      const response = await fetchThreatNews(params);
+      const data = response.data || response;
+      setItems(data.items || []);
+      setPagination(data.pagination || null);
+    } catch {
+      // D-07: Keep stale data visible, retry next interval
+    }
+  }, [after, search, label]);
+
+  useAutoRefresh(silentRefresh, 5 * 60 * 1000);
 
   useEffect(() => {
     loadData();
