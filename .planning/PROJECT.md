@@ -189,4 +189,4 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Full notification dead code removal | No notification system exists, clean slate | ✓ Good |
 
 ---
-*Last updated: 2026-03-28 after v3.2 milestone started (App Layout Page Tweaks)*
+*Last updated: 2026-03-29 after Phase 30 complete (Quick Wins — dashboard stat cards, map labels, search bug fixes)*
