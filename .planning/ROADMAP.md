@@ -38,7 +38,10 @@
   3. Dashboard does not display any "Live" label or pulsating green dot
   4. Threat map displays "100 Latest Attacks" label and tracks only the 100 most recent IPs
   5. Relation graph nodes on Threat Search are positioned correctly (not clustered top-left), search shows a proper loader, and search bar does not overlap topbar when logged out
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 30-01-PLAN.md -- Dashboard stat cards (4->7), heading, live label removal, map labels
+- [ ] 30-02-PLAN.md -- Search page bug fixes (D3 graph, skeleton loading, sticky header)
 **UI hint**: yes
 
 ### Phase 31: Auto-Refresh Infrastructure
@@ -102,7 +105,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 30. Quick Wins | 0/? | Not started | - |
+| 30. Quick Wins | 0/2 | Planning complete | - |
 | 31. Auto-Refresh Infrastructure | 0/? | Not started | - |
 | 32. Date-Based News Browsing | 0/? | Not started | - |
 | 33. Category Distribution Chart | 0/? | Not started | - |
