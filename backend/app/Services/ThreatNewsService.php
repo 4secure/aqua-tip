@@ -36,13 +36,15 @@ class ThreatNewsService
         ?string $labelId = null,
         string $orderBy = 'published',
         string $orderMode = 'desc',
+        ?string $dateStart = null,
+        ?string $dateEnd = null,
     ): array {
         $cacheKey = 'threat_news:' . md5(json_encode(func_get_args()));
 
         return Cache::remember(
             $cacheKey,
             now()->addMinutes(5),
-            fn () => $this->executeQuery($first, $after, $search, $confidence, $labelId, $orderBy, $orderMode),
+            fn () => $this->executeQuery($first, $after, $search, $confidence, $labelId, $orderBy, $orderMode, $dateStart, $dateEnd),
         );
     }
 
@@ -75,6 +77,8 @@ class ThreatNewsService
         ?string $labelId,
         string $orderBy,
         string $orderMode,
+        ?string $dateStart = null,
+        ?string $dateEnd = null,
     ): array {
         $graphql = <<<'GRAPHQL'
         query (
@@ -152,6 +156,15 @@ class ThreatNewsService
                 'key' => 'objectLabel',
                 'values' => [$labelId],
                 'operator' => 'eq',
+                'mode' => 'or',
+            ];
+        }
+
+        if ($dateStart && $dateEnd) {
+            $filterItems[] = [
+                'key' => 'published',
+                'values' => [$dateStart, $dateEnd],
+                'operator' => 'within',
                 'mode' => 'or',
             ];
         }
