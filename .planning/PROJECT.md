@@ -83,9 +83,26 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Plan chip and upgrade button auth-gated — v3.1
 - ✓ Landing page content, links, and standalone public pages fixed — v3.1
 
+## Current Milestone: v3.2 App Layout Page Tweaks
+
+**Goal:** Enhance and polish all app layout pages with richer data, better UX patterns, and functional settings.
+
+**Target features:**
+- Dashboard: "Threat Database" heading above stat cards, expand to 7 cards (add Email, Crypto Wallet, URL), remove Live label/dot
+- Threat Map: Cap to 100 most recent IPs, replace "Active Threats" with "100 Latest Attacks" label
+- Threat News: 5-min auto-refresh, date-based filtering with date selector (replaces pagination), category distribution time-series chart
+- Threat Actors: Enriched modal with deeper OpenCTI data (TTPs, tools, sectors, campaigns), 5-min auto-refresh
+- Threat Search: Fix relation graph node positioning bug, proper search loader, fix search bar z-index when logged out
+- Settings/Profile: Functional page with real user data (replace dummy data)
+
 ### Active
 
-(None — planning next milestone)
+- [ ] Dashboard stat cards expanded with Threat Database heading
+- [ ] Threat Map capped to 100 latest IPs with updated label
+- [ ] Threat News date-based filtering, auto-refresh, category chart
+- [ ] Threat Actors enriched modal and auto-refresh
+- [ ] Threat Search bug fixes (graph nodes, loader, z-index)
+- [ ] Settings/Profile page functional with real data
 
 ### Out of Scope
 
@@ -172,4 +189,4 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Full notification dead code removal | No notification system exists, clean slate | ✓ Good |
 
 ---
-*Last updated: 2026-03-27 after v3.1 milestone (Font & UI Polish) complete*
+*Last updated: 2026-03-28 after v3.2 milestone started (App Layout Page Tweaks)*

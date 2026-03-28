@@ -1,31 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: Font & UI Polish
-status: v3.1 milestone complete
-stopped_at: Milestone v3.1 complete — all 3 phases done
-last_updated: "2026-03-27T16:11:00.117Z"
-last_activity: 2026-03-27
+milestone: v3.2
+milestone_name: App Layout Page Tweaks
+status: Defining requirements
+stopped_at: Milestone v3.2 started — defining requirements
+last_updated: "2026-03-28T00:00:00.000Z"
+last_activity: 2026-03-28
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-27)
+See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Planning next milestone
+**Current focus:** v3.2 App Layout Page Tweaks
 
 ## Current Position
 
-Phase: 29 (complete)
-Plan: Done
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-28 — Milestone v3.2 started
 
 ## Performance Metrics
 
@@ -72,6 +74,6 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-03-27
-Last session: 2026-03-27
-Stopped at: Milestone v3.1 complete — all 3 phases done
+Last activity: 2026-03-28
+Last session: 2026-03-28
+Stopped at: Milestone v3.2 started — defining requirements
