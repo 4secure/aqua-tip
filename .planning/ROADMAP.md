@@ -105,7 +105,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 30. Quick Wins | 0/2 | Planning complete | - |
+| 30. Quick Wins | 1/2 | In progress | - |
 | 31. Auto-Refresh Infrastructure | 0/? | Not started | - |
 | 32. Date-Based News Browsing | 0/? | Not started | - |
 | 33. Category Distribution Chart | 0/? | Not started | - |

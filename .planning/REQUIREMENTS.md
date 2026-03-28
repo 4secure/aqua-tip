@@ -9,14 +9,14 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 
 ### Dashboard
 
-- [ ] **DASH-01**: User sees "Threat Database" heading above stat cards
-- [ ] **DASH-02**: User sees 7 stat cards: IP Address, Domain, Hostname, Certificate, Email, Crypto Wallet, URL
-- [ ] **DASH-03**: Dashboard does not show "Live" label or pulsating green dot
+- [x] **DASH-01**: User sees "Threat Database" heading above stat cards
+- [x] **DASH-02**: User sees 7 stat cards: IP Address, Domain, Hostname, Certificate, Email, Crypto Wallet, URL
+- [x] **DASH-03**: Dashboard does not show "Live" label or pulsating green dot
 
 ### Threat Map
 
-- [ ] **MAP-01**: Threat map tracks only the 100 most recent IPs
-- [ ] **MAP-02**: User sees "100 Latest Attacks" label instead of "Active Threats"
+- [x] **MAP-01**: Threat map tracks only the 100 most recent IPs
+- [x] **MAP-02**: User sees "100 Latest Attacks" label instead of "Active Threats"
 
 ### Threat News
 
@@ -66,11 +66,11 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DASH-01 | Phase 30 | Pending |
-| DASH-02 | Phase 30 | Pending |
-| DASH-03 | Phase 30 | Pending |
-| MAP-01 | Phase 30 | Pending |
-| MAP-02 | Phase 30 | Pending |
+| DASH-01 | Phase 30 | Complete |
+| DASH-02 | Phase 30 | Complete |
+| DASH-03 | Phase 30 | Complete |
+| MAP-01 | Phase 30 | Complete |
+| MAP-02 | Phase 30 | Complete |
 | NEWS-01 | Phase 31 | Pending |
 | NEWS-02 | Phase 32 | Pending |
 | NEWS-03 | Phase 32 | Pending |
