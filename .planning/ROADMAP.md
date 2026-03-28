@@ -66,7 +66,10 @@ Plans:
   2. User can select a different date and the page loads that day's threat news
   3. Selected date persists in the URL so the page can be bookmarked or shared
   4. Date filtering correctly handles timezone conversion (user's IANA timezone to UTC)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 32-01-PLAN.md -- Backend date range filtering + frontend API client
+- [ ] 32-02-PLAN.md -- Calendar dropdown UI, pagination removal, URL date state
 **UI hint**: yes
 
 ### Phase 33: Category Distribution Chart
@@ -110,7 +113,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 |-------|----------------|--------|-----------|
 | 30. Quick Wins | 1/2 | Complete    | 2026-03-28 |
 | 31. Auto-Refresh Infrastructure | 1/1 | Complete    | 2026-03-28 |
-| 32. Date-Based News Browsing | 0/? | Not started | - |
+| 32. Date-Based News Browsing | 0/2 | In progress | - |
 | 33. Category Distribution Chart | 0/? | Not started | - |
 | 34. Enriched Threat Actor Modal | 0/? | Not started | - |
 | 35. Functional Settings Page | 0/? | Not started | - |
