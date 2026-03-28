@@ -82,6 +82,9 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Upgrade button beside plan chip, links to /pricing — v3.1
 - ✓ Plan chip and upgrade button auth-gated — v3.1
 - ✓ Landing page content, links, and standalone public pages fixed — v3.1
+- ✓ Reusable useAutoRefresh hook with visibility-aware 5-min interval — v3.2
+- ✓ Threat News silent auto-refresh every 5 minutes — v3.2
+- ✓ Threat Actors silent auto-refresh every 5 minutes — v3.2
 
 ## Current Milestone: v3.2 App Layout Page Tweaks
 
@@ -124,7 +127,7 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 Shipped v3.1 with ~22,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-29 phases, 53 plans completed across 7 milestones in 15 days.
+31 phases, 54 plans completed across 7 milestones in 15 days.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
@@ -187,6 +190,7 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Bulk sed replacement for font migration | 123 occurrences across 33 files, fast and thorough | ✓ Good |
 | Violet pill plan chip in topbar | Consistent design system usage (bg-violet/10) | ✓ Good |
 | Full notification dead code removal | No notification system exists, clean slate | ✓ Good |
+| Reusable useAutoRefresh hook pattern | Generic hook with visibility-aware interval, pages add silent refresh callbacks | ✓ Good |
 
 ---
-*Last updated: 2026-03-29 after Phase 30 complete (Quick Wins — dashboard stat cards, map labels, search bug fixes)*
+*Last updated: 2026-03-29 after Phase 31 complete (Auto-Refresh Infrastructure — silent 5-min refresh for Threat News and Threat Actors)*
