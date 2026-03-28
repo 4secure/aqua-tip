@@ -19,7 +19,7 @@
 
 ### v3.2 App Layout Page Tweaks
 
-- [x] **Phase 30: Quick Wins** - Dashboard stat cards, map label, and search bug fixes (all frontend-only) (completed 2026-03-28)
+- [x] **Phase 30: Quick Wins** - Dashboard stat cards, map label, and search bug fixes (all frontend-only) (completed 2026-03-28)
 - [ ] **Phase 31: Auto-Refresh Infrastructure** - Reusable useAutoRefresh hook for Threat News and Threat Actors
 - [ ] **Phase 32: Date-Based News Browsing** - Date selector replacing pagination with timezone-aware backend filtering
 - [ ] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date
@@ -52,7 +52,10 @@ Plans:
   1. Threat News page silently refreshes data every 5 minutes without visible flicker or scroll reset
   2. Threat Actors page silently refreshes data every 5 minutes without visible flicker or scroll reset
   3. Auto-refresh pauses when the browser tab is not visible and resumes when the user returns
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 31-01-PLAN.md -- useAutoRefresh hook + Threat News and Threat Actors integration
+**UI hint**: yes
 
 ### Phase 32: Date-Based News Browsing
 **Goal**: Users can browse threat news chronologically by selecting a specific date instead of paginating through results
@@ -106,7 +109,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 30. Quick Wins | 1/2 | Complete    | 2026-03-28 |
-| 31. Auto-Refresh Infrastructure | 0/? | Not started | - |
+| 31. Auto-Refresh Infrastructure | 0/1 | Not started | - |
 | 32. Date-Based News Browsing | 0/? | Not started | - |
 | 33. Category Distribution Chart | 0/? | Not started | - |
 | 34. Enriched Threat Actor Modal | 0/? | Not started | - |
