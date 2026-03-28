@@ -1,7 +1,7 @@
 # Requirements: AQUA TIP
 
 **Defined:** 2026-03-28
-**Core Value:** Users get real threat intelligence from OpenCTI — searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
+**Core Value:** Users get real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
 
 ## v3.2 Requirements
 
@@ -55,39 +55,39 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 
 | Feature | Reason |
 |---------|--------|
-| API key management UI | No backend infrastructure exists — future milestone |
-| Webhook configuration | No backend infrastructure exists — future milestone |
-| Usage analytics tab | No usage tracking system — future milestone |
+| API key management UI | No backend infrastructure exists -- future milestone |
+| Webhook configuration | No backend infrastructure exists -- future milestone |
+| Usage analytics tab | No usage tracking system -- future milestone |
 | Real-time WebSocket auto-refresh | SSE + polling is simpler and sufficient |
 | Date range filtering (multi-day) | Single-date filtering covers the use case for now |
-| Password change in settings | Not requested — separate security feature |
+| Password change in settings | Not requested -- separate security feature |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| MAP-01 | — | Pending |
-| MAP-02 | — | Pending |
-| NEWS-01 | — | Pending |
-| NEWS-02 | — | Pending |
-| NEWS-03 | — | Pending |
-| NEWS-04 | — | Pending |
-| ACTOR-01 | — | Pending |
-| ACTOR-02 | — | Pending |
-| SEARCH-01 | — | Pending |
-| SEARCH-02 | — | Pending |
-| SEARCH-03 | — | Pending |
-| SETTINGS-01 | — | Pending |
-| SETTINGS-02 | — | Pending |
+| DASH-01 | Phase 30 | Pending |
+| DASH-02 | Phase 30 | Pending |
+| DASH-03 | Phase 30 | Pending |
+| MAP-01 | Phase 30 | Pending |
+| MAP-02 | Phase 30 | Pending |
+| NEWS-01 | Phase 31 | Pending |
+| NEWS-02 | Phase 32 | Pending |
+| NEWS-03 | Phase 32 | Pending |
+| NEWS-04 | Phase 33 | Pending |
+| ACTOR-01 | Phase 34 | Pending |
+| ACTOR-02 | Phase 31 | Pending |
+| SEARCH-01 | Phase 30 | Pending |
+| SEARCH-02 | Phase 30 | Pending |
+| SEARCH-03 | Phase 30 | Pending |
+| SETTINGS-01 | Phase 35 | Pending |
+| SETTINGS-02 | Phase 35 | Pending |
 
 **Coverage:**
-- v3.2 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17 ⚠️
+- v3.2 requirements: 16 total
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-28*
-*Last updated: 2026-03-28 after initial definition*
+*Last updated: 2026-03-28 after roadmap creation*

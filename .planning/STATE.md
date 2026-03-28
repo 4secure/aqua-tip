@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
-status: Defining requirements
-stopped_at: Milestone v3.2 started — defining requirements
+status: Ready to plan Phase 30
+stopped_at: v3.2 roadmap created — ready to plan Phase 30
 last_updated: "2026-03-28T00:00:00.000Z"
 last_activity: 2026-03-28
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** v3.2 App Layout Page Tweaks
+**Current focus:** Phase 30 - Quick Wins (Dashboard, Map, Search fixes)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-28 — Milestone v3.2 started
+Phase: 30 (1 of 6 in v3.2)
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-03-28 -- v3.2 roadmap created
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -53,6 +55,7 @@ Last activity: 2026-03-28 — Milestone v3.2 started
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table (42 entries across 7 milestones).
+Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 
 ### Pending Todos
 
@@ -61,8 +64,8 @@ None.
 ### Blockers/Concerns
 
 - OpenCTI on private network (192.168.251.20) -- works locally but needs tunneling for Railway
-- Pricing amounts (dollar values) TBD -- does not block implementation but must be decided before production
-- Trial credit level (10/day vs 50/day reverse trial) -- product decision needed
+- OpenCTI aggregation query support for category chart needs validation during Phase 33 planning
+- DashboardService expanding from 4 to 7 sequential GraphQL queries -- consider aliased batching in Phase 30
 - TRIAL-06 race condition: TrialBanner expired state may be pre-empted by lazy Free plan assignment (tech debt from v3.0)
 
 ### Quick Tasks Completed
@@ -76,4 +79,5 @@ None.
 
 Last activity: 2026-03-28
 Last session: 2026-03-28
-Stopped at: Milestone v3.2 started — defining requirements
+Stopped at: v3.2 roadmap created -- ready to plan Phase 30
+Resume file: None
