@@ -51,16 +51,16 @@ function getTodayStr(timezone) {
 function getUtcBoundaries(dateStr, timezone) {
   const [year, month, day] = dateStr.split('-').map(Number);
 
-  function toUtcMidnight(y, m, d, tz) {
-    const guess = new Date(Date.UTC(y, m - 1, d));
-    const tzStr = guess.toLocaleString('en-US', { timeZone: tz });
-    const tzDate = new Date(tzStr);
-    const diff = guess.getTime() - tzDate.getTime();
-    return new Date(guess.getTime() + diff);
-  }
+  // Use noon UTC as reference to avoid DST edge cases
+  const ref = new Date(Date.UTC(year, month - 1, day, 12));
 
-  const start = toUtcMidnight(year, month, day, timezone);
-  const end = toUtcMidnight(year, month, day + 1, timezone);
+  // Format in both UTC and target tz, parse both in system locale (system tz cancels out)
+  const utcParsed = new Date(ref.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const tzParsed = new Date(ref.toLocaleString('en-US', { timeZone: timezone }));
+  const offsetMs = utcParsed.getTime() - tzParsed.getTime();
+
+  const start = new Date(Date.UTC(year, month - 1, day) + offsetMs);
+  const end = new Date(Date.UTC(year, month - 1, day + 1) + offsetMs);
 
   return { start: start.toISOString(), end: end.toISOString() };
 }
