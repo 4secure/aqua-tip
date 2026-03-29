@@ -85,6 +85,9 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Reusable useAutoRefresh hook with visibility-aware 5-min interval — v3.2
 - ✓ Threat News silent auto-refresh every 5 minutes — v3.2
 - ✓ Threat Actors silent auto-refresh every 5 minutes — v3.2
+- ✓ Threat News date-based browsing with calendar dropdown (replaces pagination) — v3.2
+- ✓ Backend date_start/date_end filtering with OpenCTI within operator — v3.2
+- ✓ Timezone-aware UTC boundary computation for date filtering — v3.2
 
 ## Current Milestone: v3.2 App Layout Page Tweaks
 
@@ -102,7 +105,8 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 - [ ] Dashboard stat cards expanded with Threat Database heading
 - [ ] Threat Map capped to 100 latest IPs with updated label
-- [ ] Threat News date-based filtering, auto-refresh, category chart
+- [x] Threat News date-based filtering and auto-refresh — Phase 31+32
+- [ ] Threat News category distribution chart
 - [ ] Threat Actors enriched modal and auto-refresh
 - [ ] Threat Search bug fixes (graph nodes, loader, z-index)
 - [ ] Settings/Profile page functional with real data
@@ -193,4 +197,4 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Reusable useAutoRefresh hook pattern | Generic hook with visibility-aware interval, pages add silent refresh callbacks | ✓ Good |
 
 ---
-*Last updated: 2026-03-29 after Phase 31 complete (Auto-Refresh Infrastructure — silent 5-min refresh for Threat News and Threat Actors)*
+*Last updated: 2026-03-29 after Phase 32 complete (Date-Based News Browsing — calendar dropdown replacing pagination, timezone-aware date filtering)*
