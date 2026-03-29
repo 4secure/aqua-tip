@@ -113,7 +113,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 |-------|----------------|--------|-----------|
 | 30. Quick Wins | 1/2 | Complete    | 2026-03-28 |
 | 31. Auto-Refresh Infrastructure | 1/1 | Complete    | 2026-03-28 |
-| 32. Date-Based News Browsing | 2/2 | Complete   | 2026-03-29 |
+| 32. Date-Based News Browsing | 2/2 | Complete    | 2026-03-29 |
 | 33. Category Distribution Chart | 0/? | Not started | - |
 | 34. Enriched Threat Actor Modal | 0/? | Not started | - |
 | 35. Functional Settings Page | 0/? | Not started | - |
