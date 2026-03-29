@@ -2,16 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
-status: completed
-stopped_at: Phase 32 context gathered
-last_updated: "2026-03-28T23:23:45.064Z"
+status: Ready to execute
+stopped_at: Completed 32-01-PLAN.md
+last_updated: "2026-03-28T23:42:40.058Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 3
+  total_plans: 5
   completed_plans: 3
-  percent: 50
 ---
 
 # Project State
@@ -21,16 +20,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 31 - Auto-Refresh Infrastructure (complete)
+**Current focus:** Phase 32 — date-based-news-browsing
 
 ## Current Position
 
-Phase: 32 of 6 (date based news browsing)
-Plan: Not started
-Status: Phase 31 complete
-Last activity: 2026-03-28
-
-Progress: [█████░░░░░] 50%
+Phase: 32 (date-based-news-browsing) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -50,6 +45,7 @@ Progress: [█████░░░░░] 50%
 | v2.2 Live Dashboard & Search History | 4 | 6 | 2 days |
 | v3.0 Onboarding, Trial & Plans | 5 | 10 | 4 days |
 | v3.1 Font & UI Polish | 3 | 3 | 3 days |
+| Phase 32 P01 | 1min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -60,6 +56,7 @@ Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 
 - [Phase 30]: Used flexbox justify-center for 4+3 stat card layout instead of CSS grid
 - [Phase 31]: Separate silentRefresh callbacks per page to avoid setLoading flicker; ref-based fetchFn in useAutoRefresh to prevent interval restarts
+- [Phase 32]: within operator on published field for date range filtering (OpenCTI native)
 
 ### Pending Todos
 
@@ -81,7 +78,7 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-03-29
-Last session: 2026-03-28T23:23:45.048Z
-Stopped at: Phase 32 context gathered
-Resume file: .planning/phases/32-date-based-news-browsing/32-CONTEXT.md
+Last activity: 2026-03-28
+Last session: 2026-03-28T23:42:40.054Z
+Stopped at: Completed 32-01-PLAN.md
+Resume file: None

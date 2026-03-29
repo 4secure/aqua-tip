@@ -21,7 +21,7 @@
 
 - [x] **Phase 30: Quick Wins** - Dashboard stat cards, map label, and search bug fixes (all frontend-only) (completed 2026-03-28)
 - [x] **Phase 31: Auto-Refresh Infrastructure** - Reusable useAutoRefresh hook for Threat News and Threat Actors (completed 2026-03-29)
-- [ ] **Phase 32: Date-Based News Browsing** - Date selector replacing pagination with timezone-aware backend filtering
+- [x] **Phase 32: Date-Based News Browsing** - Date selector replacing pagination with timezone-aware backend filtering (completed 2026-03-29)
 - [ ] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date
 - [ ] **Phase 34: Enriched Threat Actor Modal** - TTPs, tools, campaigns, and targeted sectors via fetch-on-open
 - [ ] **Phase 35: Functional Settings Page** - Real profile data display and editing with AuthContext sync
@@ -66,10 +66,10 @@ Plans:
   2. User can select a different date and the page loads that day's threat news
   3. Selected date persists in the URL so the page can be bookmarked or shared
   4. Date filtering correctly handles timezone conversion (user's IANA timezone to UTC)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 32-01-PLAN.md -- Backend date range filtering + frontend API client
-- [ ] 32-02-PLAN.md -- Calendar dropdown UI, pagination removal, URL date state
+- [x] 32-01-PLAN.md -- Backend date range filtering + frontend API client
+- [x] 32-02-PLAN.md -- Calendar dropdown UI, pagination removal, URL date state
 **UI hint**: yes
 
 ### Phase 33: Category Distribution Chart
@@ -113,7 +113,7 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 |-------|----------------|--------|-----------|
 | 30. Quick Wins | 1/2 | Complete    | 2026-03-28 |
 | 31. Auto-Refresh Infrastructure | 1/1 | Complete    | 2026-03-28 |
-| 32. Date-Based News Browsing | 0/2 | In progress | - |
+| 32. Date-Based News Browsing | 2/2 | Complete   | 2026-03-29 |
 | 33. Category Distribution Chart | 0/? | Not started | - |
 | 34. Enriched Threat Actor Modal | 0/? | Not started | - |
 | 35. Functional Settings Page | 0/? | Not started | - |
