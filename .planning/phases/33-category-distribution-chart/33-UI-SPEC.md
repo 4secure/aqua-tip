@@ -32,7 +32,7 @@ Declared values (must be multiples of 4):
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px | Icon gaps, inline padding |
-| sm | 8px | Compact element spacing |
+| sm | 8px | Compact element spacing, tooltip padding |
 | md | 16px | Card internal padding, gap between toolbar and chart |
 | lg | 24px | Card padding (p-6), gap between chart card and report list |
 | xl | 32px | Not used this phase |
@@ -48,10 +48,12 @@ Exceptions: none
 | Role | Size | Weight | Line Height | Font |
 |------|------|--------|-------------|------|
 | Card heading | 14px | 600 (semibold) | 1.2 | Outfit |
-| Chart axis labels | 11px | 400 (regular) | 1.0 | Outfit |
-| Chart tooltip title | 13px | 600 (semibold) | 1.2 | Outfit |
+| Chart tooltip title | 14px | 600 (semibold) | 1.2 | Outfit |
+| Chart axis labels | 12px | 400 (regular) | 1.0 | Outfit |
 | Chart tooltip body | 12px | 400 (regular) | 1.4 | Outfit |
 | Legend labels | 12px | 400 (regular) | 1.5 | Outfit |
+
+Chart chrome uses a two-step type scale: 12px (regular weight, axes/legend/tooltip body) and 14px (semibold, card heading/tooltip title).
 
 ---
 
@@ -109,7 +111,7 @@ Accent reserved for: chart area fills, legend color swatches, hovered/active cat
 | Datasets | One dataset per category. Each uses `fill: 'origin'` with `stack: 'stack0'` for stacking. `tension: 0.4` for smooth curves. `pointRadius: 0` (no dots). `borderWidth: 2`. |
 | Legend | Custom HTML legend below chart canvas. Horizontal flex-wrap row of category swatches (8px circles) + 12px labels. Max 8 items visible. |
 | Click behavior | `onClick` handler on chart resolves clicked dataset label, calls `updateParam('label', categoryId)` using the same mechanism as category chip clicks. Clicking the active category clears the filter. |
-| Tooltip | Single-point tooltip showing category name (title) and count for that hour (body). Format: `"{count} reports"`. Background/border/text colors per Chart Chrome table above. Corner radius 8px, padding 10px. |
+| Tooltip | Single-point tooltip showing category name (title) and count for that hour (body). Format: `"{count} reports"`. Background/border/text colors per Chart Chrome table above. Corner radius 8px, padding 8px. |
 | Animation | Chart.js default transitions (`animation.duration: 750`). No custom animation code. |
 
 ### Placement in ThreatNewsPage
