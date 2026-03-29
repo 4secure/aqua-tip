@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -11,10 +11,12 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Calendar,
 } from 'lucide-react';
 import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import { useAuth } from '../contexts/AuthContext';
 
 const CATEGORY_COLORS = [
   { bg: 'bg-violet/20', text: 'text-violet' },
@@ -33,8 +35,66 @@ function categoryColor(labelValue) {
   return CATEGORY_COLORS[Math.abs(hash) % CATEGORY_COLORS.length];
 }
 
-const PAGE_SIZE = 20;
 const MAX_VISIBLE_CATEGORIES = 3;
+
+/* -- Date helper functions -- */
+
+function getTodayStr(timezone) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
+
+function getUtcBoundaries(dateStr, timezone) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+
+  function toUtcMidnight(y, m, d, tz) {
+    const guess = new Date(Date.UTC(y, m - 1, d));
+    const tzStr = guess.toLocaleString('en-US', { timeZone: tz });
+    const tzDate = new Date(tzStr);
+    const diff = guess.getTime() - tzDate.getTime();
+    return new Date(guess.getTime() + diff);
+  }
+
+  const start = toUtcMidnight(year, month, day, timezone);
+  const end = toUtcMidnight(year, month, day + 1, timezone);
+
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
+function getCalendarGrid(year, month) {
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const grid = [];
+  for (let i = firstDay - 1; i >= 0; i--) {
+    grid.push({ day: daysInPrevMonth - i, current: false });
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    grid.push({ day: d, current: true });
+  }
+  const remaining = 42 - grid.length;
+  for (let d = 1; d <= remaining; d++) {
+    grid.push({ day: d, current: false });
+  }
+  return grid;
+}
+
+function formatDisplayDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function formatDateParam(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
 /* -- Searchable Category Dropdown -- */
 
@@ -150,22 +210,210 @@ function CategoryDropdown({ categories, value, onChange }) {
   );
 }
 
+/* -- Calendar Dropdown -- */
+
+function CalendarDropdown({ selectedDate, onDateChange, timezone }) {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const today = getTodayStr(timezone);
+  const isToday = selectedDate === today;
+
+  // Parse selectedDate to init month view
+  const [viewYear, viewMonth] = useMemo(() => {
+    const [y, m] = selectedDate.split('-').map(Number);
+    return [y, m - 1]; // month 0-indexed for getCalendarGrid
+  }, [selectedDate]);
+  const [displayYear, setDisplayYear] = useState(viewYear);
+  const [displayMonth, setDisplayMonth] = useState(viewMonth);
+
+  // Sync display when selectedDate changes externally
+  useEffect(() => {
+    setDisplayYear(viewYear);
+    setDisplayMonth(viewMonth);
+  }, [viewYear, viewMonth]);
+
+  // Click-outside to close (same pattern as CategoryDropdown)
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const grid = getCalendarGrid(displayYear, displayMonth);
+  const monthLabel = new Date(displayYear, displayMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const handlePrevDay = () => {
+    const [y, m, d] = selectedDate.split('-').map(Number);
+    const prev = new Date(y, m - 1, d - 1);
+    onDateChange(formatDateParam(prev));
+  };
+
+  const handleNextDay = () => {
+    const [y, m, d] = selectedDate.split('-').map(Number);
+    const next = new Date(y, m - 1, d + 1);
+    // Don't allow navigating past today
+    if (next <= new Date(today.replace(/-/g, '/'))) {
+      onDateChange(formatDateParam(next));
+    }
+  };
+
+  const handleDayClick = (dayObj) => {
+    if (!dayObj.current) return;
+    const dateObj = new Date(displayYear, displayMonth, dayObj.day);
+    const todayDate = new Date(today.replace(/-/g, '/'));
+    if (dateObj > todayDate) return; // Don't allow future dates
+    onDateChange(formatDateParam(dateObj));
+    setOpen(false);
+  };
+
+  const handlePrevMonth = () => {
+    setDisplayMonth((m) => {
+      if (m === 0) { setDisplayYear((y) => y - 1); return 11; }
+      return m - 1;
+    });
+  };
+
+  const handleNextMonth = () => {
+    setDisplayMonth((m) => {
+      if (m === 11) { setDisplayYear((y) => y + 1); return 0; }
+      return m + 1;
+    });
+  };
+
+  // Check if next day button should be disabled (can't go past today)
+  const [sy, sm, sd] = selectedDate.split('-').map(Number);
+  const nextDay = new Date(sy, sm - 1, sd + 1);
+  const todayDate = new Date(today.replace(/-/g, '/'));
+  const nextDayDisabled = nextDay > todayDate;
+
+  return (
+    <div ref={dropdownRef} className="flex items-center gap-1 shrink-0">
+      {/* Today button - per D-04 */}
+      {!isToday && (
+        <button
+          type="button"
+          onClick={() => onDateChange(today)}
+          className="font-mono text-xs text-cyan hover:text-cyan/80 transition-colors mr-1"
+        >
+          Today
+        </button>
+      )}
+
+      {/* Prev day arrow - per D-03 */}
+      <button
+        type="button"
+        onClick={handlePrevDay}
+        className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors"
+      >
+        <ChevronLeft size={16} className="text-text-muted" />
+      </button>
+
+      {/* Calendar button showing current date - per D-03 */}
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center gap-1.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-xs px-3 py-2.5 focus:outline-none focus:border-violet transition-colors hover:border-violet/40"
+      >
+        <Calendar size={14} className="text-text-muted" />
+        <span>{formatDisplayDate(selectedDate)}</span>
+      </button>
+
+      {/* Next day arrow - per D-03 */}
+      <button
+        type="button"
+        onClick={handleNextDay}
+        disabled={nextDayDisabled}
+        className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <ChevronRight size={16} className="text-text-muted" />
+      </button>
+
+      {/* Calendar popup - per D-01 glassmorphism */}
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-50 w-72 bg-surface/90 border border-border backdrop-blur-md rounded-xl shadow-2xl p-3">
+          {/* Month navigation header */}
+          <div className="flex items-center justify-between mb-2">
+            <button type="button" onClick={handlePrevMonth} className="p-1 rounded hover:bg-surface-2 transition-colors">
+              <ChevronLeft size={16} className="text-text-muted" />
+            </button>
+            <span className="font-sans text-sm font-semibold text-text-primary">{monthLabel}</span>
+            <button type="button" onClick={handleNextMonth} className="p-1 rounded hover:bg-surface-2 transition-colors">
+              <ChevronRight size={16} className="text-text-muted" />
+            </button>
+          </div>
+
+          {/* Day-of-week headers */}
+          <div className="grid grid-cols-7 mb-1">
+            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
+              <div key={d} className="text-center font-mono text-[10px] text-text-muted py-1">{d}</div>
+            ))}
+          </div>
+
+          {/* Day grid */}
+          <div className="grid grid-cols-7">
+            {grid.map((cell, i) => {
+              const cellDateStr = cell.current
+                ? `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}`
+                : null;
+              const isSelected = cellDateStr === selectedDate;
+              const isTodayCell = cellDateStr === today;
+              const isFuture = cellDateStr ? new Date(cellDateStr.replace(/-/g, '/')) > todayDate : false;
+
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleDayClick(cell)}
+                  disabled={!cell.current || isFuture}
+                  className={`
+                    h-8 w-full rounded text-xs font-mono transition-colors
+                    ${!cell.current ? 'text-text-muted/30 cursor-default' : ''}
+                    ${cell.current && isFuture ? 'text-text-muted/30 cursor-not-allowed' : ''}
+                    ${cell.current && !isFuture && !isSelected ? 'text-text-primary hover:bg-surface-2 cursor-pointer' : ''}
+                    ${isSelected ? 'bg-violet text-white' : ''}
+                    ${isTodayCell && !isSelected ? 'text-cyan font-bold' : ''}
+                  `}
+                >
+                  {cell.day}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* -- Main Page Component -- */
+
 export default function ThreatNewsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState([]);
-  const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
-  const [cursorHistory, setCursorHistory] = useState([]);
   const [categoryFilterName, setCategoryFilterName] = useState('');
   const [categories, setCategories] = useState([]);
 
   const debounceRef = useRef(null);
 
-  const after = searchParams.get('after') || '';
+  const { timezone: authTimezone } = useAuth();
+  const timezone = authTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const dateParam = searchParams.get('date');
+  const effectiveDate = dateParam || getTodayStr(timezone);
   const search = searchParams.get('search') || '';
   const label = searchParams.get('label') || '';
+
+  const { start: dateStart, end: dateEnd } = useMemo(
+    () => getUtcBoundaries(effectiveDate, timezone),
+    [effectiveDate, timezone]
+  );
 
   useEffect(() => {
     fetchThreatNewsLabels()
@@ -179,40 +427,36 @@ export default function ThreatNewsPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     try {
-      const params = { sort: 'published', order: 'desc' };
-      if (after) params.after = after;
+      const params = { sort: 'published', order: 'desc', date_start: dateStart, date_end: dateEnd };
       if (search) params.search = search;
       if (label) params.label = label;
-
       const response = await fetchThreatNews(params);
       const data = response.data || response;
       setItems(data.items || []);
-      setPagination(data.pagination || null);
     } catch (err) {
       setError(err.message || 'Unable to load threat news. Please try again.');
       setItems([]);
-      setPagination(null);
     } finally {
       setLoading(false);
     }
-  }, [after, search, label]);
+  }, [dateStart, dateEnd, search, label]);
 
   const silentRefresh = useCallback(async () => {
     try {
-      const params = { sort: 'published', order: 'desc' };
-      if (after) params.after = after;
+      // If viewing "today" (no explicit ?date), recompute boundaries in case midnight has passed
+      const currentDate = dateParam ? effectiveDate : getTodayStr(timezone);
+      const { start, end } = getUtcBoundaries(currentDate, timezone);
+      const params = { sort: 'published', order: 'desc', date_start: start, date_end: end };
       if (search) params.search = search;
       if (label) params.label = label;
       const response = await fetchThreatNews(params);
       const data = response.data || response;
       setItems(data.items || []);
-      setPagination(data.pagination || null);
     } catch {
-      // D-07: Keep stale data visible, retry next interval
+      // Keep stale data visible, retry next interval
     }
-  }, [after, search, label]);
+  }, [dateParam, effectiveDate, timezone, search, label]);
 
   useAutoRefresh(silentRefresh, 5 * 60 * 1000);
 
@@ -228,10 +472,6 @@ export default function ThreatNewsPage() {
           next.set(key, value);
         } else {
           next.delete(key);
-        }
-        if (key !== 'after') {
-          next.delete('after');
-          setCursorHistory([]);
         }
         return next;
       });
@@ -263,10 +503,8 @@ export default function ThreatNewsPage() {
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev);
         next.set('label', category.id);
-        next.delete('after');
         return next;
       });
-      setCursorHistory([]);
     },
     [setSearchParams]
   );
@@ -276,31 +514,18 @@ export default function ThreatNewsPage() {
     updateParam('label', '');
   }, [updateParam]);
 
-  const handleNext = useCallback(() => {
-    if (pagination?.end_cursor) {
-      setCursorHistory((prev) => [...prev, after]);
-      updateParam('after', pagination.end_cursor);
-    }
-  }, [pagination, after, updateParam]);
-
-  const handlePrevious = useCallback(() => {
-    setCursorHistory((prev) => {
-      const copy = [...prev];
-      const prevCursor = copy.pop();
-      setSearchParams((sp) => {
-        const next = new URLSearchParams(sp);
-        if (prevCursor) {
-          next.set('after', prevCursor);
-        } else {
-          next.delete('after');
-        }
-        return next;
-      });
-      return copy;
+  const handleDateChange = useCallback((newDate) => {
+    const today = getTodayStr(timezone);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (newDate === today) {
+        next.delete('date');
+      } else {
+        next.set('date', newDate);
+      }
+      return next;
     });
-  }, [setSearchParams]);
-
-  const currentOffset = cursorHistory.length * PAGE_SIZE;
+  }, [timezone, setSearchParams]);
 
   return (
     <div className="space-y-6">
@@ -314,7 +539,7 @@ export default function ThreatNewsPage() {
         </p>
       </div>
 
-      {/* Toolbar: Search + Category Dropdown + Pagination */}
+      {/* Toolbar: Search + Category Dropdown + Date Selector */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search
@@ -341,36 +566,12 @@ export default function ThreatNewsPage() {
           }}
         />
 
-        <div className="flex items-center gap-2 shrink-0 min-w-[180px] justify-end">
-          {pagination ? (
-            <>
-              <span className="font-mono text-sm text-text-muted whitespace-nowrap">
-                {pagination.total != null
-                  ? `${currentOffset + 1}\u2013${Math.min(currentOffset + PAGE_SIZE, pagination.total)} of ${pagination.total}`
-                  : `${currentOffset + 1}\u2013${currentOffset + PAGE_SIZE}`}
-              </span>
-              <button
-                onClick={handlePrevious}
-                disabled={!pagination.has_previous}
-                className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft size={16} className="text-text-muted" />
-              </button>
-              <button
-                onClick={handleNext}
-                disabled={!pagination.has_next}
-                className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ChevronRight size={16} className="text-text-muted" />
-              </button>
-            </>
-          ) : loading && (
-            <div className="flex items-center gap-2 animate-pulse">
-              <div className="h-4 w-20 bg-surface-2 rounded" />
-              <div className="h-7 w-7 bg-surface-2 rounded-lg" />
-              <div className="h-7 w-7 bg-surface-2 rounded-lg" />
-            </div>
-          )}
+        <div className="relative shrink-0">
+          <CalendarDropdown
+            selectedDate={effectiveDate}
+            onDateChange={handleDateChange}
+            timezone={timezone}
+          />
         </div>
       </div>
 
@@ -424,10 +625,10 @@ export default function ThreatNewsPage() {
         <div className="flex flex-col items-center justify-center py-20">
           <Newspaper size={48} className="text-text-muted mb-4" />
           <p className="font-sans text-lg text-text-muted">
-            No reports available
+            No reports for {formatDisplayDate(effectiveDate)}
           </p>
           <p className="font-mono text-sm text-text-muted mt-1">
-            Try adjusting your search
+            Try selecting a different date
           </p>
         </div>
       )}
