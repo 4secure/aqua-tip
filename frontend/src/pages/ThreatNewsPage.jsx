@@ -15,6 +15,7 @@ import {
 import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import CategoryDistributionChart from '../components/threat-news/CategoryDistributionChart';
 
 const CATEGORY_COLORS = [
   { bg: 'bg-violet/20', text: 'text-violet' },
@@ -162,6 +163,7 @@ export default function ThreatNewsPage() {
   const [categories, setCategories] = useState([]);
 
   const debounceRef = useRef(null);
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const after = searchParams.get('after') || '';
   const search = searchParams.get('search') || '';
@@ -276,6 +278,11 @@ export default function ThreatNewsPage() {
     updateParam('label', '');
   }, [updateParam]);
 
+  const handleChartCategoryClick = useCallback((catId, catName) => {
+    setCategoryFilterName(catName || '');
+    updateParam('label', catId);
+  }, [updateParam]);
+
   const handleNext = useCallback(() => {
     if (pagination?.end_cursor) {
       setCursorHistory((prev) => [...prev, after]);
@@ -388,6 +395,17 @@ export default function ThreatNewsPage() {
             <X size={14} className="text-violet" />
           </button>
         </div>
+      )}
+
+      {/* Category Distribution Chart */}
+      {!loading && !error && items.length > 0 && (
+        <CategoryDistributionChart
+          items={items}
+          categories={categories}
+          activeLabel={label}
+          onCategoryClick={handleChartCategoryClick}
+          timezone={timezone}
+        />
       )}
 
       {/* Error State */}
