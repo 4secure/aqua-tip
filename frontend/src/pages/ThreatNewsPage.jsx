@@ -17,6 +17,7 @@ import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { useAuth } from '../contexts/AuthContext';
+import CategoryDistributionChart from '../components/threat-news/CategoryDistributionChart';
 
 const CATEGORY_COLORS = [
   { bg: 'bg-violet/20', text: 'text-violet' },
@@ -514,6 +515,11 @@ export default function ThreatNewsPage() {
     updateParam('label', '');
   }, [updateParam]);
 
+  const handleChartCategoryClick = useCallback((catId, catName) => {
+    setCategoryFilterName(catName || '');
+    updateParam('label', catId);
+  }, [updateParam]);
+
   const handleDateChange = useCallback((newDate) => {
     const today = getTodayStr(timezone);
     setSearchParams((prev) => {
@@ -589,6 +595,17 @@ export default function ThreatNewsPage() {
             <X size={14} className="text-violet" />
           </button>
         </div>
+      )}
+
+      {/* Category Distribution Chart */}
+      {!loading && !error && items.length > 0 && (
+        <CategoryDistributionChart
+          items={items}
+          categories={categories}
+          activeLabel={label}
+          onCategoryClick={handleChartCategoryClick}
+          timezone={timezone}
+        />
       )}
 
       {/* Error State */}
