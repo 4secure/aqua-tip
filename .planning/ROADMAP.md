@@ -22,7 +22,7 @@
 - [x] **Phase 30: Quick Wins** - Dashboard stat cards, map label, and search bug fixes (all frontend-only) (completed 2026-03-28)
 - [x] **Phase 31: Auto-Refresh Infrastructure** - Reusable useAutoRefresh hook for Threat News and Threat Actors (completed 2026-03-29)
 - [x] **Phase 32: Date-Based News Browsing** - Date selector replacing pagination with timezone-aware backend filtering (completed 2026-03-29)
-- [ ] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date
+- [x] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date (completed 2026-03-30)
 - [ ] **Phase 34: Enriched Threat Actor Modal** - TTPs, tools, campaigns, and targeted sectors via fetch-on-open
 - [ ] **Phase 35: Functional Settings Page** - Real profile data display and editing with AuthContext sync
 
@@ -79,7 +79,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. User sees a category distribution chart on the Threat News page filtered by the currently selected date
   2. Chart updates without flickering when the user changes the date
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 33-01-PLAN.md -- CategoryDistributionChart component + ThreatNewsPage integration
 **UI hint**: yes
@@ -116,6 +116,6 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 | 30. Quick Wins | 1/2 | Complete    | 2026-03-28 |
 | 31. Auto-Refresh Infrastructure | 1/1 | Complete    | 2026-03-28 |
 | 32. Date-Based News Browsing | 2/2 | Complete    | 2026-03-29 |
-| 33. Category Distribution Chart | 0/1 | Planning complete | - |
+| 33. Category Distribution Chart | 0/1 | Complete    | 2026-03-30 |
 | 34. Enriched Threat Actor Modal | 0/? | Not started | - |
 | 35. Functional Settings Page | 0/? | Not started | - |

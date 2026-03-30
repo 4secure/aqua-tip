@@ -21,9 +21,9 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 ### Threat News
 
 - [x] **NEWS-01**: Threat news page auto-refreshes every 5 minutes silently
-- [ ] **NEWS-02**: User sees current date's threat news by default
-- [ ] **NEWS-03**: User can select a date to load that day's threat news (replaces pagination)
-- [ ] **NEWS-04**: User sees a category distribution chart filtered by the selected date
+- [x] **NEWS-02**: User sees current date's threat news by default
+- [x] **NEWS-03**: User can select a date to load that day's threat news (replaces pagination)
+- [x] **NEWS-04**: User sees a category distribution chart filtered by the selected date
 
 ### Threat Actors
 
@@ -72,9 +72,9 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 | MAP-01 | Phase 30 | Complete |
 | MAP-02 | Phase 30 | Complete |
 | NEWS-01 | Phase 31 | Complete |
-| NEWS-02 | Phase 32 | Pending |
-| NEWS-03 | Phase 32 | Pending |
-| NEWS-04 | Phase 33 | Pending |
+| NEWS-02 | Phase 32 | Complete |
+| NEWS-03 | Phase 32 | Complete |
+| NEWS-04 | Phase 33 | Complete |
 | ACTOR-01 | Phase 34 | Pending |
 | ACTOR-02 | Phase 31 | Complete |
 | SEARCH-01 | Phase 30 | Pending |
