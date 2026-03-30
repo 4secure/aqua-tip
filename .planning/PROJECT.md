@@ -197,4 +197,4 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Reusable useAutoRefresh hook pattern | Generic hook with visibility-aware interval, pages add silent refresh callbacks | ✓ Good |
 
 ---
-*Last updated: 2026-03-29 after Phase 32 complete (Date-Based News Browsing — calendar dropdown replacing pagination, timezone-aware date filtering)*
+*Last updated: 2026-03-30 after Phase 33 complete (Category Distribution Chart — stacked area chart on Threat News showing hourly category distribution with click-to-filter)*
