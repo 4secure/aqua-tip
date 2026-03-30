@@ -27,7 +27,7 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 
 ### Threat Actors
 
-- [ ] **ACTOR-01**: User sees enriched threat actor modal with TTPs, tools, campaigns, and targeted sectors
+- [x] **ACTOR-01**: User sees enriched threat actor modal with TTPs, tools, campaigns, and targeted sectors
 - [x] **ACTOR-02**: Threat actors page auto-refreshes every 5 minutes silently
 
 ### Threat Search
@@ -75,7 +75,7 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 | NEWS-02 | Phase 32 | Complete |
 | NEWS-03 | Phase 32 | Complete |
 | NEWS-04 | Phase 33 | Complete |
-| ACTOR-01 | Phase 34 | Pending |
+| ACTOR-01 | Phase 34 | Complete |
 | ACTOR-02 | Phase 31 | Complete |
 | SEARCH-01 | Phase 30 | Pending |
 | SEARCH-02 | Phase 30 | Pending |
