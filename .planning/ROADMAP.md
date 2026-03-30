@@ -92,7 +92,10 @@ Plans:
   1. User sees TTPs (with MITRE ATT&CK IDs where available), tools/malware, campaigns, and targeted sectors in the threat actor modal
   2. Modal shows a loading skeleton while enrichment data is fetched (fetch-on-open pattern)
   3. Modal gracefully handles actors with no relationships (empty state, not error)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 34-01-PLAN.md -- Backend enrichment endpoint (controller + service + route)
+- [ ] 34-02-PLAN.md -- Frontend tabbed modal with enrichment tabs and D3 graph
 **UI hint**: yes
 
 ### Phase 35: Functional Settings Page
@@ -103,7 +106,10 @@ Plans:
   1. User sees their real profile data (name, email, phone, timezone, organization, role, plan) on the settings page
   2. User can edit profile fields and see changes reflected immediately after saving
   3. AuthContext syncs updated user data after a successful profile save (no stale data in sidebar or topbar)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 34-01-PLAN.md -- Backend enrichment endpoint (controller + service + route)
+- [ ] 34-02-PLAN.md -- Frontend tabbed modal with enrichment tabs and D3 graph
 **UI hint**: yes
 
 ## Progress
