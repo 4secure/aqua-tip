@@ -11,3 +11,7 @@ export function fetchThreatActors({ after, search, sort, order } = {}) {
   const qs = params.toString();
   return apiClient.get(`/api/threat-actors${qs ? '?' + qs : ''}`);
 }
+
+export function fetchThreatActorEnrichment(id) {
+  return apiClient.get(`/api/threat-actors/${encodeURIComponent(id)}/enrichment`);
+}

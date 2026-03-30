@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
-import { fetchThreatActors } from '../api/threat-actors';
+import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ChevronLeft, ChevronRight, Swords, Bug, Flag, GitBranch, Info, Loader } from 'lucide-react';
+import { fetchThreatActors, fetchThreatActorEnrichment } from '../api/threat-actors';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import SkeletonCard from '../components/shared/SkeletonCard';
@@ -340,10 +340,131 @@ function ThreatActorCard({ actor, onClick }) {
   );
 }
 
+/* ── Relationship Graph (D3 force-directed) ── */
+
+function RelationshipGraph({ relationships, actorName, actorId }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !relationships?.length) return;
+
+    let cleanup = null;
+
+    import('d3').then(d3 => {
+      const width = container.clientWidth || 500;
+      const height = 320;
+
+      const ENTITY_COLORS = {
+        'IPv4-Addr': '#FF3B5C',
+        'IPv6-Addr': '#FF3B5C',
+        'Malware': '#7A44E4',
+        'Threat-Actor': '#FFB020',
+        'Intrusion-Set': '#FFB020',
+        'Attack-Pattern': '#00E5FF',
+        'Domain-Name': '#00E5FF',
+        'Tool': '#00C48C',
+        'Campaign': '#FF3B5C',
+        'Identity': '#9B6BF7',
+        'Sector': '#9B6BF7',
+        'Country': '#00C48C',
+      };
+      const DEFAULT_COLOR = '#5A6173';
+      const eColor = (type) => ENTITY_COLORS[type] || DEFAULT_COLOR;
+
+      // Build nodes
+      const nodeMap = new Map();
+      nodeMap.set(actorId, { id: actorId, type: 'Intrusion-Set', label: actorName });
+
+      for (const rel of relationships) {
+        for (const entity of [rel.from, rel.to]) {
+          if (!entity || entity.id === actorId) continue;
+          if (nodeMap.has(entity.id)) continue;
+          nodeMap.set(entity.id, {
+            id: entity.id,
+            type: entity.entity_type,
+            label: (entity.name || entity.entity_type || '').slice(0, 25),
+          });
+        }
+      }
+
+      const nodes = Array.from(nodeMap.values());
+      nodes.forEach(n => {
+        n.x = width / 2 + (Math.random() - 0.5) * width * 0.4;
+        n.y = height / 2 + (Math.random() - 0.5) * height * 0.4;
+      });
+
+      const links = relationships
+        .filter(rel => rel.from && rel.to)
+        .map(rel => ({
+          source: rel.from.id === actorId ? actorId : rel.from.id,
+          target: rel.to.id === actorId ? actorId : rel.to.id,
+          label: rel.relationship_type,
+        }));
+
+      const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+
+      const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+        .force('charge', d3.forceManyBody().strength(-300))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(35));
+
+      const link = svg.append('g').selectAll('line').data(links).join('line')
+        .attr('stroke', '#2A2D3E').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,4');
+
+      const linkLabel = svg.append('g').selectAll('text').data(links).join('text')
+        .text(d => d.label).attr('fill', '#5A6173').attr('font-size', '8px')
+        .attr('font-family', 'JetBrains Mono').attr('text-anchor', 'middle');
+
+      const node = svg.append('g').selectAll('g').data(nodes).join('g')
+        .call(d3.drag()
+          .on('start', (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+          .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+          .on('end', (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+      node.append('circle')
+        .attr('r', d => d.id === actorId ? 18 : 12)
+        .attr('fill', d => eColor(d.type) + '30')
+        .attr('stroke', d => eColor(d.type)).attr('stroke-width', 2);
+
+      node.append('text')
+        .text(d => d.label.length > 18 ? d.label.slice(0, 15) + '...' : d.label)
+        .attr('fill', '#E8EAED').attr('font-size', '9px')
+        .attr('font-family', 'JetBrains Mono').attr('text-anchor', 'middle')
+        .attr('dy', d => d.id === actorId ? 28 : 22);
+
+      simulation.on('tick', () => {
+        link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+        linkLabel.attr('x', d => (d.source.x + d.target.x) / 2)
+                 .attr('y', d => (d.source.y + d.target.y) / 2 - 4);
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+      });
+
+      cleanup = () => { simulation.stop(); svg.remove(); };
+    });
+
+    return () => { if (cleanup) cleanup(); };
+  }, [relationships, actorName, actorId]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{ height: '320px', background: '#0A0B10', borderRadius: '0.75rem', border: '1px solid #1E2030' }}
+    />
+  );
+}
+
 /* ── Threat Actor Modal ── */
 
 function ThreatActorModal({ actor, onClose }) {
   const { formatDate } = useFormatDate();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [enrichment, setEnrichment] = useState(null);
+  const [enrichLoading, setEnrichLoading] = useState(true);
+  const [enrichError, setEnrichError] = useState(null);
+
   const isMitre = (ref) =>
     ref.source_name?.toLowerCase().includes('mitre') ||
     ref.url?.includes('attack.mitre.org');
@@ -359,6 +480,28 @@ function ThreatActorModal({ actor, onClose }) {
       document.body.style.overflow = '';
     };
   }, [onClose]);
+
+  // Fetch enrichment data once on modal open
+  useEffect(() => {
+    let cancelled = false;
+    setEnrichLoading(true);
+    setEnrichError(null);
+    setEnrichment(null);
+    setActiveTab('overview');
+    fetchThreatActorEnrichment(actor.id)
+      .then(res => { if (!cancelled) setEnrichment(res.data); })
+      .catch(err => { if (!cancelled) setEnrichError(err.message || 'Failed to load enrichment data'); })
+      .finally(() => { if (!cancelled) setEnrichLoading(false); });
+    return () => { cancelled = true; };
+  }, [actor.id]);
+
+  const TABS = [
+    { key: 'overview', label: 'Overview', icon: Info },
+    { key: 'ttps', label: 'TTPs', icon: Swords },
+    { key: 'tools', label: 'Tools', icon: Bug },
+    { key: 'campaigns', label: 'Campaigns', icon: Flag },
+    { key: 'relationships', label: 'Relationships', icon: GitBranch },
+  ];
 
   return (
     <motion.div
@@ -387,12 +530,11 @@ function ThreatActorModal({ actor, onClose }) {
           <X size={18} className="text-text-muted" />
         </button>
 
-        {/* Name */}
+        {/* ── Fixed Header ── */}
         <h2 className="font-sans text-2xl font-bold text-text-primary mb-1 pr-10">
           {actor.name}
         </h2>
 
-        {/* Aliases */}
         {actor.aliases?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {actor.aliases.map((alias) => (
@@ -406,7 +548,6 @@ function ThreatActorModal({ actor, onClose }) {
           </div>
         )}
 
-        {/* Modified date */}
         {actor.modified && (
           <p className="flex items-center gap-1.5 font-mono text-xs text-text-muted mb-4">
             <Clock size={12} />
@@ -414,7 +555,6 @@ function ThreatActorModal({ actor, onClose }) {
           </p>
         )}
 
-        {/* Badges */}
         <div className="flex flex-wrap gap-2 mb-5">
           {actor.motivation && (
             <span className="bg-violet/20 text-violet px-2.5 py-1 rounded text-xs font-mono">
@@ -428,109 +568,266 @@ function ThreatActorModal({ actor, onClose }) {
           )}
         </div>
 
-        {/* Description */}
-        {actor.description && (
-          <div className="mb-5">
-            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
-              Description
-            </h3>
-            <p className="font-mono text-sm text-text-primary whitespace-pre-line leading-relaxed">
-              {actor.description}
-            </p>
+        {/* ── Tab Bar ── */}
+        <div className="tab-bar !mb-4">
+          {TABS.map(tab => (
+            <button
+              key={tab.key}
+              className={`tab-item flex items-center gap-1.5 ${activeTab === tab.key ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              <tab.icon size={14} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Tab Content ── */}
+
+        {/* Error state for enrichment tabs */}
+        {enrichError && activeTab !== 'overview' && (
+          <div className="flex flex-col items-center justify-center py-8 text-text-muted">
+            <AlertTriangle size={32} className="mb-2 opacity-40 text-amber" />
+            <p className="text-sm">Failed to load enrichment data</p>
           </div>
         )}
 
-        {/* Goals */}
-        {actor.goals?.length > 0 && (
-          <div className="mb-5">
-            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
-              Goals
-            </h3>
-            <ul className="space-y-1">
-              {actor.goals.map((goal, i) => (
-                <li key={i} className="font-mono text-sm text-text-primary flex items-start gap-2">
-                  <span className="text-violet mt-0.5">&#x2022;</span>
-                  {goal}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Targeted Countries */}
-        {actor.targeted_countries?.length > 0 && (
-          <div className="mb-5">
-            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Globe size={12} />
-              Targeted Countries
-            </h3>
-            <div className="flex flex-wrap gap-1.5">
-              {actor.targeted_countries.map((country) => (
-                <span
-                  key={country}
-                  className="bg-cyan/10 text-cyan px-2.5 py-1 rounded-full text-xs font-mono"
-                >
-                  {country}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Targeted Sectors */}
-        {actor.targeted_sectors?.length > 0 && (
-          <div className="mb-5">
-            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Crosshair size={12} />
-              Targeted Sectors
-            </h3>
-            <div className="flex flex-wrap gap-1.5">
-              {actor.targeted_sectors.map((sector) => (
-                <span
-                  key={sector}
-                  className="bg-amber/10 text-amber px-2.5 py-1 rounded-full text-xs font-mono"
-                >
-                  {sector}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* External References */}
-        {actor.external_references?.length > 0 && (
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
           <div>
-            <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
-              External References
-            </h3>
-            <ul className="space-y-1.5">
-              {actor.external_references.map((ref, i) => (
-                <li key={i}>
-                  {ref.url ? (
-                    <a
-                      href={ref.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-1.5 text-sm font-mono hover:underline ${
-                        isMitre(ref) ? 'text-amber' : 'text-cyan'
-                      }`}
+            {actor.description && (
+              <div className="mb-5">
+                <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
+                  Description
+                </h3>
+                <p className="font-mono text-sm text-text-primary whitespace-pre-line leading-relaxed">
+                  {actor.description}
+                </p>
+              </div>
+            )}
+
+            {actor.goals?.length > 0 && (
+              <div className="mb-5">
+                <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
+                  Goals
+                </h3>
+                <ul className="space-y-1">
+                  {actor.goals.map((goal, i) => (
+                    <li key={i} className="font-mono text-sm text-text-primary flex items-start gap-2">
+                      <span className="text-violet mt-0.5">&#x2022;</span>
+                      {goal}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {actor.targeted_countries?.length > 0 && (
+              <div className="mb-5">
+                <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <Globe size={12} />
+                  Targeted Countries
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {actor.targeted_countries.map((country) => (
+                    <span
+                      key={country}
+                      className="bg-cyan/10 text-cyan px-2.5 py-1 rounded-full text-xs font-mono"
                     >
-                      <ExternalLink size={12} />
-                      {ref.source_name}
-                    </a>
-                  ) : (
-                    <span className="text-sm font-mono text-text-muted">
-                      {ref.source_name}
+                      {country}
                     </span>
-                  )}
-                  {ref.description && (
-                    <p className="text-xs text-text-muted ml-5 mt-0.5">
-                      {ref.description}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ul>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {actor.targeted_sectors?.length > 0 && (
+              <div className="mb-5">
+                <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <Crosshair size={12} />
+                  Targeted Sectors
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {actor.targeted_sectors.map((sector) => (
+                    <span
+                      key={sector}
+                      className="bg-amber/10 text-amber px-2.5 py-1 rounded-full text-xs font-mono"
+                    >
+                      {sector}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {actor.external_references?.length > 0 && (
+              <div>
+                <h3 className="text-xs font-sans text-text-muted uppercase tracking-wider mb-1.5">
+                  External References
+                </h3>
+                <ul className="space-y-1.5">
+                  {actor.external_references.map((ref, i) => (
+                    <li key={i}>
+                      {ref.url ? (
+                        <a
+                          href={ref.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex items-center gap-1.5 text-sm font-mono hover:underline ${
+                            isMitre(ref) ? 'text-amber' : 'text-cyan'
+                          }`}
+                        >
+                          <ExternalLink size={12} />
+                          {ref.source_name}
+                        </a>
+                      ) : (
+                        <span className="text-sm font-mono text-text-muted">
+                          {ref.source_name}
+                        </span>
+                      )}
+                      {ref.description && (
+                        <p className="text-xs text-text-muted ml-5 mt-0.5">
+                          {ref.description}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TTPs Tab */}
+        {activeTab === 'ttps' && !enrichError && (
+          <div>
+            {enrichLoading && (
+              <div className="animate-pulse space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i}>
+                    <div className="h-4 bg-surface-2 rounded w-1/3 mb-2" />
+                    <div className="h-3 bg-surface-2 rounded w-3/4 ml-4 mb-1" />
+                    <div className="h-3 bg-surface-2 rounded w-3/4 ml-4" />
+                  </div>
+                ))}
+              </div>
+            )}
+            {!enrichLoading && enrichment?.ttps?.length > 0 && (
+              <div>
+                {enrichment.ttps.map((group, gi) => (
+                  <div key={gi}>
+                    <h4 className="font-sans text-sm font-semibold text-violet-light mb-2">{group.tactic_label}</h4>
+                    <ul className="space-y-1 ml-4 mb-4">
+                      {group.techniques.map((technique, ti) => (
+                        <li key={ti} className="font-mono text-sm text-text-primary flex items-start gap-2">
+                          <span className="text-cyan mt-0.5">&#x2022;</span>
+                          {technique.name}
+                          {technique.mitre_id && (
+                            <span className="text-xs text-text-muted font-mono">({technique.mitre_id})</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!enrichLoading && (!enrichment?.ttps || enrichment.ttps.length === 0) && (
+              <div className="flex flex-col items-center justify-center py-8 text-text-muted">
+                <Swords size={32} className="mb-2 opacity-40" />
+                <p className="text-sm">No TTPs found for this actor</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tools Tab */}
+        {activeTab === 'tools' && !enrichError && (
+          <div>
+            {enrichLoading && (
+              <div className="animate-pulse flex flex-wrap gap-2">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="h-7 bg-surface-2 rounded-full w-24" />
+                ))}
+              </div>
+            )}
+            {!enrichLoading && (enrichment?.tools?.length > 0 || enrichment?.malware?.length > 0) && (
+              <div className="flex flex-wrap gap-2">
+                {(enrichment.tools || []).map(t => (
+                  <span key={t.id} className="bg-cyan/15 text-cyan px-3 py-1.5 rounded-full text-xs font-mono">
+                    {t.name}
+                  </span>
+                ))}
+                {(enrichment.malware || []).map(m => (
+                  <span key={m.id} className="bg-red/15 text-red px-3 py-1.5 rounded-full text-xs font-mono">
+                    {m.name}
+                  </span>
+                ))}
+              </div>
+            )}
+            {!enrichLoading && (!enrichment?.tools || enrichment.tools.length === 0) && (!enrichment?.malware || enrichment.malware.length === 0) && (
+              <div className="flex flex-col items-center justify-center py-8 text-text-muted">
+                <Bug size={32} className="mb-2 opacity-40" />
+                <p className="text-sm">No tools or malware found for this actor</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Campaigns Tab */}
+        {activeTab === 'campaigns' && !enrichError && (
+          <div>
+            {enrichLoading && (
+              <div className="animate-pulse space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-5 bg-surface-2 rounded w-2/3" />
+                ))}
+              </div>
+            )}
+            {!enrichLoading && enrichment?.campaigns?.length > 0 && (
+              <div className="space-y-3">
+                {enrichment.campaigns.map(c => (
+                  <div key={c.id} className="bg-surface-2/50 border border-border rounded-lg px-4 py-3">
+                    <p className="font-sans text-sm font-medium text-text-primary">{c.name}</p>
+                    {(c.first_seen || c.last_seen) && (
+                      <p className="font-mono text-xs text-text-muted mt-1">
+                        {c.first_seen ? formatDate(c.first_seen) : '?'}
+                        {' \u2014 '}
+                        {c.last_seen ? formatDate(c.last_seen) : 'ongoing'}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {!enrichLoading && (!enrichment?.campaigns || enrichment.campaigns.length === 0) && (
+              <div className="flex flex-col items-center justify-center py-8 text-text-muted">
+                <Flag size={32} className="mb-2 opacity-40" />
+                <p className="text-sm">No campaigns found for this actor</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Relationships Tab */}
+        {activeTab === 'relationships' && !enrichError && (
+          <div>
+            {enrichLoading && (
+              <div className="h-[320px] bg-surface-2 rounded-xl animate-pulse" />
+            )}
+            {!enrichLoading && enrichment?.relationships?.length > 0 && (
+              <RelationshipGraph
+                relationships={enrichment.relationships}
+                actorName={actor.name}
+                actorId={actor.id}
+              />
+            )}
+            {!enrichLoading && (!enrichment?.relationships || enrichment.relationships.length === 0) && (
+              <div className="flex flex-col items-center justify-center py-8 text-text-muted">
+                <GitBranch size={32} className="mb-2 opacity-40" />
+                <p className="text-sm">No relationships found for this actor</p>
+              </div>
+            )}
           </div>
         )}
       </motion.div>
