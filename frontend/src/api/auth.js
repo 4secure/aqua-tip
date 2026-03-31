@@ -47,3 +47,8 @@ export async function completeOnboarding({ name, phone, timezone, organization, 
   await csrfCookie();
   return apiClient.post('/api/onboarding', { name, phone, timezone, organization, role });
 }
+
+export async function updateProfile({ name, phone, timezone, organization, role }) {
+  await csrfCookie();
+  return apiClient.put('/api/profile', { name, phone, timezone, organization, role });
+}
