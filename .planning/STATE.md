@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
-status: Ready to plan
-stopped_at: Phase 35 context gathered
-last_updated: "2026-03-31T11:40:49.171Z"
+status: Ready to execute
+stopped_at: Completed 35-01-PLAN.md
+last_updated: "2026-03-31T21:44:13.101Z"
 last_activity: 2026-03-31
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 8
+  total_plans: 10
   completed_plans: 8
 ---
 
@@ -20,12 +20,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 34 — enriched-threat-actor-modal
+**Current focus:** Phase 35 — functional-settings-page
 
 ## Current Position
 
-Phase: 35
-Plan: Not started
+Phase: 35 (functional-settings-page) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Plan: Not started
 | Phase 33-category-distribution-chart P01 | 2m28s | 2 tasks | 2 files |
 | Phase 34 P01 | 2min | 1 tasks | 3 files |
 | Phase 34 P02 | 4min | 1 tasks | 2 files |
+| Phase 35 P01 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,7 @@ Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 - [Phase 33]: Client-side hourly bucketing with 6-color hex chart palette for stacked area category distribution
 - [Phase 34]: Hardcoded MITRE ATT&CK kill chain order array with other fallback for TTP tactic grouping
 - [Phase 34]: D3 graph dimensions reduced for modal context (320px, radius 18/12, strength -300) vs full-page graph
+- [Phase 35]: Mirror onboarding validation rules exactly for profile update consistency
 
 ### Pending Todos
 
@@ -85,6 +87,6 @@ None.
 ## Session Continuity
 
 Last activity: 2026-03-31
-Last session: 2026-03-31T11:40:49.164Z
-Stopped at: Phase 35 context gathered
-Resume file: .planning/phases/35-functional-settings-page/35-CONTEXT.md
+Last session: 2026-03-31T21:44:13.095Z
+Stopped at: Completed 35-01-PLAN.md
+Resume file: None

@@ -38,8 +38,8 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 
 ### Settings/Profile
 
-- [ ] **SETTINGS-01**: User sees their real profile data on the settings page (not dummy data)
-- [ ] **SETTINGS-02**: User can update their profile information and see changes reflected immediately
+- [x] **SETTINGS-01**: User sees their real profile data on the settings page (not dummy data)
+- [x] **SETTINGS-02**: User can update their profile information and see changes reflected immediately
 
 ## Future Requirements
 
@@ -80,8 +80,8 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 | SEARCH-01 | Phase 30 | Pending |
 | SEARCH-02 | Phase 30 | Pending |
 | SEARCH-03 | Phase 30 | Pending |
-| SETTINGS-01 | Phase 35 | Pending |
-| SETTINGS-02 | Phase 35 | Pending |
+| SETTINGS-01 | Phase 35 | Complete |
+| SETTINGS-02 | Phase 35 | Complete |
 
 **Coverage:**
 - v3.2 requirements: 16 total
