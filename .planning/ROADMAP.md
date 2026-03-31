@@ -24,7 +24,7 @@
 - [x] **Phase 32: Date-Based News Browsing** - Date selector replacing pagination with timezone-aware backend filtering (completed 2026-03-29)
 - [x] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date (completed 2026-03-30)
 - [x] **Phase 34: Enriched Threat Actor Modal** - TTPs, tools, campaigns, and targeted sectors via fetch-on-open (completed 2026-03-31)
-- [ ] **Phase 35: Functional Settings Page** - Real profile data display and editing with AuthContext sync
+- [x] **Phase 35: Functional Settings Page** - Real profile data display and editing with AuthContext sync (completed 2026-03-31)
 
 ## Phase Details
 
@@ -106,10 +106,10 @@ Plans:
   1. User sees their real profile data (name, email, phone, timezone, organization, role, plan) on the settings page
   2. User can edit profile fields and see changes reflected immediately after saving
   3. AuthContext syncs updated user data after a successful profile save (no stale data in sidebar or topbar)
-**Plans:** 0/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 35-01-PLAN.md -- Backend profile endpoint + UserResource updates + API client layer
-- [ ] 35-02-PLAN.md -- Frontend SettingsPage rewrite with Toast component
+- [x] 35-01-PLAN.md -- Backend profile endpoint + UserResource updates + API client layer
+- [x] 35-02-PLAN.md -- Frontend SettingsPage rewrite with Toast component
 **UI hint**: yes
 
 ## Progress
@@ -124,4 +124,4 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 | 32. Date-Based News Browsing | 2/2 | Complete    | 2026-03-29 |
 | 33. Category Distribution Chart | 0/1 | Complete    | 2026-03-30 |
 | 34. Enriched Threat Actor Modal | 1/2 | Complete    | 2026-03-31 |
-| 35. Functional Settings Page | 0/2 | Planned    |  |
+| 35. Functional Settings Page | 2/2 | Complete   | 2026-03-31 |

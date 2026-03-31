@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
-status: Ready to execute
-stopped_at: Completed 35-01-PLAN.md
-last_updated: "2026-03-31T21:44:13.101Z"
+status: Phase complete — ready for verification
+stopped_at: "Checkpoint: 35-02 Task 2 human-verify"
+last_updated: "2026-03-31T21:51:17.180Z"
 last_activity: 2026-03-31
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 10
 ---
 
 # Project State
@@ -50,6 +50,7 @@ Plan: 2 of 2
 | Phase 34 P01 | 2min | 1 tasks | 3 files |
 | Phase 34 P02 | 4min | 1 tasks | 2 files |
 | Phase 35 P01 | 3min | 2 tasks | 6 files |
+| Phase 35 P02 | 3min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,7 @@ Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 - [Phase 34]: Hardcoded MITRE ATT&CK kill chain order array with other fallback for TTP tactic grouping
 - [Phase 34]: D3 graph dimensions reduced for modal context (320px, radius 18/12, strength -300) vs full-page graph
 - [Phase 35]: Mirror onboarding validation rules exactly for profile update consistency
+- [Phase 35]: useRef initialValues with effective role for dirty-checking profile edits
 
 ### Pending Todos
 
@@ -87,6 +89,6 @@ None.
 ## Session Continuity
 
 Last activity: 2026-03-31
-Last session: 2026-03-31T21:44:13.095Z
-Stopped at: Completed 35-01-PLAN.md
+Last session: 2026-03-31T21:51:17.172Z
+Stopped at: Checkpoint: 35-02 Task 2 human-verify
 Resume file: None
