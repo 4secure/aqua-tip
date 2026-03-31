@@ -23,7 +23,7 @@
 - [x] **Phase 31: Auto-Refresh Infrastructure** - Reusable useAutoRefresh hook for Threat News and Threat Actors (completed 2026-03-29)
 - [x] **Phase 32: Date-Based News Browsing** - Date selector replacing pagination with timezone-aware backend filtering (completed 2026-03-29)
 - [x] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date (completed 2026-03-30)
-- [ ] **Phase 34: Enriched Threat Actor Modal** - TTPs, tools, campaigns, and targeted sectors via fetch-on-open
+- [x] **Phase 34: Enriched Threat Actor Modal** - TTPs, tools, campaigns, and targeted sectors via fetch-on-open (completed 2026-03-31)
 - [ ] **Phase 35: Functional Settings Page** - Real profile data display and editing with AuthContext sync
 
 ## Phase Details
@@ -92,7 +92,7 @@ Plans:
   1. User sees TTPs (with MITRE ATT&CK IDs where available), tools/malware, campaigns, and targeted sectors in the threat actor modal
   2. Modal shows a loading skeleton while enrichment data is fetched (fetch-on-open pattern)
   3. Modal gracefully handles actors with no relationships (empty state, not error)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 34-01-PLAN.md -- Backend enrichment endpoint (controller + service + route)
 - [ ] 34-02-PLAN.md -- Frontend tabbed modal with enrichment tabs and D3 graph
@@ -108,7 +108,7 @@ Plans:
   3. AuthContext syncs updated user data after a successful profile save (no stale data in sidebar or topbar)
 **Plans:** 2 plans
 Plans:
-- [ ] 34-01-PLAN.md -- Backend enrichment endpoint (controller + service + route)
+- [x] 34-01-PLAN.md -- Backend enrichment endpoint (controller + service + route)
 - [ ] 34-02-PLAN.md -- Frontend tabbed modal with enrichment tabs and D3 graph
 **UI hint**: yes
 
@@ -123,5 +123,5 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 | 31. Auto-Refresh Infrastructure | 1/1 | Complete    | 2026-03-28 |
 | 32. Date-Based News Browsing | 2/2 | Complete    | 2026-03-29 |
 | 33. Category Distribution Chart | 0/1 | Complete    | 2026-03-30 |
-| 34. Enriched Threat Actor Modal | 1/2 | In Progress|  |
+| 34. Enriched Threat Actor Modal | 1/2 | Complete    | 2026-03-31 |
 | 35. Functional Settings Page | 0/? | Not started | - |

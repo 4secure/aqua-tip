@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
-status: Ready to execute
-stopped_at: Completed 34-01-PLAN.md
-last_updated: "2026-03-30T21:19:17.506Z"
-last_activity: 2026-03-30
+status: Ready to plan
+stopped_at: Completed 34-02-PLAN.md (Task 2 checkpoint pending)
+last_updated: "2026-03-31T11:28:24.033Z"
+last_activity: 2026-03-31
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -24,8 +24,8 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 ## Current Position
 
-Phase: 34 (enriched-threat-actor-modal) — EXECUTING
-Plan: 2 of 2
+Phase: 35
+Plan: Not started
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Plan: 2 of 2
 | Phase 32 P01 | 1min | 2 tasks | 3 files |
 | Phase 33-category-distribution-chart P01 | 2m28s | 2 tasks | 2 files |
 | Phase 34 P01 | 2min | 1 tasks | 3 files |
+| Phase 34 P02 | 4min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,7 @@ Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 - [Phase 32]: within operator on published field for date range filtering (OpenCTI native)
 - [Phase 33]: Client-side hourly bucketing with 6-color hex chart palette for stacked area category distribution
 - [Phase 34]: Hardcoded MITRE ATT&CK kill chain order array with other fallback for TTP tactic grouping
+- [Phase 34]: D3 graph dimensions reduced for modal context (320px, radius 18/12, strength -300) vs full-page graph
 
 ### Pending Todos
 
@@ -82,7 +84,7 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-03-30
-Last session: 2026-03-30T21:19:17.492Z
-Stopped at: Completed 34-01-PLAN.md
+Last activity: 2026-03-31
+Last session: 2026-03-30T21:27:09.735Z
+Stopped at: Completed 34-02-PLAN.md (Task 2 checkpoint pending)
 Resume file: None
