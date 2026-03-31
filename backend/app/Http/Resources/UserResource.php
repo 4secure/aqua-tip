@@ -51,6 +51,8 @@ class UserResource extends JsonResource
                 ]
             ),
             'plan_change_at' => $this->plan_change_at?->toIso8601String(),
+            'oauth_provider' => $this->oauth_provider,
+            'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
 }

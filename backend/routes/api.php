@@ -27,6 +27,7 @@ use App\Http\Controllers\Dashboard\IndicatorsController as DashboardIndicatorsCo
 use App\Http\Controllers\Dashboard\CategoriesController as DashboardCategoriesController;
 use App\Http\Controllers\Plan\PlanIndexController;
 use App\Http\Controllers\Plan\PlanSelectionController;
+use App\Http\Controllers\Profile\UpdateController as ProfileUpdateController;
 use App\Http\Controllers\SearchHistory\IndexController as SearchHistoryIndexController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/verify-code', VerifyEmailCodeController::class);
     Route::post('/onboarding', OnboardingController::class);
     Route::get('/user', UserController::class);
+    Route::put('/profile', ProfileUpdateController::class);
     Route::post('/logout', LogoutController::class);
 
     // Dark web search (authenticated + credit-gated)
