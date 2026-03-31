@@ -53,6 +53,7 @@ async function request(method, url, data) {
 export const apiClient = {
   get: (url) => request('GET', url),
   post: (url, data) => request('POST', url, data),
+  put: (url, data) => request('PUT', url, data),
 };
 
 export function csrfCookie() {
