@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
-status: Phase complete — ready for verification
-stopped_at: "Checkpoint: 35-02 Task 2 human-verify"
-last_updated: "2026-03-31T21:51:17.180Z"
-last_activity: 2026-03-31
+status: Ready to execute
+stopped_at: Completed 34-03-PLAN.md
+last_updated: "2026-04-04T12:23:40.099Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 6
   completed_phases: 6
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 11
+  completed_plans: 11
 ---
 
 # Project State
@@ -20,12 +20,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 35 — functional-settings-page
+**Current focus:** Phase 34 — enriched-threat-actor-modal
 
 ## Current Position
 
-Phase: 35 (functional-settings-page) — EXECUTING
-Plan: 2 of 2
+Phase: 34 (enriched-threat-actor-modal) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Plan: 2 of 2
 | Phase 34 P02 | 4min | 1 tasks | 2 files |
 | Phase 35 P01 | 3min | 2 tasks | 6 files |
 | Phase 35 P02 | 3min | 1 tasks | 4 files |
+| Phase 34 P03 | 5min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,7 @@ Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 - [Phase 34]: D3 graph dimensions reduced for modal context (320px, radius 18/12, strength -300) vs full-page graph
 - [Phase 35]: Mirror onboarding validation rules exactly for profile update consistency
 - [Phase 35]: useRef initialValues with effective role for dirty-checking profile edits
+- [Phase 34]: Concrete GraphQL type fragments instead of abstract StixDomainObject for OpenCTI polymorphic union fields
 
 ### Pending Todos
 
@@ -88,7 +90,7 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-03-31
-Last session: 2026-03-31T21:51:17.172Z
-Stopped at: Checkpoint: 35-02 Task 2 human-verify
+Last activity: 2026-04-04
+Last session: 2026-04-04T12:23:40.096Z
+Stopped at: Completed 34-03-PLAN.md
 Resume file: None

@@ -92,10 +92,10 @@ Plans:
   1. User sees TTPs (with MITRE ATT&CK IDs where available), tools/malware, campaigns, and targeted sectors in the threat actor modal
   2. Modal shows a loading skeleton while enrichment data is fetched (fetch-on-open pattern)
   3. Modal gracefully handles actors with no relationships (empty state, not error)
-**Plans:** 2/2 plans complete
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 34-01-PLAN.md -- Backend enrichment endpoint (controller + service + route)
-- [ ] 34-02-PLAN.md -- Frontend tabbed modal with enrichment tabs and D3 graph
+- [x] 34-02-PLAN.md -- Frontend tabbed modal with enrichment tabs and D3 graph
 **UI hint**: yes
 
 ### Phase 35: Functional Settings Page
@@ -123,5 +123,5 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 | 31. Auto-Refresh Infrastructure | 1/1 | Complete    | 2026-03-28 |
 | 32. Date-Based News Browsing | 2/2 | Complete    | 2026-03-29 |
 | 33. Category Distribution Chart | 0/1 | Complete    | 2026-03-30 |
-| 34. Enriched Threat Actor Modal | 1/2 | Complete    | 2026-03-31 |
+| 34. Enriched Threat Actor Modal | 3/3 | Complete   | 2026-04-04 |
 | 35. Functional Settings Page | 2/2 | Complete   | 2026-03-31 |
