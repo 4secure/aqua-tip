@@ -267,6 +267,52 @@
 
 ---
 
+## Milestone: v3.2 — App Layout Page Tweaks
+
+**Shipped:** 2026-04-05
+**Phases:** 7 | **Plans:** 12
+
+### What Was Built
+- Dashboard expanded to 7 observable stat cards with "Threat Database" heading, "100 Latest Attacks" map label
+- Reusable useAutoRefresh hook with visibility-aware 5-min interval powering Threat News and Threat Actors
+- Date-based threat news browsing with calendar dropdown, timezone-aware UTC filtering (replaces pagination)
+- Stacked area category distribution chart with hourly bucketing and click-to-filter on Threat News
+- Enriched threat actor modal with TTPs (MITRE ATT&CK tactic-grouped), tools, campaigns, targeted sectors
+- Functional settings page with real profile data, dirty-checking edit, toast feedback, AuthContext sync
+- Phase 36 gap closure: VERIFICATION.md, REQUIREMENTS.md sync, SUMMARY frontmatter fixes, debug cleanup
+
+### What Worked
+- Backend-first approach continued to pay off — Phases 34-01 (enrichment API) and 35-01 (profile API) before their frontend counterparts
+- useAutoRefresh as a shared hook made adding silent refresh to any page trivial (2 lines of integration)
+- OpenCTI `within` operator for date range filtering was the right native approach (no post-filtering)
+- Concrete GraphQL type fragments solved OpenCTI's polymorphic union field issue elegantly
+- Phase 36 (gap closure) as a dedicated documentation-only phase was efficient — cleaned all audit gaps in one pass
+- Milestone audit before completion caught 6 real gaps that Phase 36 then closed
+
+### What Was Inefficient
+- OpenCTI GraphQL schema for enrichment required 3 plans (34-01, 34-02, 34-03) due to schema discovery issues — polymorphic `StixDomainObject` fragments didn't resolve, needed concrete `IntrusionSet`/`Malware` types
+- ROADMAP.md plan checkboxes still drifted (Phase 30 shows `[ ]` for both plans despite being complete)
+- Nyquist VALIDATION.md files remained partial across all 7 phases — none reached compliant status
+- Two phases needed `human_needed` VERIFICATION status for visual/interaction testing that was never performed
+
+### Patterns Established
+- useAutoRefresh hook: visibility-aware interval with ref-based fetchFn to prevent restarts
+- CalendarDropdown with URL `?date=` param for date state persistence and sharing
+- UTC boundary computation from IANA timezone for date-scoped API queries
+- Client-side hourly bucketing for time-series charts when backend aggregation is unavailable
+- Hardcoded MITRE ATT&CK kill chain order for deterministic TTP tactic grouping
+- Mirror onboarding validation rules for profile update (consistency pattern)
+- Gap-closure phase pattern: dedicated docs-only phase to close audit findings
+
+### Key Lessons
+1. OpenCTI's GraphQL schema for relationships is complex — always test enrichment queries against real data before planning frontend tabs
+2. Dedicated gap-closure phases are worth the overhead — Phase 36 resolved 6 issues in one clean pass
+3. Milestone audits should run early and often — the first audit (2026-04-04) found real gaps that would have shipped unresolved
+4. ROADMAP.md plan checkbox tracking remains a persistent problem — need automated tooling or accept manual drift
+5. Nyquist validation needs a decision: enforce or remove — partial compliance adds noise without gates
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -280,6 +326,7 @@
 | v2.2 | 4 | 6 | Live dashboard + search history — stale-cache fallback, auth-gated widgets |
 | v3.0 | 5 | 10 | Onboarding, trial & plans — CreditResolver extraction, pricing page, timezone formatting |
 | v3.1 | 3 | 3 | Font & UI polish — Outfit migration, topbar plan chip, dead code cleanup |
+| v3.2 | 7 | 12 | Page tweaks — auto-refresh, date browsing, enrichment modal, settings, gap closure |
 
 ### Cumulative Quality
 
@@ -292,6 +339,7 @@
 | v2.2 | 111+ Pest | Backend only | 0 new |
 | v3.0 | 140+ Pest | Backend only | 1 (TRIAL-06 race condition) |
 | v3.1 | 140+ Pest | Backend only | 0 new (frontend-only milestone) |
+| v3.2 | 140+ Pest | Backend only | 3 tech debt (2 visual testing pending, 1 phone validation edge case) |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -304,3 +352,5 @@
 7. Visual verification tasks catch real bugs — budget time for them in frontend phases
 8. Service extraction before feature code prevents duplication — centralize shared logic first
 9. Integration race conditions are only visible at audit time — budget cross-phase integration testing
+10. Run milestone audits early — they catch real gaps that dedicated gap-closure phases can resolve cleanly
+11. Test enrichment queries against real OpenCTI data before planning frontend — schema discovery issues cause plan bloat

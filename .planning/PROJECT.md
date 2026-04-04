@@ -88,28 +88,19 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Threat News date-based browsing with calendar dropdown (replaces pagination) — v3.2
 - ✓ Backend date_start/date_end filtering with OpenCTI within operator — v3.2
 - ✓ Timezone-aware UTC boundary computation for date filtering — v3.2
-
-## Current Milestone: v3.2 App Layout Page Tweaks
-
-**Goal:** Enhance and polish all app layout pages with richer data, better UX patterns, and functional settings.
-
-**Target features:**
-- Dashboard: "Threat Database" heading above stat cards, expand to 7 cards (add Email, Crypto Wallet, URL), remove Live label/dot
-- Threat Map: Cap to 100 most recent IPs, replace "Active Threats" with "100 Latest Attacks" label
-- Threat News: 5-min auto-refresh, date-based filtering with date selector (replaces pagination), category distribution time-series chart
-- Threat Actors: Enriched modal with deeper OpenCTI data (TTPs, tools, sectors, campaigns), 5-min auto-refresh
-- Threat Search: Fix relation graph node positioning bug, proper search loader, fix search bar z-index when logged out
-- Settings/Profile: Functional page with real user data (replace dummy data)
+- ✓ Dashboard expanded to 7 stat cards with "Threat Database" heading — v3.2
+- ✓ Threat Map capped to 100 IPs with "100 Latest Attacks" label — v3.2
+- ✓ Dashboard Live label and pulsating dot removed — v3.2
+- ✓ Category distribution stacked area chart on Threat News — v3.2
+- ✓ Enriched threat actor modal with TTPs, tools, campaigns, targeted sectors — v3.2
+- ✓ D3 graph node positioning fix and skeleton loading on Threat Search — v3.2
+- ✓ Search bar topbar clearance fix for logged-out users — v3.2
+- ✓ Functional settings page with real profile data and editing — v3.2
+- ✓ AuthContext sync after profile save (no stale sidebar/topbar) — v3.2
 
 ### Active
 
-- [ ] Dashboard stat cards expanded with Threat Database heading
-- [ ] Threat Map capped to 100 latest IPs with updated label
-- [x] Threat News date-based filtering and auto-refresh — Phase 31+32
-- [ ] Threat News category distribution chart
-- [ ] Threat Actors enriched modal and auto-refresh
-- [ ] Threat Search bug fixes (graph nodes, loader, z-index)
-- [ ] Settings/Profile page functional with real data
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -129,9 +120,9 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ## Context
 
-Shipped v3.1 with ~22,000+ LOC (JS/JSX + PHP).
+Shipped v3.2 with ~34,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-31 phases, 54 plans completed across 7 milestones in 15 days.
+36 phases, 65 plans completed across 8 milestones in 23 days.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
@@ -195,6 +186,14 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Violet pill plan chip in topbar | Consistent design system usage (bg-violet/10) | ✓ Good |
 | Full notification dead code removal | No notification system exists, clean slate | ✓ Good |
 | Reusable useAutoRefresh hook pattern | Generic hook with visibility-aware interval, pages add silent refresh callbacks | ✓ Good |
+| Flexbox justify-center for 4+3 stat card layout | Simpler than CSS grid for variable-count centered rows | ✓ Good |
+| Separate silentRefresh callbacks per page | Avoids setLoading flicker during auto-refresh | ✓ Good |
+| OpenCTI `within` operator for date range filtering | Native OpenCTI filter on published field, no post-filter | ✓ Good |
+| Client-side hourly bucketing for category chart | 6-color hex palette, stacked area chart with click-to-filter | ✓ Good |
+| Concrete GraphQL type fragments for enrichment | Solves OpenCTI polymorphic union field resolution | ✓ Good |
+| Hardcoded MITRE ATT&CK kill chain order | Deterministic tactic grouping with "other" fallback | ✓ Good |
+| Mirror onboarding validation for profile update | Consistent validation rules between onboarding and settings | ✓ Good |
+| useRef initialValues for dirty-checking | Effective role comparison prevents false-positive saves | ✓ Good |
 
 ---
-*Last updated: 2026-03-30 after Phase 33 complete (Category Distribution Chart — stacked area chart on Threat News showing hourly category distribution with click-to-filter)*
+*Last updated: 2026-04-05 after v3.2 milestone (App Layout Page Tweaks — 7 phases, 16 requirements shipped)*

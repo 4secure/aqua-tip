@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
-status: Milestone complete
-stopped_at: Completed 36-01-PLAN.md
-last_updated: "2026-04-04T22:56:18.864Z"
-last_activity: 2026-04-04
+status: Milestone archived
+stopped_at: Milestone v3.2 complete and archived
+last_updated: "2026-04-05"
+last_activity: 2026-04-05
 progress:
   total_phases: 7
   completed_phases: 7
@@ -17,22 +17,22 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-28)
+See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 36 — verification-documentation-sync
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 36
-Plan: Not started
+Milestone: v3.2 archived
+Next: `/gsd:new-milestone`
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 53 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3)
-- Total milestones: 7 shipped in 15 days
+- Total plans completed: 65 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12)
+- Total milestones: 8 shipped in 23 days
 
 **By Milestone:**
 
@@ -45,32 +45,13 @@ Plan: Not started
 | v2.2 Live Dashboard & Search History | 4 | 6 | 2 days |
 | v3.0 Onboarding, Trial & Plans | 5 | 10 | 4 days |
 | v3.1 Font & UI Polish | 3 | 3 | 3 days |
-| Phase 32 P01 | 1min | 2 tasks | 3 files |
-| Phase 33-category-distribution-chart P01 | 2m28s | 2 tasks | 2 files |
-| Phase 34 P01 | 2min | 1 tasks | 3 files |
-| Phase 34 P02 | 4min | 1 tasks | 2 files |
-| Phase 35 P01 | 3min | 2 tasks | 6 files |
-| Phase 35 P02 | 3min | 1 tasks | 4 files |
-| Phase 34 P03 | 5min | 2 tasks | 2 files |
-| Phase 36 P01 | 3min | 2 tasks | 4 files |
+| v3.2 App Layout Page Tweaks | 7 | 12 | 8 days |
 
 ## Accumulated Context
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table (42 entries across 7 milestones).
-Recent for v3.2: Zero new dependencies validated against 6 alternatives.
-
-- [Phase 30]: Used flexbox justify-center for 4+3 stat card layout instead of CSS grid
-- [Phase 31]: Separate silentRefresh callbacks per page to avoid setLoading flicker; ref-based fetchFn in useAutoRefresh to prevent interval restarts
-- [Phase 32]: within operator on published field for date range filtering (OpenCTI native)
-- [Phase 33]: Client-side hourly bucketing with 6-color hex chart palette for stacked area category distribution
-- [Phase 34]: Hardcoded MITRE ATT&CK kill chain order array with other fallback for TTP tactic grouping
-- [Phase 34]: D3 graph dimensions reduced for modal context (320px, radius 18/12, strength -300) vs full-page graph
-- [Phase 35]: Mirror onboarding validation rules exactly for profile update consistency
-- [Phase 35]: useRef initialValues with effective role for dirty-checking profile edits
-- [Phase 34]: Concrete GraphQL type fragments instead of abstract StixDomainObject for OpenCTI polymorphic union fields
-- [Phase 36]: Phase references in traceability table updated to actual implementing phases (30, 35) instead of gap closure phase 36
+All decisions logged in PROJECT.md Key Decisions table (50 entries across 8 milestones).
 
 ### Pending Todos
 
@@ -79,8 +60,6 @@ None.
 ### Blockers/Concerns
 
 - OpenCTI on private network (192.168.251.20) -- works locally but needs tunneling for Railway
-- OpenCTI aggregation query support for category chart needs validation during Phase 33 planning
-- DashboardService expanding from 4 to 7 sequential GraphQL queries -- consider aliased batching in Phase 30
 - TRIAL-06 race condition: TrialBanner expired state may be pre-empted by lazy Free plan assignment (tech debt from v3.0)
 
 ### Quick Tasks Completed
@@ -92,7 +71,7 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-04-04
-Last session: 2026-04-04T22:53:13.877Z
-Stopped at: Completed 36-01-PLAN.md
+Last activity: 2026-04-05
+Last session: Milestone v3.2 completion
+Stopped at: Milestone archived
 Resume file: None

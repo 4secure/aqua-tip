@@ -1,5 +1,23 @@
 # Milestones
 
+## v3.2 App Layout Page Tweaks (Shipped: 2026-04-05)
+
+**Phases completed:** 7 phases, 12 plans, 19 tasks
+**Timeline:** 8 days (2026-03-28 → 2026-04-05)
+**Requirements:** 16/16 complete
+**Files modified:** 82 (+12,630 / -435 lines)
+
+**Key accomplishments:**
+
+1. Dashboard expanded to 7 observable stat cards with "Threat Database" heading and "100 Latest Attacks" map label
+2. Reusable visibility-aware useAutoRefresh hook powering silent 5-min updates on Threat News and Threat Actors
+3. Date-based threat news browsing with calendar dropdown, timezone-aware UTC filtering, replacing pagination
+4. Stacked area category distribution chart with hourly bucketing and click-to-filter on Threat News
+5. Enriched threat actor modal with TTPs (MITRE ATT&CK grouped), tools, campaigns, and targeted sectors via fetch-on-open
+6. Functional settings page with real profile data, editing, and AuthContext sync
+
+---
+
 ## v3.1 Font & UI Polish (Shipped: 2026-03-27)
 
 **Phases completed:** 3 phases, 3 plans, 5 tasks
