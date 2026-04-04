@@ -1,5 +1,5 @@
 ---
-status: partial
+status: diagnosed
 phase: 34-enriched-threat-actor-modal
 source: [34-01-SUMMARY.md, 34-02-SUMMARY.md]
 started: 2026-04-04T12:00:00Z
@@ -75,52 +75,61 @@ blocked: 1
   reason: "User reported: i can see the tabs but getting this in each tab Failed to load enrichment data"
   severity: major
   test: 1
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "EnrichmentController only catches OpenCtiConnectionException, not OpenCtiQueryException — unhandled exception returns 500"
+  artifacts:
+    - path: "backend/app/Http/Controllers/ThreatActor/EnrichmentController.php"
+      issue: "Missing catch for OpenCtiQueryException at line 21"
+    - path: "backend/app/Services/ThreatActorService.php"
+      issue: "GraphQL query may reference fields changed in OpenCTI schema (lines 263-376)"
+  missing:
+    - "Add catch clause for OpenCtiQueryException returning structured JSON error"
+    - "Verify GraphQL enrichment query against current OpenCTI schema"
+  debug_session: ".planning/debug/threat-actor-enrichment-fail.md"
 - truth: "TTPs tab shows techniques grouped by MITRE ATT&CK tactic with T-codes in kill chain order"
   status: failed
   reason: "User reported: getting this Failed to load enrichment data"
   severity: major
   test: 3
-  root_cause: ""
+  root_cause: "Same as test 1 — single enrichment API failure affects all tabs"
   artifacts: []
   missing: []
-  debug_session: ""
+  debug_session: ".planning/debug/threat-actor-enrichment-fail.md"
 - truth: "Tools tab shows tool chips (cyan) and malware chips (red) with names"
   status: failed
   reason: "User reported: getting this Failed to load enrichment data"
   severity: major
   test: 4
-  root_cause: ""
+  root_cause: "Same as test 1 — single enrichment API failure affects all tabs"
   artifacts: []
   missing: []
-  debug_session: ""
+  debug_session: ".planning/debug/threat-actor-enrichment-fail.md"
 - truth: "Campaigns tab shows campaign cards with first_seen/last_seen date ranges"
   status: failed
   reason: "User reported: getting this Failed to load enrichment data"
   severity: major
   test: 5
-  root_cause: ""
+  root_cause: "Same as test 1 — single enrichment API failure affects all tabs"
   artifacts: []
   missing: []
-  debug_session: ""
+  debug_session: ".planning/debug/threat-actor-enrichment-fail.md"
 - truth: "Relationships tab shows D3 force-directed graph with actor as center node"
   status: failed
   reason: "User reported: getting this Failed to load enrichment data"
   severity: major
   test: 6
-  root_cause: ""
+  root_cause: "Same as test 1 — single enrichment API failure affects all tabs"
   artifacts: []
   missing: []
-  debug_session: ""
+  debug_session: ".planning/debug/threat-actor-enrichment-fail.md"
 - truth: "Enrichment tabs show skeleton loading animations while data is fetching"
   status: failed
   reason: "User reported: it opening directly i cannot see any skeleton"
   severity: minor
   test: 7
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Skeletons exist in code but API fails so fast that loading state is never visible — fixing the API error will resolve this"
+  artifacts:
+    - path: "frontend/src/pages/ThreatActorsPage.jsx"
+      issue: "Skeletons at lines 704-816 render only when enrichLoading && !enrichError — error arrives instantly"
+  missing:
+    - "No code change needed — will resolve when enrichment API works correctly"
+  debug_session: ".planning/debug/threat-actor-enrichment-fail.md"
