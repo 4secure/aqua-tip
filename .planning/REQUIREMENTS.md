@@ -32,14 +32,14 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 
 ### Threat Search
 
-- [ ] **SEARCH-01**: Relation graph nodes display in correct positions (not clustered in top-left)
-- [ ] **SEARCH-02**: User sees a proper loading indicator during search (not spinning logo)
-- [ ] **SEARCH-03**: Search bar does not go under the topbar when user is logged out
+- [x] **SEARCH-01**: Relation graph nodes display in correct positions (not clustered in top-left)
+- [x] **SEARCH-02**: User sees a proper loading indicator during search (not spinning logo)
+- [x] **SEARCH-03**: Search bar does not go under the topbar when user is logged out
 
 ### Settings/Profile
 
-- [ ] **SETTINGS-01**: User sees their real profile data on the settings page (not dummy data)
-- [ ] **SETTINGS-02**: User can update their profile information and see changes reflected immediately
+- [x] **SETTINGS-01**: User sees their real profile data on the settings page (not dummy data)
+- [x] **SETTINGS-02**: User can update their profile information and see changes reflected immediately
 
 ## Future Requirements
 
@@ -77,11 +77,11 @@ Requirements for App Layout Page Tweaks milestone. Each maps to roadmap phases.
 | NEWS-04 | Phase 33 | Complete |
 | ACTOR-01 | Phase 34 | Complete |
 | ACTOR-02 | Phase 31 | Complete |
-| SEARCH-01 | Phase 36 (gap closure) | Pending |
-| SEARCH-02 | Phase 36 (gap closure) | Pending |
-| SEARCH-03 | Phase 36 (gap closure) | Pending |
-| SETTINGS-01 | Phase 36 (gap closure) | Pending |
-| SETTINGS-02 | Phase 36 (gap closure) | Pending |
+| SEARCH-01 | Phase 30 | Complete |
+| SEARCH-02 | Phase 30 | Complete |
+| SEARCH-03 | Phase 30 | Complete |
+| SETTINGS-01 | Phase 35 | Complete |
+| SETTINGS-02 | Phase 35 | Complete |
 
 **Coverage:**
 - v3.2 requirements: 16 total
