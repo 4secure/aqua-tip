@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.2
-milestone_name: App Layout Page Tweaks
-status: Milestone archived
-stopped_at: Milestone v3.2 complete and archived
+milestone: v3.3
+milestone_name: Threat Map Dashboard
+status: Defining requirements
+stopped_at: null
 last_updated: "2026-04-05"
 last_activity: 2026-04-05
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 12
-  completed_plans: 12
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -20,12 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Planning next milestone
+**Current focus:** v3.3 Threat Map Dashboard
 
 ## Current Position
 
-Milestone: v3.2 archived
-Next: `/gsd:new-milestone`
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-05 — Milestone v3.3 started
 
 ## Performance Metrics
 
@@ -72,6 +74,6 @@ None.
 ## Session Continuity
 
 Last activity: 2026-04-05
-Last session: Milestone v3.2 completion
-Stopped at: Milestone archived
+Last session: Milestone v3.3 initialization
+Stopped at: Defining requirements
 Resume file: None

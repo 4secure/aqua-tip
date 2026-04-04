@@ -98,9 +98,29 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Functional settings page with real profile data and editing — v3.2
 - ✓ AuthContext sync after profile save (no stale sidebar/topbar) — v3.2
 
+## Current Milestone: v3.3 Threat Map Dashboard
+
+**Goal:** Replace the dashboard with an enhanced threat map at `/dashboard` — existing map features preserved, new overlay panels for stats and indicators with toggle + peek-on-hover.
+
+**Target features:**
+- Remove DashboardPage, threat map renders at `/dashboard`
+- Keep existing map widgets (live feed, pulse markers, counters, "100 Latest Attacks")
+- Left overlay panel: 7 threat database stat cards (stacked)
+- Right overlay panel: recent indicators table
+- Toggle button: panels visible by default, toggle collapses them
+- Peek behavior: collapsed panels show a thin edge sliver; hovering reveals just that panel independently
+- Smooth slide animation with Framer Motion
+
 ### Active
 
-(None — planning next milestone)
+- [ ] Threat map replaces dashboard at `/dashboard` route
+- [ ] DashboardPage removed entirely
+- [ ] Left overlay: 7 threat database stat cards
+- [ ] Right overlay: recent indicators table
+- [ ] Toggle button to collapse/expand overlay panels
+- [ ] Peek sliver on collapsed panels with hover-to-reveal
+- [ ] Independent panel hover (left/right reveal separately)
+- [ ] Existing map features preserved (live feed, markers, counters)
 
 ### Out of Scope
 
@@ -195,5 +215,22 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Mirror onboarding validation for profile update | Consistent validation rules between onboarding and settings | ✓ Good |
 | useRef initialValues for dirty-checking | Effective role comparison prevents false-positive saves | ✓ Good |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-04-05 after v3.2 milestone (App Layout Page Tweaks — 7 phases, 16 requirements shipped)*
+*Last updated: 2026-04-05 after v3.3 milestone started (Threat Map Dashboard)*
