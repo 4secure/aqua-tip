@@ -25,7 +25,7 @@
 - [x] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date (completed 2026-03-30)
 - [x] **Phase 34: Enriched Threat Actor Modal** - TTPs, tools, campaigns, and targeted sectors via fetch-on-open (completed 2026-03-31)
 - [x] **Phase 35: Functional Settings Page** - Real profile data display and editing with AuthContext sync (completed 2026-03-31)
-- [ ] **Phase 36: Verification & Documentation Sync** - Close audit gaps: Phase 35 VERIFICATION.md, REQUIREMENTS.md checkbox sync, SUMMARY frontmatter fixes
+- [x] **Phase 36: Verification & Documentation Sync** - Close audit gaps: Phase 35 VERIFICATION.md, REQUIREMENTS.md checkbox sync, SUMMARY frontmatter fixes (completed 2026-04-04)
 
 ## Phase Details
 
@@ -123,9 +123,9 @@ Plans:
   2. REQUIREMENTS.md shows [x] for SEARCH-01, SEARCH-02, SEARCH-03
   3. 30-02-SUMMARY.md and 33-01-SUMMARY.md have requirements_completed in frontmatter
   4. console.log(mapData) debug line removed from DashboardPage.jsx
-**Plans:** 1/1 plans
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 36-01-PLAN.md -- Verification, checkbox sync, SUMMARY frontmatter, debug cleanup
+- [x] 36-01-PLAN.md -- Verification, checkbox sync, SUMMARY frontmatter, debug cleanup
 
 ## Progress
 
@@ -140,4 +140,4 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35 -> 36
 | 33. Category Distribution Chart | 0/1 | Complete    | 2026-03-30 |
 | 34. Enriched Threat Actor Modal | 3/3 | Complete   | 2026-04-04 |
 | 35. Functional Settings Page | 2/2 | Complete   | 2026-03-31 |
-| 36. Verification & Doc Sync | 0/1 | Not started | - |
+| 36. Verification & Doc Sync | 1/1 | Complete   | 2026-04-04 |
