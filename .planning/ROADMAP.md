@@ -123,7 +123,7 @@ Plans:
   2. REQUIREMENTS.md shows [x] for SEARCH-01, SEARCH-02, SEARCH-03
   3. 30-02-SUMMARY.md and 33-01-SUMMARY.md have requirements_completed in frontmatter
   4. console.log(mapData) debug line removed from DashboardPage.jsx
-**Plans:** 0/1 plans
+**Plans:** 1/1 plans
 Plans:
 - [ ] 36-01-PLAN.md -- Verification, checkbox sync, SUMMARY frontmatter, debug cleanup
 
