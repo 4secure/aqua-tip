@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ChevronLeft, ChevronRight, Swords, Bug, Flag, GitBranch, Info, Loader } from 'lucide-react';
@@ -239,15 +240,18 @@ export default function ThreatActorsPage() {
         </>
       )}
 
-      {/* Detail Modal */}
-      <AnimatePresence>
-        {selectedActor && (
-          <ThreatActorModal
-            actor={selectedActor}
-            onClose={() => setSelectedActor(null)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Detail Modal — portal to body to escape sidebar/topbar stacking contexts */}
+      {createPortal(
+        <AnimatePresence>
+          {selectedActor && (
+            <ThreatActorModal
+              actor={selectedActor}
+              onClose={() => setSelectedActor(null)}
+            />
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
@@ -353,7 +357,7 @@ function RelationshipGraph({ relationships, actorName, actorId }) {
 
     import('d3').then(d3 => {
       const width = container.clientWidth || 500;
-      const height = 320;
+      const height = container.clientHeight || 600;
 
       const ENTITY_COLORS = {
         'IPv4-Addr': '#FF3B5C',
@@ -451,7 +455,7 @@ function RelationshipGraph({ relationships, actorName, actorId }) {
   return (
     <div
       ref={containerRef}
-      style={{ height: '320px', background: '#0A0B10', borderRadius: '0.75rem', border: '1px solid #1E2030' }}
+      style={{ height: 'calc(95vh - 200px)', background: '#0A0B10', borderRadius: '0.75rem', border: '1px solid #1E2030' }}
     />
   );
 }
@@ -497,10 +501,10 @@ function ThreatActorModal({ actor, onClose }) {
 
   const TABS = [
     { key: 'overview', label: 'Overview', icon: Info },
+    { key: 'relationships', label: 'Relationships', icon: GitBranch },
     { key: 'ttps', label: 'TTPs', icon: Swords },
     { key: 'tools', label: 'Tools', icon: Bug },
     { key: 'campaigns', label: 'Campaigns', icon: Flag },
-    { key: 'relationships', label: 'Relationships', icon: GitBranch },
   ];
 
   return (
@@ -509,7 +513,7 @@ function ThreatActorModal({ actor, onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-primary/80 backdrop-blur-sm" onClick={onClose} />
@@ -520,7 +524,7 @@ function ThreatActorModal({ actor, onClose }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.2 }}
-        className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-surface border border-border rounded-2xl p-6 shadow-2xl"
+        className="relative w-full max-w-4xl h-[95vh] overflow-y-auto bg-surface border border-border rounded-2xl p-6 shadow-2xl"
       >
         {/* Close button */}
         <button
@@ -813,7 +817,7 @@ function ThreatActorModal({ actor, onClose }) {
         {activeTab === 'relationships' && !enrichError && (
           <div>
             {enrichLoading && (
-              <div className="h-[320px] bg-surface-2 rounded-xl animate-pulse" />
+              <div className="bg-surface-2 rounded-xl animate-pulse" style={{ height: 'calc(95vh - 200px)' }} />
             )}
             {!enrichLoading && enrichment?.relationships?.length > 0 && (
               <RelationshipGraph
