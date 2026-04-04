@@ -276,13 +276,9 @@ class ThreatActorService
                       name
                       x_mitre_id
                       killChainPhases {
-                        edges {
-                          node {
-                            kill_chain_name
-                            phase_name
-                            x_opencti_order
-                          }
-                        }
+                        kill_chain_name
+                        phase_name
+                        x_opencti_order
                       }
                     }
                   }
@@ -349,11 +345,35 @@ class ThreatActorService
                       id
                       entity_type
                     }
-                    ... on StixDomainObject {
+                    ... on ThreatActor {
                       name
                     }
-                    ... on StixCyberObservable {
-                      observable_value
+                    ... on IntrusionSet {
+                      name
+                    }
+                    ... on Campaign {
+                      name
+                    }
+                    ... on Malware {
+                      name
+                    }
+                    ... on Tool {
+                      name
+                    }
+                    ... on AttackPattern {
+                      name
+                    }
+                    ... on Identity {
+                      name
+                    }
+                    ... on Location {
+                      name
+                    }
+                    ... on Country {
+                      name
+                    }
+                    ... on Vulnerability {
+                      name
                     }
                   }
                   to {
@@ -361,11 +381,35 @@ class ThreatActorService
                       id
                       entity_type
                     }
-                    ... on StixDomainObject {
+                    ... on ThreatActor {
                       name
                     }
-                    ... on StixCyberObservable {
-                      observable_value
+                    ... on IntrusionSet {
+                      name
+                    }
+                    ... on Campaign {
+                      name
+                    }
+                    ... on Malware {
+                      name
+                    }
+                    ... on Tool {
+                      name
+                    }
+                    ... on AttackPattern {
+                      name
+                    }
+                    ... on Identity {
+                      name
+                    }
+                    ... on Location {
+                      name
+                    }
+                    ... on Country {
+                      name
+                    }
+                    ... on Vulnerability {
+                      name
                     }
                   }
                 }
@@ -454,10 +498,10 @@ class ThreatActorService
                 'mitre_id' => $pattern['x_mitre_id'] ?? null,
             ];
 
-            $killChainEdges = $pattern['killChainPhases']['edges'] ?? [];
+            $killChainPhases = $pattern['killChainPhases'] ?? [];
             $mitrePhases = array_filter(
-                array_map(fn ($e) => $e['node'] ?? null, $killChainEdges),
-                fn ($node) => $node && ($node['kill_chain_name'] ?? '') === 'mitre-attack',
+                $killChainPhases,
+                fn ($phase) => ($phase['kill_chain_name'] ?? '') === 'mitre-attack',
             );
 
             if (empty($mitrePhases)) {
