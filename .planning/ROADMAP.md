@@ -9,7 +9,7 @@
 - v2.2 Live Dashboard & Search History - Phases 18-21 (shipped 2026-03-20)
 - v3.0 Onboarding, Trial & Plans - Phases 22-26 (shipped 2026-03-25)
 - v3.1 Font & UI Polish - Phases 27-29 (shipped 2026-03-27)
-- v3.2 App Layout Page Tweaks - Phases 30-35 (in progress)
+- v3.2 App Layout Page Tweaks - Phases 30-36 (in progress)
 
 ## Phases
 
@@ -25,6 +25,7 @@
 - [x] **Phase 33: Category Distribution Chart** - Time-series category chart on Threat News filtered by selected date (completed 2026-03-30)
 - [x] **Phase 34: Enriched Threat Actor Modal** - TTPs, tools, campaigns, and targeted sectors via fetch-on-open (completed 2026-03-31)
 - [x] **Phase 35: Functional Settings Page** - Real profile data display and editing with AuthContext sync (completed 2026-03-31)
+- [ ] **Phase 36: Verification & Documentation Sync** - Close audit gaps: Phase 35 VERIFICATION.md, REQUIREMENTS.md checkbox sync, SUMMARY frontmatter fixes
 
 ## Phase Details
 
@@ -112,10 +113,24 @@ Plans:
 - [x] 35-02-PLAN.md -- Frontend SettingsPage rewrite with Toast component
 **UI hint**: yes
 
+### Phase 36: Verification & Documentation Sync
+**Goal**: Close all audit gaps — create missing VERIFICATION.md, sync REQUIREMENTS.md checkboxes, fix SUMMARY frontmatter, remove debug code
+**Depends on**: Phases 30, 33, 34, 35
+**Requirements**: SETTINGS-01, SETTINGS-02, SEARCH-01, SEARCH-02, SEARCH-03, NEWS-04
+**Gap Closure**: Closes gaps from v3.2 milestone audit (2026-04-04)
+**Success Criteria** (what must be TRUE):
+  1. Phase 35 has a VERIFICATION.md confirming SETTINGS-01 and SETTINGS-02 are satisfied
+  2. REQUIREMENTS.md shows [x] for SEARCH-01, SEARCH-02, SEARCH-03
+  3. 30-02-SUMMARY.md and 33-01-SUMMARY.md have requirements_completed in frontmatter
+  4. console.log(mapData) debug line removed from DashboardPage.jsx
+**Plans:** 0/1 plans
+Plans:
+- [ ] 36-01-PLAN.md -- Verification, checkbox sync, SUMMARY frontmatter, debug cleanup
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
+Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35 -> 36
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -125,3 +140,4 @@ Phases execute in numeric order: 30 -> 31 -> 32 -> 33 -> 34 -> 35
 | 33. Category Distribution Chart | 0/1 | Complete    | 2026-03-30 |
 | 34. Enriched Threat Actor Modal | 3/3 | Complete   | 2026-04-04 |
 | 35. Functional Settings Page | 2/2 | Complete   | 2026-03-31 |
+| 36. Verification & Doc Sync | 0/1 | Not started | - |
