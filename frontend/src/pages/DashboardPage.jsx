@@ -462,7 +462,7 @@ export default function DashboardPage() {
   const handleClearFilter = () => {
     setActiveFilter(null);
   };
-  console.log(mapData);
+
   return (
     <div className="space-y-6">
       {/* Threat Map */}

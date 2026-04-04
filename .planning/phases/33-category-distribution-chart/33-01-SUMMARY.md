@@ -22,6 +22,7 @@ decisions:
 metrics:
   duration: 2m 28s
   completed: 2026-03-30
+requirements-completed: [NEWS-04]
 ---
 
 # Phase 33 Plan 01: Category Distribution Chart Summary
