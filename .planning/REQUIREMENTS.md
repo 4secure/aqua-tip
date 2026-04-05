@@ -17,11 +17,11 @@ Requirements for Threat Map Dashboard milestone. Each maps to roadmap phases.
 
 - [x] **PANEL-01**: User sees 7 threat database stat cards stacked vertically in a left overlay panel
 - [x] **PANEL-02**: User sees recent indicators in a scrollable table in a right overlay panel
-- [ ] **PANEL-03**: User sees overlay panels styled with glassmorphism (semi-transparent, backdrop blur, border)
+- [x] **PANEL-03**: User sees overlay panels styled with glassmorphism (semi-transparent, backdrop blur, border)
 
 ### Toggle & Peek Interaction
 
-- [ ] **TOGGLE-01**: User can click a single toggle button to collapse/expand both overlay panels
+- [x] **TOGGLE-01**: User can click a single toggle button to collapse/expand both overlay panels
 - [ ] **TOGGLE-02**: User sees a thin peek sliver at each edge when panels are collapsed
 - [ ] **TOGGLE-03**: User can hover a peek sliver to reveal just that panel independently
 - [ ] **TOGGLE-04**: User's toggle state persists across page refreshes via localStorage
@@ -60,8 +60,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAYOUT-03 | Phase 37 | Complete |
 | PANEL-01 | Phase 38 | Complete |
 | PANEL-02 | Phase 38 | Complete |
-| PANEL-03 | Phase 38 | Pending |
-| TOGGLE-01 | Phase 38 | Pending |
+| PANEL-03 | Phase 38 | Complete |
+| TOGGLE-01 | Phase 38 | Complete |
 | TOGGLE-02 | Phase 39 | Pending |
 | TOGGLE-03 | Phase 39 | Pending |
 | TOGGLE-04 | Phase 39 | Pending |

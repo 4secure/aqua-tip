@@ -87,7 +87,7 @@ See `.planning/milestones/v3.2-ROADMAP.md` for full details.
 **Milestone Goal:** Replace the dashboard with an enhanced threat map at /dashboard — existing map features preserved, new overlay panels for stats and indicators with toggle + peek-on-hover.
 
 - [x] **Phase 37: Map Route Foundation** — Threat map renders at /dashboard with all existing widgets preserved (completed 2026-04-05)
-- [ ] **Phase 38: Overlay Panel Components** — Stat cards and indicators overlay the map with toggle control
+- [x] **Phase 38: Overlay Panel Components** — Stat cards and indicators overlay the map with toggle control (completed 2026-04-05)
 - [ ] **Phase 39: Peek-on-Hover Behavior** — Collapsed panels show edge slivers with independent hover reveal
 - [ ] **Phase 40: Cleanup & Verification** — DashboardPage deleted, sidebar updated, zero dead references
 
@@ -116,10 +116,10 @@ Plans:
   3. Both overlay panels have glassmorphism styling (semi-transparent background, backdrop blur, border) consistent with the design system
   4. User can click a single toggle button to collapse both panels simultaneously, and click again to expand them
   5. Clicks and scrolls inside overlay panels do not propagate to the map underneath
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 38-01-PLAN.md — Extract shared dashboard config to reusable module
-- [ ] 38-02-PLAN.md — Build overlay panels, toggle button, and wire into ThreatMapPage
+- [x] 38-02-PLAN.md — Build overlay panels, toggle button, and wire into ThreatMapPage
 **UI hint**: yes
 
 ### Phase 39: Peek-on-Hover Behavior
@@ -150,7 +150,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 37. Map Route Foundation | 1/1 | Complete    | 2026-04-05 |
-| 38. Overlay Panel Components | 1/2 | In Progress|  |
+| 38. Overlay Panel Components | 2/2 | Complete   | 2026-04-05 |
 | 39. Peek-on-Hover Behavior | 0/? | Not started | - |
 | 40. Cleanup & Verification | 0/? | Not started | - |
 
