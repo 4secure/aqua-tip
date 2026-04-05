@@ -113,7 +113,7 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ### Active
 
-- [ ] Threat map replaces dashboard at `/dashboard` route
+- [x] Threat map replaces dashboard at `/dashboard` route — Validated in Phase 37
 - [ ] DashboardPage removed entirely
 - [ ] Left overlay: 7 threat database stat cards
 - [ ] Right overlay: recent indicators table
@@ -233,4 +233,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 after v3.3 milestone started (Threat Map Dashboard)*
+*Last updated: 2026-04-05 after Phase 37 complete (map route foundation — /dashboard renders ThreatMapPage)*
