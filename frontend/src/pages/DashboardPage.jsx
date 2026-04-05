@@ -8,53 +8,11 @@ import { useChartJs } from '../hooks/useChartJs';
 import { useLeaflet } from '../hooks/useLeaflet';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { CreditBadge } from '../components/shared/CreditBadge';
-
-const STAT_CARD_CONFIG = [
-  { entity_type: 'IPv4-Addr', label: 'IP Addresses', color: 'red' },
-  { entity_type: 'Domain-Name', label: 'Domains', color: 'violet' },
-  { entity_type: 'Hostname', label: 'Hostnames', color: 'cyan' },
-  { entity_type: 'X509-Certificate', label: 'Certificates', color: 'amber' },
-  { entity_type: 'Email-Addr', label: 'Email', color: 'amber' },
-  { entity_type: 'Cryptocurrency-Wallet', label: 'Crypto Wallet', color: 'green' },
-  { entity_type: 'Url', label: 'URL', color: 'violet' },
-];
-
-const STAT_COLOR_MAP = {
-  red: { bg: 'bg-red/10', text: 'text-red', border: 'border-red/20' },
-  violet: { bg: 'bg-violet/10', text: 'text-violet', border: 'border-violet/20' },
-  cyan: { bg: 'bg-cyan/10', text: 'text-cyan', border: 'border-cyan/20' },
-  amber: { bg: 'bg-amber/10', text: 'text-amber', border: 'border-amber/20' },
-  green: { bg: 'bg-green/10', text: 'text-green', border: 'border-green/20' },
-};
-
-const TYPE_BADGE_COLORS = {
-  'IPv4-Addr':        { bg: '#FF3B5C25', text: '#FF3B5C' },
-  'IPv6-Addr':        { bg: '#FF3B5C25', text: '#FF3B5C' },
-  'Domain-Name':      { bg: '#00E5FF25', text: '#00E5FF' },
-  'Url':              { bg: '#7A44E425', text: '#7A44E4' },
-  'Email-Addr':       { bg: '#FFB02025', text: '#FFB020' },
-  'StixFile':         { bg: '#00C48C25', text: '#00C48C' },
-  'Hostname':         { bg: '#9B6BF725', text: '#9B6BF7' },
-  'X509-Certificate': { bg: '#FFB02025', text: '#FFB020' },
-};
+import { STAT_CARD_CONFIG, STAT_COLOR_MAP, TYPE_BADGE_COLORS, formatRelativeTime } from '../data/dashboard-config';
 
 const CATEGORY_COLORS = [
   '#FF3B5C', '#7A44E4', '#00E5FF', '#FFB020', '#00C48C', '#9B6BF7',
 ];
-
-function formatRelativeTime(dateStr) {
-  if (!dateStr) return '';
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now - date;
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return 'Just now';
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  const diffDay = Math.floor(diffHr / 24);
-  return `${diffDay}d ago`;
-}
 
 /* ---------- Sub-components ---------- */
 
