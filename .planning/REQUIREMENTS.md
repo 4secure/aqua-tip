@@ -15,8 +15,8 @@ Requirements for Threat Map Dashboard milestone. Each maps to roadmap phases.
 
 ### Overlay Panels
 
-- [ ] **PANEL-01**: User sees 7 threat database stat cards stacked vertically in a left overlay panel
-- [ ] **PANEL-02**: User sees recent indicators in a scrollable table in a right overlay panel
+- [x] **PANEL-01**: User sees 7 threat database stat cards stacked vertically in a left overlay panel
+- [x] **PANEL-02**: User sees recent indicators in a scrollable table in a right overlay panel
 - [ ] **PANEL-03**: User sees overlay panels styled with glassmorphism (semi-transparent, backdrop blur, border)
 
 ### Toggle & Peek Interaction
@@ -58,8 +58,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAYOUT-01 | Phase 37 | Complete |
 | LAYOUT-02 | Phase 37 | Complete |
 | LAYOUT-03 | Phase 37 | Complete |
-| PANEL-01 | Phase 38 | Pending |
-| PANEL-02 | Phase 38 | Pending |
+| PANEL-01 | Phase 38 | Complete |
+| PANEL-02 | Phase 38 | Complete |
 | PANEL-03 | Phase 38 | Pending |
 | TOGGLE-01 | Phase 38 | Pending |
 | TOGGLE-02 | Phase 39 | Pending |
