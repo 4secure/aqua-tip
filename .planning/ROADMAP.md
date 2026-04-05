@@ -86,7 +86,7 @@ See `.planning/milestones/v3.2-ROADMAP.md` for full details.
 
 **Milestone Goal:** Replace the dashboard with an enhanced threat map at /dashboard — existing map features preserved, new overlay panels for stats and indicators with toggle + peek-on-hover.
 
-- [ ] **Phase 37: Map Route Foundation** — Threat map renders at /dashboard with all existing widgets preserved
+- [x] **Phase 37: Map Route Foundation** — Threat map renders at /dashboard with all existing widgets preserved (completed 2026-04-05)
 - [ ] **Phase 38: Overlay Panel Components** — Stat cards and indicators overlay the map with toggle control
 - [ ] **Phase 39: Peek-on-Hover Behavior** — Collapsed panels show edge slivers with independent hover reveal
 - [ ] **Phase 40: Cleanup & Verification** — DashboardPage deleted, sidebar updated, zero dead references
@@ -101,9 +101,9 @@ See `.planning/milestones/v3.2-ROADMAP.md` for full details.
   1. User navigating to /dashboard sees a full-viewport threat map with live SSE feed, pulse markers, counters, donut, and countries widgets
   2. User navigating to /threat-map is redirected to /dashboard automatically
   3. All existing map interactions (click-to-pan feed entries, marker animations, connection status) work identically to the previous /threat-map page
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 37-01-PLAN.md — Route swap, redirect, and sidebar nav update
+- [x] 37-01-PLAN.md — Route swap, redirect, and sidebar nav update
 **UI hint**: yes
 
 ### Phase 38: Overlay Panel Components
@@ -146,7 +146,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 37. Map Route Foundation | 0/1 | Not started | - |
+| 37. Map Route Foundation | 1/1 | Complete   | 2026-04-05 |
 | 38. Overlay Panel Components | 0/? | Not started | - |
 | 39. Peek-on-Hover Behavior | 0/? | Not started | - |
 | 40. Cleanup & Verification | 0/? | Not started | - |

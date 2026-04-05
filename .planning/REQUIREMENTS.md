@@ -9,9 +9,9 @@ Requirements for Threat Map Dashboard milestone. Each maps to roadmap phases.
 
 ### Map Dashboard Layout
 
-- [ ] **LAYOUT-01**: User sees the threat map as the main page at `/dashboard` (DashboardPage removed)
-- [ ] **LAYOUT-02**: User navigating to `/threat-map` is redirected to `/dashboard`
-- [ ] **LAYOUT-03**: User sees existing map widgets (live feed, pulse markers, counters, donut, countries) preserved on the map
+- [x] **LAYOUT-01**: User sees the threat map as the main page at `/dashboard` (DashboardPage removed)
+- [x] **LAYOUT-02**: User navigating to `/threat-map` is redirected to `/dashboard`
+- [x] **LAYOUT-03**: User sees existing map widgets (live feed, pulse markers, counters, donut, countries) preserved on the map
 
 ### Overlay Panels
 
@@ -55,9 +55,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAYOUT-01 | Phase 37 | Pending |
-| LAYOUT-02 | Phase 37 | Pending |
-| LAYOUT-03 | Phase 37 | Pending |
+| LAYOUT-01 | Phase 37 | Complete |
+| LAYOUT-02 | Phase 37 | Complete |
+| LAYOUT-03 | Phase 37 | Complete |
 | PANEL-01 | Phase 38 | Pending |
 | PANEL-02 | Phase 38 | Pending |
 | PANEL-03 | Phase 38 | Pending |
