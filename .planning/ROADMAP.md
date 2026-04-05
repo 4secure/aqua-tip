@@ -130,7 +130,9 @@ Plans:
   1. User sees a thin peek sliver at the left and right edges when panels are collapsed
   2. User hovering over the left peek sliver reveals only the left panel; hovering the right sliver reveals only the right panel
   3. User's toggle state (expanded or collapsed) persists across page refreshes via localStorage
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 39-01-PLAN.md -- localStorage persistence, peek slivers, and hover-reveal— localStorage persistence, peek slivers, and hover-reveal
 **UI hint**: yes
 
 ### Phase 40: Cleanup & Verification
@@ -141,7 +143,9 @@ Plans:
   1. DashboardPage.jsx file is deleted and no import or reference to it exists anywhere in the codebase
   2. Sidebar navigation shows a single "Dashboard" link pointing to /dashboard (no separate Dashboard and Threat Map entries)
   3. A grep audit of the codebase confirms zero references to deleted files, old routes, or stale page title mappings
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 39-01-PLAN.md -- localStorage persistence, peek slivers, and hover-reveal— localStorage persistence, peek slivers, and hover-reveal
 
 ## Progress
 
