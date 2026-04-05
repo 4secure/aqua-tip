@@ -233,4 +233,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 after Phase 37 complete (map route foundation — /dashboard renders ThreatMapPage)*
+*Last updated: 2026-04-06 after Phase 39 complete (peek-on-hover behavior — collapsed overlay panels show glassmorphism slivers with hover-reveal, localStorage toggle persistence)*
