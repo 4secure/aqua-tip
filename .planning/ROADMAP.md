@@ -87,7 +87,7 @@ See `.planning/milestones/v3.2-ROADMAP.md` for full details.
 **Milestone Goal:** Replace the dashboard with an enhanced threat map at /dashboard — existing map features preserved, new overlay panels for stats and indicators with toggle + peek-on-hover.
 
 - [x] **Phase 37: Map Route Foundation** — Threat map renders at /dashboard with all existing widgets preserved (completed 2026-04-05)
-- [x] **Phase 38: Overlay Panel Components** — Stat cards and indicators overlay the map with toggle control (completed 2026-04-05)
+- [x] **Phase 38: Overlay Panel Components** — Stat cards and indicators overlay the map with toggle control (completed 2026-04-05)
 - [x] **Phase 39: Peek-on-Hover Behavior** — Collapsed panels show edge slivers with independent hover reveal (completed 2026-04-05)
 - [ ] **Phase 40: Cleanup & Verification** — DashboardPage deleted, sidebar updated, zero dead references
 
@@ -132,7 +132,7 @@ Plans:
   3. User's toggle state (expanded or collapsed) persists across page refreshes via localStorage
 **Plans**: 1 plan
 Plans:
-- [x] 39-01-PLAN.md -- localStorage persistence, peek slivers, and hover-reveal� localStorage persistence, peek slivers, and hover-reveal
+- [x] 39-01-PLAN.md -- localStorage persistence, peek slivers, and hover-reveal
 **UI hint**: yes
 
 ### Phase 40: Cleanup & Verification
@@ -143,9 +143,9 @@ Plans:
   1. DashboardPage.jsx file is deleted and no import or reference to it exists anywhere in the codebase
   2. Sidebar navigation shows a single "Dashboard" link pointing to /dashboard (no separate Dashboard and Threat Map entries)
   3. A grep audit of the codebase confirms zero references to deleted files, old routes, or stale page title mappings
-**Plans**: 1 plan
+**Plans:** 1 plan
 Plans:
-- [ ] 39-01-PLAN.md -- localStorage persistence, peek slivers, and hover-reveal� localStorage persistence, peek slivers, and hover-reveal
+- [ ] 40-01-PLAN.md — Delete dead code, clean stale references, grep audit + build verify
 
 ## Progress
 
@@ -156,6 +156,6 @@ Plans:
 | 37. Map Route Foundation | 1/1 | Complete    | 2026-04-05 |
 | 38. Overlay Panel Components | 2/2 | Complete    | 2026-04-05 |
 | 39. Peek-on-Hover Behavior | 1/1 | Complete    | 2026-04-05 |
-| 40. Cleanup & Verification | 0/? | Not started | - |
+| 40. Cleanup & Verification | 0/1 | Not started | - |
 
 **Cumulative:** 36 phases, 65 plans across 8 milestones in 23 days
