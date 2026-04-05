@@ -101,7 +101,9 @@ See `.planning/milestones/v3.2-ROADMAP.md` for full details.
   1. User navigating to /dashboard sees a full-viewport threat map with live SSE feed, pulse markers, counters, donut, and countries widgets
   2. User navigating to /threat-map is redirected to /dashboard automatically
   3. All existing map interactions (click-to-pan feed entries, marker animations, connection status) work identically to the previous /threat-map page
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 37-01-PLAN.md — Route swap, redirect, and sidebar nav update
 **UI hint**: yes
 
 ### Phase 38: Overlay Panel Components
@@ -144,7 +146,7 @@ See `.planning/milestones/v3.2-ROADMAP.md` for full details.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 37. Map Route Foundation | 0/? | Not started | - |
+| 37. Map Route Foundation | 0/1 | Not started | - |
 | 38. Overlay Panel Components | 0/? | Not started | - |
 | 39. Peek-on-Hover Behavior | 0/? | Not started | - |
 | 40. Cleanup & Verification | 0/? | Not started | - |
