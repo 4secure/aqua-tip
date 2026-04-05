@@ -82,7 +82,7 @@ See `.planning/milestones/v3.2-ROADMAP.md` for full details.
 
 </details>
 
-### 🚧 v3.3 Threat Map Dashboard (In Progress)
+### v3.3 Threat Map Dashboard (In Progress)
 
 **Milestone Goal:** Replace the dashboard with an enhanced threat map at /dashboard — existing map features preserved, new overlay panels for stats and indicators with toggle + peek-on-hover.
 
@@ -116,7 +116,10 @@ Plans:
   3. Both overlay panels have glassmorphism styling (semi-transparent background, backdrop blur, border) consistent with the design system
   4. User can click a single toggle button to collapse both panels simultaneously, and click again to expand them
   5. Clicks and scrolls inside overlay panels do not propagate to the map underneath
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 38-01-PLAN.md — Extract shared dashboard config to reusable module
+- [ ] 38-02-PLAN.md — Build overlay panels, toggle button, and wire into ThreatMapPage
 **UI hint**: yes
 
 ### Phase 39: Peek-on-Hover Behavior
@@ -147,7 +150,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 37. Map Route Foundation | 1/1 | Complete    | 2026-04-05 |
-| 38. Overlay Panel Components | 0/? | Not started | - |
+| 38. Overlay Panel Components | 0/2 | Planning complete | - |
 | 39. Peek-on-Hover Behavior | 0/? | Not started | - |
 | 40. Cleanup & Verification | 0/? | Not started | - |
 
