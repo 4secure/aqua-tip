@@ -150,7 +150,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 37. Map Route Foundation | 1/1 | Complete    | 2026-04-05 |
-| 38. Overlay Panel Components | 2/2 | Complete   | 2026-04-05 |
+| 38. Overlay Panel Components | 2/2 | Complete    | 2026-04-05 |
 | 39. Peek-on-Hover Behavior | 0/? | Not started | - |
 | 40. Cleanup & Verification | 0/? | Not started | - |
 
