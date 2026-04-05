@@ -115,12 +115,12 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 - [x] Threat map replaces dashboard at `/dashboard` route — Validated in Phase 37
 - [ ] DashboardPage removed entirely
-- [ ] Left overlay: 7 threat database stat cards
-- [ ] Right overlay: recent indicators table
-- [ ] Toggle button to collapse/expand overlay panels
+- [x] Left overlay: 7 threat database stat cards — Validated in Phase 38
+- [x] Right overlay: recent indicators table — Validated in Phase 38
+- [x] Toggle button to collapse/expand overlay panels — Validated in Phase 38
 - [ ] Peek sliver on collapsed panels with hover-to-reveal
 - [ ] Independent panel hover (left/right reveal separately)
-- [ ] Existing map features preserved (live feed, markers, counters)
+- [x] Existing map features preserved (live feed, markers, counters) — Validated in Phase 38
 
 ### Out of Scope
 
@@ -142,7 +142,7 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 Shipped v3.2 with ~34,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-36 phases, 65 plans completed across 8 milestones in 23 days.
+38 phases, 67 plans completed across 8 milestones in 23 days.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
