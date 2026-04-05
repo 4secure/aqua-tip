@@ -55,24 +55,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAYOUT-01 | — | Pending |
-| LAYOUT-02 | — | Pending |
-| LAYOUT-03 | — | Pending |
-| PANEL-01 | — | Pending |
-| PANEL-02 | — | Pending |
-| PANEL-03 | — | Pending |
-| TOGGLE-01 | — | Pending |
-| TOGGLE-02 | — | Pending |
-| TOGGLE-03 | — | Pending |
-| TOGGLE-04 | — | Pending |
-| CLEAN-01 | — | Pending |
-| CLEAN-02 | — | Pending |
+| LAYOUT-01 | Phase 37 | Pending |
+| LAYOUT-02 | Phase 37 | Pending |
+| LAYOUT-03 | Phase 37 | Pending |
+| PANEL-01 | Phase 38 | Pending |
+| PANEL-02 | Phase 38 | Pending |
+| PANEL-03 | Phase 38 | Pending |
+| TOGGLE-01 | Phase 38 | Pending |
+| TOGGLE-02 | Phase 39 | Pending |
+| TOGGLE-03 | Phase 39 | Pending |
+| TOGGLE-04 | Phase 39 | Pending |
+| CLEAN-01 | Phase 40 | Pending |
+| CLEAN-02 | Phase 40 | Pending |
 
 **Coverage:**
 - v3.3 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12
+- Mapped to phases: 12
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-05*
-*Last updated: 2026-04-05 after initial definition*
+*Last updated: 2026-04-05 after roadmap creation*
