@@ -35,9 +35,27 @@ function addHighlightPulse(map, lat, lng) {
   }, 2100);
 }
 
+const STORAGE_KEY = 'aqua-tip:panels-collapsed';
+
 export default function ThreatMapPage() {
   const { events, counters, countryCounts, typeCounts, connected } = useThreatStream();
-  const [panelsCollapsed, setPanelsCollapsed] = useState(false);
+
+  const [panelsCollapsed, setPanelsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY) === 'true';
+    } catch {
+      return false; // default: expanded
+    }
+  });
+
+  const [leftPeeking, setLeftPeeking] = useState(false);
+  const [rightPeeking, setRightPeeking] = useState(false);
+
+  const leftEntryTimer = useRef(null);
+  const leftExitTimer = useRef(null);
+  const rightEntryTimer = useRef(null);
+  const rightExitTimer = useRef(null);
+
   const leafletMapRef = useRef(null);
   const prevEventIdRef = useRef(null);
 
@@ -62,6 +80,61 @@ export default function ThreatMapPage() {
     }
   }, [events]);
 
+  // Sync panelsCollapsed to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, String(panelsCollapsed));
+    } catch {
+      // localStorage unavailable — degrade silently
+    }
+  }, [panelsCollapsed]);
+
+  // Clear peek state and timers when expanding
+  useEffect(() => {
+    if (!panelsCollapsed) {
+      setLeftPeeking(false);
+      setRightPeeking(false);
+      clearTimeout(leftEntryTimer.current);
+      clearTimeout(leftExitTimer.current);
+      clearTimeout(rightEntryTimer.current);
+      clearTimeout(rightExitTimer.current);
+    }
+  }, [panelsCollapsed]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeout(leftEntryTimer.current);
+      clearTimeout(leftExitTimer.current);
+      clearTimeout(rightEntryTimer.current);
+      clearTimeout(rightExitTimer.current);
+    };
+  }, []);
+
+  const handlePeekStart = useCallback((side) => {
+    if (side === 'left') {
+      clearTimeout(leftExitTimer.current);
+      leftExitTimer.current = null;
+      leftEntryTimer.current = setTimeout(() => setLeftPeeking(true), 150);
+    } else {
+      clearTimeout(rightExitTimer.current);
+      rightExitTimer.current = null;
+      rightEntryTimer.current = setTimeout(() => setRightPeeking(true), 150);
+    }
+  }, []);
+
+  const handlePeekEnd = useCallback((side) => {
+    if (side === 'left') {
+      clearTimeout(leftEntryTimer.current);
+      leftEntryTimer.current = null;
+      leftExitTimer.current = setTimeout(() => setLeftPeeking(false), 250);
+    } else {
+      clearTimeout(rightEntryTimer.current);
+      rightEntryTimer.current = null;
+      rightExitTimer.current = setTimeout(() => setRightPeeking(false), 250);
+    }
+  }, []);
+
   const handleEventClick = useCallback((event) => {
     const map = leafletMapRef.current;
     if (!map || event.lat == null || event.lng == null) return;
@@ -77,6 +150,9 @@ export default function ThreatMapPage() {
 
       <LeftOverlayPanel
         collapsed={panelsCollapsed}
+        peeking={leftPeeking}
+        onPeekStart={handlePeekStart}
+        onPeekEnd={handlePeekEnd}
         counters={counters}
         connected={connected}
         countryCounts={countryCounts}
@@ -85,6 +161,9 @@ export default function ThreatMapPage() {
 
       <RightOverlayPanel
         collapsed={panelsCollapsed}
+        peeking={rightPeeking}
+        onPeekStart={handlePeekStart}
+        onPeekEnd={handlePeekEnd}
         events={events}
         onEventClick={handleEventClick}
       />
