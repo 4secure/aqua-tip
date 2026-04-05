@@ -1,12 +1,11 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import L from 'leaflet';
 import { useLeaflet } from '../hooks/useLeaflet';
 import { useThreatStream } from '../hooks/useThreatStream';
-import ThreatMapCounters from '../components/threat-map/ThreatMapCounters';
-import ThreatMapCountries from '../components/threat-map/ThreatMapCountries';
-import ThreatMapDonut from '../components/threat-map/ThreatMapDonut';
-import ThreatMapFeed from '../components/threat-map/ThreatMapFeed';
 import ThreatMapStatus from '../components/threat-map/ThreatMapStatus';
+import LeftOverlayPanel from '../components/threat-map/LeftOverlayPanel';
+import RightOverlayPanel from '../components/threat-map/RightOverlayPanel';
+import PanelToggle from '../components/threat-map/PanelToggle';
 
 function addPulseMarker(map, lat, lng, color, duration = 1600) {
   if (!map || lat == null || lng == null) return;
@@ -38,6 +37,7 @@ function addHighlightPulse(map, lat, lng) {
 
 export default function ThreatMapPage() {
   const { events, counters, countryCounts, typeCounts, connected } = useThreatStream();
+  const [panelsCollapsed, setPanelsCollapsed] = useState(false);
   const leafletMapRef = useRef(null);
   const prevEventIdRef = useRef(null);
 
@@ -75,17 +75,24 @@ export default function ThreatMapPage() {
 
       <ThreatMapStatus connected={connected} />
 
-      {/* Left sidebar overlay */}
-      <div className="absolute top-4 left-4 z-[1000] w-[340px] space-y-4">
-        <ThreatMapCounters counters={counters} connected={connected} />
-        <ThreatMapCountries countryCounts={countryCounts} />
-        <ThreatMapDonut typeCounts={typeCounts} />
-      </div>
+      <LeftOverlayPanel
+        collapsed={panelsCollapsed}
+        counters={counters}
+        connected={connected}
+        countryCounts={countryCounts}
+        typeCounts={typeCounts}
+      />
 
-      {/* Bottom-right feed */}
-      <div className="absolute bottom-4 right-4 z-[1000] w-[380px]">
-        <ThreatMapFeed events={events} onEventClick={handleEventClick} />
-      </div>
+      <RightOverlayPanel
+        collapsed={panelsCollapsed}
+        events={events}
+        onEventClick={handleEventClick}
+      />
+
+      <PanelToggle
+        collapsed={panelsCollapsed}
+        onToggle={() => setPanelsCollapsed((prev) => !prev)}
+      />
     </div>
   );
 }
