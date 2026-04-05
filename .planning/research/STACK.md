@@ -1,194 +1,220 @@
 # Technology Stack
 
-**Project:** Aqua TIP v3.2 — App Layout Page Tweaks
-**Researched:** 2026-03-28
-**Scope:** Stack additions for date filtering, auto-refresh, time-series charts, enriched modals, and functional settings
+**Project:** Aqua TIP v3.3 -- Threat Map Dashboard Overlay Panels
+**Researched:** 2026-04-05
+**Overall confidence:** HIGH
 
-## Recommendation: Zero New Dependencies
+## Verdict: Zero New Dependencies
 
-The v3.2 features do NOT require any new npm packages or Composer packages. Every capability maps to existing stack or browser-native APIs. This continues the project's established pattern of minimizing dependencies (v2.1, v3.0, v3.1 all shipped with zero new deps).
+The existing stack handles every requirement for map overlay panels with toggle + peek-on-hover. No npm installs needed. This continues the project pattern: v2.1, v3.0, v3.1, and v3.2 all shipped with zero new deps.
 
-## Feature-to-Stack Mapping
+## Existing Stack Used for This Milestone
 
-### 1. Date-Based Filtering (Threat News)
+### Core -- Direct Usage
 
-| Need | Solution | Why |
-|------|----------|-----|
-| Date selector UI | Native `<input type="date">` | Zero bundle cost, works in all modern browsers. Simple from/to range, not a complex calendar widget. |
-| Dark mode styling | `[color-scheme:dark]` CSS property on input | Makes native date picker render dark in Chromium and Firefox. Combine with existing `input-field` class. |
-| Date formatting for API | `Date` constructor + `toISOString()` | Already used throughout codebase. |
-| Date display | Existing `useFormatDate` hook | Already timezone-aware via `Intl.DateTimeFormat`. |
+| Technology | Installed Version | Role in v3.3 | Confidence |
+|------------|-------------------|---------------|------------|
+| React 19 | ^19.2.4 | `useState` for panel visibility (2 booleans), `useCallback` for hover handlers, `useRef` for debounce timers | HIGH |
+| Framer Motion | ^12.35.2 | `motion.div` with `animate` for panel slide, `onHoverStart`/`onHoverEnd` for peek behavior | HIGH |
+| Leaflet | ^1.9.4 | Existing threat map -- overlays are DOM siblings positioned over it, not Leaflet layers | HIGH |
+| Tailwind CSS 3 | ^3.4.19 | Glassmorphism panel styling, absolute positioning, z-index layering, pointer-events control | HIGH |
+| Lucide React | ^0.577.0 | Toggle button icons (`PanelLeftClose`/`PanelLeftOpen` or `ChevronLeft`/`ChevronRight`) | HIGH |
 
-**Why NOT react-datepicker (v9.1.0, 40KB+):** A full calendar widget is overkill for a simple date range filter. The native HTML date input styled with `[color-scheme:dark]` matches the dark theme. If a custom calendar is later needed, revisit then.
+### Backend -- Existing Endpoints (No Changes Needed)
 
-### 2. Auto-Refresh (Threat News + Threat Actors)
+| Endpoint | Data | Used By |
+|----------|------|---------|
+| `GET /api/dashboard/counts` | 7 entity type counts | Left overlay stat cards |
+| `GET /api/dashboard/indicators` | Recent indicators with type badges and labels | Right overlay table |
+| SSE `/api/threat-map/stream` | Live threat events | Existing map pulse markers (unchanged) |
+| `GET /api/threat-map/snapshot` | Map snapshot for initial load | Existing map markers (unchanged) |
 
-| Need | Solution | Why |
-|------|----------|-----|
-| 5-minute polling | `setInterval` + `useEffect` cleanup | Standard React pattern. Both pages already use `useCallback` for `loadData`. |
-| Tab visibility pause | `document.visibilityState` check inside interval | Prevents wasted API calls when tab is hidden. Native browser API. |
-| Refresh indicator | Existing `RotateCcw` icon from lucide-react | Already imported in both pages. Add `animate-spin` class during refresh. |
-| Countdown timer | `useState` counter, decrement with 1-second interval | Simple state, no library needed. |
+## Framer Motion Integration Plan
 
-**Pattern:**
+### Why Framer Motion (not CSS transitions)
+
+1. **Already in bundle** -- framer-motion ^12.35.2 is installed, used in 5+ components
+2. **AnimatePresence** -- handles mount/unmount animation for panel content when toggling
+3. **Gesture props** -- `onHoverStart`/`onHoverEnd` are built into every `motion` element, eliminating manual `onMouseEnter`/`onMouseLeave` wiring
+4. **Spring physics** -- `type: "spring"` gives natural slide feel; existing codebase uses this pattern
+
+### Specific APIs Needed
+
+| API | Purpose | Already Used in Codebase? |
+|-----|---------|--------------------------|
+| `motion.div` | Animated panel containers with `animate` prop | Yes -- modals, page transitions |
+| `AnimatePresence` | Mount/unmount transitions for panel content | Yes -- `PlanConfirmModal`, page lists |
+| `animate` prop | Drive panel x-position (`x: 0` expanded vs `x: -panelWidth + sliverWidth` collapsed) | Yes -- various components |
+| `onHoverStart` / `onHoverEnd` | Peek-on-hover for collapsed panel slivers | New usage -- standard Framer Motion gesture API |
+| `transition` prop | Spring config: `{ type: "spring", stiffness: 300, damping: 30 }` | Yes -- established pattern |
+
+### Recommended Animation Config
+
 ```jsx
-useEffect(() => {
-  const id = setInterval(() => {
-    if (document.visibilityState === 'visible') loadData();
-  }, 5 * 60 * 1000);
-  return () => clearInterval(id);
-}, [loadData]);
+// Shared spring transition for both panels
+const panelTransition = { type: "spring", stiffness: 300, damping: 30 };
+
+// Left panel: slides off-screen to the left when collapsed
+<motion.div
+  className="absolute top-4 left-0 z-[1000]"
+  animate={{ x: isLeftVisible ? 0 : -(panelWidth - sliverWidth) }}
+  transition={panelTransition}
+  onHoverStart={() => !panelsExpanded && setPeekLeft(true)}
+  onHoverEnd={() => !panelsExpanded && setPeekLeft(false)}
+>
+  {/* Panel content + sliver handle */}
+</motion.div>
+
+// Right panel: slides off-screen to the right when collapsed
+<motion.div
+  className="absolute top-4 right-0 z-[1000]"
+  animate={{ x: isRightVisible ? 0 : (panelWidth - sliverWidth) }}
+  transition={panelTransition}
+  onHoverStart={() => !panelsExpanded && setPeekRight(true)}
+  onHoverEnd={() => !panelsExpanded && setPeekRight(false)}
+>
+  {/* Panel content + sliver handle */}
+</motion.div>
 ```
 
-**Why NOT TanStack Query / react-query:** Would require refactoring ALL data fetching across the app. Overkill when only 2 pages need polling. The existing fetch-in-useEffect pattern is consistent across the codebase.
+## Overlay Positioning Architecture
 
-### 3. Time-Series Category Chart (Threat News)
+### Established Pattern in ThreatMapPage.jsx
 
-| Need | Solution | Why |
-|------|----------|-----|
-| Line chart over time | Chart.js 4.5.1 (already installed) | `useChartJs` hook already exists and is used on DashboardPage and SettingsPage. |
-| X-axis with dates | **Category axis with string labels** | Backend returns pre-aggregated daily buckets (`{ date: "Mar 25", malware: 12, phishing: 8 }`). No date adapter needed. |
-| Multiple category lines | Multi-dataset Chart.js config | Each category is a dataset with its own color. Standard Chart.js pattern. |
-| Chart rendering | Existing `useChartJs` hook | Same pattern as other pages. |
+The existing threat map already uses absolute-positioned React components over Leaflet:
 
-**Why NOT chartjs-adapter-date-fns (v3.0.0) + date-fns (v4.1.0):** The time scale adapter is needed when Chart.js must auto-compute axis tick intervals from raw timestamps. Here, the backend pre-buckets data by day, so a category x-axis with formatted date strings works identically. Avoids adding ~130KB of dependencies.
+```jsx
+// Current ThreatMapPage.jsx (lines 79-88)
+<div className="absolute top-4 left-4 z-[1000] w-[340px]">
+  <ThreatMapCounters />
+  <ThreatMapCountries />
+  <ThreatMapDonut />
+</div>
+<div className="absolute bottom-4 right-4 z-[1000] w-[380px]">
+  <ThreatMapFeed />
+</div>
+```
 
-**If time scale is later needed:** `npm install date-fns@^4.1.0 chartjs-adapter-date-fns@^3.0.0` and `import 'chartjs-adapter-date-fns'` in the chart hook. But defer until a concrete need arises.
+The new overlay panels follow the same approach -- DOM siblings of the map `div`, not Leaflet plugins or layers. This means:
+- No Leaflet plugin dependencies
+- No z-index conflicts (use `z-[1000]` consistently)
+- Map interaction (pan/zoom) passes through gaps between panels
+- `pointer-events-none` on outer wrapper + `pointer-events-auto` on panel content prevents blocking
 
-### 4. Enriched Threat Actor Modals
+### Component Extraction from DashboardPage
 
-| Need | Solution | Why |
-|------|----------|-----|
-| TTPs, tools, sectors, campaigns | New Laravel endpoint expanding OpenCTI GraphQL query | Existing `Http::withToken()` + caching pattern. No new PHP packages. |
-| Tabbed modal UI | Existing glassmorphism modal + tab state | ThreatActorsPage already has a detail modal. Add tabs with `useState`. |
-| MITRE ATT&CK TTP display | Structured list with IDs | Format: `T1566 - Phishing`. Data from OpenCTI `attack-pattern` relationships. |
+These components currently live inside `DashboardPage.jsx` and need extraction to shared components:
 
-**Backend approach:** New `/api/threat-actors/{id}/details` endpoint fetches:
-- `uses` relationships to `Attack-Pattern` (TTPs)
-- `uses` relationships to `Tool` and `Malware`
-- `targets` relationships to `Identity` (sectors)
-- Related `Campaign` entities
+| Component | Current Location | Extract To | Modifications for Overlay |
+|-----------|-----------------|------------|---------------------------|
+| `StatCard` | DashboardPage.jsx L61-77 | `components/shared/StatCard.jsx` | Compact padding (`p-3` vs `p-5`), smaller text for overlay context |
+| `IndicatorsTable` | DashboardPage.jsx L139-189 | `components/shared/IndicatorsTable.jsx` | Compact row height, fewer visible rows (5 vs 8) |
+| `STAT_CARD_CONFIG` | DashboardPage.jsx L12-20 | `data/dashboard-config.js` | No changes -- same 7 entity types |
+| `STAT_COLOR_MAP` | DashboardPage.jsx L22-28 | `data/dashboard-config.js` | No changes |
+| `TYPE_BADGE_COLORS` | DashboardPage.jsx L30-39 | `data/dashboard-config.js` | No changes |
+| `formatRelativeTime` | DashboardPage.jsx L45-57 | `utils/format.js` | No changes |
 
-Uses existing `Http` client, Bearer token auth, and 15-minute caching pattern.
+### Data Fetching Strategy
 
-### 5. Functional Settings/Profile Page
+**Recommended: Custom `useDashboardData` hook** extracted from DashboardPage's existing fetch logic.
 
-| Need | Solution | Why |
-|------|----------|-----|
-| Read user data | Existing `useAuth` context | Already exposes user object with name, email, organization, role, timezone, plan. |
-| Update profile | New `PUT /api/profile` endpoint | Standard Laravel validation + `$user->update()`. Sanctum auth. |
-| Change password | New `POST /api/password` endpoint | `Hash::check()` for old password, `Hash::make()` for new. |
-| Form state | `useState` per field | At most 6 editable fields. No form library needed. |
-| Success/error feedback | Inline banner with existing chip classes | `chip-green` for success, `chip-red` for error. Existing design system. |
+```jsx
+// hooks/useDashboardData.js
+// Encapsulates: GET /api/dashboard/counts + GET /api/dashboard/indicators
+// Returns: { counts, indicators, countsLoading, indicatorsLoading, countsError, indicatorsError }
+// Includes: 5-minute auto-refresh with visibility check (same pattern as useAutoRefresh)
+```
 
-**Why NOT react-hook-form or formik:** 5-6 fields max. Form libraries add value at 10+ fields with complex cross-field validation. `useState` per field is the pattern used everywhere in this codebase.
+Why a hook over inline fetching: the DashboardPage already has this exact fetch logic. Extracting it prevents duplication and keeps the overlay components presentation-only.
 
-### 6. Dashboard Stat Card Expansion
+## State Management
 
-| Need | Solution | Why |
-|------|----------|-----|
-| 3 new stat cards (Email, Crypto Wallet, URL) | Extend `STAT_CARD_CONFIG` array | Add 3 entries. Backend already returns counts for all observable types. |
-| "Threat Database" heading | JSX markup | Pure UI change. |
-| Remove Live label/dot | Delete JSX | Pure UI change. |
+Panel state is minimal -- React `useState` is sufficient:
 
-### 7. Threat Map Capping
+| State | Type | Scope | Persistence |
+|-------|------|-------|-------------|
+| `panelsExpanded` | `boolean` | ThreatMapPage (or new DashboardMapPage) | None -- resets on mount |
+| `peekLeft` | `boolean` | ThreatMapPage | None -- resets on mouse leave |
+| `peekRight` | `boolean` | ThreatMapPage | None -- resets on mouse leave |
 
-| Need | Solution | Why |
-|------|----------|-----|
-| Cap to 100 IPs | Backend GraphQL `first: 100` or `LIMIT 100` | Existing SSE/snapshot endpoint. |
-| "100 Latest Attacks" label | JSX text swap | Pure UI change. |
-
-### 8. Threat Search Bug Fixes
-
-| Need | Solution | Why |
-|------|----------|-----|
-| Graph node positioning | Adjust D3 force simulation params | D3 7.9.0 already installed. Tune `forceCenter`, `forceCollide`. |
-| Search loader | Existing loading state pattern | Already in component. |
-| Z-index when logged out | Tailwind `z-` class fix | CSS-only. |
-
-## Stack Summary: No Changes Required
-
-| Category | Current | Change | Rationale |
-|----------|---------|--------|-----------|
-| **Frontend framework** | React 19.2.4 + Vite 7.3.1 | None | Sufficient for all features |
-| **Styling** | Tailwind CSS 3.4.19 | None | `[color-scheme:dark]` for native date inputs |
-| **Charts** | Chart.js 4.5.1 | None | Category axis with string labels for time-series |
-| **Visualization** | D3 7.9.0 | None | Fix force simulation params |
-| **Maps** | Leaflet 1.9.4 | None | Backend caps query, no map changes |
-| **Animation** | Framer Motion 12.35.2 | None | Existing modal animations |
-| **Icons** | Lucide React 0.577.0 | None | All icons available (Calendar, RefreshCw, etc.) |
-| **Routing** | React Router DOM 7.13.1 | None | No new routes |
-| **Backend** | Laravel 12 + Sanctum 4 | None | New endpoints only |
-| **Database** | PostgreSQL | None | No schema changes for these features |
-| **Date handling** | Native `Intl.DateTimeFormat` | None | `useFormatDate` hook + `<input type="date">` |
-
-## New Backend Endpoints Needed
-
-| Endpoint | Method | Auth | Purpose | Cache |
-|----------|--------|------|---------|-------|
-| `PUT /api/profile` | PUT | Sanctum | Update name, organization, role, timezone | None |
-| `POST /api/password` | POST | Sanctum | Change password (old + new) | None |
-| `GET /api/threat-actors/{id}/details` | GET | Public | Enriched actor: TTPs, tools, sectors, campaigns | 15min |
-| `GET /api/threat-news/timeline` | GET | Public | Category distribution by date for chart | 5min |
-
-No new migrations needed. Profile uses existing `users` columns. Threat data from OpenCTI GraphQL.
-
-## Alternatives Considered
-
-| Feature | Recommended | Alternative | Why Not Alternative |
-|---------|-------------|-------------|---------------------|
-| Date picker | Native `<input type="date">` | react-datepicker v9.1.0 | 40KB+ for simple date range. Native with dark scheme is sufficient. |
-| Time axis | Category axis + string labels | chartjs-adapter-date-fns v3.0.0 + date-fns v4.1.0 | ~130KB for auto-ticking. Backend pre-aggregates, so strings work. |
-| Auto-refresh | `setInterval` + visibility API | TanStack Query v5 | Requires refactoring all data fetching. Overkill for 2 pages. |
-| Form handling | `useState` per field | react-hook-form v7 | 5-6 fields. Library adds complexity without benefit at this scale. |
-| State management | Existing AuthContext | Zustand/Redux | No new cross-component state needs. |
-| Refresh UI | Spinning `RotateCcw` icon | Toast notifications | Already have the icon imported. Toast library would be a new dep. |
+No global state management (Zustand, Redux, Jotai) needed. Three booleans in a single component.
 
 ## What NOT to Add
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| `react-datepicker` | Heavyweight for a date range filter | Native `<input type="date">` with `[color-scheme:dark]` |
-| `date-fns` / `dayjs` | No date manipulation beyond what `Date` and `Intl` provide | Native `Date` + `Intl.DateTimeFormat` (existing `useFormatDate`) |
-| `chartjs-adapter-date-fns` | Backend pre-aggregates data; category axis is sufficient | String labels on Chart.js category axis |
-| `react-query` / `TanStack Query` | Only 2 pages need auto-refresh; refactoring all fetches is disproportionate | `setInterval` + `document.visibilityState` |
-| `react-hook-form` / `formik` | Settings page has 5-6 fields max | `useState` per field |
-| `@tanstack/react-table` | No complex table needs | Existing HTML tables with Tailwind |
-| Any toast library | Inline feedback banners are sufficient for settings | Existing chip/banner CSS classes |
+| Temptation | Why Not | Use Instead |
+|------------|---------|-------------|
+| `react-resizable-panels` | Panels have fixed width, not user-resizable | Absolute positioning + Framer Motion `animate` |
+| `@floating-ui/react` | Panels are not tooltips/popovers; they are fixed overlays | CSS absolute positioning (established pattern) |
+| `zustand` / `jotai` | 3 boolean states in 1 component | React `useState` |
+| `react-use-gesture` / `@use-gesture/react` | No drag/swipe gestures needed | Framer Motion built-in `onHoverStart`/`onHoverEnd` |
+| CSS-only transitions | Framer Motion already in bundle; CSS would create inconsistency | Framer Motion `motion.div` |
+| Leaflet custom controls | Overlays are React components, not map controls | DOM siblings with absolute positioning |
+| `localStorage` for panel state | Expanded/collapsed should reset per session; no user preference | `useState` with default `true` |
+| Any Leaflet plugins | Overlays sit outside Leaflet's rendering pipeline | Standard React + Tailwind |
+
+## Tailwind Patterns
+
+### Glassmorphism Overlay Panels
+
+Already established in codebase via `.glass-card` class:
+```css
+bg-surface/60 border border-border backdrop-blur-sm rounded-xl
+```
+
+### Sliver (Peek Handle) When Collapsed
+
+```
+// Thin visible edge strip -- 12px wide, full panel height
+w-3 h-full bg-surface/40 backdrop-blur-sm border border-border/30
+rounded-r-lg  /* left panel's sliver */
+rounded-l-lg  /* right panel's sliver */
+cursor-pointer
+```
+
+### Pointer Events for Map Pass-Through
+
+```jsx
+// Outer wrapper: let clicks pass to map
+<div className="pointer-events-none absolute inset-0 z-[1000]">
+  {/* Panel: re-enable pointer events */}
+  <motion.div className="pointer-events-auto">
+    ...panel content...
+  </motion.div>
+</div>
+```
 
 ## Installation
 
 ```bash
-# No new packages to install.
-# Backend: create new controller methods and routes
-# Frontend: modify existing page components
+# No new packages needed.
+# Zero npm install commands.
+# Zero composer require commands.
+# Zero new backend endpoints.
+# Zero new database migrations.
 
-# Zero npm install commands needed
-# Zero composer require commands needed
+# All work is frontend component creation + extraction + route change.
 ```
 
 ## Confidence Assessment
 
 | Claim | Confidence | Basis |
 |-------|------------|-------|
-| Native date input with `[color-scheme:dark]` works | HIGH | CSS standard, well-supported in Chromium/Firefox/Safari |
-| Chart.js category axis handles date strings | HIGH | Existing working pattern in DashboardPage, official docs |
-| `setInterval` + `visibilityState` sufficient for auto-refresh | HIGH | Standard browser APIs, used across industry |
-| No new packages needed | HIGH | Each feature maps to existing stack or native APIs |
-| chartjs-adapter-date-fns v3.0.0 is latest | MEDIUM | NPM shows v3.0.0, stable but last published ~3 years ago |
-| date-fns v4.1.0 is latest | MEDIUM | NPM shows v4.1.0, last published ~2 years ago |
-| Lucide has Calendar/RefreshCw icons | HIGH | Already importing from lucide-react across pages |
+| Framer Motion `onHoverStart`/`onHoverEnd` works for peek | HIGH | Standard gesture API, documented in official docs, consistent with motion.div usage pattern |
+| Absolute positioning over Leaflet works | HIGH | Already working in production (ThreatMapPage.jsx lines 79-88) |
+| `pointer-events-none` + `pointer-events-auto` pattern | HIGH | Standard CSS, used widely for overlay-over-map scenarios |
+| Spring transition `{ stiffness: 300, damping: 30 }` feels natural | MEDIUM | Common values, may need tuning during implementation |
+| StatCard/IndicatorsTable extraction is straightforward | HIGH | Components are self-contained with clear prop interfaces |
+| No new backend work needed | HIGH | `/api/dashboard/counts` and `/api/dashboard/indicators` already return required data |
 
 ## Sources
 
-- [Chart.js Time Series Axis](https://www.chartjs.org/docs/latest/axes/cartesian/timeseries.html) — time scale docs (considered and deferred)
-- [Chart.js Time Cartesian Axis](https://www.chartjs.org/docs/latest/axes/cartesian/time.html) — date adapter requirements
-- [chartjs-adapter-date-fns on npm](https://www.npmjs.com/package/chartjs-adapter-date-fns) — v3.0.0, compatible with Chart.js 4.x
-- [date-fns on npm](https://www.npmjs.com/package/date-fns) — v4.1.0
-- [react-datepicker on npm](https://www.npmjs.com/package/react-datepicker) — v9.1.0, considered and rejected
-- [React DayPicker](https://react-day-picker.js.org/) — alternative date picker, also rejected
-- Existing codebase: `useChartJs.js`, `useFormatDate.js`, `DashboardPage.jsx`, `ThreatNewsPage.jsx`, `ThreatActorsPage.jsx`, `SettingsPage.jsx`, `package.json`, `composer.json`
+- Existing codebase: `ThreatMapPage.jsx` -- absolute overlay positioning pattern (lines 79-88)
+- Existing codebase: `DashboardPage.jsx` -- StatCard, IndicatorsTable, config constants to extract
+- Existing codebase: `package.json` -- framer-motion ^12.35.2, react ^19.2.4, leaflet ^1.9.4
+- Existing codebase: 5 files importing `{ motion, AnimatePresence } from 'framer-motion'`
+- Framer Motion gesture docs -- `onHoverStart`/`onHoverEnd` are standard props on all `motion` components
+- Project pattern: v2.1, v3.0, v3.1, v3.2 all shipped with zero new dependencies
 
 ---
-*Stack research for: Aqua TIP v3.2 -- App Layout Page Tweaks*
-*Researched: 2026-03-28*
+*Stack research for: Aqua TIP v3.3 -- Threat Map Dashboard Overlay Panels*
+*Researched: 2026-04-05*

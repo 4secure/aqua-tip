@@ -1,804 +1,521 @@
 # Architecture Patterns
 
-**Domain:** App layout page tweaks -- date filtering, auto-refresh, enriched modals, time-series charts, settings page (v3.2)
-**Researched:** 2026-03-28
-**Confidence:** HIGH (based on direct codebase analysis of existing patterns and OpenCTI GraphQL capabilities)
+**Domain:** Threat Map Dashboard Overlay Integration (v3.3)
+**Researched:** 2026-04-05
+**Confidence:** HIGH (all recommendations based on direct codebase analysis, no new external dependencies)
 
-## Existing Architecture Snapshot
+## Recommended Architecture
 
-### Current Data Flow (relevant to v3.2)
+Merge ThreatMapPage into the `/dashboard` route by promoting the threat map to full-viewport background and layering dashboard widgets as collapsible overlay panels. DashboardPage is deleted entirely; its stat card and indicator data move into a new overlay panel system rendered on top of the existing map.
 
-```
-Frontend Pages                     API Layer                          Backend Services              OpenCTI
-+-----------------+    GET /api/   +------------------+   GraphQL    +-------------------+   POST   +----------+
-| DashboardPage   | ------------> | DashboardCtrl    | ----------> | DashboardService  | -------> | GraphQL  |
-| ThreatNewsPage  | ------------> | ThreatNewsCtrl   | ----------> | ThreatNewsService | -------> | endpoint |
-| ThreatActorsPage| ------------> | ThreatActorCtrl  | ----------> | ThreatActorService| -------> |          |
-| ThreatMapPage   | ------------> | ThreatMapCtrl    | ----------> | ThreatMapService  | -------> |          |
-| SettingsPage    |               |                  |             |                   |          |          |
-+-----------------+               +------------------+             +-------------------+          +----------+
-                                                                         |
-                                                                    Cache::remember
-                                                                   (5-15 min TTL)
-```
-
-### Current Caching Strategy
-
-| Endpoint | TTL | Strategy |
-|----------|-----|----------|
-| Dashboard counts | 5 min | Manual get/put with stale fallback |
-| Dashboard indicators | 5 min | Manual get/put with stale fallback |
-| Dashboard categories | 5 min | Manual get/put with stale fallback |
-| Threat actors | 15 min | Cache::remember per param hash |
-| Threat news | 5 min | Cache::remember per param hash |
-| Threat map snapshot | 15 min | Cache::remember |
-| Geo lookups | 1 hour | Cache::remember per IP |
-
-### Current Frontend Data Fetching Pattern
-
-All pages use the same pattern:
-1. `useState` for data, loading, error
-2. `useEffect` with `cancelled` flag for cleanup
-3. `apiClient.get()` with query string params
-4. Independent widget loading (no global spinner)
-
-### Current AuthContext Shape
-
-```js
-{ user, loading, error, isAuthenticated, emailVerified, onboardingCompleted,
-  userInitials, timezone, plan, trialActive, trialDaysLeft, login, register,
-  logout, refreshUser }
-```
-
-### Current User Fields Available (from /api/user)
+### High-Level Layout
 
 ```
-id, name, email, avatar_url, phone, timezone, organization, role,
-email_verified, onboarding_completed, plan { id, name, slug, daily_credits },
-trial_active, trial_days_left, trial_ends_at
++------------------------------------------------------------------+
+| AppLayout (Sidebar + Topbar)                                      |
+|  +--------------------------------------------------------------+|
+|  | ThreatMapDashboard (full viewport, -m-6 offset)              ||
+|  |                                                              ||
+|  |  +----------+                              +----------+      ||
+|  |  | LEFT     |    LEAFLET MAP (full bg)     | RIGHT    |      ||
+|  |  | OVERLAY  |    + SSE pulse markers       | OVERLAY  |      ||
+|  |  |----------|    + ThreatMapStatus (top)    |----------|      ||
+|  |  | 7 stat   |                              | Recent   |      ||
+|  |  | cards    |                              | Indic.   |      ||
+|  |  |----------|                              | table    |      ||
+|  |  | Counters |                              |          |      ||
+|  |  | Countries|                              |          |      ||
+|  |  | Donut    |                              +----------+      ||
+|  |  +----------+                                                ||
+|  |                                                              ||
+|  |  [toggle btn]              ThreatMapFeed (bottom-right)      ||
+|  +--------------------------------------------------------------+|
++------------------------------------------------------------------+
 ```
 
----
+## Component Boundaries
 
-## New Components Overview
+| Component | Responsibility | Status | Communicates With |
+|-----------|---------------|--------|-------------------|
+| `ThreatMapDashboard` | New page at `/dashboard`, replaces DashboardPage + ThreatMapPage | **NEW** | useLeaflet, useThreatStream, useDashboardData, useOverlayPanels |
+| `OverlayPanelLeft` | Collapsible left panel: stat cards + existing map widgets | **NEW** | ThreatMapDashboard (visibility state, data props) |
+| `OverlayPanelRight` | Collapsible right panel: indicators table | **NEW** | ThreatMapDashboard (visibility state, indicator data) |
+| `OverlayToggle` | Single button to collapse/expand both panels | **NEW** | ThreatMapDashboard (toggle callback) |
+| `StatCardCompact` | Compact stat card for overlay use (narrower) | **NEW** | OverlayPanelLeft (count data) |
+| `IndicatorsTableCompact` | Compact indicators table for overlay | **NEW** | OverlayPanelRight (indicator data) |
+| `useDashboardData` | Hook extracting dashboard API calls from DashboardPage | **NEW** | apiClient |
+| `useOverlayPanels` | Hook managing panel collapse + peek state | **NEW** | localStorage |
+| `ThreatMapCounters` | Existing: global threat counters | **KEEP** (renders inside left panel) | useThreatStream |
+| `ThreatMapCountries` | Existing: top source countries | **KEEP** (renders inside left panel) | useThreatStream |
+| `ThreatMapDonut` | Existing: attack type distribution | **KEEP** (renders inside left panel) | useThreatStream |
+| `ThreatMapFeed` | Existing: live event feed | **KEEP** (stays bottom-right) | useThreatStream |
+| `ThreatMapStatus` | Existing: connection status banner | **KEEP** (stays top-center) | useThreatStream |
+| `useLeaflet` | Existing: Leaflet map initialization | **KEEP** | Leaflet L |
+| `useThreatStream` | Existing: SSE + snapshot data | **KEEP** | EventSource, apiClient |
+| `DashboardPage` | Current dashboard page | **DELETE** | -- |
+| `ThreatMapPage` | Current standalone threat map | **DELETE** | -- |
 
-| Component | Type | New/Modified | Purpose |
-|-----------|------|--------------|---------|
-| Date filter params on ThreatNews API | Backend | MODIFIED | Accept `published_after`, `published_before` date range filters |
-| ThreatNews time-series endpoint | Backend | NEW | `GET /api/threat-news/chart` -- category distribution over time |
-| ThreatActors enriched query | Backend | MODIFIED | Extend GraphQL to include TTPs, tools, campaigns |
-| ThreatMap snapshot cap | Backend | MODIFIED | Already caps at 100 in `fetchSnapshot()` -- frontend label change only |
-| Dashboard stat cards config | Frontend | MODIFIED | Expand from 4 to 7 entity types, add heading |
-| Dashboard counts endpoint | Backend | MODIFIED | Add Email-Addr, Cryptocurrency-Wallet, Url counts |
-| Settings/Profile page | Frontend | REWRITE | Replace mock data with real user data from AuthContext |
-| Profile update endpoint | Backend | NEW | `PUT /api/profile` -- update name, phone, timezone, organization, role |
-| Password change endpoint | Backend | NEW | `PUT /api/password` -- change password for email-registered users |
-| `useAutoRefresh` hook | Frontend | NEW | Reusable interval-based refresh with visibility pause |
-| Date range picker component | Frontend | NEW | Reusable date range selector for Threat News |
-| Time-series chart component | Frontend | NEW | Category distribution over time (line/area chart) |
+## Integration Points (Detailed)
 
----
+### 1. Route Change in App.jsx
 
-## Detailed Architecture Per Feature
-
-### 1. Dashboard Stat Cards Expansion
-
-**Current:** 4 cards (IPv4-Addr, Domain-Name, Hostname, X509-Certificate) from `DashboardService::fetchCounts()` which runs 4 sequential GraphQL queries.
-
-**Change:** Expand to 7 cards by adding Email-Addr, Cryptocurrency-Wallet, Url.
-
-**Backend modification** (`DashboardService::fetchCounts()`):
-
-```php
-// Add 3 more entity types to the $entityTypes array
-$entityTypes = [
-    'IPv4-Addr'              => 'IP Addresses',
-    'Domain-Name'            => 'Domains',
-    'Hostname'               => 'Hostnames',
-    'X509-Certificate'       => 'Certificates',
-    'Email-Addr'             => 'Emails',         // NEW
-    'Cryptocurrency-Wallet'  => 'Crypto Wallets', // NEW
-    'Url'                    => 'URLs',            // NEW
-];
+**Current state** (lines 69-70 of App.jsx):
+```jsx
+<Route path="/dashboard" element={<DashboardPage />} />
+<Route path="/threat-map" element={<ThreatMapPage />} />
 ```
 
-**Performance concern:** Currently runs N sequential GraphQL queries. Going from 4 to 7 means 7 round trips. Consider batching into a single aliased query:
-
-```graphql
-query {
-  ipv4: stixCyberObservables(filters: $ipv4Filter, first: 1) { pageInfo { globalCount } }
-  domains: stixCyberObservables(filters: $domainFilter, first: 1) { pageInfo { globalCount } }
-  # ... etc
-}
+**Target state:**
+```jsx
+<Route path="/dashboard" element={<ThreatMapDashboard />} />
+<Route path="/threat-map" element={<Navigate to="/dashboard" replace />} />
 ```
 
-This is a single HTTP request returning all 7 counts. OpenCTI GraphQL supports aliased queries.
+Import `ThreatMapDashboard` eagerly (not lazy) since it is the primary authenticated view. The `/threat-map` route becomes a redirect to preserve bookmarks and browser history.
 
-**Frontend modification** (`DashboardPage.jsx`):
+### 2. Sidebar Navigation Update
 
-```js
-// Expand STAT_CARD_CONFIG to 7 entries
-const STAT_CARD_CONFIG = [
-  { entity_type: 'IPv4-Addr', label: 'IP Addresses', color: 'red' },
-  { entity_type: 'Domain-Name', label: 'Domains', color: 'violet' },
-  { entity_type: 'Hostname', label: 'Hostnames', color: 'cyan' },
-  { entity_type: 'X509-Certificate', label: 'Certificates', color: 'amber' },
-  { entity_type: 'Email-Addr', label: 'Emails', color: 'green' },           // NEW
-  { entity_type: 'Cryptocurrency-Wallet', label: 'Crypto Wallets', color: 'amber' },  // NEW
-  { entity_type: 'Url', label: 'URLs', color: 'violet' },                   // NEW
-];
+**Current** in `mock-data.js` NAV_CATEGORIES (lines 135-157):
+- Overview category: Dashboard (`/dashboard`)
+- Monitoring category: Threat Map (`/threat-map`), Dark Web (`/dark-web`)
 
-// Add STAT_COLOR_MAP entries for green
+**Target:**
+- Overview category: Dashboard (`/dashboard`) -- kept, now shows merged view
+- Monitoring category: Remove Threat Map entry. Dark Web remains.
+
+### 3. AppLayout Main Padding Override
+
+**Problem:** AppLayout's `<main>` (line 27) applies `p-6` padding. The threat map needs full-bleed rendering.
+
+**Solution:** Use the same `-m-6` negative margin pattern from ThreatMapPage (line 73). The new `ThreatMapDashboard` wraps itself in:
+```jsx
+<div className="relative -m-6" style={{ height: 'calc(100vh - 60px)' }}>
 ```
+This is a proven pattern already in the codebase, not a new hack.
 
-**Grid change:** `grid-cols-4` becomes a responsive layout for 7 cards. Use `grid-cols-4 lg:grid-cols-7` or keep 4-col with a second row. Recommendation: 7-col on desktop, 4-col on medium, wraps naturally.
+### 4. Data Sources Merge
 
-**Additional UI changes:**
-- Add "Threat Database" heading above stat cards
-- Remove `live-dot` and "Live" label from stat cards (keep on map only)
+The merged component needs TWO data sources currently in separate pages:
 
-### 2. Threat Map Cap and Label
+| Data Source | Current Owner | Target |
+|-------------|---------------|--------|
+| SSE events, counters, countries, types | ThreatMapPage via `useThreatStream()` | `ThreatMapDashboard` calls `useThreatStream()` directly |
+| Dashboard counts (7 stat cards) | DashboardPage via inline useEffect | Extract to `useDashboardData()` hook |
+| Dashboard indicators (recent table) | DashboardPage via inline useEffect | Extract to `useDashboardData()` hook |
+| Dashboard categories (attack chart) | DashboardPage via inline useEffect | **NOT NEEDED** -- out of overlay scope |
+| Credits, search history, quick actions | DashboardPage via inline useEffect | **NOT NEEDED** -- sidebar already shows credits |
 
-**Current state of ThreatMapService::fetchSnapshot():**
-- Already fetches `first: 100` observables (line 351 of ThreatMapService.php)
-- Already ordered by `created_at desc`
-- Frontend `useThreatStream.js` caps at `MAX_EVENTS = 50` for SSE events
+**Key insight:** The overlay panels only need stat counts and recent indicators. The attack chart, credit widget, recent searches, and quick actions from DashboardPage are NOT part of v3.3. This significantly reduces the data surface.
 
-**Changes needed:**
-- Frontend label change only: Replace "Active Threats" with "100 Latest Attacks" in `ThreatMapCounters.jsx`
-- No backend change needed -- snapshot already caps at 100
-- Consider increasing `MAX_EVENTS` in `useThreatStream.js` from 50 to 100 to match snapshot
+### 5. Overlay Panel Behavior
 
-### 3. Threat News: Date-Based Filtering
-
-**Current filtering:** search (text), label (category), cursor pagination.
-
-**New filtering:** Add `published_after` and `published_before` date range filters.
-
-**Backend: ThreatNewsService modification**
-
-Add date range parameters to `list()` method:
-
-```php
-public function list(
-    int $first = 20,
-    ?string $after = null,
-    ?string $search = null,
-    ?string $confidence = null,
-    ?string $labelId = null,
-    ?string $publishedAfter = null,    // NEW: ISO-8601 date
-    ?string $publishedBefore = null,   // NEW: ISO-8601 date
-    string $orderBy = 'published',
-    string $orderMode = 'desc',
-): array
-```
-
-OpenCTI `FilterGroup` supports date range on `published` field:
-
-```php
-if ($publishedAfter) {
-    $filterItems[] = [
-        'key'      => 'published',
-        'values'   => [$publishedAfter],
-        'operator' => 'gt',
-        'mode'     => 'or',
-    ];
-}
-if ($publishedBefore) {
-    $filterItems[] = [
-        'key'      => 'published',
-        'values'   => [$publishedBefore],
-        'operator' => 'lt',
-        'mode'     => 'or',
-    ];
-}
-```
-
-**Backend: ThreatNewsController modification**
-
-Accept new query params:
-
-```php
-$validated = $request->validate([
-    'after'            => 'nullable|string',
-    'search'           => 'nullable|string|max:255',
-    'label'            => 'nullable|string',
-    'published_after'  => 'nullable|date',
-    'published_before' => 'nullable|date',
-    'sort'             => 'nullable|in:published,name',
-    'order'            => 'nullable|in:asc,desc',
-]);
-```
-
-**Frontend: ThreatNewsPage modifications**
-
-Replace cursor-based pagination with date-based infinite scroll or date selector:
+**State machine for each panel (left/right independently):**
 
 ```
-Current flow: pagination toolbar with prev/next cursors
-New flow:     date range selector replaces pagination
-              - Default: last 7 days
-              - Presets: Today, 7 days, 30 days, 90 days, Custom range
-              - Load all items within date range (may need higher first limit)
+EXPANDED (default) ──[toggle click]──> COLLAPSED
+COLLAPSED ──[toggle click]──> EXPANDED
+COLLAPSED ──[mouse enter sliver]──> PEEKING
+PEEKING ──[mouse leave panel]──> COLLAPSED
 ```
 
-**Data flow:**
+**Implementation with Framer Motion** (already installed as `framer-motion@^12.35.2`):
 
-```
-DateRangeSelector (state: {from, to})
-    |
-    v
-ThreatNewsPage (passes published_after, published_before to API)
-    |
-    v
-GET /api/threat-news?published_after=2026-03-21&published_before=2026-03-28
-    |
-    v
-ThreatNewsService -> OpenCTI GraphQL with date FilterGroup
-```
-
-**API module change** (`threat-news.js`):
-
-```js
-export function fetchThreatNews({ after, search, label, published_after, published_before, sort, order } = {}) {
-    const params = new URLSearchParams();
-    if (published_after) params.set('published_after', published_after);
-    if (published_before) params.set('published_before', published_before);
-    // ... existing params
-}
+```jsx
+<motion.div
+  animate={{
+    x: collapsed && !peeking ? -panelWidth + sliverWidth : 0
+  }}
+  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+  onMouseEnter={() => collapsed && setPeeking(true)}
+  onMouseLeave={() => setPeeking(false)}
+  className="absolute top-4 left-4 z-[1000] w-[280px]"
+>
+  {/* panel content */}
+</motion.div>
 ```
 
-### 4. Threat News: Category Distribution Time-Series Chart
+**Dimensions:**
+- Sliver width: 6px visible edge when collapsed
+- Left panel width: 280px (stat cards stacked + map widgets)
+- Right panel width: 360px (indicators table)
+- Z-index: 1000 (matches existing map overlay z-index)
 
-**New endpoint:** `GET /api/threat-news/chart?days=30`
+**Why spring animation:** Spring handles interruptions (hover during collapse animation) gracefully without easing resets. Already used in landing page animations.
 
-Returns daily category counts for a time-series chart.
+### 6. Existing Map Widget Repositioning
 
-**Backend: New method on ThreatNewsService**
+**Current ThreatMapPage widget positions:**
+- `top-4 left-4`: Counters, Countries, Donut (stacked in 340px column) -- line 79
+- `bottom-4 right-4`: Feed (380px wide) -- line 86
+- `top-2 center`: Status banner -- line 76
 
-```php
-public function categoryTimeSeries(int $days = 30): array
-{
-    // Fetch reports from last N days with labels
-    // Group by day + label
-    // Return: { dates: [...], series: { "Malware": [...], "Phishing": [...] } }
-}
-```
+**Conflict:** The new left overlay panel occupies `top-4 left-4` where existing map widgets live.
 
-**GraphQL approach:**
-1. Query reports with `published` filter (gt: N days ago), fetch `first: 500` with `objectLabel`
-2. Server-side aggregation: bucket by date, count labels per bucket
-3. Cache for 5 min (same as news)
-
-**Response shape:**
-
-```json
-{
-    "dates": ["2026-03-01", "2026-03-02", "..."],
-    "series": [
-        { "label": "Malware", "data": [5, 3, 8, ...] },
-        { "label": "Phishing", "data": [2, 1, 4, ...] }
-    ]
-}
-```
-
-**Frontend: Time-series chart in ThreatNewsPage**
-
-Use existing `useChartJs` hook with Chart.js line chart:
-
-```js
-const chartConfig = {
-    type: 'line',
-    data: {
-        labels: dates,
-        datasets: series.map(s => ({
-            label: s.label,
-            data: s.data,
-            borderColor: categoryColor(s.label),
-            fill: false,
-            tension: 0.3,
-        })),
-    },
-};
-```
-
-Place above the report list, below the toolbar. Collapsible panel recommended (glass-card with toggle).
-
-### 5. Threat News: Auto-Refresh
-
-**Pattern:** 5-minute interval refresh using a reusable hook.
-
-**New hook: `useAutoRefresh.js`**
-
-```js
-export function useAutoRefresh(callback, intervalMs = 300000) {
-    useEffect(() => {
-        // Skip when tab is hidden (save resources)
-        let timer = null;
-
-        function tick() {
-            if (!document.hidden) callback();
-        }
-
-        timer = setInterval(tick, intervalMs);
-        return () => clearInterval(timer);
-    }, [callback, intervalMs]);
-}
-```
-
-**Integration in ThreatNewsPage:**
-
-```js
-useAutoRefresh(loadData, 5 * 60 * 1000);
-```
-
-**Note:** Dashboard already has auto-refresh (lines 431-444 of DashboardPage.jsx). The new hook extracts this pattern for reuse across ThreatNews and ThreatActors pages.
-
-### 6. Threat Actors: Enriched Modal
-
-**Current GraphQL query fields per actor:**
-- id, name, description, aliases, primary_motivation, resource_level, modified, goals
-- targetedCountries (via stixCoreRelationships targets -> Country)
-- targetedSectors (via stixCoreRelationships targets -> Sector)
-- externalReferences
-
-**New fields needed for enriched modal:**
-
-```graphql
-# TTPs (Attack Patterns used by this actor)
-usedTTPs: stixCoreRelationships(
-    relationship_type: "uses"
-    toTypes: ["Attack-Pattern"]
-    first: 20
-) {
-    edges {
-        node {
-            to {
-                ... on AttackPattern {
-                    id
-                    name
-                    x_mitre_id
-                }
-            }
-        }
-    }
-}
-
-# Tools used
-usedTools: stixCoreRelationships(
-    relationship_type: "uses"
-    toTypes: ["Tool"]
-    first: 20
-) {
-    edges {
-        node {
-            to {
-                ... on Tool {
-                    id
-                    name
-                }
-            }
-        }
-    }
-}
-
-# Campaigns
-campaigns: stixCoreRelationships(
-    relationship_type: "attributed-to"
-    fromTypes: ["Campaign"]
-    first: 10
-) {
-    edges {
-        node {
-            from {
-                ... on Campaign {
-                    id
-                    name
-                    first_seen
-                    last_seen
-                }
-            }
-        }
-    }
-}
-```
-
-**Architecture decision: Fetch-on-open vs Batch-in-list**
-
-Two approaches:
-1. **Batch-in-list:** Add TTPs/tools/campaigns to the existing list query (all actors in one request)
-2. **Fetch-on-open:** Load enriched data when modal opens via separate API call
-
-**Recommendation: Fetch-on-open** because:
-- List query already includes relationships (countries, sectors, refs) -- adding TTPs/tools/campaigns per actor multiplies response size significantly (24 actors x 20 TTPs + 20 tools + 10 campaigns = enormous query)
-- Most users click 1-3 modals, not all 24
-- Modal can show a loading skeleton for 200-300ms while enrichment loads
-
-**New endpoint:** `GET /api/threat-actors/{id}`
-
-```php
-// ThreatActorService::getDetail(string $id): array
-// New method with enriched GraphQL query for a single actor
-// Cache for 15 min per actor ID
-```
-
-**Frontend flow:**
+**Solution:** Move existing map widgets INSIDE the left overlay panel, below the stat cards. This creates a single cohesive left column:
 
 ```
-User clicks actor card
-  -> ThreatActorModal opens with basic data (already in list)
-  -> useEffect fires GET /api/threat-actors/{actor.id}
-  -> Modal enriches with TTPs, tools, campaigns (skeleton -> content)
+Left Overlay Panel (280px, scrollable)
++----------------------------------+
+| StatCardCompact x 7 (stacked)   |  <-- from DashboardPage
+|----------------------------------|
+| ThreatMapCounters                |  <-- from ThreatMapPage
+| ThreatMapCountries               |  <-- from ThreatMapPage
+| ThreatMapDonut                   |  <-- from ThreatMapPage
++----------------------------------+
 ```
 
-**Frontend API addition** (`threat-actors.js`):
+This eliminates z-index conflicts entirely. The existing components render inside the overlay panel div instead of as separate absolute-positioned elements. They already use `glass-card-static` styling which works inside any container.
 
-```js
-export function fetchThreatActorDetail(id) {
-    return apiClient.get(`/api/threat-actors/${encodeURIComponent(id)}`);
-}
-```
+**ThreatMapFeed** stays at `bottom-4 right-4` -- no conflict with the right overlay panel at `top-4 right-4`.
 
-### 7. Threat Actors: Auto-Refresh
+**ThreatMapStatus** stays at `top-2 center` -- no conflict.
 
-Same pattern as Threat News. Use `useAutoRefresh` hook:
+### 7. Right Overlay Panel Content
 
-```js
-useAutoRefresh(loadData, 5 * 60 * 1000);
-```
+The right panel contains the indicators table from DashboardPage, adapted for narrower width:
+- Remove Labels column (too wide for 360px panel)
+- Keep columns: Type badge, Value (truncated), Date (relative)
+- Show 10 rows max (vs 8 currently)
+- Auto-refresh every 5 minutes (carried over from DashboardPage)
+- No category filter interaction (attack chart is removed)
 
-### 8. Settings/Profile Page Rewrite
-
-**Current state:** Entirely mock data. Tabs: API Keys (mock), Webhooks (mock), Usage (random chart), Account (hardcoded "Acme Corp", "john.doe@acme.com").
-
-**New state:** Two meaningful tabs -- Profile and Account.
-
-**Tab structure:**
-
-| Tab | Content | Data Source |
-|-----|---------|-------------|
-| Profile | Name, email (read-only), phone, timezone, organization, role, avatar | AuthContext user data |
-| Account | Current plan + credits summary, change password, danger zone (future) | AuthContext + /api/credits |
-
-**Profile tab -- editable fields:**
+## Data Flow Diagram
 
 ```
-Name         [text input, pre-filled from user.name]
-Email        [read-only, from user.email]
-Phone        [PhoneNumberInput component, from user.phone]
-Timezone     [SearchableDropdown, from user.timezone]
-Organization [text input, from user.organization]
-Role         [SimpleDropdown, from user.role]
-
-[Save Changes] button -> PUT /api/profile
+                    +---------------------------+
+                    |   ThreatMapDashboard      |
+                    |   (page component)        |
+                    +-----+-------+-------+-----+
+                          |       |       |
+            +-------------+       |       +--------------+
+            v                     v                      v
+   useThreatStream()    useDashboardData()    useOverlayPanels()
+            |                     |                      |
+   +--------+---------+    +-----+------+          collapsed
+   | events  counters |    | counts     |          leftPeeking
+   | countries types  |    | indicators |          rightPeeking
+   | connected        |    |            |
+   +--------+---------+    +-----+------+
+            |                     |
+   +--------+----------+    +----+----+
+   |    |    |    |     |    |         |
+   v    v    v    v     v    v         v
+ Map  Cnt  Ctry Dnt  Feed  Left      Right
+      |    |    |          Panel     Panel
+      +----+----+          (stats    (indicators
+      (inside left          + map     table)
+       panel)               widgets)
 ```
 
-**New backend endpoint:** `PUT /api/profile`
+## New Component Specifications
 
-```php
-// app/Http/Controllers/Auth/ProfileController.php
-class ProfileController extends Controller
-{
-    public function __invoke(Request $request): UserResource
-    {
-        $validated = $request->validate([
-            'name'         => ['required', 'string', 'min:2', 'max:255'],
-            'phone'        => ['nullable', 'string', 'min:5', 'max:20'],
-            'timezone'     => ['nullable', 'string', 'timezone:all'],
-            'organization' => ['nullable', 'string', 'max:255'],
-            'role'         => ['nullable', 'string', Rule::in([...])],
-        ]);
-
-        $request->user()->update($validated);
-
-        return new UserResource($request->user()->fresh());
-    }
-}
-```
-
-**Route:** Inside `auth:sanctum` group: `Route::put('/profile', ProfileController::class);`
-
-**Account tab -- password change:**
-
-Only for non-OAuth users (user.password is not null). OAuth users see "Managed by [Google/GitHub]" message.
-
-**New backend endpoint:** `PUT /api/password`
-
-```php
-class PasswordController extends Controller
-{
-    public function __invoke(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password'         => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-
-        $request->user()->update([
-            'password' => Hash::make($validated['password']),
-        ]);
-
-        return response()->json(['message' => 'Password updated']);
-    }
-}
-```
-
-**Frontend data flow:**
+### ThreatMapDashboard (pages/ThreatMapDashboard.jsx)
 
 ```
-SettingsPage
-  |-- useAuth() -> user data for Profile tab
-  |-- useState for form fields (initialized from user)
-  |-- handleSave -> apiClient.put('/api/profile', formData)
-  |-- on success -> refreshUser() to update AuthContext
-  |
-  |-- Account tab
-  |     |-- Credits display from /api/credits (or inline from AuthContext)
-  |     |-- Plan name from user.plan
-  |     |-- Password change form (conditionally rendered for non-OAuth)
-  |     |-- handlePasswordChange -> apiClient.put('/api/password', passwordData)
+Responsibilities:
+- Full-viewport Leaflet map (via useLeaflet with onReady callback)
+- SSE stream connection (via useThreatStream)
+- Dashboard data fetching (via useDashboardData)
+- Overlay panel state management (via useOverlayPanels)
+- Compose all sub-components
+- Pulse marker rendering on new SSE events (same logic as ThreatMapPage lines 55-63)
+- Event click -> map flyTo behavior (same logic as ThreatMapPage lines 65-69)
+
+Props: none (page component)
+State: managed entirely by hooks
+Estimated lines: 80-120 (composition only, all logic in hooks)
 ```
 
-**Reusable components already available:**
-- `PhoneNumberInput` (from GetStartedPage)
-- `SearchableDropdown` (from GetStartedPage)
-- `SimpleDropdown` (from GetStartedPage)
-- `CreditBadge` (from shared components)
+### useDashboardData (hooks/useDashboardData.js)
 
-These should be extracted to `components/shared/` if not already there.
+```
+Extracted from DashboardPage useEffect blocks (lines 360-444).
 
-### 9. Threat Search Bug Fixes
+Returns:
+  { counts, countsLoading, countsError,
+    indicators, indicatorsLoading, indicatorsError }
 
-Three bugs identified:
+Fetches:
+  GET /api/dashboard/counts
+  GET /api/dashboard/indicators
+  Auto-refreshes every 5 minutes (reuse useAutoRefresh hook from v3.2)
 
-**a) Relation graph node positioning bug**
-- D3 force simulation in `D3Graph` component (ThreatSearchPage.jsx)
-- Nodes likely cluster or overlap due to force parameters
-- Fix: Adjust `forceCollide`, `forceManyBody` strength, `forceCenter` positioning
-
-**b) Search loader**
-- Currently no proper loading state during search API call
-- Fix: Add loading spinner/skeleton during `searchThreat()` execution
-
-**c) Search bar z-index when logged out**
-- The search bar in the topbar or page may be behind other elements for unauthenticated users
-- Fix: Adjust z-index on the search container, likely in ThreatSearchPage or Topbar
-
-These are CSS/component-level fixes, no architecture changes needed.
-
----
-
-## Reusable Hook: useAutoRefresh
-
-Extract from existing DashboardPage pattern:
-
-```js
-// hooks/useAutoRefresh.js
-import { useEffect, useRef } from 'react';
-
-export function useAutoRefresh(callback, intervalMs = 300000) {
-    const callbackRef = useRef(callback);
-
-    useEffect(() => {
-        callbackRef.current = callback;
-    }, [callback]);
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            if (!document.hidden) {
-                callbackRef.current();
-            }
-        }, intervalMs);
-
-        return () => clearInterval(timer);
-    }, [intervalMs]);
-}
+Does NOT fetch: categories, credits, search history (not needed in overlay)
+Estimated lines: 40-60
 ```
 
-**Usage locations:**
-1. ThreatNewsPage -- refresh reports every 5 min
-2. ThreatActorsPage -- refresh actors every 5 min
-3. DashboardPage -- refactor existing setInterval to use this hook
+### useOverlayPanels (hooks/useOverlayPanels.js)
 
----
+```
+Returns:
+  { collapsed, togglePanels,
+    leftPeeking, rightPeeking,
+    onLeftEnter, onLeftLeave,
+    onRightEnter, onRightLeave }
 
-## Component Boundaries Summary
+- collapsed: boolean, persisted to localStorage key 'overlay-panels-collapsed'
+- togglePanels: flips collapsed state
+- leftPeeking/rightPeeking: ephemeral mouse-driven state
+- onLeftEnter/onLeftLeave: handlers for left panel hover
+- onRightEnter/onRightLeave: handlers for right panel hover
+- Peek only activates when collapsed === true
 
-| Component | Responsibility | Communicates With |
-|-----------|---------------|-------------------|
-| `useAutoRefresh` hook | Manage periodic data refresh with visibility awareness | Any page's loadData callback |
-| `DateRangeSelector` component | Date picker UI for filtering by date range | ThreatNewsPage state |
-| `ThreatNewsService` (modified) | Date-filtered report listing + time-series aggregation | OpenCTI GraphQL, Cache |
-| `ThreatActorService` (modified) | Enriched actor detail endpoint | OpenCTI GraphQL, Cache |
-| `ProfileController` (new) | Update user profile fields | User model |
-| `PasswordController` (new) | Change user password | User model, Hash |
-| `SettingsPage` (rewritten) | Profile editing + account management | AuthContext, /api/profile, /api/password, /api/credits |
-| `DashboardService` (modified) | Expanded entity type counts (4 -> 7) | OpenCTI GraphQL, Cache |
-| `ThreatNewsChartController` (new) | Serve time-series category data | ThreatNewsService |
-
----
-
-## New API Routes
-
-```php
-// Public (no auth required)
-// None new
-
-// Inside auth:sanctum group
-Route::put('/profile', ProfileController::class);
-Route::put('/password', PasswordController::class);
-Route::get('/threat-actors/{id}', ThreatActorDetailController::class);
-Route::get('/threat-news/chart', ThreatNewsChartController::class);
+Estimated lines: 30-40
 ```
 
----
+### OverlayPanelLeft (components/dashboard/OverlayPanelLeft.jsx)
+
+```
+Props:
+  { collapsed, peeking, onMouseEnter, onMouseLeave,
+    counts, countsLoading, countsError,
+    counters, connected, countryCounts, typeCounts }
+
+Renders:
+  - motion.div wrapper with horizontal slide animation
+  - Scrollable inner column (max-height: calc(100vh - 120px))
+  - 7 StatCardCompact components
+  - Divider
+  - ThreatMapCounters (existing component, imported directly)
+  - ThreatMapCountries (existing component, imported directly)
+  - ThreatMapDonut (existing component, imported directly)
+
+Position: absolute top-4 left-4 z-[1000] w-[280px]
+Estimated lines: 60-80
+```
+
+### OverlayPanelRight (components/dashboard/OverlayPanelRight.jsx)
+
+```
+Props:
+  { collapsed, peeking, onMouseEnter, onMouseLeave,
+    indicators, indicatorsLoading, indicatorsError }
+
+Renders:
+  - motion.div wrapper with horizontal slide animation (slides RIGHT when collapsed)
+  - IndicatorsTableCompact
+
+Position: absolute top-4 right-4 z-[1000] w-[360px]
+Estimated lines: 40-60
+```
+
+### OverlayToggle (components/dashboard/OverlayToggle.jsx)
+
+```
+Props: { collapsed, onToggle }
+
+Renders:
+  - Floating glassmorphism button
+  - Icon: PanelLeftClose / PanelLeftOpen from Lucide (or ChevronLeft/Right)
+  - Tooltip: "Hide panels" / "Show panels"
+
+Position: absolute top-4, horizontally centered z-[1001]
+Estimated lines: 20-30
+```
+
+### StatCardCompact (components/dashboard/StatCardCompact.jsx)
+
+```
+Props: { label, count, color, loading, error }
+
+Narrower version of existing StatCard from DashboardPage.
+- Single row: icon-dot + label + count (vs stacked layout)
+- Fits within 280px panel width
+- Uses same STAT_COLOR_MAP
+
+Estimated lines: 20-30
+```
+
+### IndicatorsTableCompact (components/dashboard/IndicatorsTableCompact.jsx)
+
+```
+Props: { indicators, loading, error }
+
+Simplified version of IndicatorsTable from DashboardPage.
+- 3 columns: Type badge, Value, Date
+- No Labels column (space constraint)
+- No category filter (attack chart removed)
+- 10 rows max
+- glass-card-static styling
+
+Estimated lines: 40-60
+```
+
+## Patterns to Follow
+
+### Pattern 1: Hook Extraction for Data Fetching
+
+**What:** Extract DashboardPage's 6 inline useEffect blocks into a single `useDashboardData` hook.
+**When:** Page component has 3+ data-fetching effects.
+**Why:** ThreatMapDashboard already uses `useThreatStream` (same pattern). Keeps page component focused on composition.
+
+### Pattern 2: Framer Motion Slide with Peek
+
+**What:** Use `motion.div` with `animate.x` for horizontal slide, separate hover zone for peek.
+**When:** Collapsible overlay panel with peek-on-hover.
+
+```jsx
+<motion.div
+  animate={{ x: collapsed && !peeking ? offscreenX : 0 }}
+  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+  onMouseEnter={onMouseEnter}
+  onMouseLeave={onMouseLeave}
+>
+  {children}
+</motion.div>
+```
+
+### Pattern 3: Sliver Hit Target
+
+**What:** When panel is collapsed, an invisible 24px-wide div extends from the visible 6px sliver to provide a wider hover target.
+**Why:** 6px is hard to hover precisely. 24px invisible hit zone makes peek feel responsive.
+
+### Pattern 4: Full-Bleed Map Inside AppLayout
+
+**What:** Use `-m-6` negative margin plus explicit height `calc(100vh - 60px)` to break out of AppLayout padding.
+**When:** Any page needing edge-to-edge rendering inside AppLayout.
+**Existing usage:** ThreatMapPage line 73.
+
+### Pattern 5: Existing Components as Panel Children
+
+**What:** Import ThreatMapCounters, ThreatMapCountries, ThreatMapDonut directly into OverlayPanelLeft. No copying, no rewriting.
+**Why:** They already use `glass-card-static` which renders correctly inside any container. One source of truth.
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Client-Side Date Filtering
+### Anti-Pattern 1: Shared Peek State Between Panels
 
-**What:** Fetch all reports, then filter by date in JavaScript.
-**Why bad:** OpenCTI may have thousands of reports. Transferring all to filter client-side wastes bandwidth and memory. The 5-min server cache becomes useless since each date range is unique.
-**Instead:** Pass date range to backend, let OpenCTI filter via GraphQL FilterGroup, cache per param hash (existing pattern).
+**What:** Single boolean controlling both panels' peek state.
+**Why bad:** Requirement specifies independent hover-to-reveal. If left peeks, right stays collapsed.
+**Instead:** Track `collapsed` (global toggle) + `leftPeeking` + `rightPeeking` separately. Toggle affects base state; peek overrides per-panel.
 
-### Anti-Pattern 2: Batch-Loading All Enrichment in Actor List
+### Anti-Pattern 2: Re-rendering Map on Panel State Change
 
-**What:** Adding TTPs, tools, campaigns to the actors list query for all 24 actors.
-**Why bad:** Multiplies GraphQL payload (24 actors x 50+ relationships each). Response time increases from ~500ms to potentially 5+ seconds. Most modal data is never viewed.
-**Instead:** Fetch-on-open pattern. Load enriched data for a single actor when the modal opens. Show skeleton in modal for 200-300ms.
+**What:** Putting overlay panel state in the same subtree that owns the Leaflet map ref.
+**Why bad:** Leaflet map re-initialization is expensive. Any re-render of the map container div risks destroying and recreating the map.
+**Instead:** Overlay panels are siblings of the map div, not children. Panel hover state changes only trigger re-renders on `motion.div` wrappers. Map div stays in a stable subtree.
 
-### Anti-Pattern 3: Separate SSE Stream for Auto-Refresh
+### Anti-Pattern 3: Duplicating Existing Map Widgets
 
-**What:** Using Server-Sent Events for Threat News and Threat Actors auto-refresh.
-**Why bad:** SSE is justified for Threat Map (truly real-time, continuous events). News and actors update infrequently (hourly at most). SSE connections consume server resources and have 5-min lifetime limits already imposed.
-**Instead:** Simple `setInterval` polling every 5 minutes. The server-side cache (5 min for news) means most polls return cached data instantly.
+**What:** Copying ThreatMapCounters/Countries/Donut code into new overlay components.
+**Why bad:** Two copies diverge over time.
+**Instead:** Import and render existing components directly inside OverlayPanelLeft.
 
-### Anti-Pattern 4: Building Full Settings Infrastructure
+### Anti-Pattern 4: Removing /threat-map Without Redirect
 
-**What:** API Keys, Webhooks, Usage analytics, 2FA toggle -- features that don't exist on the backend.
-**Why bad:** Current SettingsPage has mock API keys and webhooks that are purely decorative. Building backend infrastructure for features with zero demand is premature.
-**Instead:** Profile + Account tabs only. Remove mock API Keys, Webhooks, and Usage tabs entirely. Add them back when backend support exists.
+**What:** Deleting the route entirely.
+**Why bad:** Bookmarks, browser history, and external links break silently.
+**Instead:** Keep `/threat-map` as `<Navigate to="/dashboard" replace />`.
 
-### Anti-Pattern 5: Client-Side Time-Series Aggregation
+### Anti-Pattern 5: Fetching Dashboard Data in Overlay Components
 
-**What:** Fetching all reports with dates, then bucketing by day in JavaScript.
-**Why bad:** Same as client-side date filtering -- requires transferring potentially thousands of records. Aggregation is compute-intensive in the browser.
-**Instead:** Server-side aggregation in `ThreatNewsService::categoryTimeSeries()`. Cache the result. Send only the aggregated dates + counts to the frontend.
-
----
-
-## Modified Files Inventory
-
-### Backend -- Modified
-
-| File | Change | Risk |
-|------|--------|------|
-| `app/Services/DashboardService.php` | Add 3 entity types to `fetchCounts()`, batch into single aliased query | LOW |
-| `app/Services/ThreatNewsService.php` | Add `publishedAfter`/`publishedBefore` params, add `categoryTimeSeries()` | MEDIUM |
-| `app/Services/ThreatActorService.php` | Add `getDetail()` method with enriched GraphQL | LOW |
-| `app/Http/Controllers/ThreatNews/IndexController.php` | Accept date range query params | LOW |
-| `routes/api.php` | Add PUT /profile, PUT /password, GET /threat-actors/{id}, GET /threat-news/chart | LOW |
-
-### Backend -- New
-
-| File | Purpose |
-|------|---------|
-| `app/Http/Controllers/Auth/ProfileController.php` | Update user profile (PUT /api/profile) |
-| `app/Http/Controllers/Auth/PasswordController.php` | Change password (PUT /api/password) |
-| `app/Http/Controllers/ThreatActor/DetailController.php` | Single actor enriched detail |
-| `app/Http/Controllers/ThreatNews/ChartController.php` | Time-series category chart data |
-
-### Frontend -- Modified
-
-| File | Change | Risk |
-|------|--------|------|
-| `src/pages/DashboardPage.jsx` | Expand stat cards to 7, add "Threat Database" heading, remove Live dots | LOW |
-| `src/pages/ThreatNewsPage.jsx` | Add date range selector, category chart, auto-refresh, remove pagination | MEDIUM |
-| `src/pages/ThreatActorsPage.jsx` | Add auto-refresh, enrich modal with fetch-on-open detail | LOW |
-| `src/pages/ThreatMapPage.jsx` | Label change only ("100 Latest Attacks") | LOW |
-| `src/pages/SettingsPage.jsx` | Full rewrite: real user data, Profile + Account tabs | HIGH (complete rewrite) |
-| `src/pages/ThreatSearchPage.jsx` | Bug fixes (D3 nodes, loader, z-index) | LOW |
-| `src/api/threat-news.js` | Add date range params, chart fetch function | LOW |
-| `src/api/threat-actors.js` | Add `fetchThreatActorDetail(id)` | LOW |
-| `src/components/threat-map/ThreatMapCounters.jsx` | Label text change | LOW |
-
-### Frontend -- New
-
-| File | Purpose |
-|------|---------|
-| `src/hooks/useAutoRefresh.js` | Reusable interval refresh hook with visibility pause |
-| `src/api/profile.js` | `updateProfile()` and `changePassword()` API functions |
-| `src/components/shared/DateRangeSelector.jsx` | Date range picker with presets |
-
----
+**What:** Each overlay panel makes its own API calls.
+**Why bad:** Violates single-responsibility. Makes it impossible to coordinate loading states or share data between panels.
+**Instead:** `useDashboardData` hook lives in `ThreatMapDashboard` (the page). Data flows down as props to overlay panels.
 
 ## Suggested Build Order
 
-Ordered by dependencies: backend endpoints first, then frontend consumers. Independent features in parallel where possible.
+Build order follows dependency chains. Each phase produces a testable increment.
+
+### Phase 1: Extract useDashboardData hook
+**Creates:** `hooks/useDashboardData.js`
+**Changes:** None (hook exists but is not yet consumed)
+**Testable:** Import in console, verify API calls fire and data returns.
+**Rationale:** Zero-risk extraction. Unblocks Phase 3.
+
+### Phase 2: Create useOverlayPanels hook
+**Creates:** `hooks/useOverlayPanels.js`
+**Changes:** None
+**Testable:** Import in console, verify state toggles and localStorage persistence.
+**Rationale:** Pure state management. Unblocks Phase 4.
+
+### Phase 3: Build ThreatMapDashboard page (map only, no overlays)
+**Creates:** `pages/ThreatMapDashboard.jsx`
+**Changes:** `App.jsx` (swap route), `mock-data.js` (remove Threat Map nav)
+**Testable:** Navigate to `/dashboard`, see full-viewport map with SSE events, counters, countries, donut, feed. Old `/threat-map` redirects.
+**Rationale:** Validates map works at new route before adding overlay complexity.
+
+### Phase 4: Build overlay panel components
+**Creates:** `components/dashboard/OverlayPanelLeft.jsx`, `OverlayPanelRight.jsx`, `OverlayToggle.jsx`, `StatCardCompact.jsx`, `IndicatorsTableCompact.jsx`
+**Changes:** `pages/ThreatMapDashboard.jsx` (wire in overlays + hooks)
+**Testable:** See stat cards on left, indicators on right, toggle collapses both.
+**Rationale:** All new components, no existing code modified beyond the new page.
+
+### Phase 5: Add peek behavior and animation polish
+**Changes:** Overlay components (add peek mouse handlers, tune spring params, add sliver hit target)
+**Testable:** Collapse panels, hover sliver, panel peeks independently.
+**Rationale:** Peek is the trickiest UX. Isolated so animation tuning does not block functional delivery.
+
+### Phase 6: Cleanup dead code
+**Deletes:** `pages/DashboardPage.jsx`, `pages/ThreatMapPage.jsx`
+**Changes:** `App.jsx` (remove dead imports)
+**Testable:** Build succeeds, no unused imports, `/dashboard` still works.
+**Rationale:** Cleanup only after new page is verified. Reversible if issues found.
+
+### Phase Dependency Graph
 
 ```
-Phase 1: Simple Backend Changes (no new endpoints, low risk)
-  1. DashboardService: expand entity types to 7, batch aliased query
-  2. DashboardPage: expand stat cards, add heading, remove Live dots
-  3. ThreatMapCounters: label change to "100 Latest Attacks"
-  => Quick wins, testable immediately
-
-Phase 2: Auto-Refresh Hook + Integration (reusable pattern)
-  4. Create useAutoRefresh hook
-  5. Integrate into ThreatNewsPage
-  6. Integrate into ThreatActorsPage
-  7. Refactor DashboardPage to use the hook
-  => Pattern established, 3 pages improved
-
-Phase 3: Date-Based Filtering for Threat News (backend + frontend)
-  8. ThreatNewsService: add date range params to list()
-  9. ThreatNewsController: accept published_after, published_before
-  10. Frontend: DateRangeSelector component
-  11. ThreatNewsPage: integrate date selector, replace pagination
-  => News page date filtering complete
-
-Phase 4: Threat News Category Chart (depends on Phase 3 backend pattern)
-  12. ThreatNewsService: add categoryTimeSeries() method
-  13. ThreatNewsChartController: new endpoint
-  14. ThreatNewsPage: add time-series chart component
-  => News page fully enhanced
-
-Phase 5: Enriched Threat Actor Modal (independent, parallel-safe with Phase 3-4)
-  15. ThreatActorService: add getDetail() with enriched GraphQL
-  16. ThreatActorDetailController: new endpoint
-  17. Frontend: fetchThreatActorDetail(id) API function
-  18. ThreatActorModal: fetch-on-open enrichment with loading skeleton
-  => Actor modals enriched with TTPs, tools, campaigns
-
-Phase 6: Settings/Profile Page (independent, parallel-safe)
-  19. ProfileController: PUT /api/profile endpoint
-  20. PasswordController: PUT /api/password endpoint
-  21. Frontend: api/profile.js module
-  22. SettingsPage: full rewrite with Profile + Account tabs
-  => Settings page functional with real data
-
-Phase 7: Threat Search Bug Fixes (independent, any time)
-  23. D3 force simulation parameter tuning
-  24. Search loading state during API call
-  25. Z-index fix for logged-out search bar
-  => Bug fixes complete
+Phase 1 (useDashboardData) ---+
+                               +--> Phase 3 (map page) --> Phase 4 (overlays) --> Phase 5 (peek) --> Phase 6 (cleanup)
+Phase 2 (useOverlayPanels) ---+
 ```
 
-**Why this order:**
-- Phase 1 is pure config changes with zero risk, delivers visible progress
-- Phase 2 creates the reusable hook before needing it in Phases 3-5
-- Phases 3-4 are sequential (chart depends on backend date filtering pattern)
-- Phases 5, 6, 7 are independent and can be parallelized with Phases 3-4
-- Settings page (Phase 6) has no dependencies on other features
-- Bug fixes (Phase 7) are isolated and can be done anytime
+Phases 1 and 2 are independent and can run in parallel. Phases 3-6 are strictly sequential.
 
----
+## Files Changed Summary
+
+### New Files (8)
+
+| File | Purpose |
+|------|---------|
+| `src/pages/ThreatMapDashboard.jsx` | Merged page component |
+| `src/hooks/useDashboardData.js` | Dashboard API data hook |
+| `src/hooks/useOverlayPanels.js` | Panel collapse/peek state hook |
+| `src/components/dashboard/OverlayPanelLeft.jsx` | Left overlay (stats + map widgets) |
+| `src/components/dashboard/OverlayPanelRight.jsx` | Right overlay (indicators) |
+| `src/components/dashboard/OverlayToggle.jsx` | Toggle button |
+| `src/components/dashboard/StatCardCompact.jsx` | Compact stat card |
+| `src/components/dashboard/IndicatorsTableCompact.jsx` | Compact indicators table |
+
+### Modified Files (2)
+
+| File | Change | Risk |
+|------|--------|------|
+| `src/App.jsx` | Swap DashboardPage/ThreatMapPage imports and routes | LOW |
+| `src/data/mock-data.js` | Remove Threat Map from NAV_CATEGORIES | LOW |
+
+### Deleted Files (2)
+
+| File | Reason |
+|------|--------|
+| `src/pages/DashboardPage.jsx` | Replaced by ThreatMapDashboard |
+| `src/pages/ThreatMapPage.jsx` | Replaced by ThreatMapDashboard |
+
+### Backend Changes
+
+**None.** All existing API endpoints (`/api/dashboard/counts`, `/api/dashboard/indicators`, `/api/threat-map/snapshot`, `/api/threat-map/stream`) remain unchanged. The merge is purely a frontend concern.
 
 ## Scalability Considerations
 
-| Concern | Current (100 users) | At 10K users | At 100K users |
-|---------|---------------------|--------------|---------------|
-| Dashboard counts (7 queries) | Batch into 1 aliased query, 5-min cache | Same | Same (cached) |
-| Time-series aggregation | Server-side, 500 reports, 5-min cache | Same | Increase cache TTL to 15 min |
-| Enriched actor detail | Per-actor cache, 15 min | Same | Same (read-heavy, cache effective) |
-| Auto-refresh polling | 5 min interval, cache absorbs | Same | Same (cache hit rate > 99%) |
-| Profile updates | Direct DB update | Same | Same (rare operation) |
-| Date-range news queries | Cache per param hash | Cache may fragment heavily | Consider LRU eviction, limit date ranges |
-
----
+| Concern | Current | After Merge | Notes |
+|---------|---------|-------------|-------|
+| API calls on mount | Dashboard: 4 endpoints; ThreatMap: 1 snapshot + SSE | Combined: 3 endpoints + SSE | Fewer total calls (categories/credits/history dropped) |
+| SSE connections | 1 per ThreatMap visit | 1 per Dashboard visit | Same, but now always active since Dashboard is the landing page |
+| Leaflet memory | Only on /threat-map | Always on /dashboard | Acceptable: map was already lazy-loaded per useLeaflet |
+| Overlay animation | N/A | Spring animation on hover | Negligible: Framer Motion handles GPU-accelerated transforms |
+| Panel re-renders | N/A | Only motion.div on hover | Map div is not affected |
 
 ## Sources
 
-- Direct codebase analysis: `backend/app/Services/DashboardService.php` (current counts query pattern)
-- Direct codebase analysis: `backend/app/Services/ThreatNewsService.php` (current filtering, GraphQL FilterGroup pattern)
-- Direct codebase analysis: `backend/app/Services/ThreatActorService.php` (current GraphQL relationships pattern)
-- Direct codebase analysis: `backend/app/Services/ThreatMapService.php` (snapshot already caps at 100)
-- Direct codebase analysis: `frontend/src/pages/DashboardPage.jsx` (existing auto-refresh pattern, stat cards)
-- Direct codebase analysis: `frontend/src/pages/ThreatNewsPage.jsx` (current filtering, pagination)
-- Direct codebase analysis: `frontend/src/pages/ThreatActorsPage.jsx` (current modal, data loading)
-- Direct codebase analysis: `frontend/src/pages/SettingsPage.jsx` (mock data to replace)
-- Direct codebase analysis: `frontend/src/contexts/AuthContext.jsx` (user data shape)
-- Direct codebase analysis: `backend/routes/api.php` (current route structure)
-- Direct codebase analysis: `frontend/src/hooks/useThreatStream.js` (visibility-aware pattern)
-- OpenCTI GraphQL FilterGroup pattern verified from existing service implementations (HIGH confidence)
-- All recommendations build on verified patterns in the existing codebase (HIGH confidence)
+- Direct codebase: `App.jsx` (routing structure, lines 62-76)
+- Direct codebase: `DashboardPage.jsx` (stat cards, indicators, data fetching, 581 lines)
+- Direct codebase: `ThreatMapPage.jsx` (map integration, SSE, widgets, 91 lines)
+- Direct codebase: `AppLayout.jsx` (padding, layout structure, 32 lines)
+- Direct codebase: `Sidebar.jsx` (nav rendering, 216 lines)
+- Direct codebase: `useLeaflet.js` (map init pattern, onReady callback, 72 lines)
+- Direct codebase: `useThreatStream.js` (SSE + snapshot, visibility handling, 174 lines)
+- Direct codebase: `mock-data.js` NAV_CATEGORIES (lines 135-157)
+- Direct codebase: All threat-map components (ThreatMapCounters, Countries, Donut, Feed, Status)
+- Direct codebase: `glassmorphism.css` (glass-card-static class definition)
+- Direct codebase: `package.json` (framer-motion@^12.35.2 already installed)
+- Confidence: HIGH -- all recommendations build on verified patterns in the existing codebase

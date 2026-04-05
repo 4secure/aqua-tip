@@ -1,354 +1,408 @@
-# Pitfalls Research
+# Domain Pitfalls
 
-**Domain:** Adding auto-refresh, date filtering, time-series charts, enriched modals, and functional settings to existing React + Laravel + OpenCTI threat intelligence platform
-**Project:** AQUA TIP v3.2 -- App Layout Page Tweaks
-**Researched:** 2026-03-28
-**Confidence:** HIGH (based on direct codebase analysis of all affected files, existing patterns, and established React/Chart.js/D3 knowledge)
+**Domain:** Adding glassmorphism overlay panels on a full-viewport Leaflet map, merging dashboard data into map page, removing DashboardPage, with toggle/peek-on-hover behavior using Framer Motion
+**Project:** AQUA TIP v3.3 -- Threat Map Dashboard
+**Researched:** 2026-04-05
+**Confidence:** HIGH (direct codebase analysis of ThreatMapPage.jsx, DashboardPage.jsx, useLeaflet.js, useThreatStream.js, App.jsx, Sidebar nav config, CSS files, and verified Leaflet event propagation behavior)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: setInterval Stale Closure in Auto-Refresh
+Mistakes that cause rewrites or major issues.
+
+### Pitfall 1: Click and Drag Events Propagate Through Overlay Panels to Leaflet Map
 
 **What goes wrong:**
-The 5-min auto-refresh `setInterval` captures stale closures over filter state. When users change date filters or category filters between refresh cycles, the interval callback fires with the old filter values, fetching wrong data and silently replacing the user's filtered view with unfiltered results.
+Clicking, dragging, or scrolling inside glassmorphism overlay panels (stat cards, indicators table) triggers map interactions underneath -- panning, zooming, or marker selection. The map "grabs" through the panel, making the overlay unusable.
 
 **Why it happens:**
-The existing DashboardPage.jsx (lines 432-443) already uses `setInterval` but with no dependencies -- it always fetches the same three endpoints with no parameters. Adding date-based filtering to Threat News means the interval callback must reference the current date/category state, but `setInterval` captures the closure at creation time. This is the most common React interval bug.
+Leaflet attaches pointer/mouse/touch event listeners directly on the map container DOM element. Browser events bubble up from child elements. When an overlay `<div>` is positioned absolutely over the Leaflet container (the current pattern on ThreatMapPage.jsx lines 79-88 using `z-[1000]`), clicks inside the overlay still propagate to the Leaflet map container beneath. The existing map widgets (ThreatMapCounters, ThreatMapCountries, ThreatMapDonut, ThreatMapFeed) already use `z-[1000]` and work because they are small and mostly non-scrollable. But the new overlay panels will be large, scrollable, and draggable (Framer Motion slide animations), creating far more interaction surface area for event leakage.
 
-**How to avoid:**
-Use a `useRef` to hold current filter values, and read from the ref inside the interval callback. The ref approach keeps the interval stable while always reading current values:
+**Consequences:**
+- User drags to scroll the indicators table, map pans instead
+- User clicks a stat card, map registers a click at that coordinate
+- Double-click on overlay text triggers map zoom
+- Mouse wheel scroll on the scrollable indicators table zooms the map
+
+**Prevention:**
+Apply both `L.DomEvent.disableClickPropagation()` and `L.DomEvent.disableScrollPropagation()` to each overlay panel's root DOM element via a `useEffect` + `useRef` pattern:
+
 ```jsx
-const filtersRef = useRef({ date, category });
-useEffect(() => { filtersRef.current = { date, category }; }, [date, category]);
+const panelRef = useRef(null);
+
 useEffect(() => {
-  const id = setInterval(() => {
-    fetchNews(filtersRef.current);  // always reads current values
-  }, 5 * 60 * 1000);
-  return () => clearInterval(id);
-}, []);  // stable interval, no stale closure
-```
-
-**Warning signs:**
-After changing a date filter, the page reverts to showing all-dates data after 5 minutes. Users see a "flash" of different data periodically.
-
-**Phase to address:**
-Threat News phase (date filtering + auto-refresh must be implemented together). Build a reusable `useAutoRefresh` hook here for reuse on Threat Actors.
-
----
-
-### Pitfall 2: useChartJs Hook Destroys and Recreates Chart on Every Data Change
-
-**What goes wrong:**
-The existing `useChartJs` hook (lines 10-17 of `useChartJs.js`) uses `[config]` as its sole useEffect dependency. Any new config object reference triggers full chart destruction and recreation -- visible as flickering, loss of animation state, and tooltip disappearance mid-hover.
-
-**Why it happens:**
-The current hook works fine for static charts (SettingsPage uses `useMemo(() => ..., [])` with empty deps). But the new time-series chart for Threat News needs dynamic data (date-filtered category counts). Every date filter change creates a new config object, triggering destroy+recreate. JavaScript reference equality means `{} !== {}` even with identical contents.
-
-**How to avoid:**
-Chart.js supports in-place data updates via `chart.data = newData; chart.update()`. Either modify `useChartJs` to accept separate static config and dynamic data, or create a new `useTimeSeriesChart` hook:
-```jsx
-useEffect(() => {
-  if (!chartRef.current) {
-    chartRef.current = new Chart(canvas, initialConfig);
-  } else {
-    chartRef.current.data = newData;
-    chartRef.current.update('none'); // skip animation on data swap
-  }
-}, [dataVersion]); // only react to data changes, not full config
-```
-The existing static charts (Dashboard AttackChart, SettingsPage UsageChart) can continue using the current hook unchanged.
-
-**Warning signs:**
-Chart flickers on filter change. Tooltips disappear mid-hover. Animation replays from scratch on every data update instead of smoothly transitioning.
-
-**Phase to address:**
-Threat News phase (time-series chart implementation). Must decide on hook strategy before building the chart.
-
----
-
-### Pitfall 3: D3 Force Graph Nodes Cluster at Origin (0,0)
-
-**What goes wrong:**
-The existing ThreatSearchPage.jsx D3 force graph (lines 105-147) has a known node positioning bug (explicitly listed in v3.2 targets). Nodes pile up at the top-left corner or overlap the center node on initial render.
-
-**Why it happens:**
-D3's `forceSimulation` initializes node positions to (0,0) if `x` and `y` are not pre-set on data objects. The current code (line 105-109) creates the simulation without assigning initial positions. `forceCenter` shifts the center of mass but does not spread nodes apart. With `forceManyBody` strength of -400, nodes eventually separate after many simulation ticks, but the initial visual state is chaotic.
-
-**How to avoid:**
-Pre-assign initial positions in a circle around the center before starting the simulation:
-```jsx
-nodes.forEach((node, i) => {
-  if (node.id === centerQuery) {
-    node.x = width / 2;
-    node.y = height / 2;
-    node.fx = width / 2; // pin center node
-    node.fy = height / 2;
-  } else {
-    const angle = (2 * Math.PI * i) / (nodes.length - 1);
-    node.x = width / 2 + 120 * Math.cos(angle);
-    node.y = height / 2 + 120 * Math.sin(angle);
-  }
-});
-```
-Also clamp node positions to the SVG bounds in the tick handler to prevent escape.
-
-**Warning signs:**
-Nodes visually "explode" from top-left on load. Nodes overlap each other. Nodes escape the visible SVG area.
-
-**Phase to address:**
-Threat Search bug fix phase.
-
----
-
-### Pitfall 4: OpenCTI N+1 Queries in Enriched Threat Actor Modal
-
-**What goes wrong:**
-Enriching threat actor modals with TTPs, tools, targeted sectors, and campaigns requires additional OpenCTI GraphQL queries per actor. If each relation type is fetched separately (4 queries per modal open), or if the page pre-fetches enrichment for all 24 visible actors on load, the OpenCTI instance gets hammered and responses slow dramatically.
-
-**Why it happens:**
-OpenCTI's GraphQL schema nests relationships behind `stixCoreRelationships` edges, and different entity types (AttackPattern, Tool, Identity-sector, Campaign) require different filter parameters. Developers naturally write one query per entity type. Combined with the 15-second timeout on `OpenCtiService` (line 38), slow queries cascade into visible timeouts.
-
-**How to avoid:**
-Fetch enrichment lazily (only on modal open, not for all cards). Use a single GraphQL query with aliased fields to fetch all relation types in one round-trip:
-```graphql
-query ($id: String!) {
-  intrusionSet(id: $id) {
-    id name description
-    ttps: stixCoreRelationships(relationship_type: "uses", toTypes: ["Attack-Pattern"], first: 20) {
-      edges { node { to { ... on AttackPattern { name x_mitre_id } } } }
-    }
-    tools: stixCoreRelationships(relationship_type: "uses", toTypes: ["Tool"], first: 15) {
-      edges { node { to { ... on Tool { name } } } }
-    }
-    sectors: stixCoreRelationships(relationship_type: "targets", toTypes: ["Identity"], first: 15) {
-      edges { node { to { ... on Identity { name identity_class } } } }
-    }
-    campaigns: stixCoreRelationships(relationship_type: "attributed-to", fromTypes: ["Campaign"], first: 10) {
-      edges { node { from { ... on Campaign { name first_seen last_seen } } } }
-    }
-  }
-}
-```
-Cache enrichment per actor ID for 15 minutes (matching actor list cache TTL). Limit each alias with `first: N` to prevent massive payloads for heavily-mapped APT groups.
-
-**Warning signs:**
-Modal takes 3+ seconds to open. OpenCTI logs show burst of queries on each modal click. Timeout errors during high-traffic periods.
-
-**Phase to address:**
-Threat Actors enrichment phase. Backend service method must use the single-query aliased pattern from the start.
-
----
-
-### Pitfall 5: Auth Context Not Updated After Settings/Profile Save
-
-**What goes wrong:**
-The Settings/Profile page saves user data (name, timezone, organization, role) to the backend, but the `AuthContext` still holds the stale user object. The sidebar initials, topbar plan chip, and `useFormatDate` hook (which reads `user.timezone` from context) all display stale data until full page refresh.
-
-**Why it happens:**
-The current AuthContext (lines 36-48) only updates the user object on login/register via `fetchCurrentUser()`. There is no `refreshUser` or `updateUser` method exposed in the context value (line 55). The Settings page has no mechanism to signal "user data changed" to the context.
-
-**How to avoid:**
-Add a `refreshUser` method to AuthContext that re-fetches `/api/user` and updates state. Call it after successful profile save:
-```jsx
-// In AuthContext
-const refreshUser = useCallback(async () => {
-  const userData = await fetchCurrentUser();
-  setUser(userData);
+  if (!panelRef.current) return;
+  L.DomEvent.disableClickPropagation(panelRef.current);
+  L.DomEvent.disableScrollPropagation(panelRef.current);
 }, []);
-// Add to value: { ...existing, refreshUser }
 ```
-Do NOT do optimistic-only updates -- if the save fails server-side but context is already updated, timezone-dependent features render with wrong timezone. Always confirm save succeeded before updating context.
 
-**Warning signs:**
-User changes timezone in settings, but dates on dashboard still show old timezone. User changes name, sidebar initials still show old name until page reload.
+This must be applied to EVERY interactive overlay element, including the toggle button and the peek sliver. Create a reusable `useMapOverlay(ref)` hook that encapsulates both calls, so every overlay component gets it consistently.
+
+**Detection:**
+- Click on overlay, watch if map pans or shows popup
+- Scroll inside indicators table, watch if map zooms
+- Drag inside overlay panel, watch if map pans
 
 **Phase to address:**
-Settings/Profile phase. Must modify AuthContext before building the settings form.
+Very first overlay panel implementation phase. Must be in place before any overlay is functional.
 
 ---
 
-### Pitfall 6: Date-Based Filtering Timezone Mismatch with OpenCTI
+### Pitfall 2: Leaflet Z-Index War with Overlay Panels
 
 **What goes wrong:**
-The date selector sends a date string (e.g., "2026-03-28") to the Laravel backend, which constructs a GraphQL date filter. But OpenCTI stores all timestamps in UTC. A user in Asia/Tokyo (UTC+9) filtering for "March 28" expects a different UTC range than a user in America/New_York (UTC-5). Without timezone conversion, reports appear under wrong dates.
+Leaflet internally manages z-index values for its tile panes, marker panes, popup panes, and shadow panes. Overlay panels positioned with CSS `z-index` values can conflict with Leaflet's internal layering, causing: (a) map popups appearing above overlay panels, (b) tile layers rendering over the overlay during zoom transitions, or (c) the Leaflet attribution control overlapping panel edges.
 
 **Why it happens:**
-HTML `<input type="date">` produces bare date strings with no timezone. The backend receives "2026-03-28" and naively constructs `>= 2026-03-28T00:00:00Z` and `< 2026-03-29T00:00:00Z`. But "March 28 in Tokyo" starts at `2026-03-27T15:00:00Z`, not midnight UTC.
+Leaflet's internal pane z-index hierarchy (from leaflet source):
+- Tile pane: `z-index: 200`
+- Shadow pane: `z-index: 500`
+- Marker pane: `z-index: 600`
+- Tooltip pane: `z-index: 650`
+- Popup pane: `z-index: 700`
 
-**How to avoid:**
-The users table already stores IANA timezone from onboarding. Use it on the backend to convert date ranges:
-```php
-$tz = new DateTimeZone($request->user()?->timezone ?? 'UTC');
-$start = new DateTime($date, $tz);
-$end = (clone $start)->modify('+1 day');
-$start->setTimezone(new DateTimeZone('UTC'));
-$end->setTimezone(new DateTimeZone('UTC'));
-// Use $start and $end as UTC ISO-8601 strings in the GraphQL filter
-```
-For unauthenticated users (dashboard is public), default to UTC -- consistent with the existing credit reset behavior.
+The existing code uses `z-[1000]` (Tailwind for `z-index: 1000`), which sits above all default Leaflet panes. However, Leaflet popups created by the current `useLeaflet.js` hook (lines 63-66, bound via `.bindPopup()`) render in the popup pane at z-index 700, which is correctly below 1000. The problem arises when:
+1. Custom Leaflet controls or plugins inject elements with higher z-index
+2. Framer Motion `animate` creates a new stacking context with `transform` that resets z-index behavior relative to ancestors
+3. The Leaflet map container itself creates a stacking context that isolates its children
 
-**Warning signs:**
-Reports dated "March 28" do not appear when filtering for March 28. Reports from adjacent days bleed into the filtered view. Noticeable for users in UTC+12 or UTC-12.
+**Consequences:**
+- Map popups bleed through panels during tile zoom animations
+- Pulse markers (from `addPulseMarker` function, ThreatMapPage.jsx lines 11-23) visually appear above overlay panels during their scale animation
+- Toggle button unreachable behind a Leaflet control
+
+**Prevention:**
+1. Place overlay panels as siblings of the map container, not children. The current ThreatMapPage.jsx structure already does this correctly (overlay divs are siblings of the map `ref` div inside the parent `relative` container). Preserve this pattern when refactoring.
+2. Use `z-[1000]` for panels (already proven in current code) and ensure no Leaflet pane exceeds this.
+3. Disable Leaflet's attribution control (already done: `attributionControl: false` in useLeaflet.js line 19).
+4. Test overlay z-index specifically during map zoom transitions and tile loading, when Leaflet temporarily elevates tile pane z-index.
+
+**Detection:**
+- Zoom in/out rapidly while overlay is visible -- watch for tile flash-through
+- Click a map marker to open popup, check if popup renders above or below the overlay
 
 **Phase to address:**
-Threat News date filtering phase. Must be part of the backend endpoint design, not patched after.
+Initial overlay panel layout phase. Establish z-index contract once, document it, reference it in all subsequent overlay work.
 
 ---
 
-### Pitfall 7: Memory Leak from Unmounted Auto-Refresh Intervals
+### Pitfall 3: Framer Motion Transform Creates New Stacking Context, Breaking Z-Index
 
 **What goes wrong:**
-User navigates away from Threat News or Threat Actors while auto-refresh interval is active. If cleanup is missed, the interval continues firing API calls and calling `setState` on the unmounted component, causing React warnings and memory leaks over long sessions.
+When Framer Motion animates the overlay panel slide-in/slide-out (`animate={{ x: ... }}`), it applies a CSS `transform` to the element. CSS `transform` creates a new stacking context, which means `z-index` values inside the transformed element are relative to its stacking context, not the page root. This can cause the animated panel to render below Leaflet's map container during animation, even with a high z-index value.
 
 **Why it happens:**
-The existing codebase correctly returns cleanup functions (e.g., DashboardPage line 443: `return () => clearInterval(interval)`). But when adding auto-refresh to two more pages, it is easy to forget cleanup in one, or have the interval stored in a ref that gets cleared in the wrong useEffect. Adding conditional logic (like "do not refresh while modal is open") creates more branches to miss.
+CSS specification: any element with `transform` other than `none` establishes a new stacking context. Framer Motion's `animate` applies `transform: translateX(...)` for slide animations. If the Leaflet map container also establishes a stacking context (it does, via its own `transform` and `position: relative`), the two stacking contexts compete based on DOM order, not z-index values.
 
-**How to avoid:**
-Create a reusable `useAutoRefresh(callback, intervalMs, enabled)` hook that encapsulates the interval + cleanup + ref pattern:
+**Consequences:**
+- Panel visually "dips behind" the map mid-animation, then pops back on top when animation completes (if transform is removed after)
+- Panel permanently renders behind map tiles if Framer Motion keeps the transform applied
+- Flickering during slide animations as stacking contexts fight
+
+**Prevention:**
+1. Ensure the overlay panel wrapper has `position: relative` or `position: absolute` AND `z-index` set on the wrapper OUTSIDE the Framer Motion animated element, so the stacking context is established before the transform is applied.
+2. Use `will-change: transform` on the panel element to hint the browser to composite it on its own layer.
+3. Alternatively, animate `x` with `style={{ zIndex: 1000 }}` directly on the Framer Motion component (not Tailwind class) to ensure z-index is in the same stacking context as the transform.
+4. Test with `opacity` animation alongside `x` -- opacity also creates stacking contexts and can compound the problem.
+
+Structure the DOM like this:
 ```jsx
-function useAutoRefresh(callback, intervalMs, enabled = true) {
-  const callbackRef = useRef(callback);
-  useEffect(() => { callbackRef.current = callback; }, [callback]);
-  useEffect(() => {
-    if (!enabled) return;
-    const id = setInterval(() => callbackRef.current(), intervalMs);
-    return () => clearInterval(id);
-  }, [intervalMs, enabled]);
-}
+<div className="absolute top-0 left-0 z-[1000]"> {/* stacking context wrapper */}
+  <motion.div animate={{ x: collapsed ? -320 : 0 }}> {/* animated content */}
+    {/* panel content */}
+  </motion.div>
+</div>
 ```
-Use `enabled: false` when a modal is open. Use this hook on both Threat News and Threat Actors.
 
-**Warning signs:**
-React console warnings about state updates on unmounted components. Network tab shows periodic requests after navigating away.
+**Detection:**
+- Open browser DevTools, Elements panel, toggle the overlay -- watch for visual z-order flicker
+- Slow down animation (set `transition.duration` to 2s) to observe mid-animation rendering
 
 **Phase to address:**
-First page that implements auto-refresh. Build the hook once, reuse on the second page.
+The phase that implements Framer Motion slide animations. Must be tested immediately after first animation is added.
 
 ---
 
-## Technical Debt Patterns
+### Pitfall 4: Dual SSE Connection When Merging Dashboard Data into Map Page
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Raw `setInterval` instead of shared hook | Faster per-page | Duplicated cleanup logic, inconsistent behavior, stale closure bugs | Never -- the hook is 10 lines and prevents the #1 pitfall |
-| Full Chart.js destroy/recreate on data change | Works with existing `useChartJs` hook | Flickering, poor UX, tooltip loss, animation replay | Only if chart type changes (line to bar), never for data-only updates |
-| Separate HTTP call per relation type in enriched modal | Simpler to write | 4x slower modal load, hammers OpenCTI, timeout cascades | Never -- single aliased query is straightforward |
-| Hardcoded UTC in date filter endpoint | Simpler backend | Wrong results for non-UTC users (majority of any global user base) | Only if all users are known to be UTC |
-| Optimistic-only profile update (no server confirmation) | Instant UI feedback | UI lies if save fails; timezone-dependent features break silently | Never for timezone or critical fields; acceptable for cosmetic-only fields |
-| Skipping `document.visibilityState` check in auto-refresh | Simpler interval logic | Wasteful API calls on hidden tabs from day one | Never -- 2 lines of code prevent unnecessary load |
+**What goes wrong:**
+The current ThreatMapPage uses `useThreatStream()` which opens an SSE connection to `/api/threat-map/stream`. The current DashboardPage does NOT use SSE -- it fetches dashboard data via REST (`/api/dashboard/counts`, `/api/dashboard/indicators`, etc.) with a 5-minute `setInterval` auto-refresh. When merging these, developers may accidentally:
+1. Open TWO SSE connections (one for map events, one imagined for dashboard data)
+2. Duplicate the REST polling alongside the existing SSE, wasting connections
+3. Break the existing SSE connection by remounting the hook during refactoring
 
-## Integration Gotchas
+**Why it happens:**
+The `useThreatStream` hook (useThreatStream.js) manages EventSource lifecycle including snapshot loading, SSE connection, reconnection with exponential backoff, and visibility-aware disconnect. The dashboard data (stat counts, indicators, categories) comes from separate REST endpoints cached server-side (15min for counts, 5min for categories). These are fundamentally different data streams. Developers may conflate "live data" with "dashboard data" and try to pipe everything through SSE.
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| OpenCTI date filters | Using bare date strings ("2026-03-28") without timezone conversion | Convert user's local date to UTC start/end range using their IANA timezone |
-| OpenCTI `stixCoreRelationships` | Assuming `to` always holds the related entity | Check both `from` and `to` -- direction depends on relationship type (e.g., "attributed-to" has Campaign in `from`, not `to`) |
-| OpenCTI relationship queries | Separate query per relation type for enrichment | Single query with GraphQL aliases for all relation types + `first: N` limits |
-| OpenCTI report `published` field | Treating it as OpenCTI ingestion date | `published` is the report's stated publication date; `created_at` is ingestion time -- filter on `published` for user-facing date selectors |
-| OpenCTI label aggregation for chart | Client-side counting labels from loaded 20-item page | Server-side aggregation (e.g., `stixCoreObjectsDistribution`) -- client only sees current page, not the full dataset |
-| Chart.js responsive sizing | Setting explicit width/height on canvas element | Use `responsive: true` + `maintainAspectRatio: false` and control size via parent container CSS |
-| Laravel `Cache::remember` with OpenCTI | Default behavior deletes cache on exception | Already solved in codebase with manual get/put stale-cache pattern (Key Decision row) -- use same approach for new endpoints |
-| D3 force simulation in React | Not stopping simulation on unmount | Current code correctly calls `simulation.stop(); svg.remove()` in cleanup -- preserve this pattern when fixing node positions |
+**Consequences:**
+- Two EventSource connections per user doubles server connection count (SSE connections are long-lived and expensive)
+- If `useThreatStream` is accidentally unmounted/remounted during refactor, the EventSource disconnects and snapshot reloads, causing a visible data flash
+- If dashboard REST polling is removed in favor of SSE, dashboard stats lose their server-side caching benefit
 
-## Performance Traps
+**Prevention:**
+Keep the two data sources separate and explicit:
+1. `useThreatStream()` -- unchanged, provides map events, pulse markers, counters, country/type aggregations
+2. Dashboard REST endpoints -- keep existing `useEffect` pattern from DashboardPage.jsx lines 360-428, but extract into a custom `useDashboardData()` hook for cleanliness
+3. Do NOT create a second SSE connection
+4. The 5-minute auto-refresh for dashboard data can use the existing `useAutoRefresh` hook (already built in v3.2)
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Auto-refresh firing on background/hidden tabs | Unnecessary API calls, wasted bandwidth, server load from idle users | Check `document.visibilityState === 'visible'` before fetch; pause interval on `visibilitychange` event | Immediately -- wastes resources from day one |
-| Time-series chart with 365+ data points + animations | Sluggish rendering, dropped frames, janky date range changes | Limit to 30-90 data points; aggregate by week/month for longer ranges; use `chart.update('none')` to skip animation on data swaps | >100 points with animation enabled |
-| Pre-fetching enrichment for all 24 visible threat actor cards | Page load takes 15+ seconds, 24 GraphQL queries fire simultaneously | Fetch enrichment lazily only when modal opens; cache per actor ID | Always -- 24 parallel queries is never acceptable |
-| Large enrichment payloads for heavily-mapped APT groups | Some groups have 200+ ATT&CK techniques; response exceeds 500KB | Add `first: 20` limit on each relationship alias in the GraphQL query | Any well-known APT group (APT28, APT29, Lazarus, etc.) |
-| Sidebar collapse/expand triggering chart resize cascade | Charts briefly render at wrong size, then snap to correct size | Use `ResizeObserver` or Chart.js built-in resize handling; avoid forcing re-render on sidebar toggle | Every time user collapses/expands sidebar |
+**Detection:**
+- Open browser DevTools Network tab, filter by `EventSource` -- should see exactly ONE SSE connection
+- Check for duplicate REST polling in the Network timeline
 
-## Security Mistakes
+**Phase to address:**
+The data integration phase when dashboard data is wired into the map page. Plan the data architecture before writing any code.
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Settings endpoint accepting `plan_id`, `credits`, or `email_verified` fields | Privilege escalation -- user upgrades own plan or grants credits via crafted POST | Whitelist only updateable fields with `$request->only(['name', 'phone', 'timezone', 'organization', 'role'])` |
-| Allowing email change without re-verification | Account takeover by changing email to attacker-controlled address | Either require current password + new email verification, or defer email editing entirely (simplest for v3.2) |
-| Settings form CSRF gap if using raw fetch | Session hijacking via cross-site form submission | Already mitigated: `apiClient` reads XSRF-TOKEN cookie and sends it as header (client.js lines 17-19) |
-| Exposing user timezone in public API responses | Minor information leak (timezone reveals approximate location) | Return timezone only in the authenticated user's own `/api/user` response, never in public endpoints |
+---
 
-## UX Pitfalls
+### Pitfall 5: Route Removal Leaves Dead References and Broken Navigation
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Auto-refresh with no visual indicator | User confused when data silently changes while reading | Show subtle "Updated X seconds ago" timestamp; pulse briefly on refresh |
-| Date picker resets on auto-refresh | User loses selected date every 5 minutes | Store date in URL params via `useSearchParams` (existing pattern in ThreatActorsPage) -- survives refresh and is shareable |
-| Time-series chart with gaps for zero-count dates | Confusing gaps in the line -- user thinks data is missing | Fill date range with explicit zero-value data points; show zero on y-axis, not a gap |
-| Modal blocks auto-refresh, data stale when closed | User closes modal to find outdated data underneath | Pause auto-refresh while modal is open (`useAutoRefresh` with `enabled: !modalOpen`); trigger immediate refresh on modal close |
-| Settings save with no loading/success feedback | User unsure if save worked, clicks save repeatedly | Disable save button during request; show inline success toast; re-enable on completion or error |
-| Profile form pre-filled with dummy/placeholder data from mock-data.js | User thinks placeholders are their actual data | The current SettingsPage imports `API_KEYS` from mock-data -- replace entirely with real user data from AuthContext. Show empty fields with placeholder text styling |
-| Search bar z-index hidden behind other elements when logged out | User cannot access the primary search functionality | Ensure search bar has `z-index` above any overlapping elements (topbar, modals, dropdowns) |
+**What goes wrong:**
+Removing DashboardPage and the `/threat-map` route (since the map now lives at `/dashboard`) leaves dead references scattered across the codebase: sidebar nav items, topbar page title mapping, internal `<Link>` components, quick action buttons, and the existing `<Navigate>` redirect pattern for `/ip-search`.
+
+**Why it happens:**
+The codebase has references to `/dashboard` and `/threat-map` in multiple files:
+- `App.jsx` line 69: `<Route path="/dashboard" element={<DashboardPage />}>`
+- `App.jsx` line 70: `<Route path="/threat-map" element={<ThreatMapPage />}>`
+- `frontend/src/data/mock-data.js` line 139: nav item `{ label: 'Dashboard', href: '/dashboard' }`
+- `frontend/src/data/mock-data.js` line 153: nav item `{ label: 'Threat Map', href: '/threat-map' }`
+- `frontend/src/components/layout/Topbar.jsx` line 8: page title `'/dashboard': 'Dashboard'`
+- `frontend/src/components/layout/Topbar.jsx` line 10: page title `'/threat-map': 'Threat Map'`
+- `DashboardPage.jsx` lines 572-577: Quick Actions with `<Link to="/threat-map">`
+
+Missing even one reference causes: 404 pages, sidebar highlighting the wrong item, topbar showing "undefined" as page title, or users bookmarking the old `/threat-map` URL getting a blank page.
+
+**Consequences:**
+- Users with bookmarked `/threat-map` URLs get 404
+- Sidebar shows two separate nav items for what is now one page
+- Quick Actions in the old dashboard code (if partially carried over) link to non-existent routes
+
+**Prevention:**
+1. Add a redirect: `<Route path="/threat-map" element={<Navigate to="/dashboard" replace />} />`
+2. Create a checklist of every file referencing `/dashboard` or `/threat-map` BEFORE starting the route change
+3. Run a project-wide grep for both strings after the change to verify zero remaining dead references
+4. Update the sidebar nav to show a single "Dashboard" item pointing to `/dashboard`
+5. Update Topbar page title mapping
+6. Remove the DashboardPage.jsx file entirely (do not leave it as dead code)
+
+**Detection:**
+Run `grep -rn "threat-map\|/dashboard" frontend/src/` after route changes. Every hit must be intentional.
+
+**Phase to address:**
+Route restructuring phase. Should be a dedicated phase (not mixed with overlay panel work) to keep the diff clean and reviewable.
+
+---
+
+## Moderate Pitfalls
+
+### Pitfall 6: Peek-on-Hover Conflicts with Map Marker Hover
+
+**What goes wrong:**
+The "peek sliver" design requires `mouseenter` on a thin edge strip to reveal the collapsed panel. But if map markers are positioned near the left or right edge of the viewport, their hover tooltips conflict with the peek trigger zone. The user hovers near the edge intending to inspect a marker, and the overlay panel slides out, covering the marker.
+
+**Prevention:**
+1. Make the peek sliver narrow (8-12px) and visually distinct (subtle border glow) so it reads as a UI control, not empty space
+2. Add a small delay (150-200ms) before peek-on-hover triggers, using the same `setTimeout` + `clearTimeout` pattern already used in `Sidebar.jsx` lines 15-26 (hover timer with 150ms delay)
+3. When a peek panel is revealed via hover, do NOT expand it to full width -- show a condensed preview (maybe just the section titles or summary numbers) that requires an explicit click to fully expand
+4. Consider making peek only work when panels are collapsed via the toggle button, not when they slide off due to a map interaction
+
+**Detection:**
+Place a test marker at the left edge of the map. Hover near the left edge. Panel should not interfere with marker tooltip.
+
+**Phase to address:**
+Peek-on-hover implementation phase.
+
+---
+
+### Pitfall 7: Framer Motion Slide Animation Triggers Leaflet Map Resize
+
+**What goes wrong:**
+When overlay panels slide in or out, the visible map area effectively changes. Leaflet does NOT automatically detect container size changes. Map tiles may not load for newly exposed areas, or the map center shifts unexpectedly.
+
+**Prevention:**
+1. The overlay panels sit ON TOP of the map (position: absolute), not beside it. The map container size does NOT change -- this is the correct architectural choice and must be preserved. Do NOT use flexbox to split space between panels and map.
+2. If for any reason the map container does resize, call `map.invalidateSize()` after the animation completes. The `leafletMapRef.current` from ThreatMapPage.jsx (line 41) provides direct access.
+3. Framer Motion's `onAnimationComplete` callback is the correct place to call `invalidateSize()` if needed.
+
+**Detection:**
+Toggle panels in and out. Check for gray/blank tile areas at map edges. Verify map center does not shift on toggle.
+
+**Phase to address:**
+Overlay panel layout phase. Verify map tiles load correctly after first slide animation is implemented.
+
+---
+
+### Pitfall 8: Glassmorphism `backdrop-filter: blur()` Performance Over Map Tiles
+
+**What goes wrong:**
+The `glass-card` and `glass-panel` CSS classes use `backdrop-filter: blur(20px)` and `blur(24px)`. When these panels overlay a continuously-updating Leaflet map with tile transitions, zoom animations, and pulse markers, the browser must re-composite the blur effect on every frame. This causes dropped frames, janky scroll inside the panel, and high GPU memory usage.
+
+**Prevention:**
+1. Use a solid or near-solid background for overlay panels instead of heavy blur. The `glass-card-static` class (glassmorphism.css line 17) with `background: rgba(15, 17, 23, 0.7)` is better than `glass-card` because it avoids the hover transition. But even 0.7 opacity with blur is expensive over a dynamic map.
+2. Recommended approach: Use `background: rgba(15, 17, 23, 0.92)` (nearly opaque) with a thin `backdrop-filter: blur(4px)` (minimal blur). The dark theme makes near-opaque backgrounds look intentional. Save heavy blur for static pages.
+3. Avoid `backdrop-filter` entirely on the scrollable indicators table container -- blur re-composites on every scroll frame.
+4. Use CSS `will-change: transform` on the overlay panel to force GPU layer promotion, keeping blur compositing isolated from the map layer.
+
+**Detection:**
+Open Chrome DevTools Performance tab. Toggle panels, scroll indicators table, zoom map simultaneously. Look for long "Composite Layers" tasks and frame drops below 60fps.
+
+**Phase to address:**
+Overlay panel styling phase. Decide on blur strategy before building all panel variants.
+
+---
+
+### Pitfall 9: Dashboard Auto-Refresh Conflicts with Map SSE Updates
+
+**What goes wrong:**
+The merged page will have two concurrent data update mechanisms: SSE for map events (real-time, sub-second) and REST polling for dashboard stats (every 5 minutes). When the 5-minute auto-refresh fires and updates stat card counts, it can cause a visible re-render that interrupts the user's interaction with the map or causes the overlay panels to "jump" (layout shift from number changes).
+
+**Prevention:**
+1. Use `silentRefresh` pattern already established in v3.2 -- update state without setting `loading: true`, so no skeleton flash
+2. Animate number changes with a subtle count-up transition (CSS `countUp` animation from animations.css) instead of instant replacement
+3. Ensure stat card re-renders do NOT trigger overlay panel re-render. Keep stat data in its own state, separate from panel visibility state. React will batch updates, but verify.
+4. Consider increasing the auto-refresh interval to 10 minutes for dashboard stats (they are server-cached at 15min anyway, so 5min polling mostly returns identical data)
+
+**Detection:**
+Wait for auto-refresh to fire while interacting with the map. Verify no layout shift, no scroll position reset in indicators table, no panel animation restart.
+
+**Phase to address:**
+Data integration phase when dashboard REST endpoints are wired in.
+
+---
+
+### Pitfall 10: Toggle State Lost on Route Navigation
+
+**What goes wrong:**
+User collapses overlay panels via toggle button, navigates to another page, then returns to `/dashboard`. Panels are expanded again because component remounted with default state (`collapsed: false`).
+
+**Prevention:**
+Store panel toggle state in `localStorage` or `sessionStorage`, similar to the existing pattern for trial banner dismiss (`sessionStorage` usage noted in Key Decisions). Use `useState` with lazy initializer:
+```jsx
+const [collapsed, setCollapsed] = useState(() => {
+  return localStorage.getItem('mapPanelsCollapsed') === 'true';
+});
+useEffect(() => {
+  localStorage.setItem('mapPanelsCollapsed', String(collapsed));
+}, [collapsed]);
+```
+
+**Detection:**
+Toggle panels, navigate away, navigate back. Panels should retain collapsed/expanded state.
+
+**Phase to address:**
+Toggle button implementation phase.
+
+---
+
+## Minor Pitfalls
+
+### Pitfall 11: Existing Map Widgets Overlap New Overlay Panels
+
+**What goes wrong:**
+The current ThreatMapPage has left-side widgets (ThreatMapCounters, ThreatMapCountries, ThreatMapDonut at `left-4 top-4`) and a bottom-right feed (ThreatMapFeed at `bottom-4 right-4`). The new left and right overlay panels will occupy the same screen real estate, causing visual overlap.
+
+**Prevention:**
+The existing widgets must be incorporated into or replaced by the new overlay panels. The left overlay panel should absorb the counter/country/donut widgets. The right overlay panel replaces the feed position. Do not try to keep both the old widgets AND the new panels -- that is a layout collision.
+
+**Phase to address:**
+First overlay panel phase. Map out which existing widgets go where before coding.
+
+---
+
+### Pitfall 12: DashboardPage Public Route Becomes Protected
+
+**What goes wrong:**
+The current `/dashboard` route is inside `<ProtectedRoute />` (App.jsx line 69), requiring auth + verified + onboarded. But the current DashboardPage data endpoints are documented as "Public dashboard routes (no auth)" in Key Decisions. The ThreatMapPage at `/threat-map` is also behind `<ProtectedRoute />`. If the merged page stays protected, unauthenticated users lose access to the dashboard entirely.
+
+**Prevention:**
+Decide auth policy upfront:
+- Option A: Keep `/dashboard` protected (current behavior for both routes) -- simplest, no backend changes needed. SSE requires auth anyway for the stream connection.
+- Option B: Make the merged page publicly accessible with degraded state -- show map with snapshot data only (no SSE), hide auth-only widgets (credit balance, recent searches). This requires moving the route outside `<ProtectedRoute />` and adding conditional rendering.
+
+Recommendation: Option A (keep protected). The threat map with SSE streaming is the core feature and requires auth. The public landing page already serves as the unauthenticated entry point.
+
+**Phase to address:**
+Route restructuring phase. Decide before any route changes.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Route restructuring | Dead references to `/threat-map` and old `/dashboard` | Grep-based audit after every route change (Pitfall 5) |
+| Overlay panel layout | Z-index war with Leaflet panes | Use `z-[1000]`, panels as siblings not children of map container (Pitfall 2) |
+| Overlay panel layout | Event propagation through panels | `L.DomEvent.disableClickPropagation` + `disableScrollPropagation` on every panel (Pitfall 1) |
+| Framer Motion animation | Transform stacking context breaks z-index | Wrapper div holds z-index, motion div handles transform (Pitfall 3) |
+| Framer Motion animation | Map resize on panel toggle | Panels overlay map (position: absolute), do not resize it (Pitfall 7) |
+| Glassmorphism styling | `backdrop-filter: blur` performance over dynamic map | Near-opaque background with minimal blur (Pitfall 8) |
+| Peek-on-hover | Conflicts with map marker hover | 150ms delay, narrow trigger zone, condensed preview (Pitfall 6) |
+| Dashboard data merge | Dual SSE connections | Keep one SSE for map, REST for dashboard stats, extract into hooks (Pitfall 4) |
+| Dashboard data merge | Auto-refresh layout shift | Silent refresh, animated number transitions (Pitfall 9) |
+| Toggle button | State lost on navigation | localStorage persistence (Pitfall 10) |
+| Existing widget merge | Old and new widgets overlap | Old widgets absorbed into new panels, not coexisting (Pitfall 11) |
+| Auth/route decision | Public vs protected access change | Decide upfront, keep protected (Pitfall 12) |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Auto-refresh:** Verify interval pauses when browser tab is hidden (check `document.visibilityState`)
-- [ ] **Auto-refresh:** Verify no React warnings in console after navigating away from page with active interval
-- [ ] **Auto-refresh:** Verify refresh pauses while enrichment modal or any modal is open
-- [ ] **Date filter:** Verify chart shows zero (not a gap) for dates with no reports
-- [ ] **Date filter:** Verify a user in UTC+9 sees correct reports for their selected date (test with timezone-shifted user)
-- [ ] **Date filter:** Verify date selection persists in URL params and survives browser refresh
-- [ ] **Time-series chart:** Verify chart does not flicker on data change (uses in-place update, not destroy/recreate)
-- [ ] **Time-series chart:** Verify chart resizes correctly when sidebar collapses/expands
-- [ ] **Enriched modal:** Verify skeleton/spinner shows while enrichment data loads (not just a blank modal)
-- [ ] **Enriched modal:** Verify graceful fallback when OpenCTI enrichment query fails or times out
-- [ ] **Enriched modal:** Verify relationship direction is correct (Campaign in `from` for "attributed-to", AttackPattern in `to` for "uses")
-- [ ] **D3 force graph:** Verify nodes start in visible positions (not clustered at 0,0)
-- [ ] **D3 force graph:** Verify nodes do not escape visible SVG boundaries
-- [ ] **Settings page:** Verify sidebar and topbar reflect saved changes without page reload (AuthContext synced)
-- [ ] **Settings page:** Verify server-side validation errors display inline on the form
-- [ ] **Settings page:** Verify OAuth users cannot change email (managed by provider)
-- [ ] **Settings page:** Verify ALL mock data imports removed -- no `mock-data.js` usage remains
-- [ ] **Dashboard stat cards:** Verify 7 cards render without layout breakage on narrow screens
-- [ ] **Threat Map:** Verify old markers are cleared when capping to 100 latest (no accumulation)
+- [ ] Click inside overlay panel -- map does NOT pan
+- [ ] Scroll inside indicators table -- map does NOT zoom
+- [ ] Double-click text in overlay -- map does NOT zoom in
+- [ ] Drag inside overlay panel -- map does NOT pan
+- [ ] Right-click in overlay panel -- no Leaflet context menu
+- [ ] Toggle panel slide animation -- no z-index flicker mid-animation
+- [ ] Map zoom in/out while panel is visible -- no tile flash-through overlay
+- [ ] Open map marker popup near panel edge -- popup renders below panel
+- [ ] Hover near panel edge with nearby marker -- peek does not steal marker hover
+- [ ] Toggle panels collapsed, navigate away, return -- panels still collapsed
+- [ ] Scroll indicators table while map is animating -- no frame drops below 30fps
+- [ ] Auto-refresh fires -- no visible layout shift in panels
+- [ ] Browser Network tab shows exactly ONE SSE connection on merged page
+- [ ] Navigate to bookmarked `/threat-map` -- redirects to `/dashboard`
+- [ ] Grep for `/threat-map` across `frontend/src/` -- only the redirect route remains
+- [ ] DashboardPage.jsx file is deleted (not just unused)
+- [ ] Sidebar shows single "Dashboard" nav item (not separate Dashboard + Threat Map)
+- [ ] Topbar shows correct page title for `/dashboard`
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Stale closure in auto-refresh | LOW | Replace raw setInterval with useRef-based `useAutoRefresh` hook; 15 min per page |
-| Chart flickering from full recreate | MEDIUM | Modify or create new chart hook supporting in-place updates; test all existing chart usages still work |
-| N+1 OpenCTI queries for enrichment | MEDIUM | Rewrite as single aliased query in ThreatActorService; update cache key; ~1 hour |
-| Timezone mismatch in date filter | LOW | Add timezone param to endpoint; Carbon/DateTime conversion in service; 30 min |
-| Auth context not syncing after save | LOW | Add `refreshUser` to AuthContext; call after save; 15 min if designed upfront |
-| D3 nodes at origin | LOW | Add initial circular position assignment; 20 min |
-| Memory leak from intervals | MEDIUM if discovered late | Build `useAutoRefresh` hook; audit all setInterval usages; refactor DashboardPage too for consistency |
-| Settings page still using mock data | LOW | Remove imports, wire to AuthContext + new profile API; 30-60 min |
-
-## Pitfall-to-Phase Mapping
-
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Stale closure in auto-refresh | Threat News (first auto-refresh page) | Change date filter, wait 5 min, confirm data matches current filter |
-| Chart destroy/recreate flickering | Threat News (time-series chart) | Change date range 5 times rapidly, confirm no flash/flicker |
-| D3 node positioning at origin | Threat Search bug fixes | Load search with 10+ relationships, confirm nodes start spread out |
-| N+1 OpenCTI enrichment queries | Threat Actors enrichment | Open modal, check Network tab shows exactly 1 additional request |
-| Auth context stale after save | Settings/Profile (modify AuthContext first) | Save timezone change, navigate to dashboard, confirm dates use new timezone |
-| Timezone mismatch in date filter | Threat News date filtering (backend endpoint) | Set user timezone to UTC+12, filter for today, confirm only today's reports |
-| Memory leak from intervals | Threat News (build useAutoRefresh hook first) | Navigate away, check Network tab for absence of periodic requests |
-| Background tab wasted requests | Threat News or Threat Actors (first auto-refresh) | Switch to another browser tab, verify no API calls during 5-min interval |
-| Settings page mock data | Settings/Profile phase | Grep for `mock-data` imports in SettingsPage -- must be zero |
-| Dashboard 7 stat cards layout | Dashboard stat card expansion | Resize browser to 1024px width, verify cards wrap gracefully |
+| Event propagation through overlay (1) | LOW | Add `useMapOverlay` hook with `L.DomEvent` calls; apply to each panel ref; 15 min |
+| Z-index war (2) | LOW | Verify `z-[1000]` on all overlay wrappers; ensure panels are map siblings; 10 min |
+| Stacking context from Framer Motion (3) | MEDIUM | Restructure DOM: wrapper div for z-index, inner motion.div for animation; test all panels; 30 min |
+| Dual SSE connections (4) | LOW if caught early, HIGH if architecture baked in | Extract to separate hooks before merging; verify with Network tab; 20 min |
+| Dead route references (5) | LOW | Grep + fix each reference; add redirect; 30 min |
+| Peek-hover conflict with markers (6) | LOW | Add setTimeout delay, narrow trigger zone; 20 min |
+| Map resize on toggle (7) | LOW | Ensure panels use position:absolute overlay (not flexbox layout); 10 min |
+| Blur performance over map (8) | MEDIUM | Replace `backdrop-filter: blur(20px)` with `blur(4px)` + near-opaque bg; test all panel variants; 30 min |
+| Auto-refresh layout shift (9) | LOW | Apply silentRefresh pattern from v3.2; 15 min |
+| Toggle state lost (10) | LOW | Add localStorage read/write; 10 min |
 
 ## Sources
 
-- Direct codebase analysis: `frontend/src/pages/DashboardPage.jsx` lines 430-444 (existing auto-refresh pattern with setInterval)
-- Direct codebase analysis: `frontend/src/hooks/useChartJs.js` lines 1-18 (chart hook with config-reference dependency)
-- Direct codebase analysis: `frontend/src/pages/ThreatSearchPage.jsx` lines 105-147 (D3 force simulation without initial positions)
-- Direct codebase analysis: `frontend/src/contexts/AuthContext.jsx` lines 55-68 (no refreshUser method)
-- Direct codebase analysis: `backend/app/Services/OpenCtiService.php` line 38 (15s timeout, 2 retries)
-- Direct codebase analysis: `backend/app/Services/ThreatActorService.php` (15-min cache, GraphQL query structure)
-- Direct codebase analysis: `backend/app/Services/ThreatNewsService.php` (5-min cache, label-based filtering)
-- Direct codebase analysis: `frontend/src/pages/SettingsPage.jsx` lines 1-4 (imports mock-data.js, no real API calls)
-- Direct codebase analysis: `frontend/src/api/client.js` (XSRF token handling, credentials: include)
-- React documentation: useEffect cleanup for intervals and subscriptions
-- Chart.js documentation: `chart.update()` for in-place data mutations vs destroy/recreate
-- D3 force simulation documentation: initial node positioning and boundary clamping
-- All findings are HIGH confidence based on direct code inspection of the existing system
+- Direct codebase analysis: `frontend/src/pages/ThreatMapPage.jsx` (full-viewport map with z-[1000] overlays, useThreatStream, pulse markers)
+- Direct codebase analysis: `frontend/src/pages/DashboardPage.jsx` (REST endpoints, auto-refresh interval, auth-gated widgets)
+- Direct codebase analysis: `frontend/src/hooks/useLeaflet.js` (map initialization, attributionControl: false, marker layer management)
+- Direct codebase analysis: `frontend/src/hooks/useThreatStream.js` (SSE EventSource with reconnection, visibility-aware disconnect, snapshot loading)
+- Direct codebase analysis: `frontend/src/App.jsx` (route structure, ProtectedRoute wrapping)
+- Direct codebase analysis: `frontend/src/data/mock-data.js` lines 139, 153 (NAV_CATEGORIES with /dashboard and /threat-map items)
+- Direct codebase analysis: `frontend/src/components/layout/Topbar.jsx` lines 8, 10 (page title mappings)
+- Direct codebase analysis: `frontend/src/components/layout/Sidebar.jsx` (hover timer pattern at 150ms delay)
+- Direct codebase analysis: `frontend/src/styles/glassmorphism.css` (glass-card with backdrop-filter: blur(20px))
+- Direct codebase analysis: `frontend/src/styles/animations.css` (mapEventPulse, countUp animations)
+- [Leaflet overlay event propagation](https://copyprogramming.com/howto/make-overlaying-div-on-leaflet-not-click-through) -- L.DomEvent.disableClickPropagation pattern
+- [Leaflet DomEvent.stopPropagation in React](https://github.com/PaulLeCam/react-leaflet/issues/765) -- useRef + useEffect integration
+- [Leaflet internal z-index pane hierarchy](https://github.com/Leaflet/Leaflet/issues/8958) -- tile 200, marker 600, popup 700
+- [Framer Motion GPU acceleration and compositing](https://motion.dev/docs/performance) -- transform creates new stacking context, prefer transform+opacity
+- [Framer Motion performance tier list](https://motion.dev/magazine/web-animation-performance-tier-list) -- compositor-only properties for 60fps
+- [Leaflet disableScrollPropagation](https://github.com/Leaflet/Leaflet/issues/5594) -- scroll event blocking on overlay elements
+- [Leaflet map z-index DOM events interference](https://community.openstreetmap.org/t/leaflet-map-is-unaffected-by-z-index-interferes-with-overlayed-dom-events/114778)
+- CSS Specification: `transform` property establishes new stacking context (confirmed behavior)
+- All findings HIGH confidence based on direct code inspection and verified Leaflet behavior
 
 ---
-*Pitfalls research for: AQUA TIP v3.2 -- App Layout Page Tweaks*
-*Researched: 2026-03-28*
+*Pitfalls research for: AQUA TIP v3.3 -- Threat Map Dashboard*
+*Researched: 2026-04-05*
