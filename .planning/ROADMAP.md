@@ -155,7 +155,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 37. Map Route Foundation | 1/1 | Complete    | 2026-04-05 |
 | 38. Overlay Panel Components | 2/2 | Complete    | 2026-04-05 |
-| 39. Peek-on-Hover Behavior | 1/1 | Complete   | 2026-04-05 |
+| 39. Peek-on-Hover Behavior | 1/1 | Complete    | 2026-04-05 |
 | 40. Cleanup & Verification | 0/? | Not started | - |
 
 **Cumulative:** 36 phases, 65 plans across 8 milestones in 23 days
