@@ -40,7 +40,7 @@ function StatRow({ config, count, loading, error }) {
   );
 }
 
-export default function LeftOverlayPanel({ collapsed, counters, connected, countryCounts, typeCounts }) {
+export default function LeftOverlayPanel({ collapsed, peeking, onPeekStart, onPeekEnd, counters, connected, countryCounts, typeCounts }) {
   const [counts, setCounts] = useState({});
   const [countsLoading, setCountsLoading] = useState(true);
   const [countsError, setCountsError] = useState(null);
@@ -69,37 +69,80 @@ export default function LeftOverlayPanel({ collapsed, counters, connected, count
     return () => { cancelled = true; };
   }, []);
 
-  return (
-    <AnimatePresence>
-      {!collapsed && (
-        <motion.div
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -20, opacity: 0 }}
-          transition={SPRING_TRANSITION}
-          className="absolute top-4 left-4 z-[1000] w-[340px] max-h-[calc(100vh-120px)] overflow-y-auto space-y-4"
-          {...EVENT_ISOLATION}
-        >
-          {/* Stat cards section */}
-          <div className="glass-card-static p-3">
-            <h3 className="text-sm font-semibold text-text-secondary mb-2">Threat Database</h3>
-            {STAT_CARD_CONFIG.map((config) => (
-              <StatRow
-                key={config.entity_type}
-                config={config}
-                count={counts[config.entity_type]}
-                loading={countsLoading}
-                error={countsError}
-              />
-            ))}
-          </div>
+  const panelContent = (
+    <>
+      {/* Stat cards section */}
+      <div className="glass-card-static p-3">
+        <h3 className="text-sm font-semibold text-text-secondary mb-2">Threat Database</h3>
+        {STAT_CARD_CONFIG.map((config) => (
+          <StatRow
+            key={config.entity_type}
+            config={config}
+            count={counts[config.entity_type]}
+            loading={countsLoading}
+            error={countsError}
+          />
+        ))}
+      </div>
 
-          {/* Existing map widgets */}
-          <ThreatMapCounters counters={counters} connected={connected} />
-          <ThreatMapCountries countryCounts={countryCounts} />
-          <ThreatMapDonut typeCounts={typeCounts} />
-        </motion.div>
+      {/* Existing map widgets */}
+      <ThreatMapCounters counters={counters} connected={connected} />
+      <ThreatMapCountries countryCounts={countryCounts} />
+      <ThreatMapDonut typeCounts={typeCounts} />
+    </>
+  );
+
+  return (
+    <>
+      {collapsed && (
+        <div
+          className="absolute top-4 left-4 z-[1000]"
+          onPointerEnter={() => onPeekStart('left')}
+          onPointerLeave={() => onPeekEnd('left')}
+        >
+          <AnimatePresence mode="wait">
+            {!peeking ? (
+              <motion.div
+                key="left-sliver"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="w-[10px] glass-card-static cursor-pointer hover:border-violet/30 transition-colors"
+                style={{ height: 'calc(100vh - 120px)' }}
+                {...EVENT_ISOLATION}
+              />
+            ) : (
+              <motion.div
+                key="left-panel"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -20, opacity: 0 }}
+                transition={SPRING_TRANSITION}
+                className="w-[340px] max-h-[calc(100vh-120px)] overflow-y-auto space-y-4"
+                {...EVENT_ISOLATION}
+              >
+                {panelContent}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       )}
-    </AnimatePresence>
+
+      {!collapsed && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -20, opacity: 0 }}
+            transition={SPRING_TRANSITION}
+            className="absolute top-4 left-4 z-[1000] w-[340px] max-h-[calc(100vh-120px)] overflow-y-auto space-y-4"
+            {...EVENT_ISOLATION}
+          >
+            {panelContent}
+          </motion.div>
+        </AnimatePresence>
+      )}
+    </>
   );
 }

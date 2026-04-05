@@ -41,7 +41,7 @@ function IndicatorRow({ indicator }) {
   );
 }
 
-export default function RightOverlayPanel({ collapsed, events, onEventClick }) {
+export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onPeekEnd, events, onEventClick }) {
   const [indicators, setIndicators] = useState([]);
   const [indicatorsLoading, setIndicatorsLoading] = useState(true);
   const [indicatorsError, setIndicatorsError] = useState(null);
@@ -64,45 +64,88 @@ export default function RightOverlayPanel({ collapsed, events, onEventClick }) {
     return () => { cancelled = true; };
   }, []);
 
-  return (
-    <AnimatePresence>
-      {!collapsed && (
-        <motion.div
-          initial={{ x: 20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 20, opacity: 0 }}
-          transition={SPRING_TRANSITION}
-          className="absolute top-4 right-4 z-[1000] w-[380px] max-h-[calc(100vh-120px)] overflow-y-auto space-y-4"
-          {...EVENT_ISOLATION}
-        >
-          {/* Indicators section */}
-          <div className="glass-card-static p-3">
-            <h3 className="text-sm font-semibold text-text-secondary mb-2">Recent Indicators</h3>
-            {indicatorsLoading ? (
-              <div className="space-y-2">
-                {SKELETON_WIDTHS.map((w, i) => (
-                  <div
-                    key={i}
-                    className="h-6 bg-surface-2 rounded animate-pulse"
-                    style={{ width: `${w}%` }}
-                  />
-                ))}
-              </div>
-            ) : indicatorsError ? (
-              <p className="text-xs text-text-muted text-center py-4">Failed to load indicators</p>
-            ) : indicators.length === 0 ? (
-              <p className="text-xs text-text-muted text-center py-4">No indicators found</p>
-            ) : (
-              indicators.map((ind) => (
-                <IndicatorRow key={ind.id} indicator={ind} />
-              ))
-            )}
+  const panelContent = (
+    <>
+      {/* Indicators section */}
+      <div className="glass-card-static p-3">
+        <h3 className="text-sm font-semibold text-text-secondary mb-2">Recent Indicators</h3>
+        {indicatorsLoading ? (
+          <div className="space-y-2">
+            {SKELETON_WIDTHS.map((w, i) => (
+              <div
+                key={i}
+                className="h-6 bg-surface-2 rounded animate-pulse"
+                style={{ width: `${w}%` }}
+              />
+            ))}
           </div>
+        ) : indicatorsError ? (
+          <p className="text-xs text-text-muted text-center py-4">Failed to load indicators</p>
+        ) : indicators.length === 0 ? (
+          <p className="text-xs text-text-muted text-center py-4">No indicators found</p>
+        ) : (
+          indicators.map((ind) => (
+            <IndicatorRow key={ind.id} indicator={ind} />
+          ))
+        )}
+      </div>
 
-          {/* Existing feed widget */}
-          <ThreatMapFeed events={events} onEventClick={onEventClick} />
-        </motion.div>
+      {/* Existing feed widget */}
+      <ThreatMapFeed events={events} onEventClick={onEventClick} />
+    </>
+  );
+
+  return (
+    <>
+      {collapsed && (
+        <div
+          className="absolute top-4 right-4 z-[1000]"
+          onPointerEnter={() => onPeekStart('right')}
+          onPointerLeave={() => onPeekEnd('right')}
+        >
+          <AnimatePresence mode="wait">
+            {!peeking ? (
+              <motion.div
+                key="right-sliver"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="w-[10px] glass-card-static cursor-pointer hover:border-violet/30 transition-colors"
+                style={{ height: 'calc(100vh - 120px)' }}
+                {...EVENT_ISOLATION}
+              />
+            ) : (
+              <motion.div
+                key="right-panel"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={SPRING_TRANSITION}
+                className="w-[380px] max-h-[calc(100vh-120px)] overflow-y-auto space-y-4"
+                {...EVENT_ISOLATION}
+              >
+                {panelContent}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       )}
-    </AnimatePresence>
+
+      {!collapsed && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 20, opacity: 0 }}
+            transition={SPRING_TRANSITION}
+            className="absolute top-4 right-4 z-[1000] w-[380px] max-h-[calc(100vh-120px)] overflow-y-auto space-y-4"
+            {...EVENT_ISOLATION}
+          >
+            {panelContent}
+          </motion.div>
+        </AnimatePresence>
+      )}
+    </>
   );
 }
