@@ -22,9 +22,9 @@ Requirements for Threat Map Dashboard milestone. Each maps to roadmap phases.
 ### Toggle & Peek Interaction
 
 - [x] **TOGGLE-01**: User can click a single toggle button to collapse/expand both overlay panels
-- [ ] **TOGGLE-02**: User sees a thin peek sliver at each edge when panels are collapsed
-- [ ] **TOGGLE-03**: User can hover a peek sliver to reveal just that panel independently
-- [ ] **TOGGLE-04**: User's toggle state persists across page refreshes via localStorage
+- [x] **TOGGLE-02**: User sees a thin peek sliver at each edge when panels are collapsed
+- [x] **TOGGLE-03**: User can hover a peek sliver to reveal just that panel independently
+- [x] **TOGGLE-04**: User's toggle state persists across page refreshes via localStorage
 
 ### Cleanup
 
@@ -62,9 +62,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PANEL-02 | Phase 38 | Complete |
 | PANEL-03 | Phase 38 | Complete |
 | TOGGLE-01 | Phase 38 | Complete |
-| TOGGLE-02 | Phase 39 | Pending |
-| TOGGLE-03 | Phase 39 | Pending |
-| TOGGLE-04 | Phase 39 | Pending |
+| TOGGLE-02 | Phase 39 | Complete |
+| TOGGLE-03 | Phase 39 | Complete |
+| TOGGLE-04 | Phase 39 | Complete |
 | CLEAN-01 | Phase 40 | Pending |
 | CLEAN-02 | Phase 40 | Pending |
 
