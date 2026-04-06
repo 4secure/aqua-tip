@@ -150,7 +150,6 @@ export const NAV_CATEGORIES = Object.freeze([
   {
     label: 'Monitoring',
     items: [
-      { label: 'Threat Map', icon: 'globe', href: '/threat-map', public: false },
       { label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false },
     ],
   },
