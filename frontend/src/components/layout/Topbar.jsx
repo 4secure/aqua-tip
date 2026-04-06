@@ -7,7 +7,6 @@ import { GradientButton } from '../ui/GradientButton';
 const PAGE_NAMES = {
   '/dashboard': 'Dashboard',
   '/threat-search': 'Threat Search',
-  '/threat-map': 'Threat Map',
   '/dark-web': 'Dark Web',
   '/threat-actors': 'Threat Actors',
   '/threat-news': 'Threat News',

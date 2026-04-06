@@ -1,43 +1,38 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.3
-milestone_name: Threat Map Dashboard
-status: executing
-stopped_at: Phase 40 context gathered
-last_updated: "2026-04-05T20:21:02.061Z"
-last_activity: 2026-04-05
+milestone: v3.2
+milestone_name: App Layout Page Tweaks
+status: Ready to plan
+stopped_at: Completed 40-01-PLAN.md
+last_updated: "2026-04-06T11:54:32.004Z"
+last_activity: 2026-03-30
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
-  percent: 0
+  total_phases: 6
+  completed_phases: 4
+  total_plans: 6
+  completed_plans: 6
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-05)
+See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 39 — peek-on-hover-behavior
+**Current focus:** Phase 33 — category-distribution-chart
 
 ## Current Position
 
-Phase: 40
+Phase: 34
 Plan: Not started
-Status: Executing Phase 39
-Last activity: 2026-04-05
-
-Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 65 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12)
-- Total milestones: 8 shipped in 23 days
+- Total plans completed: 53 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3)
+- Total milestones: 7 shipped in 15 days
 
 **By Milestone:**
 
@@ -50,19 +45,23 @@ Progress: [░░░░░░░░░░] 0%
 | v2.2 Live Dashboard & Search History | 4 | 6 | 2 days |
 | v3.0 Onboarding, Trial & Plans | 5 | 10 | 4 days |
 | v3.1 Font & UI Polish | 3 | 3 | 3 days |
-| v3.2 App Layout Page Tweaks | 7 | 12 | 8 days |
-| Phase 37 P01 | 8min | 3 tasks | 2 files |
-| Phase 38 P02 | 3min | 2 tasks | 4 files |
+| Phase 32 P01 | 1min | 2 tasks | 3 files |
+| Phase 33-category-distribution-chart P01 | 2m28s | 2 tasks | 2 files |
+| Phase 40 P01 | 4min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table (50 entries across 8 milestones).
+All decisions logged in PROJECT.md Key Decisions table (42 entries across 7 milestones).
+Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 
-- [Phase 37]: Keep DashboardPage.jsx on disk for Phase 40 cleanup
-- [Phase 38]: Convert counts API array to lookup object for O(1) stat row access
-- [Phase 38]: Shared EVENT_ISOLATION object to DRY 5-handler event isolation across panels
+- [Phase 30]: Used flexbox justify-center for 4+3 stat card layout instead of CSS grid
+- [Phase 31]: Separate silentRefresh callbacks per page to avoid setLoading flicker; ref-based fetchFn in useAutoRefresh to prevent interval restarts
+- [Phase 32]: within operator on published field for date range filtering (OpenCTI native)
+- [Phase 33]: Client-side hourly bucketing with 6-color hex chart palette for stacked area category distribution
+- [Phase 40]: Removed DashboardPage import from App.jsx and routed /dashboard to ThreatMapPage (Phase 37 did not complete this)
+- [Phase 40]: Removed Threat Map sidebar nav entry for single Dashboard link at /dashboard
 
 ### Pending Todos
 
@@ -71,6 +70,8 @@ None.
 ### Blockers/Concerns
 
 - OpenCTI on private network (192.168.251.20) -- works locally but needs tunneling for Railway
+- OpenCTI aggregation query support for category chart needs validation during Phase 33 planning
+- DashboardService expanding from 4 to 7 sequential GraphQL queries -- consider aliased batching in Phase 30
 - TRIAL-06 race condition: TrialBanner expired state may be pre-empted by lazy Free plan assignment (tech debt from v3.0)
 
 ### Quick Tasks Completed
@@ -82,7 +83,7 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-04-05
-Last session: 2026-04-05T20:21:02.058Z
-Stopped at: Phase 40 context gathered
-Resume file: .planning/phases/40-cleanup-verification/40-CONTEXT.md
+Last activity: 2026-03-30
+Last session: 2026-04-06T11:54:31.999Z
+Stopped at: Completed 40-01-PLAN.md
+Resume file: None
