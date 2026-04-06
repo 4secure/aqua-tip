@@ -7,7 +7,6 @@ import AppLayout from './components/layout/AppLayout';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
 import ThreatSearchPage from './pages/ThreatSearchPage';
 import ThreatMapPage from './pages/ThreatMapPage';
 import SettingsPage from './pages/SettingsPage';
@@ -66,8 +65,8 @@ export default function App() {
 
               {/* Protected routes -- auth + verified + onboarded */}
               <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/threat-map" element={<ThreatMapPage />} />
+                <Route path="/dashboard" element={<ThreatMapPage />} />
+                <Route path="/threat-map" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dark-web" element={<DarkWebPage />} />
                 <Route path="/threat-actors" element={<ThreatActorsPage />} />
                 <Route path="/threat-news" element={<ThreatNewsPage />} />
