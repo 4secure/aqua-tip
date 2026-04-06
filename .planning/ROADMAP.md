@@ -89,7 +89,7 @@ See `.planning/milestones/v3.2-ROADMAP.md` for full details.
 - [x] **Phase 37: Map Route Foundation** — Threat map renders at /dashboard with all existing widgets preserved (completed 2026-04-05)
 - [x] **Phase 38: Overlay Panel Components** — Stat cards and indicators overlay the map with toggle control (completed 2026-04-05)
 - [x] **Phase 39: Peek-on-Hover Behavior** — Collapsed panels show edge slivers with independent hover reveal (completed 2026-04-05)
-- [ ] **Phase 40: Cleanup & Verification** — DashboardPage deleted, sidebar updated, zero dead references
+- [x] **Phase 40: Cleanup & Verification** — DashboardPage deleted, sidebar updated, zero dead references (completed 2026-04-06)
 
 ## Phase Details
 
@@ -143,7 +143,7 @@ Plans:
   1. DashboardPage.jsx file is deleted and no import or reference to it exists anywhere in the codebase
   2. Sidebar navigation shows a single "Dashboard" link pointing to /dashboard (no separate Dashboard and Threat Map entries)
   3. A grep audit of the codebase confirms zero references to deleted files, old routes, or stale page title mappings
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 40-01-PLAN.md — Delete dead code, clean stale references, grep audit + build verify
 
@@ -156,6 +156,6 @@ Plans:
 | 37. Map Route Foundation | 1/1 | Complete    | 2026-04-05 |
 | 38. Overlay Panel Components | 2/2 | Complete    | 2026-04-05 |
 | 39. Peek-on-Hover Behavior | 1/1 | Complete    | 2026-04-05 |
-| 40. Cleanup & Verification | 0/1 | Not started | - |
+| 40. Cleanup & Verification | 0/1 | Complete    | 2026-04-06 |
 
 **Cumulative:** 36 phases, 65 plans across 8 milestones in 23 days
