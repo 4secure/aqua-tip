@@ -6,6 +6,7 @@ import ThreatMapStatus from '../components/threat-map/ThreatMapStatus';
 import LeftOverlayPanel from '../components/threat-map/LeftOverlayPanel';
 import RightOverlayPanel from '../components/threat-map/RightOverlayPanel';
 import PanelToggle from '../components/threat-map/PanelToggle';
+import ThreatMapFeed from '../components/threat-map/ThreatMapFeed';
 
 function addPulseMarker(map, lat, lng, color, duration = 1600) {
   if (!map || lat == null || lng == null) return;
@@ -167,6 +168,10 @@ export default function ThreatMapPage() {
         events={events}
         onEventClick={handleEventClick}
       />
+
+      <div className="absolute bottom-4 right-4 z-[1000] w-[380px]">
+        <ThreatMapFeed events={events} onEventClick={handleEventClick} />
+      </div>
 
       <PanelToggle
         collapsed={panelsCollapsed}

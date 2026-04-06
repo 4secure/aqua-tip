@@ -46,8 +46,8 @@ export default function ThreatMapFeed({ events, onEventClick }) {
   }, [events, userScrolled]);
 
   return (
-    <div className="glass-card-static p-4">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="glass-card-static p-3">
+      <div className="flex items-center gap-2 mb-2">
         <div className="text-xs text-text-muted uppercase tracking-wider font-semibold">
           Live Feed
         </div>
@@ -56,7 +56,7 @@ export default function ThreatMapFeed({ events, onEventClick }) {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="space-y-2 max-h-[240px] overflow-y-auto text-xs"
+        className="space-y-1.5 max-h-[140px] overflow-y-auto text-xs"
       >
         {events.length === 0 ? (
           <div className="text-text-muted text-center py-4">Waiting for events...</div>

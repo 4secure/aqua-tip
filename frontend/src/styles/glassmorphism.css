@@ -22,6 +22,24 @@
   border-radius: 1rem;
 }
 
+.glass-sliver-left {
+  background: rgba(15, 17, 23, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(30, 32, 48, 0.8);
+  border-left: none;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.glass-sliver-right {
+  background: rgba(15, 17, 23, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(30, 32, 48, 0.8);
+  border-right: none;
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
 .glass-surface {
   background: rgba(22, 24, 34, 0.6);
   backdrop-filter: blur(12px);
