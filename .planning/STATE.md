@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: App Layout Page Tweaks
 status: Ready to plan
-stopped_at: Completed 33-01-PLAN.md
-last_updated: "2026-03-30T10:57:24.429Z"
+stopped_at: Completed 40-01-PLAN.md
+last_updated: "2026-04-06T11:54:32.004Z"
 last_activity: 2026-03-30
 progress:
   total_phases: 6
@@ -47,6 +47,7 @@ Plan: Not started
 | v3.1 Font & UI Polish | 3 | 3 | 3 days |
 | Phase 32 P01 | 1min | 2 tasks | 3 files |
 | Phase 33-category-distribution-chart P01 | 2m28s | 2 tasks | 2 files |
+| Phase 40 P01 | 4min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -59,6 +60,8 @@ Recent for v3.2: Zero new dependencies validated against 6 alternatives.
 - [Phase 31]: Separate silentRefresh callbacks per page to avoid setLoading flicker; ref-based fetchFn in useAutoRefresh to prevent interval restarts
 - [Phase 32]: within operator on published field for date range filtering (OpenCTI native)
 - [Phase 33]: Client-side hourly bucketing with 6-color hex chart palette for stacked area category distribution
+- [Phase 40]: Removed DashboardPage import from App.jsx and routed /dashboard to ThreatMapPage (Phase 37 did not complete this)
+- [Phase 40]: Removed Threat Map sidebar nav entry for single Dashboard link at /dashboard
 
 ### Pending Todos
 
@@ -81,6 +84,6 @@ None.
 ## Session Continuity
 
 Last activity: 2026-03-30
-Last session: 2026-03-30T10:52:28.777Z
-Stopped at: Completed 33-01-PLAN.md
+Last session: 2026-04-06T11:54:31.999Z
+Stopped at: Completed 40-01-PLAN.md
 Resume file: None
