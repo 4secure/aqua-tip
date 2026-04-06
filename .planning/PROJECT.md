@@ -114,7 +114,7 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 ### Active
 
 - [x] Threat map replaces dashboard at `/dashboard` route — Validated in Phase 37
-- [ ] DashboardPage removed entirely
+- [x] DashboardPage removed entirely — Validated in Phase 40
 - [x] Left overlay: 7 threat database stat cards — Validated in Phase 38
 - [x] Right overlay: recent indicators table — Validated in Phase 38
 - [x] Toggle button to collapse/expand overlay panels — Validated in Phase 38
@@ -142,7 +142,7 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 Shipped v3.2 with ~34,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-38 phases, 67 plans completed across 8 milestones in 23 days.
+40 phases, 69 plans completed across 8 milestones in 23 days.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
@@ -233,4 +233,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 after Phase 39 complete (peek-on-hover behavior — collapsed overlay panels show glassmorphism slivers with hover-reveal, localStorage toggle persistence)*
+*Last updated: 2026-04-06 after Phase 40 complete (cleanup-verification — 10 dead files removed, navigation cleaned, Vite build verified)*
