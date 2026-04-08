@@ -1,5 +1,26 @@
 # Milestones
 
+## v3.3 Threat Map Dashboard (Shipped: 2026-04-06)
+
+**Phases completed:** 4 phases, 5 plans
+**Timeline:** 2 days (2026-04-05 → 2026-04-06)
+**Requirements:** 12/12 complete
+**Files modified:** 61 (+7,066 / -3,217 lines)
+**Git range:** `3e7eeef` → `8596523` (54 commits)
+
+**Key accomplishments:**
+
+1. Threat map relocated to `/dashboard` with `/threat-map` redirect for backward compatibility; sidebar simplified to single Dashboard entry
+2. Shared `dashboard-config.js` module extracting STAT_CARD_CONFIG, TYPE_BADGE_COLORS, and formatRelativeTime for cross-component reuse
+3. Left/Right overlay panels with glassmorphism over Leaflet map, with 5-handler event isolation and unified PanelToggle for simultaneous collapse/expand
+4. Peek-on-hover interaction with 10px glassmorphism edge slivers, 150ms entry / 250ms exit delays, unified hover-zone wrappers, and independent per-panel reveal
+5. localStorage-persisted toggle state under `aqua-tip:panels-collapsed` with try/catch fallback for unavailable storage
+6. Dead code cleanup — DashboardPage and 9 other orphans deleted, STAT_COLOR_MAP orphan export removed, ThreatSearchPage consolidated onto shared config, grep audit zero stale refs, Vite build verified
+
+See `.planning/milestones/v3.3-ROADMAP.md` and `.planning/milestones/v3.3-REQUIREMENTS.md` for full details.
+
+---
+
 ## v3.2 App Layout Page Tweaks (Shipped: 2026-04-05)
 
 **Phases completed:** 7 phases, 12 plans, 19 tasks

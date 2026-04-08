@@ -97,30 +97,28 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Search bar topbar clearance fix for logged-out users — v3.2
 - ✓ Functional settings page with real profile data and editing — v3.2
 - ✓ AuthContext sync after profile save (no stale sidebar/topbar) — v3.2
+- ✓ Threat map relocated to `/dashboard` with `/threat-map` redirect — v3.3
+- ✓ DashboardPage.jsx removed entirely with grep-audited cleanup — v3.3
+- ✓ Shared `dashboard-config.js` module for stat cards, badge colors, formatters — v3.3
+- ✓ Left/Right overlay panels with glassmorphism over Leaflet map — v3.3
+- ✓ PanelToggle for simultaneous collapse/expand of both overlay panels — v3.3
+- ✓ Peek-on-hover edge slivers with independent left/right reveal — v3.3
+- ✓ localStorage-persisted toggle state (`aqua-tip:panels-collapsed`) — v3.3
+- ✓ Sidebar navigation simplified to single Dashboard link — v3.3
 
-## Current Milestone: v3.3 Threat Map Dashboard
+## Current State
 
-**Goal:** Replace the dashboard with an enhanced threat map at `/dashboard` — existing map features preserved, new overlay panels for stats and indicators with toggle + peek-on-hover.
+**Shipped:** v3.3 Threat Map Dashboard (2026-04-06)
 
-**Target features:**
-- Remove DashboardPage, threat map renders at `/dashboard`
-- Keep existing map widgets (live feed, pulse markers, counters, "100 Latest Attacks")
-- Left overlay panel: 7 threat database stat cards (stacked)
-- Right overlay panel: recent indicators table
-- Toggle button: panels visible by default, toggle collapses them
-- Peek behavior: collapsed panels show a thin edge sliver; hovering reveals just that panel independently
-- Smooth slide animation with Framer Motion
+The dashboard at `/dashboard` is now the enhanced threat map with existing widgets (live feed, pulse markers, counters, donut, countries) preserved under two glassmorphism overlay panels: left panel surfaces 7 threat database stat cards and map widgets, right panel houses the recent indicators table and live feed. A unified `PanelToggle` collapses both panels to 10px peek slivers; hovering a sliver reveals only that panel with per-side delays. Toggle state persists across refreshes via localStorage. DashboardPage and 9 other orphaned files were removed; grep audit and Vite production build confirm zero stale references.
+
+## Next Milestone Goals
+
+_No active milestone. Use `/gsd:new-milestone` to start the next cycle._
 
 ### Active
 
-- [x] Threat map replaces dashboard at `/dashboard` route — Validated in Phase 37
-- [x] DashboardPage removed entirely — Validated in Phase 40
-- [x] Left overlay: 7 threat database stat cards — Validated in Phase 38
-- [x] Right overlay: recent indicators table — Validated in Phase 38
-- [x] Toggle button to collapse/expand overlay panels — Validated in Phase 38
-- [ ] Peek sliver on collapsed panels with hover-to-reveal
-- [ ] Independent panel hover (left/right reveal separately)
-- [x] Existing map features preserved (live feed, markers, counters) — Validated in Phase 38
+(None — awaiting next milestone requirements)
 
 ### Out of Scope
 
@@ -140,9 +138,9 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ## Context
 
-Shipped v3.2 with ~34,000+ LOC (JS/JSX + PHP).
-Tech stack: React 19, Vite 7, Tailwind CSS 3, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-40 phases, 69 plans completed across 8 milestones in 23 days.
+Shipped v3.3 with ~37,000+ LOC (JS/JSX + PHP).
+Tech stack: React 19, Vite 7, Tailwind CSS 3, Framer Motion, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
+40 phases, 70 plans completed across 9 milestones in 25 days.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
@@ -214,6 +212,12 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 | Hardcoded MITRE ATT&CK kill chain order | Deterministic tactic grouping with "other" fallback | ✓ Good |
 | Mirror onboarding validation for profile update | Consistent validation rules between onboarding and settings | ✓ Good |
 | useRef initialValues for dirty-checking | Effective role comparison prevents false-positive saves | ✓ Good |
+| Route swap without deleting DashboardPage in Phase 37 | Keep revert-safe; Phase 40 handles deletion | ✓ Good |
+| Shared `dashboard-config.js` in `frontend/src/data/` | Cross-component reuse of stat config, badges, formatters | ✓ Good |
+| Overlay panel pattern: motion.div + AnimatePresence + event isolation | Leaflet-compatible absolute-positioned panels with 5-handler stopPropagation | ✓ Good |
+| Unified hover-zone wrapper for sliver+panel | Prevents flicker from hover-gap transition | ✓ Good |
+| localStorage-backed useState with try/catch | Handle storage unavailability gracefully | ✓ Good |
+| Deletion-then-audit cleanup pattern | Delete orphans first, grep audit confirms zero stale refs | ✓ Good |
 
 ## Evolution
 
@@ -233,4 +237,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 after Phase 40 complete (cleanup-verification — 10 dead files removed, navigation cleaned, Vite build verified)*
+*Last updated: 2026-04-08 after v3.3 milestone shipped (Threat Map Dashboard — 4 phases, 5 plans, 12/12 requirements)*

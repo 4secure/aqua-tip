@@ -8,14 +8,6 @@ export const STAT_CARD_CONFIG = [
   { entity_type: 'Url', label: 'URL', color: 'violet' },
 ];
 
-export const STAT_COLOR_MAP = {
-  red: { bg: 'bg-red/10', text: 'text-red', border: 'border-red/20' },
-  violet: { bg: 'bg-violet/10', text: 'text-violet', border: 'border-violet/20' },
-  cyan: { bg: 'bg-cyan/10', text: 'text-cyan', border: 'border-cyan/20' },
-  amber: { bg: 'bg-amber/10', text: 'text-amber', border: 'border-amber/20' },
-  green: { bg: 'bg-green/10', text: 'text-green', border: 'border-green/20' },
-};
-
 export const TYPE_BADGE_COLORS = {
   'IPv4-Addr':        { bg: '#FF3B5C25', text: '#FF3B5C' },
   'IPv6-Addr':        { bg: '#FF3B5C25', text: '#FF3B5C' },

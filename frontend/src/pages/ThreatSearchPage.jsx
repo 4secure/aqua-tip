@@ -10,6 +10,7 @@ import { searchThreat, fetchCredits } from '../api/threat-search';
 import { useAuth } from '../contexts/AuthContext';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { apiClient } from '../api/client';
+import { TYPE_BADGE_COLORS, formatRelativeTime } from '../data/dashboard-config';
 
 /* ── Entity type → color mapping for D3 graph ── */
 const ENTITY_COLORS = {
@@ -30,30 +31,6 @@ const DEFAULT_ENTITY_COLOR = '#5A6173';
 function entityColor(entityType) {
   return ENTITY_COLORS[entityType] || DEFAULT_ENTITY_COLOR;
 }
-
-function formatRelativeTime(dateStr) {
-  if (!dateStr) return '';
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now - date;
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return 'Just now';
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  const diffDay = Math.floor(diffHr / 24);
-  return `${diffDay}d ago`;
-}
-
-const TYPE_BADGE_COLORS = {
-  'IPv4-Addr':     { bg: '#FF3B5C25', text: '#FF3B5C' },
-  'IPv6-Addr':     { bg: '#FF3B5C25', text: '#FF3B5C' },
-  'Domain-Name':   { bg: '#00E5FF25', text: '#00E5FF' },
-  'Url':           { bg: '#7A44E425', text: '#7A44E4' },
-  'Email-Addr':    { bg: '#FFB02025', text: '#FFB020' },
-  'StixFile':      { bg: '#00C48C25', text: '#00C48C' },
-  'Hostname':      { bg: '#9B6BF725', text: '#9B6BF7' },
-};
 
 /* ── D3 Force-Directed Relationship Graph ── */
 function D3Graph({ relationships, centerQuery, detectedType }) {

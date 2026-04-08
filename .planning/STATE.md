@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.3
-milestone_name: Threat Map Dashboard
-status: executing
-stopped_at: Phase 40 context gathered
-last_updated: "2026-04-06T12:00:01.324Z"
-last_activity: 2026-04-06
+milestone: null
+milestone_name: null
+status: between_milestones
+stopped_at: v3.3 shipped
+last_updated: "2026-04-08T00:00:00.000Z"
+last_activity: 2026-04-08
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -18,26 +18,22 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-05)
+See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 40 — cleanup-verification
+**Current focus:** Planning next milestone (`/gsd:new-milestone`)
 
 ## Current Position
 
-Phase: 40
-Plan: Not started
-Status: Executing Phase 40
-Last activity: 2026-04-06
-
-Progress: [░░░░░░░░░░] 0%
+Status: Between milestones — v3.3 shipped 2026-04-06
+Last activity: 2026-04-08
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 65 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12)
-- Total milestones: 8 shipped in 23 days
+- Total plans completed: 70 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12, v3.3: 5)
+- Total milestones: 9 shipped in 25 days
 
 **By Milestone:**
 
@@ -51,18 +47,13 @@ Progress: [░░░░░░░░░░] 0%
 | v3.0 Onboarding, Trial & Plans | 5 | 10 | 4 days |
 | v3.1 Font & UI Polish | 3 | 3 | 3 days |
 | v3.2 App Layout Page Tweaks | 7 | 12 | 8 days |
-| Phase 37 P01 | 8min | 3 tasks | 2 files |
-| Phase 38 P02 | 3min | 2 tasks | 4 files |
+| v3.3 Threat Map Dashboard | 4 | 5 | 2 days |
 
 ## Accumulated Context
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table (50 entries across 8 milestones).
-
-- [Phase 37]: Keep DashboardPage.jsx on disk for Phase 40 cleanup
-- [Phase 38]: Convert counts API array to lookup object for O(1) stat row access
-- [Phase 38]: Shared EVENT_ISOLATION object to DRY 5-handler event isolation across panels
+All decisions logged in PROJECT.md Key Decisions table (57 entries across 9 milestones).
 
 ### Pending Todos
 
@@ -82,7 +73,6 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-04-05
-Last session: 2026-04-05T20:21:02.058Z
-Stopped at: Phase 40 context gathered
-Resume file: .planning/phases/40-cleanup-verification/40-CONTEXT.md
+Last activity: 2026-04-08
+Last session: 2026-04-08 (v3.3 milestone completion)
+Stopped at: v3.3 shipped — ready for next milestone
