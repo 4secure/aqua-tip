@@ -100,7 +100,7 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
 
 **Milestone Goal:** Restructure subscription plans with new pricing/credits, add feature gating for free-tier users, fix auth loading flash, and polish UI across all pages.
 
-- [x] **Phase 41: Plan Data Restructure** - Update plan seeder, credit limits, and sync existing users to new tier values (completed 2026-04-10)
+- [x] **Phase 41: Plan Data Restructure** - Update plan seeder, credit limits, and sync existing users to new tier values (completed 2026-04-10)
 - [ ] **Phase 42: Auth Loading & Data States** - Fix auth FOUC with global loading gate, replace connection errors with loading indicators
 - [ ] **Phase 43: Feature Gating** - Restrict free plan to threat search only with backend middleware and frontend route guards
 - [ ] **Phase 44: Pricing & Contact** - Update pricing page with new tiers, enterprise contact form, auth-aware routing
@@ -219,7 +219,11 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
   3. Server version header is absent from all responses and only GET/POST/PUT/DELETE/OPTIONS/PATCH methods are accepted
   4. HSTS header with max-age=31536000 and includeSubDomains appears on every response
   5. Content-Security-Policy header is present on API responses, and request body size is capped at 2M
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 47-01-PLAN.md — Nginx security hardening (path traversal, FastCGI lockdown, headers, method restriction)
+- [ ] 47-02-PLAN.md — Debug route removal from web.php
 
 ### Phase 48: API Security
 **Goal**: API endpoints are protected against unauthorized access, abuse, and information leakage
@@ -274,7 +278,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 47. Infrastructure Hardening | 0/0 | Not started | - |
+| 47. Infrastructure Hardening | 0/2 | Planned | - |
 | 48. API Security | 0/0 | Not started | - |
 | 49. Auth & Session Hardening | 0/0 | Not started | - |
 | 50. Frontend Security | 0/0 | Not started | - |
