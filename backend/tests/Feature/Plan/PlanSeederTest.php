@@ -15,13 +15,13 @@ test('plan seeder creates correct tiers', function () {
 
     $free = Plan::where('slug', 'free')->first();
     expect($free)->not->toBeNull();
-    expect($free->daily_credit_limit)->toBe(3);
+    expect($free->daily_credit_limit)->toBe(5);
     expect($free->price_cents)->toBe(0);
 
     $basic = Plan::where('slug', 'basic')->first();
     expect($basic)->not->toBeNull();
-    expect($basic->daily_credit_limit)->toBe(15);
-    expect($basic->price_cents)->toBe(900);
+    expect($basic->daily_credit_limit)->toBe(30);
+    expect($basic->price_cents)->toBe(1000);
 
     $pro = Plan::where('slug', 'pro')->first();
     expect($pro)->not->toBeNull();
@@ -32,6 +32,7 @@ test('plan seeder creates correct tiers', function () {
     $enterprise = Plan::where('slug', 'enterprise')->first();
     expect($enterprise)->not->toBeNull();
     expect($enterprise->daily_credit_limit)->toBe(200);
+    expect($enterprise->price_cents)->toBeNull();
 });
 
 test('plan seeder is idempotent', function () {
@@ -45,4 +46,20 @@ test('plan features are arrays', function () {
     $pro = Plan::where('slug', 'pro')->first();
     expect($pro->features)->toBeArray();
     expect($pro->features)->toContain('50 searches per day');
+    expect($pro->features)->toContain('All threat lookups');
+    expect($pro->features)->toContain('Dark web monitoring');
+});
+
+test('enterprise has API access feature', function () {
+    $this->seed(\Database\Seeders\PlanSeeder::class);
+    $enterprise = Plan::where('slug', 'enterprise')->first();
+    expect($enterprise->features)->toContain('API access');
+    expect($enterprise->features)->toHaveCount(7);
+});
+
+test('free plan does not have API access', function () {
+    $this->seed(\Database\Seeders\PlanSeeder::class);
+    $free = Plan::where('slug', 'free')->first();
+    expect($free->features)->not->toContain('API access');
+    expect($free->features)->toHaveCount(6);
 });
