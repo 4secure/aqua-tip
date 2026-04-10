@@ -106,19 +106,41 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ localStorage-persisted toggle state (`aqua-tip:panels-collapsed`) — v3.3
 - ✓ Sidebar navigation simplified to single Dashboard link — v3.3
 
-## Current State
+## Current Milestone: v4.0 Plan Overhaul & UX Polish
 
-**Shipped:** v3.3 Threat Map Dashboard (2026-04-06)
+**Goal:** Restructure subscription plans with new pricing/credits, fix auth loading flash, and polish UI across all pages.
 
-The dashboard at `/dashboard` is now the enhanced threat map with existing widgets (live feed, pulse markers, counters, donut, countries) preserved under two glassmorphism overlay panels: left panel surfaces 7 threat database stat cards and map widgets, right panel houses the recent indicators table and live feed. A unified `PanelToggle` collapses both panels to 10px peek slivers; hovering a sliver reveals only that panel with per-side delays. Toggle state persists across refreshes via localStorage. DashboardPage and 9 other orphaned files were removed; grep audit and Vite production build confirm zero stale references.
-
-## Next Milestone Goals
-
-_No active milestone. Use `/gsd:new-milestone` to start the next cycle._
+**Target features:**
+- New plan structure: Trial (30d, 10/day), Free (5/day, threat search only), Basic ($10, 30/day), Pro ($29, 50/day), Enterprise (contact us, API)
+- Fix auth FOUC — loading screen until auth state resolves
+- Replace "connection lost" with "Fetching data..." loading states
+- Rename Dashboard to Threat Map everywhere
+- Category bar chart in right panel, fix missing observable counts
+- Threat News category-only chart with side labels
+- D3 relationship tab zoom controls
+- Enterprise contact form → email
+- Pricing routing (auth-aware layout)
+- Landing page globe + animation polish
+- Settings page alignment, breadcrumb capitalization
 
 ### Active
 
-(None — awaiting next milestone requirements)
+- [ ] Plan seeder with new pricing tiers and credit limits
+- [ ] CreditResolver updated for new plan credits
+- [ ] Auth FOUC fix (loading screen until auth resolves)
+- [ ] "Fetching data" loading states replacing connection errors
+- [ ] Dashboard renamed to Threat Map
+- [ ] Category bar chart in dashboard right panel
+- [ ] Fix email/URL/crypto counts in Threat Database widget
+- [ ] Threat News category-only chart with side labels
+- [ ] D3 relationship tab zoom in/out
+- [ ] Enterprise contact form sending email
+- [ ] Pricing page auth-aware routing
+- [ ] Settings profile middle alignment
+- [ ] Breadcrumb capitalization
+- [ ] Top icon navigation (Threat Map for auth, Landing for unauth)
+- [ ] Landing page smooth animations and immediate globe render
+- [ ] Free plan feature gating (threat search only)
 
 ### Out of Scope
 
@@ -144,6 +166,7 @@ Tech stack: React 19, Vite 7, Tailwind CSS 3, Framer Motion, Laravel 12, Sanctum
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
+v4.0 introduces first feature-gated tier (Free = threat search only) and auth-aware layout routing for pricing page.
 
 ## Constraints
 
@@ -237,4 +260,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after v3.3 milestone shipped (Threat Map Dashboard — 4 phases, 5 plans, 12/12 requirements)*
+*Last updated: 2026-04-10 after v4.0 milestone started (Plan Overhaul & UX Polish)*

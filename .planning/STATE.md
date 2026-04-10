@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-stopped_at: v3.3 shipped
-last_updated: "2026-04-08T00:00:00.000Z"
-last_activity: 2026-04-08
+milestone: v4.0
+milestone_name: Plan Overhaul & UX Polish
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-04-10T00:00:00.000Z"
+last_activity: 2026-04-10
 progress:
   total_phases: 0
   completed_phases: 0
@@ -18,15 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-08)
+See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Planning next milestone (`/gsd:new-milestone`)
+**Current focus:** Defining requirements for v4.0
 
 ## Current Position
 
-Status: Between milestones — v3.3 shipped 2026-04-06
-Last activity: 2026-04-08
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-10 — Milestone v4.0 started
 
 ## Performance Metrics
 
