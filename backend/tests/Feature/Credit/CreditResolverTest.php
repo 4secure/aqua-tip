@@ -44,7 +44,7 @@ it('returns Free plan limit for user with no plan and expired trial', function (
         'trial_ends_at' => now()->subDay(),
     ]);
 
-    expect($this->resolver->resolveLimit($user))->toBe(3);
+    expect($this->resolver->resolveLimit($user))->toBe(5);
 });
 
 // --- resolve tests ---
@@ -61,8 +61,8 @@ it('creates Credit record with plan-derived limit for authenticated user', funct
 
     expect($credit)->toBeInstanceOf(Credit::class)
         ->and($credit->user_id)->toBe($user->id)
-        ->and($credit->remaining)->toBe(15)
-        ->and($credit->limit)->toBe(15);
+        ->and($credit->remaining)->toBe(30)
+        ->and($credit->limit)->toBe(30);
 });
 
 it('creates Credit record with 1/1 for guest', function () {
@@ -132,8 +132,8 @@ it('assigns Free plan to user with expired trial during lazy reset', function ()
     $user->refresh();
     $credit->refresh();
     expect($user->plan_id)->toBe($freePlan->id)
-        ->and($credit->remaining)->toBe(3)
-        ->and($credit->limit)->toBe(3);
+        ->and($credit->remaining)->toBe(5)
+        ->and($credit->limit)->toBe(5);
 });
 
 it('applies pending downgrade when plan_change_at is today or past', function () {
@@ -158,8 +158,8 @@ it('applies pending downgrade when plan_change_at is today or past', function ()
     expect($user->plan_id)->toBe($freePlan->id)
         ->and($user->pending_plan_id)->toBeNull()
         ->and($user->plan_change_at)->toBeNull()
-        ->and($credit->remaining)->toBe(3)
-        ->and($credit->limit)->toBe(3);
+        ->and($credit->remaining)->toBe(5)
+        ->and($credit->limit)->toBe(5);
 });
 
 it('does not apply pending downgrade if plan_change_at is in the future', function () {
