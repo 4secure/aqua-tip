@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Plan Overhaul & UX Polish
-status: defining_requirements
+status: ready_to_plan
 stopped_at: null
 last_updated: "2026-04-10T00:00:00.000Z"
 last_activity: 2026-04-10
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Defining requirements for v4.0
+**Current focus:** Phase 41 — Plan Data Restructure
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-10 — Milestone v4.0 started
+Phase: 41 of 46 (Plan Data Restructure)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-04-10 — Roadmap created for v4.0 milestone
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -56,6 +58,11 @@ Last activity: 2026-04-10 — Milestone v4.0 started
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table (57 entries across 9 milestones).
+Recent decisions affecting v4.0:
+
+- Do NOT create a `trial` plan slug. Trial remains `plan_id = null` + `trial_ends_at`.
+- Zero new dependencies -- all v4.0 features use existing stack.
+- Feature gating enforced on both frontend (UX) and backend (security) simultaneously.
 
 ### Pending Todos
 
@@ -64,7 +71,9 @@ None.
 ### Blockers/Concerns
 
 - OpenCTI on private network (192.168.251.20) -- works locally but needs tunneling for Railway
-- TRIAL-06 race condition: TrialBanner expired state may be pre-empted by lazy Free plan assignment (tech debt from v3.0)
+- Plan seeder must ship with atomic credit sync migration to avoid stale limits (Pitfall 1)
+- Auth FOUC fix must be global App.jsx wrapper, not per-route (Pitfall 4)
+- D3 zoom must coexist with node drag via stopPropagation (Pitfall 5)
 
 ### Quick Tasks Completed
 
@@ -75,6 +84,6 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-04-08
-Last session: 2026-04-08 (v3.3 milestone completion)
-Stopped at: v3.3 shipped — ready for next milestone
+Last activity: 2026-04-10
+Last session: 2026-04-10 (v4.0 roadmap creation)
+Stopped at: Roadmap created -- ready to plan Phase 41

@@ -80,33 +80,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLAN-01 | — | Pending |
-| PLAN-02 | — | Pending |
-| PLAN-03 | — | Pending |
-| PLAN-04 | — | Pending |
-| PLAN-05 | — | Pending |
-| PRICE-01 | — | Pending |
-| PRICE-02 | — | Pending |
-| PRICE-03 | — | Pending |
-| PRICE-04 | — | Pending |
-| PRICE-05 | — | Pending |
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| DASH-04 | — | Pending |
-| SRCH-01 | — | Pending |
-| NEWS-01 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
+| PLAN-01 | Phase 41 | Pending |
+| PLAN-02 | Phase 41 | Pending |
+| PLAN-03 | Phase 41 | Pending |
+| PLAN-04 | Phase 43 | Pending |
+| PLAN-05 | Phase 43 | Pending |
+| PRICE-01 | Phase 44 | Pending |
+| PRICE-02 | Phase 44 | Pending |
+| PRICE-03 | Phase 44 | Pending |
+| PRICE-04 | Phase 44 | Pending |
+| PRICE-05 | Phase 44 | Pending |
+| AUTH-01 | Phase 42 | Pending |
+| AUTH-02 | Phase 42 | Pending |
+| DASH-01 | Phase 45 | Pending |
+| DASH-02 | Phase 45 | Pending |
+| DASH-03 | Phase 45 | Pending |
+| DASH-04 | Phase 45 | Pending |
+| SRCH-01 | Phase 45 | Pending |
+| NEWS-01 | Phase 45 | Pending |
+| UI-01 | Phase 46 | Pending |
+| UI-02 | Phase 46 | Pending |
+| UI-03 | Phase 46 | Pending |
 
 **Coverage:**
 - v4.0 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21 ⚠️
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-10*
-*Last updated: 2026-04-10 after initial definition*
+*Last updated: 2026-04-10 after roadmap creation*
