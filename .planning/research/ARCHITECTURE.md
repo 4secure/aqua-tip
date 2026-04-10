@@ -1,521 +1,485 @@
 # Architecture Patterns
 
-**Domain:** Threat Map Dashboard Overlay Integration (v3.3)
-**Researched:** 2026-04-05
-**Confidence:** HIGH (all recommendations based on direct codebase analysis, no new external dependencies)
+**Domain:** v4.0 Feature Integration into Existing Threat Intelligence Platform
+**Researched:** 2026-04-10
+**Confidence:** HIGH (all recommendations based on direct codebase analysis of existing patterns)
 
 ## Recommended Architecture
 
-Merge ThreatMapPage into the `/dashboard` route by promoting the threat map to full-viewport background and layering dashboard widgets as collapsible overlay panels. DashboardPage is deleted entirely; its stat card and indicator data move into a new overlay panel system rendered on top of the existing map.
+Five new features integrating into the existing React 19 SPA + Laravel 12 backend. Every feature touches existing code; no greenfield systems.
 
-### High-Level Layout
-
-```
-+------------------------------------------------------------------+
-| AppLayout (Sidebar + Topbar)                                      |
-|  +--------------------------------------------------------------+|
-|  | ThreatMapDashboard (full viewport, -m-6 offset)              ||
-|  |                                                              ||
-|  |  +----------+                              +----------+      ||
-|  |  | LEFT     |    LEAFLET MAP (full bg)     | RIGHT    |      ||
-|  |  | OVERLAY  |    + SSE pulse markers       | OVERLAY  |      ||
-|  |  |----------|    + ThreatMapStatus (top)    |----------|      ||
-|  |  | 7 stat   |                              | Recent   |      ||
-|  |  | cards    |                              | Indic.   |      ||
-|  |  |----------|                              | table    |      ||
-|  |  | Counters |                              |          |      ||
-|  |  | Countries|                              |          |      ||
-|  |  | Donut    |                              +----------+      ||
-|  |  +----------+                                                ||
-|  |                                                              ||
-|  |  [toggle btn]              ThreatMapFeed (bottom-right)      ||
-|  +--------------------------------------------------------------+|
-+------------------------------------------------------------------+
-```
-
-## Component Boundaries
-
-| Component | Responsibility | Status | Communicates With |
-|-----------|---------------|--------|-------------------|
-| `ThreatMapDashboard` | New page at `/dashboard`, replaces DashboardPage + ThreatMapPage | **NEW** | useLeaflet, useThreatStream, useDashboardData, useOverlayPanels |
-| `OverlayPanelLeft` | Collapsible left panel: stat cards + existing map widgets | **NEW** | ThreatMapDashboard (visibility state, data props) |
-| `OverlayPanelRight` | Collapsible right panel: indicators table | **NEW** | ThreatMapDashboard (visibility state, indicator data) |
-| `OverlayToggle` | Single button to collapse/expand both panels | **NEW** | ThreatMapDashboard (toggle callback) |
-| `StatCardCompact` | Compact stat card for overlay use (narrower) | **NEW** | OverlayPanelLeft (count data) |
-| `IndicatorsTableCompact` | Compact indicators table for overlay | **NEW** | OverlayPanelRight (indicator data) |
-| `useDashboardData` | Hook extracting dashboard API calls from DashboardPage | **NEW** | apiClient |
-| `useOverlayPanels` | Hook managing panel collapse + peek state | **NEW** | localStorage |
-| `ThreatMapCounters` | Existing: global threat counters | **KEEP** (renders inside left panel) | useThreatStream |
-| `ThreatMapCountries` | Existing: top source countries | **KEEP** (renders inside left panel) | useThreatStream |
-| `ThreatMapDonut` | Existing: attack type distribution | **KEEP** (renders inside left panel) | useThreatStream |
-| `ThreatMapFeed` | Existing: live event feed | **KEEP** (stays bottom-right) | useThreatStream |
-| `ThreatMapStatus` | Existing: connection status banner | **KEEP** (stays top-center) | useThreatStream |
-| `useLeaflet` | Existing: Leaflet map initialization | **KEEP** | Leaflet L |
-| `useThreatStream` | Existing: SSE + snapshot data | **KEEP** | EventSource, apiClient |
-| `DashboardPage` | Current dashboard page | **DELETE** | -- |
-| `ThreatMapPage` | Current standalone threat map | **DELETE** | -- |
-
-## Integration Points (Detailed)
-
-### 1. Route Change in App.jsx
-
-**Current state** (lines 69-70 of App.jsx):
-```jsx
-<Route path="/dashboard" element={<DashboardPage />} />
-<Route path="/threat-map" element={<ThreatMapPage />} />
-```
-
-**Target state:**
-```jsx
-<Route path="/dashboard" element={<ThreatMapDashboard />} />
-<Route path="/threat-map" element={<Navigate to="/dashboard" replace />} />
-```
-
-Import `ThreatMapDashboard` eagerly (not lazy) since it is the primary authenticated view. The `/threat-map` route becomes a redirect to preserve bookmarks and browser history.
-
-### 2. Sidebar Navigation Update
-
-**Current** in `mock-data.js` NAV_CATEGORIES (lines 135-157):
-- Overview category: Dashboard (`/dashboard`)
-- Monitoring category: Threat Map (`/threat-map`), Dark Web (`/dark-web`)
-
-**Target:**
-- Overview category: Dashboard (`/dashboard`) -- kept, now shows merged view
-- Monitoring category: Remove Threat Map entry. Dark Web remains.
-
-### 3. AppLayout Main Padding Override
-
-**Problem:** AppLayout's `<main>` (line 27) applies `p-6` padding. The threat map needs full-bleed rendering.
-
-**Solution:** Use the same `-m-6` negative margin pattern from ThreatMapPage (line 73). The new `ThreatMapDashboard` wraps itself in:
-```jsx
-<div className="relative -m-6" style={{ height: 'calc(100vh - 60px)' }}>
-```
-This is a proven pattern already in the codebase, not a new hack.
-
-### 4. Data Sources Merge
-
-The merged component needs TWO data sources currently in separate pages:
-
-| Data Source | Current Owner | Target |
-|-------------|---------------|--------|
-| SSE events, counters, countries, types | ThreatMapPage via `useThreatStream()` | `ThreatMapDashboard` calls `useThreatStream()` directly |
-| Dashboard counts (7 stat cards) | DashboardPage via inline useEffect | Extract to `useDashboardData()` hook |
-| Dashboard indicators (recent table) | DashboardPage via inline useEffect | Extract to `useDashboardData()` hook |
-| Dashboard categories (attack chart) | DashboardPage via inline useEffect | **NOT NEEDED** -- out of overlay scope |
-| Credits, search history, quick actions | DashboardPage via inline useEffect | **NOT NEEDED** -- sidebar already shows credits |
-
-**Key insight:** The overlay panels only need stat counts and recent indicators. The attack chart, credit widget, recent searches, and quick actions from DashboardPage are NOT part of v3.3. This significantly reduces the data surface.
-
-### 5. Overlay Panel Behavior
-
-**State machine for each panel (left/right independently):**
+### Integration Map
 
 ```
-EXPANDED (default) ──[toggle click]──> COLLAPSED
-COLLAPSED ──[toggle click]──> EXPANDED
-COLLAPSED ──[mouse enter sliver]──> PEEKING
-PEEKING ──[mouse leave panel]──> COLLAPSED
+Feature                        Frontend Touch Points              Backend Touch Points
+-----------------------------  ---------------------------------  ----------------------------------
+1. Feature Gating (Free tier)  Sidebar, mock-data.js, new util    Plan model (allowed_routes col),
+                               new PlanGatedRoute                 new CheckFeatureAccess middleware
+2. Auth FOUC Fix               App.jsx (AppContent wrapper)       None (pure frontend)
+3. Contact Form Email          ContactUsPage.jsx, apiClient       New ContactController + Mailable,
+                                                                  api.php route, throttle
+4. D3 Zoom Controls            ThreatSearchPage.jsx (D3Graph fn)  None (pure frontend)
+5. Pricing Dual Layout         App.jsx (route move),              None (pure frontend)
+                               PricingPage.jsx (conditional nav)
 ```
 
-**Implementation with Framer Motion** (already installed as `framer-motion@^12.35.2`):
+### Component Boundaries
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| `AuthContext` | Holds user + plan data, `loading` state for FOUC gate | Every component via `useAuth()` |
+| `Plan` model | Stores plan metadata including allowed routes | `CreditResolver`, `CheckFeatureAccess` middleware |
+| `CheckFeatureAccess` middleware | Blocks API calls to gated features for Free tier | `Plan` model, request user |
+| `Sidebar` | Renders nav items with plan-aware lock/upgrade icons | `useAuth()` for plan slug |
+| `PlanGatedRoute` | Redirects Free users away from restricted routes | `useAuth()` for plan data |
+| `planAccess.js` utility | Pure function: plan hierarchy comparison | Nav data, route guards |
+| `ContactController` | Validates + dispatches contact email | Laravel Mail (existing config) |
+| `D3Graph` (modified) | Force-directed graph with zoom/pan controls | D3 library (already loaded) |
+| `PricingPage` (modified) | Dual layout: hides own navbar when inside AppLayout | `useAuth()`, React Router |
+
+## Feature 1: Free Plan Feature Gating
+
+### Problem
+Free plan users should only access Threat Search. Plan info already exists on the user object (`user.plan.slug`, `user.plan.features`) but no route/feature restriction exists beyond auth vs guest.
+
+### Architecture Decision: Frontend-Primary Gating with Backend Enforcement
+
+Use frontend gating for UX (sidebar locks, redirects) and backend middleware for enforcement (API 403s).
+
+### Frontend Changes
+
+**1. Extend `NAV_CATEGORIES` in `mock-data.js`:**
+Add a `minPlan` field to nav items. `null` means everyone (including guests).
+
+```javascript
+{ label: 'Threat Search', icon: 'search', href: '/threat-search', public: true, minPlan: null },
+{ label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false, minPlan: 'basic' },
+{ label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false, minPlan: 'basic' },
+{ label: 'Threat News', icon: 'rss', href: '/threat-news', public: false, minPlan: 'basic' },
+{ label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false, minPlan: 'pro' },
+```
+
+**2. Plan access utility (new file `utils/planAccess.js`):**
+
+```javascript
+const PLAN_HIERARCHY = { free: 0, trial: 1, basic: 1, pro: 2, enterprise: 3 };
+
+export function canAccessFeature(userPlanSlug, isTrialActive, minPlan) {
+  if (!minPlan) return true;
+  const effectiveSlug = isTrialActive ? 'trial' : (userPlanSlug ?? 'free');
+  return (PLAN_HIERARCHY[effectiveSlug] ?? 0) >= (PLAN_HIERARCHY[minPlan] ?? 0);
+}
+```
+
+Trial users get Basic-equivalent access (level 1), matching current trial behavior.
+
+**3. Sidebar.jsx modification (lines 100-121):**
+Current sidebar has a two-state check: `isAccessible = item.public || isAuthenticated`. Extend to three states:
+- Guest (not authenticated): show lock icon + "Log in" redirect (existing behavior)
+- Authenticated but plan-restricted: show lock icon + "Upgrade" label, navigate to `/pricing`
+- Accessible: normal NavLink (existing behavior)
+
+**4. New `PlanGatedRoute` component:**
+Similar to existing `ProtectedRoute` pattern. Wraps route groups that require a minimum plan level. Redirects to `/pricing` with a flash message when plan is insufficient.
 
 ```jsx
-<motion.div
-  animate={{
-    x: collapsed && !peeking ? -panelWidth + sliverWidth : 0
-  }}
-  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-  onMouseEnter={() => collapsed && setPeeking(true)}
-  onMouseLeave={() => setPeeking(false)}
-  className="absolute top-4 left-4 z-[1000] w-[280px]"
->
-  {/* panel content */}
-</motion.div>
+// components/auth/PlanGatedRoute.jsx
+export default function PlanGatedRoute({ minPlan = 'basic' }) {
+  const { user, loading } = useAuth();
+  if (loading) return <LoadingSpinner />;
+  const planSlug = user?.plan?.slug ?? 'free';
+  const isTrialActive = user?.trial_active === true;
+  if (!canAccessFeature(planSlug, isTrialActive, minPlan)) {
+    return <Navigate to="/pricing" state={{ upgrade: minPlan }} replace />;
+  }
+  return <Outlet />;
+}
 ```
-
-**Dimensions:**
-- Sliver width: 6px visible edge when collapsed
-- Left panel width: 280px (stat cards stacked + map widgets)
-- Right panel width: 360px (indicators table)
-- Z-index: 1000 (matches existing map overlay z-index)
-
-**Why spring animation:** Spring handles interruptions (hover during collapse animation) gracefully without easing resets. Already used in landing page animations.
-
-### 6. Existing Map Widget Repositioning
-
-**Current ThreatMapPage widget positions:**
-- `top-4 left-4`: Counters, Countries, Donut (stacked in 340px column) -- line 79
-- `bottom-4 right-4`: Feed (380px wide) -- line 86
-- `top-2 center`: Status banner -- line 76
-
-**Conflict:** The new left overlay panel occupies `top-4 left-4` where existing map widgets live.
-
-**Solution:** Move existing map widgets INSIDE the left overlay panel, below the stat cards. This creates a single cohesive left column:
-
-```
-Left Overlay Panel (280px, scrollable)
-+----------------------------------+
-| StatCardCompact x 7 (stacked)   |  <-- from DashboardPage
-|----------------------------------|
-| ThreatMapCounters                |  <-- from ThreatMapPage
-| ThreatMapCountries               |  <-- from ThreatMapPage
-| ThreatMapDonut                   |  <-- from ThreatMapPage
-+----------------------------------+
-```
-
-This eliminates z-index conflicts entirely. The existing components render inside the overlay panel div instead of as separate absolute-positioned elements. They already use `glass-card-static` styling which works inside any container.
-
-**ThreatMapFeed** stays at `bottom-4 right-4` -- no conflict with the right overlay panel at `top-4 right-4`.
-
-**ThreatMapStatus** stays at `top-2 center` -- no conflict.
-
-### 7. Right Overlay Panel Content
-
-The right panel contains the indicators table from DashboardPage, adapted for narrower width:
-- Remove Labels column (too wide for 360px panel)
-- Keep columns: Type badge, Value (truncated), Date (relative)
-- Show 10 rows max (vs 8 currently)
-- Auto-refresh every 5 minutes (carried over from DashboardPage)
-- No category filter interaction (attack chart is removed)
-
-## Data Flow Diagram
-
-```
-                    +---------------------------+
-                    |   ThreatMapDashboard      |
-                    |   (page component)        |
-                    +-----+-------+-------+-----+
-                          |       |       |
-            +-------------+       |       +--------------+
-            v                     v                      v
-   useThreatStream()    useDashboardData()    useOverlayPanels()
-            |                     |                      |
-   +--------+---------+    +-----+------+          collapsed
-   | events  counters |    | counts     |          leftPeeking
-   | countries types  |    | indicators |          rightPeeking
-   | connected        |    |            |
-   +--------+---------+    +-----+------+
-            |                     |
-   +--------+----------+    +----+----+
-   |    |    |    |     |    |         |
-   v    v    v    v     v    v         v
- Map  Cnt  Ctry Dnt  Feed  Left      Right
-      |    |    |          Panel     Panel
-      +----+----+          (stats    (indicators
-      (inside left          + map     table)
-       panel)               widgets)
-```
-
-## New Component Specifications
-
-### ThreatMapDashboard (pages/ThreatMapDashboard.jsx)
-
-```
-Responsibilities:
-- Full-viewport Leaflet map (via useLeaflet with onReady callback)
-- SSE stream connection (via useThreatStream)
-- Dashboard data fetching (via useDashboardData)
-- Overlay panel state management (via useOverlayPanels)
-- Compose all sub-components
-- Pulse marker rendering on new SSE events (same logic as ThreatMapPage lines 55-63)
-- Event click -> map flyTo behavior (same logic as ThreatMapPage lines 65-69)
-
-Props: none (page component)
-State: managed entirely by hooks
-Estimated lines: 80-120 (composition only, all logic in hooks)
-```
-
-### useDashboardData (hooks/useDashboardData.js)
-
-```
-Extracted from DashboardPage useEffect blocks (lines 360-444).
-
-Returns:
-  { counts, countsLoading, countsError,
-    indicators, indicatorsLoading, indicatorsError }
-
-Fetches:
-  GET /api/dashboard/counts
-  GET /api/dashboard/indicators
-  Auto-refreshes every 5 minutes (reuse useAutoRefresh hook from v3.2)
-
-Does NOT fetch: categories, credits, search history (not needed in overlay)
-Estimated lines: 40-60
-```
-
-### useOverlayPanels (hooks/useOverlayPanels.js)
-
-```
-Returns:
-  { collapsed, togglePanels,
-    leftPeeking, rightPeeking,
-    onLeftEnter, onLeftLeave,
-    onRightEnter, onRightLeave }
-
-- collapsed: boolean, persisted to localStorage key 'overlay-panels-collapsed'
-- togglePanels: flips collapsed state
-- leftPeeking/rightPeeking: ephemeral mouse-driven state
-- onLeftEnter/onLeftLeave: handlers for left panel hover
-- onRightEnter/onRightLeave: handlers for right panel hover
-- Peek only activates when collapsed === true
-
-Estimated lines: 30-40
-```
-
-### OverlayPanelLeft (components/dashboard/OverlayPanelLeft.jsx)
-
-```
-Props:
-  { collapsed, peeking, onMouseEnter, onMouseLeave,
-    counts, countsLoading, countsError,
-    counters, connected, countryCounts, typeCounts }
-
-Renders:
-  - motion.div wrapper with horizontal slide animation
-  - Scrollable inner column (max-height: calc(100vh - 120px))
-  - 7 StatCardCompact components
-  - Divider
-  - ThreatMapCounters (existing component, imported directly)
-  - ThreatMapCountries (existing component, imported directly)
-  - ThreatMapDonut (existing component, imported directly)
-
-Position: absolute top-4 left-4 z-[1000] w-[280px]
-Estimated lines: 60-80
-```
-
-### OverlayPanelRight (components/dashboard/OverlayPanelRight.jsx)
-
-```
-Props:
-  { collapsed, peeking, onMouseEnter, onMouseLeave,
-    indicators, indicatorsLoading, indicatorsError }
-
-Renders:
-  - motion.div wrapper with horizontal slide animation (slides RIGHT when collapsed)
-  - IndicatorsTableCompact
-
-Position: absolute top-4 right-4 z-[1000] w-[360px]
-Estimated lines: 40-60
-```
-
-### OverlayToggle (components/dashboard/OverlayToggle.jsx)
-
-```
-Props: { collapsed, onToggle }
-
-Renders:
-  - Floating glassmorphism button
-  - Icon: PanelLeftClose / PanelLeftOpen from Lucide (or ChevronLeft/Right)
-  - Tooltip: "Hide panels" / "Show panels"
-
-Position: absolute top-4, horizontally centered z-[1001]
-Estimated lines: 20-30
-```
-
-### StatCardCompact (components/dashboard/StatCardCompact.jsx)
-
-```
-Props: { label, count, color, loading, error }
-
-Narrower version of existing StatCard from DashboardPage.
-- Single row: icon-dot + label + count (vs stacked layout)
-- Fits within 280px panel width
-- Uses same STAT_COLOR_MAP
-
-Estimated lines: 20-30
-```
-
-### IndicatorsTableCompact (components/dashboard/IndicatorsTableCompact.jsx)
-
-```
-Props: { indicators, loading, error }
-
-Simplified version of IndicatorsTable from DashboardPage.
-- 3 columns: Type badge, Value, Date
-- No Labels column (space constraint)
-- No category filter (attack chart removed)
-- 10 rows max
-- glass-card-static styling
-
-Estimated lines: 40-60
-```
-
-## Patterns to Follow
-
-### Pattern 1: Hook Extraction for Data Fetching
-
-**What:** Extract DashboardPage's 6 inline useEffect blocks into a single `useDashboardData` hook.
-**When:** Page component has 3+ data-fetching effects.
-**Why:** ThreatMapDashboard already uses `useThreatStream` (same pattern). Keeps page component focused on composition.
-
-### Pattern 2: Framer Motion Slide with Peek
-
-**What:** Use `motion.div` with `animate.x` for horizontal slide, separate hover zone for peek.
-**When:** Collapsible overlay panel with peek-on-hover.
-
-```jsx
-<motion.div
-  animate={{ x: collapsed && !peeking ? offscreenX : 0 }}
-  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-  onMouseEnter={onMouseEnter}
-  onMouseLeave={onMouseLeave}
->
-  {children}
-</motion.div>
-```
-
-### Pattern 3: Sliver Hit Target
-
-**What:** When panel is collapsed, an invisible 24px-wide div extends from the visible 6px sliver to provide a wider hover target.
-**Why:** 6px is hard to hover precisely. 24px invisible hit zone makes peek feel responsive.
-
-### Pattern 4: Full-Bleed Map Inside AppLayout
-
-**What:** Use `-m-6` negative margin plus explicit height `calc(100vh - 60px)` to break out of AppLayout padding.
-**When:** Any page needing edge-to-edge rendering inside AppLayout.
-**Existing usage:** ThreatMapPage line 73.
-
-### Pattern 5: Existing Components as Panel Children
-
-**What:** Import ThreatMapCounters, ThreatMapCountries, ThreatMapDonut directly into OverlayPanelLeft. No copying, no rewriting.
-**Why:** They already use `glass-card-static` which renders correctly inside any container. One source of truth.
-
-## Anti-Patterns to Avoid
-
-### Anti-Pattern 1: Shared Peek State Between Panels
-
-**What:** Single boolean controlling both panels' peek state.
-**Why bad:** Requirement specifies independent hover-to-reveal. If left peeks, right stays collapsed.
-**Instead:** Track `collapsed` (global toggle) + `leftPeeking` + `rightPeeking` separately. Toggle affects base state; peek overrides per-panel.
-
-### Anti-Pattern 2: Re-rendering Map on Panel State Change
-
-**What:** Putting overlay panel state in the same subtree that owns the Leaflet map ref.
-**Why bad:** Leaflet map re-initialization is expensive. Any re-render of the map container div risks destroying and recreating the map.
-**Instead:** Overlay panels are siblings of the map div, not children. Panel hover state changes only trigger re-renders on `motion.div` wrappers. Map div stays in a stable subtree.
-
-### Anti-Pattern 3: Duplicating Existing Map Widgets
-
-**What:** Copying ThreatMapCounters/Countries/Donut code into new overlay components.
-**Why bad:** Two copies diverge over time.
-**Instead:** Import and render existing components directly inside OverlayPanelLeft.
-
-### Anti-Pattern 4: Removing /threat-map Without Redirect
-
-**What:** Deleting the route entirely.
-**Why bad:** Bookmarks, browser history, and external links break silently.
-**Instead:** Keep `/threat-map` as `<Navigate to="/dashboard" replace />`.
-
-### Anti-Pattern 5: Fetching Dashboard Data in Overlay Components
-
-**What:** Each overlay panel makes its own API calls.
-**Why bad:** Violates single-responsibility. Makes it impossible to coordinate loading states or share data between panels.
-**Instead:** `useDashboardData` hook lives in `ThreatMapDashboard` (the page). Data flows down as props to overlay panels.
-
-## Suggested Build Order
-
-Build order follows dependency chains. Each phase produces a testable increment.
-
-### Phase 1: Extract useDashboardData hook
-**Creates:** `hooks/useDashboardData.js`
-**Changes:** None (hook exists but is not yet consumed)
-**Testable:** Import in console, verify API calls fire and data returns.
-**Rationale:** Zero-risk extraction. Unblocks Phase 3.
-
-### Phase 2: Create useOverlayPanels hook
-**Creates:** `hooks/useOverlayPanels.js`
-**Changes:** None
-**Testable:** Import in console, verify state toggles and localStorage persistence.
-**Rationale:** Pure state management. Unblocks Phase 4.
-
-### Phase 3: Build ThreatMapDashboard page (map only, no overlays)
-**Creates:** `pages/ThreatMapDashboard.jsx`
-**Changes:** `App.jsx` (swap route), `mock-data.js` (remove Threat Map nav)
-**Testable:** Navigate to `/dashboard`, see full-viewport map with SSE events, counters, countries, donut, feed. Old `/threat-map` redirects.
-**Rationale:** Validates map works at new route before adding overlay complexity.
-
-### Phase 4: Build overlay panel components
-**Creates:** `components/dashboard/OverlayPanelLeft.jsx`, `OverlayPanelRight.jsx`, `OverlayToggle.jsx`, `StatCardCompact.jsx`, `IndicatorsTableCompact.jsx`
-**Changes:** `pages/ThreatMapDashboard.jsx` (wire in overlays + hooks)
-**Testable:** See stat cards on left, indicators on right, toggle collapses both.
-**Rationale:** All new components, no existing code modified beyond the new page.
-
-### Phase 5: Add peek behavior and animation polish
-**Changes:** Overlay components (add peek mouse handlers, tune spring params, add sliver hit target)
-**Testable:** Collapse panels, hover sliver, panel peeks independently.
-**Rationale:** Peek is the trickiest UX. Isolated so animation tuning does not block functional delivery.
-
-### Phase 6: Cleanup dead code
-**Deletes:** `pages/DashboardPage.jsx`, `pages/ThreatMapPage.jsx`
-**Changes:** `App.jsx` (remove dead imports)
-**Testable:** Build succeeds, no unused imports, `/dashboard` still works.
-**Rationale:** Cleanup only after new page is verified. Reversible if issues found.
-
-### Phase Dependency Graph
-
-```
-Phase 1 (useDashboardData) ---+
-                               +--> Phase 3 (map page) --> Phase 4 (overlays) --> Phase 5 (peek) --> Phase 6 (cleanup)
-Phase 2 (useOverlayPanels) ---+
-```
-
-Phases 1 and 2 are independent and can run in parallel. Phases 3-6 are strictly sequential.
-
-## Files Changed Summary
-
-### New Files (8)
-
-| File | Purpose |
-|------|---------|
-| `src/pages/ThreatMapDashboard.jsx` | Merged page component |
-| `src/hooks/useDashboardData.js` | Dashboard API data hook |
-| `src/hooks/useOverlayPanels.js` | Panel collapse/peek state hook |
-| `src/components/dashboard/OverlayPanelLeft.jsx` | Left overlay (stats + map widgets) |
-| `src/components/dashboard/OverlayPanelRight.jsx` | Right overlay (indicators) |
-| `src/components/dashboard/OverlayToggle.jsx` | Toggle button |
-| `src/components/dashboard/StatCardCompact.jsx` | Compact stat card |
-| `src/components/dashboard/IndicatorsTableCompact.jsx` | Compact indicators table |
-
-### Modified Files (2)
-
-| File | Change | Risk |
-|------|--------|------|
-| `src/App.jsx` | Swap DashboardPage/ThreatMapPage imports and routes | LOW |
-| `src/data/mock-data.js` | Remove Threat Map from NAV_CATEGORIES | LOW |
-
-### Deleted Files (2)
-
-| File | Reason |
-|------|--------|
-| `src/pages/DashboardPage.jsx` | Replaced by ThreatMapDashboard |
-| `src/pages/ThreatMapPage.jsx` | Replaced by ThreatMapDashboard |
 
 ### Backend Changes
 
-**None.** All existing API endpoints (`/api/dashboard/counts`, `/api/dashboard/indicators`, `/api/threat-map/snapshot`, `/api/threat-map/stream`) remain unchanged. The merge is purely a frontend concern.
+**1. Add `allowed_routes` JSON column to `plans` table:**
 
-## Scalability Considerations
+```php
+// Migration
+Schema::table('plans', function (Blueprint $table) {
+    $table->json('allowed_routes')->nullable();
+});
+```
 
-| Concern | Current | After Merge | Notes |
-|---------|---------|-------------|-------|
-| API calls on mount | Dashboard: 4 endpoints; ThreatMap: 1 snapshot + SSE | Combined: 3 endpoints + SSE | Fewer total calls (categories/credits/history dropped) |
-| SSE connections | 1 per ThreatMap visit | 1 per Dashboard visit | Same, but now always active since Dashboard is the landing page |
-| Leaflet memory | Only on /threat-map | Always on /dashboard | Acceptable: map was already lazy-loaded per useLeaflet |
-| Overlay animation | N/A | Spring animation on hover | Negligible: Framer Motion handles GPU-accelerated transforms |
-| Panel re-renders | N/A | Only motion.div on hover | Map div is not affected |
+Seeder values:
+- Free: `["threat-search"]`
+- Basic: `["threat-search", "threat-actors", "threat-news", "dashboard"]`
+- Pro/Enterprise: all routes
+
+**2. New `CheckFeatureAccess` middleware:**
+
+```php
+class CheckFeatureAccess
+{
+    public function handle(Request $request, Closure $next, string $feature): Response
+    {
+        $user = $request->user();
+        if (!$user) return $next($request); // Guest access handled elsewhere
+
+        // Trial users get Basic-equivalent access
+        if ($user->trial_ends_at?->isFuture() && $user->plan_id === null) {
+            $plan = Plan::where('slug', 'basic')->first();
+        } else {
+            $plan = $user->plan ?? Plan::where('slug', 'free')->first();
+        }
+
+        $allowed = $plan->allowed_routes ?? [];
+        if (!in_array($feature, $allowed, true)) {
+            return response()->json([
+                'message' => 'Upgrade your plan to access this feature',
+                'current_plan' => $plan->slug,
+            ], 403);
+        }
+        return $next($request);
+    }
+}
+```
+
+**3. Apply to gated API routes in `api.php`:**
+
+```php
+Route::get('/threat-actors', ThreatActorIndexController::class)->middleware('feature:threat-actors');
+Route::get('/threat-news', ThreatNewsIndexController::class)->middleware('feature:threat-news');
+Route::get('/threat-map/stream', ThreatMapStreamController::class)->middleware('feature:dashboard');
+```
+
+**4. Expose `allowed_routes` in UserResource:**
+Add `allowed_routes` to the plan sub-object so frontend can use it for gating decisions without hardcoding.
+
+### Why This Approach
+
+- Trial users (no plan_id, trial_ends_at future) get Basic-equivalent access, matching existing `CreditResolver` trial logic.
+- Backend enforcement prevents curl/API abuse even if frontend is bypassed.
+- Sidebar visual gating provides clear upgrade path.
+- No new Context provider needed -- plan data already lives in `useAuth().user.plan`.
+
+## Feature 2: Auth FOUC Fix
+
+### Problem
+On page load, `AuthContext` calls `fetchCurrentUser()`. Until the response returns (~50-200ms), `loading` is `true` but only `ProtectedRoute` checks it. Public routes (landing, threat search, pricing) render immediately with `user: null`, then re-render when auth resolves. This causes:
+- Flash of "Sign in" buttons before switching to authenticated UI
+- Sidebar flashing unauthenticated state
+- Topbar plan chip appearing with delay
+
+### Architecture Decision: Global Loading Gate in App.jsx
+
+Block all rendering until auth resolves. Single change point.
+
+### Implementation
+
+Extract routes into an `AppContent` component inside `AuthProvider`:
+
+```jsx
+function AppContent() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-primary flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <img src="/logo.png" alt="Aqua Tip" className="w-10 h-10 animate-pulse" />
+          <div className="w-8 h-8 border-2 border-violet border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Suspense fallback={<LazyFallback />}>
+      <Routes>{/* ... existing routes unchanged ... */}</Routes>
+    </Suspense>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+```
+
+### Why This Approach
+
+- **Single point of control** -- one loading gate replaces scattered checks.
+- **`AppContent` must be inside `AuthProvider`** -- `useAuth()` requires context. Current `Routes` is a direct child of `AuthProvider`, so extracting to `AppContent` is cleanest.
+- **Branded loading** -- logo + spinner matches design system. Already used in `LazyFallback` and `ProtectedRoute`.
+- **No performance concern** -- GET `/api/user` with Sanctum cookie resolves in 50-200ms. On unauthenticated sessions, the 401 is equally fast.
+- **ProtectedRoute loading check** becomes redundant but harmless -- leave for defense-in-depth.
+
+### What NOT to Do
+
+- Do NOT cache auth state in `sessionStorage`/`localStorage`. Sanctum cookie sessions are the source of truth. Caching creates stale-auth bugs.
+- Do NOT use `startTransition` or deferred rendering. Auth check must block.
+
+## Feature 3: Enterprise Contact Form Email
+
+### Problem
+`ContactUsPage.jsx` has a form (name, email, message) that does nothing -- `handleSubmit` sets `submitted: true` without any API call (line 14-17).
+
+### Architecture Decision: New API Endpoint + Laravel Mailable
+
+Reuse existing Laravel Mail configuration (already used for email verification).
+
+### Backend Changes
+
+**1. `ContactRequest` form request** with name (max 100), email, message (max 5000), optional `plan_interest` field.
+
+**2. `ContactMailable`** using `replyTo` set to sender's email, subject differentiated for enterprise inquiries. Sends to `config('mail.admin_address')`.
+
+**3. `ContactController`** -- invokable, dispatches mailable synchronously (`Mail::send`, not `Mail::queue` -- low volume).
+
+**4. Route:** `Route::post('/contact', ContactController::class)->middleware('throttle:3,60');`
+
+The `throttle:3,60` limits to 3 requests per 60 minutes per IP. No auth required -- enterprise inquiries come from non-users. No CAPTCHA needed at this volume.
+
+### Frontend Changes
+
+Modify `ContactUsPage.jsx`:
+- Replace fake `handleSubmit` with `apiClient.post('/api/contact', form)` call
+- Add loading state during submission, error handling with user-friendly message
+- Accept `plan_interest` via URL query param (`/contact?plan=enterprise`) from pricing page Enterprise "Contact Us" button
+- Parse with `useSearchParams` and include in POST body
+
+### Why This Approach
+
+- Reuses existing Mail config -- no new SMTP setup.
+- `replyTo` header lets admin reply directly to the sender.
+- Rate limiting at route level prevents spam without CAPTCHA complexity.
+- Synchronous mail is fine for expected volume (<10/day).
+
+## Feature 4: D3 Relationship Graph Zoom Controls
+
+### Problem
+The `D3Graph` function in `ThreatSearchPage.jsx` (lines 36-134) renders a force-directed graph but has no zoom/pan. Users with complex graphs cannot navigate.
+
+### Architecture Decision: D3 Zoom Behavior + Overlay Buttons
+
+`d3.zoom()` on the SVG with all graph elements in a child `<g>` group. Overlay buttons for zoom in/out/reset.
+
+### Implementation
+
+**1. Refactor SVG structure** -- currently links, labels, and nodes are appended directly to `svg`. Wrap in a child `<g>`:
+
+```javascript
+const g = svg.append('g');
+// Move all appends from svg to g:
+const link = g.append('g').selectAll('line')...
+const linkLabel = g.append('g').selectAll('text')...
+const node = g.append('g').selectAll('g')...
+```
+
+**2. Add zoom behavior:**
+
+```javascript
+const zoom = d3.zoom()
+  .scaleExtent([0.3, 4])
+  .on('zoom', (event) => g.attr('transform', event.transform));
+
+svg.call(zoom);
+// Store ref for button controls
+containerRef.current.__d3Zoom = zoom;
+containerRef.current.__d3Svg = svg;
+```
+
+**3. Add zoom buttons (JSX in D3Graph return):**
+
+Three buttons (+ - R) positioned `absolute top-3 right-3` over the graph container. Styled with `bg-surface-2/90 border border-border rounded-md` to match design system.
+
+- Zoom in: `svg.transition().call(zoom.scaleBy, 1.3)`
+- Zoom out: `svg.transition().call(zoom.scaleBy, 0.7)`
+- Reset: `svg.transition().call(zoom.transform, d3.zoomIdentity)`
+
+### Key Details
+
+- **Drag + zoom coexistence:** `d3.drag()` on nodes (line 103) and `d3.zoom()` on SVG coexist correctly. D3 drag stops event propagation, preventing zoom during node drag. This is built-in D3 behavior.
+- **Store references on `containerRef.current`** rather than React state to avoid re-renders. Zoom state is D3-managed, not React-managed.
+- **`scaleExtent([0.3, 4])`** prevents over-zoom.
+- **Zero new dependencies** -- D3 already provides `d3.zoom()`.
+
+## Feature 5: Pricing Page Dual Layout
+
+### Problem
+`PricingPage.jsx` renders as standalone with its own navbar (lines 65-97). Authenticated users lose the app layout when visiting from the topbar "Upgrade" button.
+
+### Architecture Decision: Move Route Inside AppLayout, Conditional Navbar
+
+**Place `/pricing` inside `AppLayout` but outside `ProtectedRoute` (same pattern as `/threat-search`). PricingPage conditionally hides its own navbar when user is authenticated.**
+
+### Implementation
+
+**1. Move route in `App.jsx`:**
+
+```jsx
+{/* Remove from standalone routes */}
+{/* <Route path="/pricing" element={<PricingPage />} /> */}
+
+{/* Add inside AppLayout, outside ProtectedRoute */}
+<Route element={<AppLayout />}>
+  <Route path="/threat-search" element={<ThreatSearchPage />} />
+  <Route path="/pricing" element={<PricingPage />} />
+  <Route element={<ProtectedRoute />}>
+    {/* ... protected routes ... */}
+  </Route>
+</Route>
+```
+
+**2. Modify `PricingPage.jsx`:**
+
+```jsx
+export default function PricingPage() {
+  const { user } = useAuth();
+
+  return (
+    <div className={user ? '' : 'min-h-screen bg-primary'}>
+      {/* Public navbar only when not inside AppLayout */}
+      {!user && <PublicNavbar />}
+
+      <div className={user ? 'py-8' : 'px-12 py-16'}>
+        {/* ... plan cards content unchanged ... */}
+      </div>
+    </div>
+  );
+}
+```
+
+### Why This Approach
+
+- **`/threat-search` already uses this exact pattern** -- inside `AppLayout`, outside `ProtectedRoute`, accessible by guests. Proven pattern.
+- **Single route, single component** -- no duplication, no redirect overhead.
+- **PricingPage already checks `user`** (line 75 toggles button text). Adding navbar conditional is minimal.
+- **Topbar "Upgrade" link** already points to `/pricing` -- no link changes.
+- **Public visitors see sidebar in guest mode** which helps platform discoverability.
+
+### What Changes in PricingPage.jsx
+
+1. Wrap the `<nav>` element (lines 65-97) in `{!user && ...}` conditional
+2. Remove `min-h-screen bg-primary` from outer div when embedded (AppLayout provides background)
+3. Adjust padding from `px-12 py-16` to `py-8` when user is authenticated (sidebar provides left margin)
+
+## Build Order (Dependency-Aware)
+
+```
+Phase 1: Auth FOUC Fix
+  No dependencies. Unblocks clean development of all other features.
+  Prevents confusing flash behavior during feature gating work.
+  Touches: App.jsx only (extract AppContent component)
+
+Phase 2: Plan Seeder + Backend Feature Gating
+  Updates PlanSeeder with new tiers, credits, allowed_routes.
+  Adds allowed_routes column migration + CheckFeatureAccess middleware.
+  Updates CreditResolver constants for new tier values.
+  Touches: PlanSeeder.php, CreditResolver.php, new migration, new middleware, api.php
+
+Phase 3: Frontend Feature Gating
+  Depends on Phase 2 (plan data with allowed_routes must exist in /api/user response).
+  Touches: mock-data.js (minPlan field), Sidebar.jsx (3-state logic), new planAccess.js, new PlanGatedRoute.jsx
+
+Phase 4: Pricing Dual Layout
+  Depends on Phase 1 (FOUC fix prevents flash of wrong layout).
+  Depends on Phase 3 (feature gating determines upgrade CTAs on pricing).
+  Touches: App.jsx (route move), PricingPage.jsx (conditional navbar removal)
+
+Phase 5: Contact Form Email
+  Depends on Phase 2 (plan_interest references new plan slugs).
+  Independent of frontend gating otherwise.
+  Touches: ContactUsPage.jsx, new ContactController, ContactMailable, ContactRequest
+
+Phase 6: D3 Zoom Controls
+  Fully independent. Can parallel with Phase 4 or 5.
+  Touches: ThreatSearchPage.jsx (D3Graph function only, ~30 lines changed)
+```
+
+### Dependency Graph
+
+```
+Phase 1 (FOUC) -----> Phase 4 (Pricing Layout)
+                  |
+Phase 2 (Backend) --> Phase 3 (Frontend Gating) --> Phase 4 (Pricing Layout)
+                  |
+                  --> Phase 5 (Contact Form)
+
+Phase 6 (D3 Zoom) -- independent, any time after Phase 1
+```
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Separate PlanContext Provider
+**What:** Creating a new `PlanContext` to hold plan/gating state.
+**Why bad:** Plan data already lives in `AuthContext.user.plan`. Second provider creates sync issues and unnecessary re-renders.
+**Instead:** Read `user.plan.slug` from `useAuth()`. Extract `usePlanAccess()` hook if logic gets complex.
+
+### Anti-Pattern 2: Client-Only Feature Gating
+**What:** Only checking plan access in frontend without backend enforcement.
+**Why bad:** Any authenticated user can call API endpoints directly. Free tier users access premium data via curl.
+**Instead:** Always enforce on backend via middleware. Frontend gating is UX; backend gating is security.
+
+### Anti-Pattern 3: localStorage Auth Cache for FOUC
+**What:** Caching user data in localStorage to skip loading screen.
+**Why bad:** Stale auth state shows logged-in UI when session expired. Cookie-based Sanctum sessions are the source of truth.
+**Instead:** Show branded loading screen for 50-200ms while auth resolves.
+
+### Anti-Pattern 4: Dual Route Registration for Pricing
+**What:** `/pricing` (public) and `/app-pricing` (authenticated) pointing to same component.
+**Why bad:** Two URLs for same content, back-button confusion, link management.
+**Instead:** Single `/pricing` inside `AppLayout` (same as `/threat-search`), conditional navbar.
+
+### Anti-Pattern 5: Separate Zoom SVG Overlay
+**What:** Creating a separate canvas/SVG for D3 zoom controls.
+**Why bad:** DOM complexity, z-index conflicts.
+**Instead:** HTML buttons positioned over the SVG container. Standard pattern for map/graph controls.
+
+## Files Changed Summary
+
+### New Files (7)
+
+| File | Purpose |
+|------|---------|
+| `frontend/src/utils/planAccess.js` | Plan hierarchy comparison utility |
+| `frontend/src/components/auth/PlanGatedRoute.jsx` | Route guard for plan-restricted routes |
+| `backend/app/Http/Middleware/CheckFeatureAccess.php` | API-level plan enforcement |
+| `backend/app/Http/Controllers/Contact/ContactController.php` | Contact form endpoint |
+| `backend/app/Http/Requests/ContactRequest.php` | Contact form validation |
+| `backend/app/Mail/ContactMailable.php` | Contact form email template |
+| `backend/resources/views/emails/contact.blade.php` | Email view template |
+
+### Modified Files (8)
+
+| File | Change | Risk |
+|------|--------|------|
+| `frontend/src/App.jsx` | Extract AppContent for FOUC fix + move pricing route | LOW |
+| `frontend/src/data/mock-data.js` | Add `minPlan` to NAV_CATEGORIES items | LOW |
+| `frontend/src/components/layout/Sidebar.jsx` | 3-state nav item logic (guest/plan-locked/accessible) | MEDIUM |
+| `frontend/src/pages/PricingPage.jsx` | Conditional navbar, adjusted padding | LOW |
+| `frontend/src/pages/ContactUsPage.jsx` | Wire API call, loading/error states | LOW |
+| `frontend/src/pages/ThreatSearchPage.jsx` | D3Graph zoom: g wrapper + zoom behavior + buttons | MEDIUM |
+| `backend/routes/api.php` | Add contact route, feature middleware on gated routes | LOW |
+| `backend/database/seeders/PlanSeeder.php` | New tiers, allowed_routes | LOW |
+
+### New Migration (1)
+
+| Migration | Change |
+|-----------|--------|
+| `add_allowed_routes_to_plans` | JSON `allowed_routes` column on plans table |
+
+### Backend Config (1)
+
+| File | Change |
+|------|--------|
+| `backend/config/mail.php` | Add `admin_address` config key |
 
 ## Sources
 
-- Direct codebase: `App.jsx` (routing structure, lines 62-76)
-- Direct codebase: `DashboardPage.jsx` (stat cards, indicators, data fetching, 581 lines)
-- Direct codebase: `ThreatMapPage.jsx` (map integration, SSE, widgets, 91 lines)
-- Direct codebase: `AppLayout.jsx` (padding, layout structure, 32 lines)
-- Direct codebase: `Sidebar.jsx` (nav rendering, 216 lines)
-- Direct codebase: `useLeaflet.js` (map init pattern, onReady callback, 72 lines)
-- Direct codebase: `useThreatStream.js` (SSE + snapshot, visibility handling, 174 lines)
-- Direct codebase: `mock-data.js` NAV_CATEGORIES (lines 135-157)
-- Direct codebase: All threat-map components (ThreatMapCounters, Countries, Donut, Feed, Status)
-- Direct codebase: `glassmorphism.css` (glass-card-static class definition)
-- Direct codebase: `package.json` (framer-motion@^12.35.2 already installed)
-- Confidence: HIGH -- all recommendations build on verified patterns in the existing codebase
+- Direct codebase analysis: `AuthContext.jsx`, `App.jsx`, `ProtectedRoute.jsx`, `Sidebar.jsx`, `PricingPage.jsx`, `ContactUsPage.jsx`, `ThreatSearchPage.jsx` (D3Graph), `CreditResolver.php`, `DeductCredit.php`, `PlanSeeder.php`, `UserResource.php`, `api.php`, `mock-data.js`
+- D3 zoom behavior: standard D3 pattern (d3.zoom + child g transform) -- HIGH confidence, well-established
+- Laravel Mail: existing codebase uses Mail for verification -- HIGH confidence
+- React Router nested layouts: existing codebase uses AppLayout + ProtectedRoute pattern -- HIGH confidence
