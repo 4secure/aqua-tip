@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v5.0
-milestone_name: Security Hardening
-status: planned
-stopped_at: Completed 41-01 execution, ready for 41-02
-last_updated: "2026-04-11"
-last_activity: 2026-04-11 — Phase 41 Wave 1 complete
+milestone: v4.0
+milestone_name: Plan Overhaul & UX Polish
+status: executing
+stopped_at: Completed 41-02-PLAN.md
+last_updated: "2026-04-10T21:40:30.705Z"
+last_activity: 2026-04-10
 progress:
-  total_phases: 5
-  completed_phases: 0
+  total_phases: 6
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 50
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 41 of 51 (Plan Data Restructure) -- v4.0 tail
-Plan: 1 of 2 in current phase (41-01 complete, 41-02 pending)
-Status: Executing Wave 2
-Last activity: 2026-04-11 -- Wave 1 complete (migration + seeder)
+Plan: 2 of 2 in current phase (41-01 complete, 41-02 pending)
+Status: Ready to execute
+Last activity: 2026-04-10
 
 Progress: [█████░░░░░] 50%
 
@@ -53,6 +53,7 @@ Progress: [█████░░░░░] 50%
 | v3.2 App Layout Page Tweaks | 7 | 12 | 8 days |
 | v3.3 Threat Map Dashboard | 4 | 5 | 2 days |
 | Phase 41 P01 | 2min | 2 tasks | 2 files |
+| Phase 41 P02 | 11min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,7 @@ Recent decisions affecting v5.0:
 - Feature gating enforced on both frontend (UX) and backend (security) simultaneously.
 - [Phase 41]: Enterprise price_cents = null signals Contact Us (not 0)
 - [Phase 41]: Credit sync is full reset - all users get fresh start at new cap
+- [Phase 41]: Made migration SQL driver-aware (pgsql vs sqlite) to unblock test suite
 
 ### Pending Todos
 
@@ -89,5 +91,5 @@ None.
 ## Session Continuity
 
 Last activity: 2026-04-11
-Last session: 2026-04-11 (Phase 41 Wave 1 executed)
-Stopped at: Completed 41-01, executing 41-02 next
+Last session: 2026-04-10T21:40:30.695Z
+Stopped at: Completed 41-02-PLAN.md

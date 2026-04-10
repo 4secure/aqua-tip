@@ -10,7 +10,7 @@ Requirements for Plan Overhaul & UX Polish milestone. Each maps to roadmap phase
 ### Plans & Credits
 
 - [x] **PLAN-01**: Plan seeder creates 4 tiers: Free (5 credits/day), Basic ($10, 30/day), Pro ($29, 50/day), Enterprise (contact us)
-- [ ] **PLAN-02**: Trial period grants 10 credits/day for 30 days with all features
+- [x] **PLAN-02**: Trial period grants 10 credits/day for 30 days with all features
 - [x] **PLAN-03**: Credit sync migration updates existing users' credit limits to match new plan values
 - [ ] **PLAN-04**: Free plan restricts access to Threat Search only — other pages show upgrade CTA
 - [ ] **PLAN-05**: Feature gating enforced on both frontend (route guards + sidebar lock) and backend (middleware)
@@ -81,7 +81,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PLAN-01 | Phase 41 | Complete |
-| PLAN-02 | Phase 41 | Pending |
+| PLAN-02 | Phase 41 | Complete |
 | PLAN-03 | Phase 41 | Complete |
 | PLAN-04 | Phase 43 | Pending |
 | PLAN-05 | Phase 43 | Pending |
