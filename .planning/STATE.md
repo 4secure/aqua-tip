@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: Plan Overhaul & UX Polish
-status: Defining requirements
-stopped_at: Completed 41-01-PLAN.md
-last_updated: "2026-04-10T21:24:03.231Z"
-last_activity: 2026-04-11 — Milestone v5.0 started
+milestone: v5.0
+milestone_name: Security Hardening
+status: planned
+stopped_at: Completed 41-01 execution, ready for 41-02
+last_updated: "2026-04-11"
+last_activity: 2026-04-11 — Phase 41 Wave 1 complete
 progress:
-  total_phases: 6
+  total_phases: 5
   completed_phases: 0
   total_plans: 2
   completed_plans: 1
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Defining requirements for v5.0 Security Hardening
+**Current focus:** Phase 41 -- Plan Data Restructure (v4.0), then Phase 47 -- Infrastructure Hardening (v5.0)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-11 — Milestone v5.0 started
+Phase: 41 of 51 (Plan Data Restructure) -- v4.0 tail
+Plan: 1 of 2 in current phase (41-01 complete, 41-02 pending)
+Status: Executing Wave 2
+Last activity: 2026-04-11 -- Wave 1 complete (migration + seeder)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 70 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12, v3.3: 5)
+- Total plans completed: 71 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12, v3.3: 5, v4.0: 1)
 - Total milestones: 9 shipped in 25 days
 
 **By Milestone:**
@@ -58,9 +58,12 @@ Progress: [░░░░░░░░░░] 0%
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table (57 entries across 9 milestones).
-Recent decisions affecting v4.0:
+All decisions logged in PROJECT.md Key Decisions table.
+Recent decisions affecting v5.0:
 
+- v5.0 roadmap lives in ROADMAP-v5.md (v4.0 owns ROADMAP.md in parallel)
+- Phase numbering continues from v4.0 (47-51)
+- Confirmed LFI (path traversal serving /etc/passwd) is highest priority -- Phase 47 first
 - Do NOT create a `trial` plan slug. Trial remains `plan_id = null` + `trial_ends_at`.
 - Zero new dependencies -- all v4.0 features use existing stack.
 - Feature gating enforced on both frontend (UX) and backend (security) simultaneously.
@@ -73,10 +76,8 @@ None.
 
 ### Blockers/Concerns
 
-- OpenCTI on private network (192.168.251.20) -- works locally but needs tunneling for Railway
-- Plan seeder must ship with atomic credit sync migration to avoid stale limits (Pitfall 1)
-- Auth FOUC fix must be global App.jsx wrapper, not per-route (Pitfall 4)
-- D3 zoom must coexist with node drag via stopPropagation (Pitfall 5)
+- Nginx config changes require Railway deployment (cannot test locally without Docker)
+- DKIM/SPF/DMARC records require DNS provider access for tip.aquasecure.ai
 
 ### Quick Tasks Completed
 
@@ -88,5 +89,5 @@ None.
 ## Session Continuity
 
 Last activity: 2026-04-11
-Last session: 2026-04-10T21:24:03.228Z
-Stopped at: Completed 41-01-PLAN.md
+Last session: 2026-04-11 (Phase 41 Wave 1 executed)
+Stopped at: Completed 41-01, executing 41-02 next

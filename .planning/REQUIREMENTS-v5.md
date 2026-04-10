@@ -78,40 +78,40 @@ Requirements for security hardening release. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| INFRA-05 | TBD | Pending |
-| INFRA-06 | TBD | Pending |
-| INFRA-07 | TBD | Pending |
-| INFRA-08 | TBD | Pending |
-| API-01 | TBD | Pending |
-| API-02 | TBD | Pending |
-| API-03 | TBD | Pending |
-| API-04 | TBD | Pending |
-| API-05 | TBD | Pending |
-| API-06 | TBD | Pending |
-| API-07 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| AUTH-04 | TBD | Pending |
-| AUTH-05 | TBD | Pending |
-| FRONT-01 | TBD | Pending |
-| FRONT-02 | TBD | Pending |
-| FRONT-03 | TBD | Pending |
-| FRONT-04 | TBD | Pending |
-| FRONT-05 | TBD | Pending |
-| EMAIL-01 | TBD | Pending |
-| EMAIL-02 | TBD | Pending |
-| EMAIL-03 | TBD | Pending |
+| INFRA-01 | Phase 47 | Pending |
+| INFRA-02 | Phase 47 | Pending |
+| INFRA-03 | Phase 47 | Pending |
+| INFRA-04 | Phase 47 | Pending |
+| INFRA-05 | Phase 47 | Pending |
+| INFRA-06 | Phase 47 | Pending |
+| INFRA-07 | Phase 47 | Pending |
+| INFRA-08 | Phase 47 | Pending |
+| API-01 | Phase 48 | Pending |
+| API-02 | Phase 48 | Pending |
+| API-03 | Phase 48 | Pending |
+| API-04 | Phase 48 | Pending |
+| API-05 | Phase 48 | Pending |
+| API-06 | Phase 48 | Pending |
+| API-07 | Phase 48 | Pending |
+| AUTH-01 | Phase 49 | Pending |
+| AUTH-02 | Phase 49 | Pending |
+| AUTH-03 | Phase 49 | Pending |
+| AUTH-04 | Phase 49 | Pending |
+| AUTH-05 | Phase 49 | Pending |
+| FRONT-01 | Phase 50 | Pending |
+| FRONT-02 | Phase 50 | Pending |
+| FRONT-03 | Phase 50 | Pending |
+| FRONT-04 | Phase 50 | Pending |
+| FRONT-05 | Phase 50 | Pending |
+| EMAIL-01 | Phase 51 | Pending |
+| EMAIL-02 | Phase 51 | Pending |
+| EMAIL-03 | Phase 51 | Pending |
 
 **Coverage:**
 - v5.0 requirements: 28 total
-- Mapped to phases: 0
-- Unmapped: 28 (pending roadmap)
+- Mapped to phases: 28
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-11*
-*Last updated: 2026-04-11 after initial definition*
+*Last updated: 2026-04-11 after roadmap creation*
