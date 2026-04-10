@@ -49,6 +49,53 @@ Requirements for Plan Overhaul & UX Polish milestone. Each maps to roadmap phase
 - [ ] **UI-02**: Breadcrumbs capitalized across all pages
 - [ ] **UI-03**: Landing page animations are smooth with globe rendering on first load (no delay)
 
+## v5.0 Requirements
+
+Requirements for Security Hardening release. Each maps to roadmap phases.
+
+### Infrastructure (INFRA)
+
+- [ ] **INFRA-01**: Nginx rejects all requests containing `..` path sequences (returns 403)
+- [ ] **INFRA-02**: Nginx restricts fastcgi_script_name to /index.php only
+- [ ] **INFRA-03**: Nginx hides server version header (server_tokens off)
+- [ ] **INFRA-04**: Nginx restricts HTTP methods to GET, POST, PUT, DELETE, OPTIONS, PATCH
+- [ ] **INFRA-05**: Nginx adds HSTS header (max-age=31536000, includeSubDomains)
+- [ ] **INFRA-06**: Nginx client_max_body_size reduced from 20M to 2M (no file uploads exist)
+- [ ] **INFRA-07**: Content-Security-Policy header configured for API backend
+- [ ] **INFRA-08**: Debug routes /my-ip and /debug-opencti removed from routes/web.php
+
+### API Security (API)
+
+- [ ] **API-01**: Dark-web task status endpoint validates user ownership (IDOR fix)
+- [ ] **API-02**: Rate limiting middleware on /ip-search, /threat-search, /credits (30/min)
+- [ ] **API-03**: EnrichmentController returns generic error, logs OpenCTI details server-side
+- [ ] **API-04**: HealthController returns generic 503 on failure, logs details server-side
+- [ ] **API-05**: Raw OpenCTI observable data removed from search API responses
+- [ ] **API-06**: Rate limiting on OAuth redirect endpoint
+- [ ] **API-07**: Rate limiting on email verification resend (per-day cap)
+
+### Authentication & Session (AUTH — v5.0)
+
+- [ ] **AUTH-01**: SESSION_SECURE_COOKIE defaults to true in config/session.php
+- [ ] **AUTH-02**: Sanctum token expiration shortened from 7 days to 24 hours
+- [ ] **AUTH-03**: All existing tokens invalidated on password reset
+- [ ] **AUTH-04**: Forgot-password returns uniform response regardless of email/provider status
+- [ ] **AUTH-05**: Session cookie name changed to non-descriptive value
+
+### Frontend Security (FRONT)
+
+- [ ] **FRONT-01**: OAuth error parameter whitelisted to known error codes on LoginPage
+- [ ] **FRONT-02**: OAuth redirect URL validated against allowed provider domains before redirect
+- [ ] **FRONT-03**: DOMPurify config removes target from ALLOWED_ATTR, enforces rel=noopener noreferrer via hook
+- [ ] **FRONT-04**: External Leaflet CSS bundled locally (eliminates CDN dependency and SRI need)
+- [ ] **FRONT-05**: Google Tag Manager gated behind consent check (GDPR compliance)
+
+### Email & DNS (EMAIL)
+
+- [ ] **EMAIL-01**: SMTP MAIL_VERIFY_PEER enabled in production environment
+- [ ] **EMAIL-02**: Geolocation API calls switched from HTTP to HTTPS
+- [ ] **EMAIL-03**: SPF/DKIM/DMARC DNS record configurations documented for tip.aquasecure.ai and api.tip.aquasecure.ai
+
 ## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -102,9 +149,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-02 | Phase 46 | Pending |
 | UI-03 | Phase 46 | Pending |
 
+| INFRA-01 | Phase 47 | Pending |
+| INFRA-02 | Phase 47 | Pending |
+| INFRA-03 | Phase 47 | Pending |
+| INFRA-04 | Phase 47 | Pending |
+| INFRA-05 | Phase 47 | Pending |
+| INFRA-06 | Phase 47 | Pending |
+| INFRA-07 | Phase 47 | Pending |
+| INFRA-08 | Phase 47 | Pending |
+| API-01 | Phase 48 | Pending |
+| API-02 | Phase 48 | Pending |
+| API-03 | Phase 48 | Pending |
+| API-04 | Phase 48 | Pending |
+| API-05 | Phase 48 | Pending |
+| API-06 | Phase 48 | Pending |
+| API-07 | Phase 48 | Pending |
+| AUTH-01 | Phase 49 | Pending |
+| AUTH-02 | Phase 49 | Pending |
+| AUTH-03 | Phase 49 | Pending |
+| AUTH-04 | Phase 49 | Pending |
+| AUTH-05 | Phase 49 | Pending |
+| FRONT-01 | Phase 50 | Pending |
+| FRONT-02 | Phase 50 | Pending |
+| FRONT-03 | Phase 50 | Pending |
+| FRONT-04 | Phase 50 | Pending |
+| FRONT-05 | Phase 50 | Pending |
+| EMAIL-01 | Phase 51 | Pending |
+| EMAIL-02 | Phase 51 | Pending |
+| EMAIL-03 | Phase 51 | Pending |
+
 **Coverage:**
-- v4.0 requirements: 21 total
-- Mapped to phases: 21
+- v4.0 requirements: 21 total (3 complete, 18 pending)
+- v5.0 requirements: 28 total (0 complete, 28 pending)
+- Total: 49 requirements mapped to phases
 - Unmapped: 0
 
 ---
