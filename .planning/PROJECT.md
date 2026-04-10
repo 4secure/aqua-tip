@@ -105,6 +105,11 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Peek-on-hover edge slivers with independent left/right reveal — v3.3
 - ✓ localStorage-persisted toggle state (`aqua-tip:panels-collapsed`) — v3.3
 - ✓ Sidebar navigation simplified to single Dashboard link — v3.3
+- ✓ Plan tier values restructured (Free=5, Basic=30, Pro=100, Enterprise=500 credits) — v4.0
+- ✓ price_cents nullable for Enterprise (Contact Us signal) — v4.0
+- ✓ Credit sync migration for existing users to new limits — v4.0
+- ✓ PlanSeeder updated with new tier values and unified features — v4.0
+- ✓ Migration SQL made driver-aware (pgsql + sqlite) — v4.0
 
 ## Current Milestone: v5.0 Security Hardening
 
@@ -267,4 +272,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 after v5.0 milestone started (Security Hardening)*
+*Last updated: 2026-04-11 after Phase 41 plan-data-restructure completed (v4.0)*
