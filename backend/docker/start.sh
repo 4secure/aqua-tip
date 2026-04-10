@@ -4,7 +4,10 @@ set -e
 # Run migrations on every deploy
 php artisan migrate --force
 
-# Cache configuration for production performance
+# Seed plans (updateOrCreate = safe to re-run)
+php artisan db:seed --class=PlanSeeder --force
+
+# Cache configuration (reads Railway env vars at runtime)
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
