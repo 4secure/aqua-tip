@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v5.0
-milestone_name: Security Hardening
-status: ready_to_plan
-stopped_at: null
-last_updated: "2026-04-11T00:00:00.000Z"
-last_activity: 2026-04-11
+milestone: v4.0
+milestone_name: Plan Overhaul & UX Polish
+status: Defining requirements
+stopped_at: Completed 41-01-PLAN.md
+last_updated: "2026-04-10T21:24:03.231Z"
+last_activity: 2026-04-11 — Milestone v5.0 started
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 | v3.1 Font & UI Polish | 3 | 3 | 3 days |
 | v3.2 App Layout Page Tweaks | 7 | 12 | 8 days |
 | v3.3 Threat Map Dashboard | 4 | 5 | 2 days |
+| Phase 41 P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ Recent decisions affecting v4.0:
 - Do NOT create a `trial` plan slug. Trial remains `plan_id = null` + `trial_ends_at`.
 - Zero new dependencies -- all v4.0 features use existing stack.
 - Feature gating enforced on both frontend (UX) and backend (security) simultaneously.
+- [Phase 41]: Enterprise price_cents = null signals Contact Us (not 0)
+- [Phase 41]: Credit sync is full reset - all users get fresh start at new cap
 
 ### Pending Todos
 
@@ -85,5 +88,5 @@ None.
 ## Session Continuity
 
 Last activity: 2026-04-11
-Last session: 2026-04-11 (v5.0 security hardening milestone started)
-Stopped at: Defining requirements for security hardening
+Last session: 2026-04-10T21:24:03.228Z
+Stopped at: Completed 41-01-PLAN.md
