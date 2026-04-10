@@ -106,41 +106,47 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ localStorage-persisted toggle state (`aqua-tip:panels-collapsed`) — v3.3
 - ✓ Sidebar navigation simplified to single Dashboard link — v3.3
 
-## Current Milestone: v4.0 Plan Overhaul & UX Polish
+## Current Milestone: v5.0 Security Hardening
 
-**Goal:** Restructure subscription plans with new pricing/credits, fix auth loading flash, and polish UI across all pages.
+**Goal:** Fix all critical, high, and medium security vulnerabilities identified in comprehensive audit — covering confirmed LFI, debug route removal, API protection, error disclosure, security headers, frontend XSS/redirect vectors, and infrastructure hardening.
 
 **Target features:**
-- New plan structure: Trial (30d, 10/day), Free (5/day, threat search only), Basic ($10, 30/day), Pro ($29, 50/day), Enterprise (contact us, API)
-- Fix auth FOUC — loading screen until auth state resolves
-- Replace "connection lost" with "Fetching data..." loading states
-- Rename Dashboard to Threat Map everywhere
-- Category bar chart in right panel, fix missing observable counts
-- Threat News category-only chart with side labels
-- D3 relationship tab zoom controls
-- Enterprise contact form → email
-- Pricing routing (auth-aware layout)
-- Landing page globe + animation polish
-- Settings page alignment, breadcrumb capitalization
+- Nginx path traversal blocking (confirmed LFI serving /etc/passwd)
+- Remove unauthenticated debug routes (/my-ip, /debug-opencti)
+- IDOR fix on dark-web task status endpoint
+- Rate limiting on search endpoints
+- Sanitize OpenCTI error messages leaked to users
+- Security headers: HSTS, CSP, SRI
+- Session cookie secure default
+- OAuth error whitelist and redirect URL validation
+- DOMPurify tab-nabbing fix
+- SMTP TLS verification
+- User enumeration fix on forgot-password
+- HTTPS for geolocation calls
+- Remove raw OpenCTI data from responses
+- SPF/DKIM/DMARC DNS records
 
 ### Active
 
-- [ ] Plan seeder with new pricing tiers and credit limits
-- [ ] CreditResolver updated for new plan credits
-- [ ] Auth FOUC fix (loading screen until auth resolves)
-- [ ] "Fetching data" loading states replacing connection errors
-- [ ] Dashboard renamed to Threat Map
-- [ ] Category bar chart in dashboard right panel
-- [ ] Fix email/URL/crypto counts in Threat Database widget
-- [ ] Threat News category-only chart with side labels
-- [ ] D3 relationship tab zoom in/out
-- [ ] Enterprise contact form sending email
-- [ ] Pricing page auth-aware routing
-- [ ] Settings profile middle alignment
-- [ ] Breadcrumb capitalization
-- [ ] Top icon navigation (Threat Map for auth, Landing for unauth)
-- [ ] Landing page smooth animations and immediate globe render
-- [ ] Free plan feature gating (threat search only)
+- [ ] Nginx blocks all path traversal (.. sequences) before reaching PHP
+- [ ] Debug routes /my-ip and /debug-opencti removed
+- [ ] Dark-web task status validates user ownership (IDOR fix)
+- [ ] Rate limiting on /ip-search, /threat-search, /credits endpoints
+- [ ] OpenCTI error messages sanitized in EnrichmentController and HealthController
+- [ ] HSTS header added to SecurityHeaders middleware
+- [ ] CSP header configured for backend and frontend
+- [ ] SESSION_SECURE_COOKIE defaults to true
+- [ ] OAuth error parameter whitelisted on LoginPage
+- [ ] OAuth redirect URLs validated against allowed provider domains
+- [ ] DOMPurify target attribute removed, rel=noopener noreferrer enforced
+- [ ] SMTP MAIL_VERIFY_PEER enabled in production
+- [ ] SRI on external Leaflet CSS or bundled locally
+- [ ] Forgot-password returns uniform response (no user/provider enumeration)
+- [ ] Geolocation calls use HTTPS instead of HTTP
+- [ ] Raw OpenCTI data removed from search API responses
+- [ ] Sanctum token expiration shortened, tokens invalidated on password reset
+- [ ] Nginx hardened: server version hidden, HTTP methods restricted
+- [ ] SPF/DKIM/DMARC DNS records documented
 
 ### Out of Scope
 
@@ -167,6 +173,7 @@ Tech stack: React 19, Vite 7, Tailwind CSS 3, Framer Motion, Laravel 12, Sanctum
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
 v4.0 introduces first feature-gated tier (Free = threat search only) and auth-aware layout routing for pricing page.
+v5.0 comprehensive security audit revealed confirmed LFI (path traversal serving /etc/passwd), unauthenticated debug routes, IDOR, missing rate limiting, error message leakage, and missing security headers.
 
 ## Constraints
 
@@ -260,4 +267,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-10 after v4.0 milestone started (Plan Overhaul & UX Polish)*
+*Last updated: 2026-04-11 after v5.0 milestone started (Security Hardening)*
