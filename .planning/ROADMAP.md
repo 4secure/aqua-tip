@@ -99,7 +99,7 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
 
 **Milestone Goal:** Restructure subscription plans with new pricing/credits, add feature gating for free-tier users, fix auth loading flash, and polish UI across all pages.
 
-- [ ] **Phase 41: Plan Data Restructure** - Update plan seeder, credit limits, and sync existing users to new tier values
+- [x] **Phase 41: Plan Data Restructure** - Update plan seeder, credit limits, and sync existing users to new tier values (completed 2026-04-10)
 - [ ] **Phase 42: Auth Loading & Data States** - Fix auth FOUC with global loading gate, replace connection errors with loading indicators
 - [ ] **Phase 43: Feature Gating** - Restrict free plan to threat search only with backend middleware and frontend route guards
 - [ ] **Phase 44: Pricing & Contact** - Update pricing page with new tiers, enterprise contact form, auth-aware routing
@@ -116,11 +116,11 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
   1. Plans table contains 4 tiers: Free (5/day), Basic ($10, 30/day), Pro ($29, 50/day), Enterprise (contact us)
   2. Trial period grants 10 credits/day for 30 days with access to all features
   3. Existing users' credit limits are updated to match their plan's new daily limit without waiting for midnight reset
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 41-01-PLAN.md — Migration + seeder update (schema, plan values, credit sync)
-- [ ] 41-02-PLAN.md — Test updates and verification
+- [x] 41-02-PLAN.md — Test updates and verification
 
 ### Phase 42: Auth Loading & Data States
 **Goal**: Users never see a flash of unauthenticated UI or misleading "connection lost" errors during page load
@@ -189,7 +189,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 41. Plan Data Restructure | 1/2 | In Progress|  |
+| 41. Plan Data Restructure | 2/2 | Complete   | 2026-04-10 |
 | 42. Auth Loading & Data States | 0/TBD | Not started | - |
 | 43. Feature Gating | 0/TBD | Not started | - |
 | 44. Pricing & Contact | 0/TBD | Not started | - |
