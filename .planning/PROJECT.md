@@ -272,4 +272,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 after Phase 41 plan-data-restructure completed (v4.0)*
+*Last updated: 2026-04-11 after Phase 47 infrastructure-hardening completed (v5.0) — Nginx hardened with path traversal block, security headers, method restriction; debug routes removed*
