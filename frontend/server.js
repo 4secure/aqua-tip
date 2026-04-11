@@ -1,10 +1,10 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { join, extname, resolve, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
-const DIST = join(__dirname, 'dist');
+const DIST = resolve(__dirname, 'dist');
 const PORT = process.env.PORT || 3000;
 
 const MIME = {
@@ -25,7 +25,25 @@ const MIME = {
 };
 
 const server = createServer(async (req, res) => {
-  let filePath = join(DIST, req.url === '/' ? 'index.html' : req.url);
+  // Strip query string and decode URI
+  const urlPath = decodeURIComponent(req.url.split('?')[0]);
+
+  // Block any path containing .. sequences (path traversal)
+  if (urlPath.includes('..')) {
+    res.writeHead(403);
+    res.end('Forbidden');
+    return;
+  }
+
+  const filePath = resolve(DIST, urlPath === '/' ? 'index.html' : '.' + normalize(urlPath));
+
+  // Ensure resolved path stays within DIST (defense in depth)
+  if (!filePath.startsWith(DIST)) {
+    res.writeHead(403);
+    res.end('Forbidden');
+    return;
+  }
+
   const ext = extname(filePath);
 
   try {
