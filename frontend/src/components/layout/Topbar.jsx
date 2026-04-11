@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { GradientButton } from '../ui/GradientButton';
 
 const PAGE_NAMES = {
-  '/dashboard': 'Dashboard',
+  '/threat-map': 'Threat Map',
   '/threat-search': 'Threat Search',
   '/dark-web': 'Dark Web',
   '/threat-actors': 'Threat Actors',
@@ -17,7 +17,7 @@ export default function Topbar({ collapsed, onHamburgerClick }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, userInitials, logout } = useAuth();
-  const pageName = PAGE_NAMES[location.pathname] || 'Dashboard';
+  const pageName = PAGE_NAMES[location.pathname] || 'Threat Map';
 
   const [avatarDropdown, setAvatarDropdown] = useState(false);
   const dropdownRef = useRef(null);
