@@ -1,7 +1,11 @@
 <?php
 
 use App\Exceptions\OpenCtiConnectionException;
+use App\Models\User;
 use App\Services\DashboardService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 function fakeDashboardCounts(): array
 {
@@ -28,7 +32,9 @@ function mockDashboardCounts(array $counts = null): void
 test('GET /api/dashboard/counts returns 200 with correct structure', function () {
     mockDashboardCounts();
 
-    $response = $this->getJson('/api/dashboard/counts');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/counts');
 
     $response->assertStatus(200)
         ->assertJsonStructure([
@@ -40,12 +46,12 @@ test('GET /api/dashboard/counts returns 200 with correct structure', function ()
     expect($response->json('data'))->toHaveCount(4);
 });
 
-test('GET /api/dashboard/counts is publicly accessible (no auth required)', function () {
+test('GET /api/dashboard/counts requires authentication', function () {
     mockDashboardCounts();
 
     $response = $this->getJson('/api/dashboard/counts');
 
-    $response->assertStatus(200);
+    $response->assertStatus(401);
 });
 
 test('GET /api/dashboard/counts returns 502 on OpenCTI connection failure', function () {
@@ -57,7 +63,9 @@ test('GET /api/dashboard/counts returns 502 on OpenCTI connection failure', func
         return $mock;
     });
 
-    $response = $this->getJson('/api/dashboard/counts');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/counts');
 
     $response->assertStatus(502)
         ->assertJsonPath('message', 'Unable to load dashboard counts. Please try again.');
@@ -66,7 +74,9 @@ test('GET /api/dashboard/counts returns 502 on OpenCTI connection failure', func
 test('GET /api/dashboard/counts returns correct entity types', function () {
     mockDashboardCounts();
 
-    $response = $this->getJson('/api/dashboard/counts');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/counts');
 
     $entityTypes = array_column($response->json('data'), 'entity_type');
 

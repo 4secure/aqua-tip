@@ -1,7 +1,11 @@
 <?php
 
 use App\Exceptions\OpenCtiConnectionException;
+use App\Models\User;
 use App\Services\DashboardService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 function fakeDashboardCategories(): array
 {
@@ -30,7 +34,9 @@ function mockDashboardCategories(array $categories = null): void
 test('GET /api/dashboard/categories returns 200 with correct structure', function () {
     mockDashboardCategories();
 
-    $response = $this->getJson('/api/dashboard/categories');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/categories');
 
     $response->assertStatus(200)
         ->assertJsonStructure([
@@ -40,12 +46,12 @@ test('GET /api/dashboard/categories returns 200 with correct structure', functio
         ]);
 });
 
-test('GET /api/dashboard/categories is publicly accessible (no auth required)', function () {
+test('GET /api/dashboard/categories requires authentication', function () {
     mockDashboardCategories();
 
     $response = $this->getJson('/api/dashboard/categories');
 
-    $response->assertStatus(200);
+    $response->assertStatus(401);
 });
 
 test('GET /api/dashboard/categories returns 502 on OpenCTI connection failure', function () {
@@ -57,7 +63,9 @@ test('GET /api/dashboard/categories returns 502 on OpenCTI connection failure', 
         return $mock;
     });
 
-    $response = $this->getJson('/api/dashboard/categories');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/categories');
 
     $response->assertStatus(502)
         ->assertJsonPath('message', 'Unable to load dashboard categories. Please try again.');
@@ -66,7 +74,9 @@ test('GET /api/dashboard/categories returns 502 on OpenCTI connection failure', 
 test('GET /api/dashboard/categories returns at most 6 categories', function () {
     mockDashboardCategories();
 
-    $response = $this->getJson('/api/dashboard/categories');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/categories');
 
     expect(count($response->json('data')))->toBeLessThanOrEqual(6);
 });

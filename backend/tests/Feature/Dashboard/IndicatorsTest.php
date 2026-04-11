@@ -1,7 +1,11 @@
 <?php
 
 use App\Exceptions\OpenCtiConnectionException;
+use App\Models\User;
 use App\Services\DashboardService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 function fakeDashboardIndicators(): array
 {
@@ -30,7 +34,9 @@ function mockDashboardIndicators(array $indicators = null): void
 test('GET /api/dashboard/indicators returns 200 with correct structure', function () {
     mockDashboardIndicators();
 
-    $response = $this->getJson('/api/dashboard/indicators');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/indicators');
 
     $response->assertStatus(200)
         ->assertJsonStructure([
@@ -40,12 +46,12 @@ test('GET /api/dashboard/indicators returns 200 with correct structure', functio
         ]);
 });
 
-test('GET /api/dashboard/indicators is publicly accessible (no auth required)', function () {
+test('GET /api/dashboard/indicators requires authentication', function () {
     mockDashboardIndicators();
 
     $response = $this->getJson('/api/dashboard/indicators');
 
-    $response->assertStatus(200);
+    $response->assertStatus(401);
 });
 
 test('GET /api/dashboard/indicators returns 502 on OpenCTI connection failure', function () {
@@ -57,7 +63,9 @@ test('GET /api/dashboard/indicators returns 502 on OpenCTI connection failure', 
         return $mock;
     });
 
-    $response = $this->getJson('/api/dashboard/indicators');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/indicators');
 
     $response->assertStatus(502)
         ->assertJsonPath('message', 'Unable to load dashboard indicators. Please try again.');
@@ -66,7 +74,9 @@ test('GET /api/dashboard/indicators returns 502 on OpenCTI connection failure', 
 test('GET /api/dashboard/indicators includes labels array for each indicator', function () {
     mockDashboardIndicators();
 
-    $response = $this->getJson('/api/dashboard/indicators');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/indicators');
 
     $firstIndicator = $response->json('data.0');
     expect($firstIndicator)->toHaveKey('labels');
@@ -76,7 +86,9 @@ test('GET /api/dashboard/indicators includes labels array for each indicator', f
 test('GET /api/dashboard/indicators returns up to 10 indicators', function () {
     mockDashboardIndicators();
 
-    $response = $this->getJson('/api/dashboard/indicators');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/dashboard/indicators');
 
     expect($response->json('data'))->toHaveCount(10);
 });
