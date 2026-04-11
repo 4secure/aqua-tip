@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Plan Overhaul & UX Polish
 status: executing
-stopped_at: Phase 48 context gathered
-last_updated: "2026-04-11T08:00:26.400Z"
+stopped_at: Completed 48-02-PLAN.md
+last_updated: "2026-04-11T09:49:33.000Z"
 last_activity: 2026-04-11
 progress:
   total_phases: 11
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 47 — infrastructure-hardening
+**Current focus:** Phase 48 — api-security
 
 ## Current Position
 
-Phase: 47
-Plan: Not started
-Status: Executing Phase 47
+Phase: 48
+Plan: 02 of 3 complete
+Status: Executing Phase 48
 Last activity: 2026-04-11
 
 Progress: [█████░░░░░] 50%
@@ -54,6 +54,7 @@ Progress: [█████░░░░░] 50%
 | v3.3 Threat Map Dashboard | 4 | 5 | 2 days |
 | Phase 41 P01 | 2min | 2 tasks | 2 files |
 | Phase 41 P02 | 11min | 2 tasks | 3 files |
+| Phase 48 P02 | 11min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Recent decisions affecting v5.0:
 - [Phase 41]: Enterprise price_cents = null signals Contact Us (not 0)
 - [Phase 41]: Credit sync is full reset - all users get fresh start at new cap
 - [Phase 41]: Made migration SQL driver-aware (pgsql vs sqlite) to unblock test suite
+- [Phase 48]: Throttle middleware placed before deduct-credit to prevent credit loss on rate-limited requests
+- [Phase 48]: Rate limiter keys use user ID when authenticated, falling back to IP for guests
 
 ### Pending Todos
 
@@ -91,5 +94,5 @@ None.
 ## Session Continuity
 
 Last activity: 2026-04-11
-Last session: 2026-04-11T08:00:26.397Z
-Stopped at: Phase 48 context gathered
+Last session: 2026-04-11T09:49:33.000Z
+Stopped at: Completed 48-02-PLAN.md

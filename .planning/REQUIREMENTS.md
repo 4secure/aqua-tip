@@ -67,12 +67,12 @@ Requirements for Security Hardening release. Each maps to roadmap phases.
 ### API Security (API)
 
 - [ ] **API-01**: Dark-web task status endpoint validates user ownership (IDOR fix)
-- [ ] **API-02**: Rate limiting middleware on /ip-search, /threat-search, /credits (30/min)
+- [x] **API-02**: Rate limiting middleware on /ip-search, /threat-search, /credits (30/min)
 - [ ] **API-03**: EnrichmentController returns generic error, logs OpenCTI details server-side
 - [ ] **API-04**: HealthController returns generic 503 on failure, logs details server-side
 - [ ] **API-05**: Raw OpenCTI observable data removed from search API responses
-- [ ] **API-06**: Rate limiting on OAuth redirect endpoint
-- [ ] **API-07**: Rate limiting on email verification resend (per-day cap)
+- [x] **API-06**: Rate limiting on OAuth redirect endpoint
+- [x] **API-07**: Rate limiting on email verification resend (per-day cap)
 
 ### Authentication & Session (AUTH — v5.0)
 
@@ -158,12 +158,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-07 | Phase 47 | Pending |
 | INFRA-08 | Phase 47 | Pending |
 | API-01 | Phase 48 | Pending |
-| API-02 | Phase 48 | Pending |
+| API-02 | Phase 48 | Complete |
 | API-03 | Phase 48 | Pending |
 | API-04 | Phase 48 | Pending |
 | API-05 | Phase 48 | Pending |
-| API-06 | Phase 48 | Pending |
-| API-07 | Phase 48 | Pending |
+| API-06 | Phase 48 | Complete |
+| API-07 | Phase 48 | Complete |
 | AUTH-01 | Phase 49 | Pending |
 | AUTH-02 | Phase 49 | Pending |
 | AUTH-03 | Phase 49 | Pending |
