@@ -4,6 +4,7 @@ namespace App\Http\Controllers\DarkWeb;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DarkWebSearchRequest;
+use App\Models\DarkWebTask;
 use App\Models\SearchLog;
 use App\Services\DarkWebProviderService;
 use Illuminate\Http\JsonResponse;
@@ -44,6 +45,11 @@ class SearchController extends Controller
             'query' => $request->validated('query'),
         ]);
 
+        DarkWebTask::firstOrCreate(
+            ['task_id' => $taskId],
+            ['user_id' => $request->user()->id],
+        );
+
         return response()->json([
             'task_id' => $taskId,
             'credits' => $this->creditsPayload($credit),
@@ -61,6 +67,14 @@ class SearchController extends Controller
 
         if (empty($taskId) || strlen($taskId) > 256) {
             return response()->json(['message' => 'Invalid task ID.'], 422);
+        }
+
+        $task = DarkWebTask::where('task_id', $taskId)->first();
+
+        if (!$task || $task->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Forbidden.',
+            ], 403);
         }
 
         try {
