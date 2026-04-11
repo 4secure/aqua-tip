@@ -208,7 +208,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 **Security Hardening (v5.0):**
 
 - [x] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers (completed 2026-04-11)
-- [ ] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data
+- [x] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data (completed 2026-04-11)
 - [ ] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset
 - [ ] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM
 - [ ] **Phase 51: Email, DNS & Final Hardening** - Enable SMTP TLS, switch to HTTPS geo calls, document DNS records
@@ -242,8 +242,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
-- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [x] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [x] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
 - [x] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 
 ### Phase 49: Auth & Session Hardening
@@ -288,9 +288,59 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
-| 48. API Security | 1/3 | In Progress|  |
+| 48. API Security | 3/3 | Complete    | 2026-04-11 |
 | 49. Auth & Session Hardening | 0/0 | Not started | - |
 | 50. Frontend Security | 0/0 | Not started | - |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
 
 **Cumulative:** 45 phases, 72 plans across 10 milestones in 25 days
+
+### Phase 52: Rename Dashboard to Threat Map, fix top icon routing to Threat Map inside app
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 51
+**Plans:** 3/3 plans complete
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 52 to break down)
+
+### Phase 53: Threat News bar chart with categories and side labels
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 52
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 53 to break down)
+
+### Phase 54: IOC display for email, URL, crypto types and relationship graph zoom controls
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 53
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 54 to break down)
+
+### Phase 55: Profile settings center alignment, pricing dual routing, and pricing contact email backend
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 54
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 55 to break down)
+
+### Phase 56: Trial plan 10 credits per day configuration
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 55
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 56 to break down)

@@ -4,13 +4,13 @@ milestone: v4.0
 milestone_name: Plan Overhaul & UX Polish
 status: executing
 stopped_at: Phase 48 context gathered
-last_updated: "2026-04-11T09:34:08.029Z"
-last_activity: 2026-04-11 -- Phase 48 execution started
+last_updated: "2026-04-11T14:29:15.972Z"
+last_activity: 2026-04-11
 progress:
-  total_phases: 11
-  completed_phases: 3
+  total_phases: 16
+  completed_phases: 4
   total_plans: 11
-  completed_plans: 6
+  completed_plans: 9
   percent: 50
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 ## Current Position
 
-Phase: 48 (api-security) — EXECUTING
-Plan: 1 of 3
+Phase: 52
+Plan: Not started
 Status: Executing Phase 48
-Last activity: 2026-04-11 -- Phase 48 execution started
+Last activity: 2026-04-11
 
 Progress: [█████░░░░░] 50%
 
@@ -71,6 +71,14 @@ Recent decisions affecting v5.0:
 - [Phase 41]: Enterprise price_cents = null signals Contact Us (not 0)
 - [Phase 41]: Credit sync is full reset - all users get fresh start at new cap
 - [Phase 41]: Made migration SQL driver-aware (pgsql vs sqlite) to unblock test suite
+
+### Roadmap Evolution
+
+- Phase 52 added: Rename Dashboard to Threat Map, fix top icon routing to Threat Map inside app
+- Phase 53 added: Threat News bar chart with categories and side labels
+- Phase 54 added: IOC display for email, URL, crypto types and relationship graph zoom controls
+- Phase 55 added: Profile settings center alignment, pricing dual routing, and pricing contact email backend
+- Phase 56 added: Trial plan 10 credits per day configuration
 
 ### Pending Todos
 
