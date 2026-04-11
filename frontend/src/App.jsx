@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import FeatureGatedRoute from './components/auth/FeatureGatedRoute';
 import GuestRoute from './components/auth/GuestRoute';
 import AppLayout from './components/layout/AppLayout';
 import LoadingScreen from './components/ui/LoadingScreen';
@@ -62,12 +63,16 @@ export default function App() {
 
               {/* Protected routes -- auth + verified + onboarded */}
               <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<ThreatMapPage />} />
-                <Route path="/threat-map" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dark-web" element={<DarkWebPage />} />
-                <Route path="/threat-actors" element={<ThreatActorsPage />} />
-                <Route path="/threat-news" element={<ThreatNewsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+
+                {/* Feature-gated routes -- free plan sees UpgradeCTA */}
+                <Route element={<FeatureGatedRoute />}>
+                  <Route path="/dashboard" element={<ThreatMapPage />} />
+                  <Route path="/threat-map" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dark-web" element={<DarkWebPage />} />
+                  <Route path="/threat-actors" element={<ThreatActorsPage />} />
+                  <Route path="/threat-news" element={<ThreatNewsPage />} />
+                </Route>
               </Route>
             </Route>
           </Routes>

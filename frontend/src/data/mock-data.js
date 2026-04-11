@@ -136,21 +136,21 @@ export const NAV_CATEGORIES = Object.freeze([
   {
     label: 'Overview',
     items: [
-      { label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false },
+      { label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false, gated: true },
     ],
   },
   {
     label: 'Intelligence',
     items: [
-      { label: 'Threat Search', icon: 'search', href: '/threat-search', public: true },
-      { label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false },
-      { label: 'Threat News', icon: 'rss', href: '/threat-news', public: false },
+      { label: 'Threat Search', icon: 'search', href: '/threat-search', public: true, gated: false },
+      { label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false, gated: true },
+      { label: 'Threat News', icon: 'rss', href: '/threat-news', public: false, gated: true },
     ],
   },
   {
     label: 'Monitoring',
     items: [
-      { label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false },
+      { label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false, gated: true },
     ],
   },
 ]);

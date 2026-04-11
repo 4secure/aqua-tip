@@ -4,11 +4,13 @@ import { Lock, Settings, LogOut, ChevronDown, ChevronRight, ChevronLeft, X } fro
 import { NAV_CATEGORIES } from '../../data/mock-data';
 import { Icon } from '../../data/icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useFeatureAccess } from '../../hooks/useFeatureAccess';
 
 export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }) {
   const [hovered, setHovered] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { isAuthenticated, user, userInitials, logout } = useAuth();
+  const { isFreePlan } = useFeatureAccess();
   const navigate = useNavigate();
   const hoverTimerRef = useRef(null);
 
@@ -98,9 +100,10 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
                 {/* Category items */}
                 <div className="space-y-0.5">
                   {category.items.map(item => {
-                      const isAccessible = item.public || isAuthenticated;
+                      const isAuthAccessible = item.public || isAuthenticated;
+                      const isPlanGated = isAuthenticated && isFreePlan && item.gated;
 
-                      if (!isAccessible) {
+                      if (!isAuthAccessible) {
                         return (
                           <button
                             key={item.href}
@@ -117,6 +120,26 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
                               </>
                             )}
                           </button>
+                        );
+                      }
+
+                      if (isPlanGated) {
+                        return (
+                          <NavLink
+                            key={item.href}
+                            to={item.href}
+                            className="flex items-center gap-3 px-4 py-2 text-sm rounded-lg mx-2 transition-all duration-200 text-text-muted/50 opacity-40 hover:opacity-60"
+                          >
+                            <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                              <Icon name={item.icon} />
+                            </span>
+                            {showLabels && (
+                              <>
+                                <span className="flex-1">{item.label}</span>
+                                <Lock className="w-3.5 h-3.5 shrink-0" />
+                              </>
+                            )}
+                          </NavLink>
                         );
                       }
 
