@@ -69,91 +69,58 @@ return new class extends Migration
         ]);
 
         // Step 3: Sync credit records (per D-08, D-09)
-        // Uses driver-aware SQL: PostgreSQL supports UPDATE...FROM, SQLite uses subqueries.
-        $driver = DB::connection()->getDriverName();
-        $now = now()->toDateTimeString();
+        // Uses query builder for cross-database compatibility (SQLite + PostgreSQL).
+        $now = now();
 
-        if ($driver === 'pgsql') {
-            // 3a. Users WITH a plan — reset to their plan's new daily limit
-            DB::statement("
-                UPDATE credits
-                SET remaining = plans.daily_credit_limit,
-                    \"limit\" = plans.daily_credit_limit,
-                    last_reset_at = '{$now}'
-                FROM users
-                JOIN plans ON users.plan_id = plans.id
-                WHERE credits.user_id = users.id
-            ");
+        // 3a. Users WITH a plan — reset to their plan's new daily limit
+        $usersWithPlan = DB::table('users')
+            ->join('plans', 'users.plan_id', '=', 'plans.id')
+            ->select('users.id', 'plans.daily_credit_limit')
+            ->get();
 
-            // 3b. Active trial users (no plan, trial not expired) — set to 10
-            DB::statement("
-                UPDATE credits
-                SET remaining = 10,
-                    \"limit\" = 10,
-                    last_reset_at = '{$now}'
-                FROM users
-                WHERE credits.user_id = users.id
-                  AND users.plan_id IS NULL
-                  AND users.trial_ends_at > '{$now}'
-            ");
+        foreach ($usersWithPlan as $row) {
+            DB::table('credits')
+                ->where('user_id', $row->id)
+                ->update([
+                    'remaining' => $row->daily_credit_limit,
+                    'limit' => $row->daily_credit_limit,
+                    'last_reset_at' => $now,
+                ]);
+        }
 
-            // 3c. Expired trial / no-plan users — fallback to Free tier limit of 5
-            DB::statement("
-                UPDATE credits
-                SET remaining = 5,
-                    \"limit\" = 5,
-                    last_reset_at = '{$now}'
-                FROM users
-                WHERE credits.user_id = users.id
-                  AND users.plan_id IS NULL
-                  AND (users.trial_ends_at IS NULL OR users.trial_ends_at <= '{$now}')
-            ");
-        } else {
-            // SQLite-compatible: use subqueries instead of UPDATE...FROM
-            // 3a. Users WITH a plan
-            DB::statement("
-                UPDATE credits
-                SET remaining = (
-                    SELECT plans.daily_credit_limit FROM users
-                    JOIN plans ON users.plan_id = plans.id
-                    WHERE users.id = credits.user_id
-                ),
-                \"limit\" = (
-                    SELECT plans.daily_credit_limit FROM users
-                    JOIN plans ON users.plan_id = plans.id
-                    WHERE users.id = credits.user_id
-                ),
-                last_reset_at = '{$now}'
-                WHERE user_id IN (
-                    SELECT users.id FROM users WHERE users.plan_id IS NOT NULL
-                )
-            ");
+        // 3b. Active trial users (no plan, trial not expired) — set to 10
+        $trialUsers = DB::table('users')
+            ->whereNull('plan_id')
+            ->where('trial_ends_at', '>', $now)
+            ->pluck('id');
 
-            // 3b. Active trial users
-            DB::statement("
-                UPDATE credits
-                SET remaining = 10,
-                    \"limit\" = 10,
-                    last_reset_at = '{$now}'
-                WHERE user_id IN (
-                    SELECT users.id FROM users
-                    WHERE users.plan_id IS NULL
-                      AND users.trial_ends_at > '{$now}'
-                )
-            ");
+        if ($trialUsers->isNotEmpty()) {
+            DB::table('credits')
+                ->whereIn('user_id', $trialUsers)
+                ->update([
+                    'remaining' => 10,
+                    'limit' => 10,
+                    'last_reset_at' => $now,
+                ]);
+        }
 
-            // 3c. Expired trial / no-plan users
-            DB::statement("
-                UPDATE credits
-                SET remaining = 5,
-                    \"limit\" = 5,
-                    last_reset_at = '{$now}'
-                WHERE user_id IN (
-                    SELECT users.id FROM users
-                    WHERE users.plan_id IS NULL
-                      AND (users.trial_ends_at IS NULL OR users.trial_ends_at <= '{$now}')
-                )
-            ");
+        // 3c. Expired trial / no-plan users — fallback to Free tier limit of 5
+        $expiredUsers = DB::table('users')
+            ->whereNull('plan_id')
+            ->where(function ($query) use ($now) {
+                $query->whereNull('trial_ends_at')
+                    ->orWhere('trial_ends_at', '<=', $now);
+            })
+            ->pluck('id');
+
+        if ($expiredUsers->isNotEmpty()) {
+            DB::table('credits')
+                ->whereIn('user_id', $expiredUsers)
+                ->update([
+                    'remaining' => 5,
+                    'limit' => 5,
+                    'last_reset_at' => $now,
+                ]);
         }
     }
 
