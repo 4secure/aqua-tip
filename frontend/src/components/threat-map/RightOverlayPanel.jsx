@@ -126,7 +126,15 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
             ))}
           </div>
         ) : indicatorsError ? (
-          <p className="text-xs text-text-muted text-center py-4">Failed to load indicators</p>
+          <div className="space-y-2">
+            {SKELETON_WIDTHS.map((w, i) => (
+              <div
+                key={i}
+                className="h-6 bg-surface-2 rounded animate-pulse"
+                style={{ width: `${w}%` }}
+              />
+            ))}
+          </div>
         ) : indicators.length === 0 ? (
           <p className="text-xs text-text-muted text-center py-4">No indicators found</p>
         ) : (
