@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([
             'deduct-credit' => \App\Http\Middleware\DeductCredit::class,
+            'feature-gate' => \App\Http\Middleware\FeatureGate::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
