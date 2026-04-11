@@ -297,13 +297,13 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 
 ### Phase 52: Rename Dashboard to Threat Map, fix top icon routing to Threat Map inside app
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Sidebar, breadcrumb, and routes consistently show "Threat Map" instead of "Dashboard", with sidebar logo routing to /threat-map inside the app
+**Requirements**: DASH-01, DASH-04
 **Depends on:** Phase 51
-**Plans:** 3/3 plans complete
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 52 to break down)
+- [ ] 52-01-PLAN.md — Rename Dashboard to Threat Map in routes, nav, breadcrumb, and fix sidebar logo link
 
 ### Phase 53: Threat News bar chart with categories and side labels
 
