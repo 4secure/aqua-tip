@@ -101,7 +101,7 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
 **Milestone Goal:** Restructure subscription plans with new pricing/credits, add feature gating for free-tier users, fix auth loading flash, and polish UI across all pages.
 
 - [x] **Phase 41: Plan Data Restructure** - Update plan seeder, credit limits, and sync existing users to new tier values (completed 2026-04-10)
-- [ ] **Phase 42: Auth Loading & Data States** - Fix auth FOUC with global loading gate, replace connection errors with loading indicators
+- [x] **Phase 42: Auth Loading & Data States** - Fix auth FOUC with global loading gate, replace connection errors with loading indicators (completed 2026-04-11)
 - [ ] **Phase 43: Feature Gating** - Restrict free plan to threat search only with backend middleware and frontend route guards
 - [ ] **Phase 44: Pricing & Contact** - Update pricing page with new tiers, enterprise contact form, auth-aware routing
 - [ ] **Phase 45: Dashboard & Visualization Improvements** - Rename to Threat Map, add category bar chart, fix observable counts, chart and zoom improvements
@@ -131,11 +131,11 @@ Plans:
   1. A branded loading screen (logo + spinner) displays until auth state fully resolves on every page
   2. No flash of login buttons, locked sidebar, or wrong gating state occurs during initial load
   3. Pages that fetch data show "Fetching data..." indicators instead of "Connection lost" errors while loading
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 42-01-PLAN.md -- Branded loading screen + auth gate (LoadingScreen, AppLayout, ProtectedRoute, GuestRoute)
-- [ ] 42-02-PLAN.md -- Error-to-loading replacements (ThreatMapStatus, RightOverlayPanel)
+- [x] 42-01-PLAN.md -- Branded loading screen + auth gate (LoadingScreen, AppLayout, ProtectedRoute, GuestRoute)
+- [x] 42-02-PLAN.md -- Error-to-loading replacements (ThreatMapStatus, RightOverlayPanel)
 
 ### Phase 43: Feature Gating
 **Goal**: Free-plan users can only access Threat Search while other pages show upgrade prompts, enforced on both frontend and backend
@@ -195,7 +195,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 41. Plan Data Restructure | 2/2 | Complete    | 2026-04-10 |
-| 42. Auth Loading & Data States | 0/2 | Not started | - |
+| 42. Auth Loading & Data States | 2/2 | Complete   | 2026-04-11 |
 | 43. Feature Gating | 0/TBD | Not started | - |
 | 44. Pricing & Contact | 0/TBD | Not started | - |
 | 45. Dashboard & Visualization Improvements | 0/TBD | Not started | - |
