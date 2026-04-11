@@ -254,7 +254,10 @@ Plans:
   1. Session cookie has Secure flag set and uses a non-descriptive cookie name
   2. Sanctum tokens expire after 24 hours (not 7 days) and all tokens are invalidated on password reset
   3. Forgot-password endpoint returns identical response regardless of whether email exists or which OAuth provider was used
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 49-01-PLAN.md — Config hardening, controller rewrites, test updates
 
 ### Phase 50: Frontend Security
 **Goal**: Frontend code does not expose users to XSS, open redirect, or tab-nabbing attacks
@@ -289,7 +292,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 |-------|----------------|--------|-----------|
 | 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
 | 48. API Security | 3/3 | Complete    | 2026-04-11 |
-| 49. Auth & Session Hardening | 0/0 | Not started | - |
+| 49. Auth & Session Hardening | 0/1 | Not started | - |
 | 50. Frontend Security | 0/0 | Not started | - |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
 
