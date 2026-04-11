@@ -136,7 +136,7 @@ export const NAV_CATEGORIES = Object.freeze([
   {
     label: 'Overview',
     items: [
-      { label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false, gated: true },
+      { label: 'Threat Map', icon: 'map', href: '/threat-map', public: false, gated: true },
     ],
   },
   {
