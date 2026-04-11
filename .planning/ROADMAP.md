@@ -203,7 +203,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 
 **Security Hardening (v5.0):**
 
-- [ ] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers
+- [x] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers (completed 2026-04-11)
 - [ ] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data
 - [ ] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset
 - [ ] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM
@@ -219,11 +219,11 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
   3. Server version header is absent from all responses and only GET/POST/PUT/DELETE/OPTIONS/PATCH methods are accepted
   4. HSTS header with max-age=31536000 and includeSubDomains appears on every response
   5. Content-Security-Policy header is present on API responses, and request body size is capped at 2M
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 47-01-PLAN.md — Nginx security hardening (path traversal, FastCGI lockdown, headers, method restriction)
-- [ ] 47-02-PLAN.md — Debug route removal from web.php
+- [x] 47-01-PLAN.md — Nginx security hardening (path traversal, FastCGI lockdown, headers, method restriction)
+- [x] 47-02-PLAN.md — Debug route removal from web.php
 
 ### Phase 48: API Security
 **Goal**: API endpoints are protected against unauthorized access, abuse, and information leakage
@@ -278,7 +278,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 47. Infrastructure Hardening | 0/2 | Planned | - |
+| 47. Infrastructure Hardening | 2/2 | Complete   | 2026-04-11 |
 | 48. API Security | 0/0 | Not started | - |
 | 49. Auth & Session Hardening | 0/0 | Not started | - |
 | 50. Frontend Security | 0/0 | Not started | - |
