@@ -163,7 +163,12 @@ Plans:
   3. Submitting the contact form sends an inquiry email to the admin
   4. Unauthenticated users see pricing as a standalone page; authenticated users see it inside the app layout with sidebar
   5. Logo on the standalone pricing page navigates to the landing page
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [ ] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 **UI hint**: yes
 
 ### Phase 45: Dashboard & Visualization Improvements
@@ -177,7 +182,12 @@ Plans:
   4. Top logo/icon navigates to Threat Map for authenticated users and Landing page for unauthenticated users
   5. Threat News chart shows category-only distribution with labels on the side
   6. Relationship tab D3 graph has zoom in/out button controls that work alongside node dragging
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [ ] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 **UI hint**: yes
 
 ### Phase 46: UI Polish
@@ -188,7 +198,12 @@ Plans:
   1. Settings profile form is vertically centered on the page
   2. Breadcrumbs display capitalized text on all pages
   3. Landing page globe renders immediately on first load with smooth scroll-driven animations (no delay or pop-in)
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [ ] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 **UI hint**: yes
 
 ## Progress
@@ -239,7 +254,12 @@ Plans:
   3. OpenCTI failures return a generic "Service unavailable" message -- no internal URLs, stack traces, or provider details in response body
   4. Search API responses contain only curated fields -- no raw OpenCTI observable payloads
   5. OAuth redirect and email verification resend endpoints are rate-limited
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [ ] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 
 ### Phase 49: Auth & Session Hardening
 **Goal**: Authentication and session management follow security best practices with no information leakage
@@ -249,7 +269,12 @@ Plans:
   1. Session cookie has Secure flag set and uses a non-descriptive cookie name
   2. Sanctum tokens expire after 24 hours (not 7 days) and all tokens are invalidated on password reset
   3. Forgot-password endpoint returns identical response regardless of whether email exists or which OAuth provider was used
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [ ] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 
 ### Phase 50: Frontend Security
 **Goal**: Frontend code does not expose users to XSS, open redirect, or tab-nabbing attacks
@@ -261,7 +286,12 @@ Plans:
   3. DOMPurify-sanitized HTML never contains target="_blank" without rel="noopener noreferrer"
   4. Leaflet CSS is served from local bundle -- no external CDN requests for map styles
   5. Google Tag Manager script only loads after user consent is confirmed
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [ ] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 **UI hint**: yes
 
 ### Phase 51: Email, DNS & Final Hardening
@@ -272,7 +302,12 @@ Plans:
   1. SMTP connections verify peer TLS certificates in production (MAIL_VERIFY_PEER enabled)
   2. All geolocation API calls use HTTPS -- no plaintext HTTP requests to ip-api.com or similar
   3. SPF, DKIM, and DMARC DNS record configurations are documented with exact values for tip.aquasecure.ai
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [ ] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 
 ### Security Hardening Progress
 
@@ -283,7 +318,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
-| 48. API Security | 0/0 | Not started | - |
+| 48. API Security | 0/3 | Not started | - |
 | 49. Auth & Session Hardening | 0/0 | Not started | - |
 | 50. Frontend Security | 0/0 | Not started | - |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
