@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import GuestRoute from './components/auth/GuestRoute';
 import AppLayout from './components/layout/AppLayout';
+import LoadingScreen from './components/ui/LoadingScreen';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -24,11 +25,7 @@ const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ContactUsPage = lazy(() => import('./pages/ContactUsPage'));
 
 function LazyFallback() {
-  return (
-    <div className="min-h-screen bg-primary flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-violet border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  return <LoadingScreen />;
 }
 
 export default function App() {
