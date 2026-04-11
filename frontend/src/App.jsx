@@ -67,8 +67,8 @@ export default function App() {
 
                 {/* Feature-gated routes -- free plan sees UpgradeCTA */}
                 <Route element={<FeatureGatedRoute />}>
-                  <Route path="/dashboard" element={<ThreatMapPage />} />
-                  <Route path="/threat-map" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/threat-map" element={<ThreatMapPage />} />
+                  <Route path="/dashboard" element={<Navigate to="/threat-map" replace />} />
                   <Route path="/dark-web" element={<DarkWebPage />} />
                   <Route path="/threat-actors" element={<ThreatActorsPage />} />
                   <Route path="/threat-news" element={<ThreatNewsPage />} />

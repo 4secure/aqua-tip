@@ -71,7 +71,7 @@ export default function Sidebar({ collapsed, toggle, mobileOpen, setMobileOpen }
         )}
 
         {/* Logo */}
-        <Link to="/" className="h-[60px] flex items-center gap-3 px-5 border-b border-border/50 shrink-0 hover:bg-surface-2 transition-colors">
+        <Link to="/threat-map" className="h-[60px] flex items-center gap-3 px-5 border-b border-border/50 shrink-0 hover:bg-surface-2 transition-colors">
           <img
             src="/logo.png"
             alt="Aqua-TIP"
