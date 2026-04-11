@@ -15,7 +15,7 @@ Fix all critical, high, and medium security vulnerabilities identified in compre
 - Integer phases (47, 48, 49): Planned milestone work
 - Decimal phases (47.1, 47.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers
+- [x] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers (completed 2026-04-11)
 - [ ] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data
 - [ ] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset
 - [ ] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM
@@ -33,7 +33,11 @@ Fix all critical, high, and medium security vulnerabilities identified in compre
   3. Server version header is absent from all responses and only GET/POST/PUT/DELETE/OPTIONS/PATCH methods are accepted
   4. HSTS header with max-age=31536000 and includeSubDomains appears on every response
   5. Content-Security-Policy header is present on API responses, and request body size is capped at 2M
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 47-01-PLAN.md — Nginx security hardening (path traversal, FastCGI lockdown, headers, method restriction)
+- [x] 47-02-PLAN.md — Debug route removal from web.php
 
 ### Phase 48: API Security
 **Goal**: API endpoints are protected against unauthorized access, abuse, and information leakage
@@ -45,7 +49,12 @@ Fix all critical, high, and medium security vulnerabilities identified in compre
   3. OpenCTI failures return a generic "Service unavailable" message -- no internal URLs, stack traces, or provider details in response body
   4. Search API responses contain only curated fields -- no raw OpenCTI observable payloads
   5. OAuth redirect and email verification resend endpoints are rate-limited
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — IDOR fix: dark-web task ownership table and status endpoint enforcement
+- [ ] 48-02-PLAN.md — Rate limiting: search/credit, OAuth redirect, email verification endpoints
+- [ ] 48-03-PLAN.md — Error sanitization and response stripping for OpenCTI data
 
 ### Phase 49: Auth & Session Hardening
 **Goal**: Authentication and session management follow security best practices with no information leakage
@@ -88,8 +97,8 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 47. Infrastructure Hardening | 0/0 | Not started | - |
-| 48. API Security | 0/0 | Not started | - |
+| 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
+| 48. API Security | 0/3 | Not started | - |
 | 49. Auth & Session Hardening | 0/0 | Not started | - |
 | 50. Frontend Security | 0/0 | Not started | - |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
