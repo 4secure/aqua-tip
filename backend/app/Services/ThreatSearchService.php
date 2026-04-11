@@ -205,7 +205,6 @@ class ThreatSearchService
             'sightings' => $sightings,
             'notes' => $notes,
             'external_references' => $externalReferences,
-            'raw' => $observable,
         ];
     }
 

@@ -7,6 +7,7 @@ use App\Exceptions\OpenCtiQueryException;
 use App\Http\Controllers\Controller;
 use App\Services\OpenCtiService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class HealthController extends Controller
 {
@@ -17,9 +18,14 @@ class HealthController extends Controller
 
             return response()->json($result);
         } catch (OpenCtiConnectionException|OpenCtiQueryException $e) {
+            Log::error('OpenCTI health check failed', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'Service temporarily unavailable.',
             ], 503);
         }
     }
