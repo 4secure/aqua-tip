@@ -56,27 +56,37 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', ProfileUpdateController::class);
     Route::post('/logout', LogoutController::class);
 
-    // Dark web search (authenticated + credit-gated)
-    Route::post('/dark-web/search', DarkWebSearchController::class)->middleware('deduct-credit');
-    Route::get('/dark-web/status/{taskId}', [DarkWebSearchController::class, 'status']);
-
     // OpenCTI health check
     Route::get('/opencti/health', OpenCtiHealthController::class);
 
-    // Threat actors & threat news (browse pages, no credit gating)
-    Route::get('/threat-actors', ThreatActorIndexController::class);
-    Route::get('/threat-actors/{id}/enrichment', ThreatActorEnrichmentController::class);
-    Route::get('/threat-news', ThreatNewsIndexController::class);
-    Route::get('/threat-news/labels', ThreatNewsLabelsController::class);
-
-    // Threat map stream (authenticated, no credit gating)
-    Route::get('/threat-map/stream', ThreatMapStreamController::class);
-
-    // Search history (authenticated, no credit gating)
+    // Search history (authenticated, no feature gating)
     Route::get('/search-history', SearchHistoryIndexController::class);
 
     // Plan selection (authenticated)
     Route::post('/plan', PlanSelectionController::class);
+
+    // Premium features (authenticated + feature-gated)
+    Route::middleware('feature-gate')->group(function () {
+        // Dark web search (feature-gated + credit-gated)
+        Route::post('/dark-web/search', DarkWebSearchController::class)->middleware('deduct-credit');
+        Route::get('/dark-web/status/{taskId}', [DarkWebSearchController::class, 'status']);
+
+        // Threat actors & enrichment
+        Route::get('/threat-actors', ThreatActorIndexController::class);
+        Route::get('/threat-actors/{id}/enrichment', ThreatActorEnrichmentController::class);
+
+        // Threat news
+        Route::get('/threat-news', ThreatNewsIndexController::class);
+        Route::get('/threat-news/labels', ThreatNewsLabelsController::class);
+
+        // Threat map stream
+        Route::get('/threat-map/stream', ThreatMapStreamController::class);
+
+        // Dashboard stats (authenticated + feature-gated)
+        Route::get('/dashboard/counts', DashboardCountsController::class);
+        Route::get('/dashboard/indicators', DashboardIndicatorsController::class);
+        Route::get('/dashboard/categories', DashboardCategoriesController::class);
+    });
 });
 
 // Plan listing (public, no auth required)
@@ -93,8 +103,3 @@ Route::get('/credits', CreditStatusController::class);
 
 // Threat map snapshot (public, used by dashboard map)
 Route::get('/threat-map/snapshot', ThreatMapSnapshotController::class);
-
-// Dashboard stats (public, no auth, no credit gating)
-Route::get('/dashboard/counts', DashboardCountsController::class);
-Route::get('/dashboard/indicators', DashboardIndicatorsController::class);
-Route::get('/dashboard/categories', DashboardCategoriesController::class);
