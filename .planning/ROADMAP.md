@@ -147,7 +147,11 @@ Plans:
   3. Sidebar shows lock icons on pages the user's plan cannot access
   4. Backend middleware rejects API calls to gated endpoints from free-plan users with a 403 and upgrade message
   5. Basic, Pro, and Enterprise users access all pages without restriction
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 43-01-PLAN.md — Backend FeatureGate middleware + route protection + tests
+- [ ] 43-02-PLAN.md — Frontend useFeatureAccess hook, UpgradeCTA, FeatureGatedRoute, sidebar locks
 
 ### Phase 44: Pricing & Contact
 **Goal**: Users can view updated pricing tiers and enterprise prospects can submit a contact inquiry via email
@@ -196,7 +200,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 |-------|----------------|--------|-----------|
 | 41. Plan Data Restructure | 2/2 | Complete    | 2026-04-10 |
 | 42. Auth Loading & Data States | 2/2 | Complete    | 2026-04-11 |
-| 43. Feature Gating | 0/TBD | Not started | - |
+| 43. Feature Gating | 0/2 | Not started | - |
 | 44. Pricing & Contact | 0/TBD | Not started | - |
 | 45. Dashboard & Visualization Improvements | 0/TBD | Not started | - |
 | 46. UI Polish | 0/TBD | Not started | - |
@@ -284,4 +288,4 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 | 50. Frontend Security | 0/0 | Not started | - |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
 
-**Cumulative:** 45 phases, 70 plans across 10 milestones in 25 days
+**Cumulative:** 45 phases, 72 plans across 10 milestones in 25 days
