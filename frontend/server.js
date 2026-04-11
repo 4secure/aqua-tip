@@ -25,8 +25,15 @@ const MIME = {
 };
 
 const server = createServer(async (req, res) => {
-  // Strip query string and decode URI
-  const urlPath = decodeURIComponent(req.url.split('?')[0]);
+  // Strip query string and safely decode URI
+  let urlPath;
+  try {
+    urlPath = decodeURIComponent(req.url.split('?')[0]);
+  } catch {
+    res.writeHead(400);
+    res.end('Bad Request');
+    return;
+  }
 
   // Block any path containing .. sequences (path traversal)
   if (urlPath.includes('..')) {
