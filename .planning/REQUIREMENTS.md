@@ -30,10 +30,10 @@ Requirements for Plan Overhaul & UX Polish milestone. Each maps to roadmap phase
 
 ### Dashboard & Visuals
 
-- [ ] **DASH-01**: "Dashboard" renamed to "Threat Map" in sidebar, breadcrumb, and page title
+- [x] **DASH-01**: "Dashboard" renamed to "Threat Map" in sidebar, breadcrumb, and page title
 - [ ] **DASH-02**: Category bar chart added to right panel alongside existing widgets
 - [ ] **DASH-03**: Threat Database widget shows correct counts for email, URL, and crypto observable types
-- [ ] **DASH-04**: Top logo/icon navigates to Threat Map (auth) or Landing page (unauth)
+- [x] **DASH-04**: Top logo/icon navigates to Threat Map (auth) or Landing page (unauth)
 
 ### Threat Search
 
@@ -139,10 +139,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRICE-05 | Phase 44 | Pending |
 | AUTH-01 | Phase 42 | Pending |
 | AUTH-02 | Phase 42 | Pending |
-| DASH-01 | Phase 45 | Pending |
+| DASH-01 | Phase 45 | Complete |
 | DASH-02 | Phase 45 | Pending |
 | DASH-03 | Phase 45 | Pending |
-| DASH-04 | Phase 45 | Pending |
+| DASH-04 | Phase 45 | Complete |
 | SRCH-01 | Phase 45 | Pending |
 | NEWS-01 | Phase 45 | Pending |
 | UI-01 | Phase 46 | Pending |

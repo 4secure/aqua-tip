@@ -300,10 +300,10 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 **Goal:** Sidebar, breadcrumb, and routes consistently show "Threat Map" instead of "Dashboard", with sidebar logo routing to /threat-map inside the app
 **Requirements**: DASH-01, DASH-04
 **Depends on:** Phase 51
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 52-01-PLAN.md — Rename Dashboard to Threat Map in routes, nav, breadcrumb, and fix sidebar logo link
+- [x] 52-01-PLAN.md — Rename Dashboard to Threat Map in routes, nav, breadcrumb, and fix sidebar logo link
 
 ### Phase 53: Threat News bar chart with categories and side labels
 

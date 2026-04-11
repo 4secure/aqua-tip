@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Plan Overhaul & UX Polish
-status: executing
-stopped_at: Phase 49 context gathered
-last_updated: "2026-04-11T16:58:53.238Z"
+status: verifying
+stopped_at: Completed 52-01-PLAN.md
+last_updated: "2026-04-11T17:11:11.994Z"
 last_activity: 2026-04-11
 progress:
   total_phases: 16
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 9
+  completed_phases: 5
+  total_plans: 12
+  completed_plans: 10
   percent: 50
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 48 — api-security
+**Current focus:** Phase 52 — rename-dashboard-to-threat-map-fix-top-icon-routing-to-threat-map-inside-app
 
 ## Current Position
 
-Phase: 52
-Plan: Not started
-Status: Executing Phase 48
+Phase: 52 (rename-dashboard-to-threat-map-fix-top-icon-routing-to-threat-map-inside-app) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
 Last activity: 2026-04-11
 
 Progress: [█████░░░░░] 50%
@@ -54,6 +54,7 @@ Progress: [█████░░░░░] 50%
 | v3.3 Threat Map Dashboard | 4 | 5 | 2 days |
 | Phase 41 P01 | 2min | 2 tasks | 2 files |
 | Phase 41 P02 | 11min | 2 tasks | 3 files |
+| Phase 52 P01 | 2min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,7 @@ Recent decisions affecting v5.0:
 - [Phase 41]: Enterprise price_cents = null signals Contact Us (not 0)
 - [Phase 41]: Credit sync is full reset - all users get fresh start at new cap
 - [Phase 41]: Made migration SQL driver-aware (pgsql vs sqlite) to unblock test suite
+- [Phase 52]: Kept dashboard icon key intact for backward compatibility
 
 ### Roadmap Evolution
 
@@ -99,5 +101,5 @@ None.
 ## Session Continuity
 
 Last activity: 2026-04-11
-Last session: 2026-04-11T16:58:53.232Z
-Stopped at: Phase 49 context gathered
+Last session: 2026-04-11T17:11:11.988Z
+Stopped at: Completed 52-01-PLAN.md
