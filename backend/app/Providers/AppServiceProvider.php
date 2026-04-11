@@ -35,6 +35,25 @@ class AppServiceProvider extends ServiceProvider
             ];
         });
 
+        // 30 requests/min for search and credit endpoints (per D-03, D-04)
+        RateLimiter::for('api-search', function (Request $request) {
+            return Limit::perMinute(30)->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
+
+        // 10 requests/min for OAuth redirect (per D-05)
+        RateLimiter::for('oauth-redirect', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        // 20 requests/day for email verification resend (per D-06)
+        RateLimiter::for('email-verify-daily', function (Request $request) {
+            return Limit::perDay(20)->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
+
         VerifyEmail::createUrlUsing(function ($notifiable) {
             $verifyUrl = URL::temporarySignedRoute(
                 'verification.verify',

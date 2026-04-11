@@ -40,7 +40,7 @@ Route::middleware('throttle:auth')->group(function () {
 });
 
 // OAuth redirect URL (called via XHR from frontend)
-Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect']);
+Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->middleware('throttle:oauth-redirect');
 
 // Auth required (for unverified users to verify, fetch profile, and log out)
 Route::middleware('auth:sanctum')->group(function () {
@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('signed')
         ->name('verification.verify');
     Route::post('/email/verification-notification', ResendVerificationController::class)
-        ->middleware('throttle:6,1')
+        ->middleware(['throttle:6,1', 'throttle:email-verify-daily'])
         ->name('verification.send');
     Route::post('/email/verify-code', VerifyEmailCodeController::class);
     Route::post('/onboarding', OnboardingController::class);
@@ -93,13 +93,13 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/plans', PlanIndexController::class);
 
 // IP search (guests + authenticated users, credit-gated)
-Route::post('/ip-search', SearchController::class)->middleware('deduct-credit');
+Route::post('/ip-search', SearchController::class)->middleware(['throttle:api-search', 'deduct-credit']);
 
 // Threat search (guests + authenticated users, credit-gated)
-Route::post('/threat-search', ThreatSearchController::class)->middleware('deduct-credit');
+Route::post('/threat-search', ThreatSearchController::class)->middleware(['throttle:api-search', 'deduct-credit']);
 
 // Credit status (read-only, no deduction)
-Route::get('/credits', CreditStatusController::class);
+Route::get('/credits', CreditStatusController::class)->middleware('throttle:api-search');
 
 // Threat map snapshot (public, used by dashboard map)
 Route::get('/threat-map/snapshot', ThreatMapSnapshotController::class);
