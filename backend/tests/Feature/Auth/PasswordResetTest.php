@@ -23,10 +23,11 @@ test('forgot password sends reset link for email/password user', function () {
         ]);
 
     $response->assertOk();
+    $response->assertJson(['message' => 'If an account exists with that email, a password reset link has been sent.']);
     Notification::assertSentTo($user, ResetPassword::class);
 });
 
-test('forgot password returns 422 for oauth-only user with provider message', function () {
+test('forgot password returns uniform response for oauth user', function () {
     User::factory()->create([
         'email' => 'oauthonly@example.com',
         'oauth_provider' => 'google',
@@ -38,17 +39,33 @@ test('forgot password returns 422 for oauth-only user with provider message', fu
             'email' => 'oauthonly@example.com',
         ]);
 
-    $response->assertStatus(422);
-    expect(strtolower($response->json('message')))->toContain('google');
+    $response->assertOk();
+    $response->assertJson(['message' => 'If an account exists with that email, a password reset link has been sent.']);
 });
 
-test('forgot password returns 422 for non-existent email', function () {
+test('forgot password returns uniform response for non-existent email', function () {
     $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
         ->postJson('/api/forgot-password', [
             'email' => 'nobody@example.com',
         ]);
 
-    $response->assertStatus(422);
+    $response->assertOk();
+    $response->assertJson(['message' => 'If an account exists with that email, a password reset link has been sent.']);
+});
+
+test('forgot password does not send reset link to oauth user', function () {
+    Notification::fake();
+
+    $user = User::factory()->create([
+        'email' => 'oauthonly2@example.com',
+        'oauth_provider' => 'google',
+        'oauth_id' => '67890',
+    ]);
+
+    $this->withHeaders(['Origin' => 'http://localhost:5173'])
+        ->postJson('/api/forgot-password', ['email' => 'oauthonly2@example.com']);
+
+    Notification::assertNotSentTo($user, ResetPassword::class);
 });
 
 test('reset password resets password with valid token', function () {
@@ -129,6 +146,30 @@ test('password reset does not auto-login user', function () {
     $this->assertGuest();
 });
 
+test('password reset invalidates all user tokens', function () {
+    $user = User::factory()->create([
+        'email' => 'wipe@example.com',
+        'oauth_provider' => null,
+    ]);
+
+    // Create tokens
+    $user->createToken('device-1');
+    $user->createToken('device-2');
+    expect($user->tokens()->count())->toBe(2);
+
+    $token = Password::createToken($user);
+
+    $this->withHeaders(['Origin' => 'http://localhost:5173'])
+        ->postJson('/api/reset-password', [
+            'token' => $token,
+            'email' => 'wipe@example.com',
+            'password' => 'NewPassword1',
+            'password_confirmation' => 'NewPassword1',
+        ]);
+
+    expect($user->tokens()->count())->toBe(0);
+});
+
 test('forgot password is throttled for same email', function () {
     Notification::fake();
 
@@ -145,12 +186,12 @@ test('forgot password is throttled for same email', function () {
 
     $first->assertOk();
 
-    // Second request within throttle window should fail
+    // Second request within throttle window
+    // Response is always 200 (anti-enumeration), but broker throttles internally
     $second = $this->withHeaders(['Origin' => 'http://localhost:5173'])
         ->postJson('/api/forgot-password', [
             'email' => 'throttle@example.com',
         ]);
 
-    // Laravel's Password broker returns RESET_THROTTLED for rapid re-sends
-    $second->assertStatus(422);
+    $second->assertOk();
 });

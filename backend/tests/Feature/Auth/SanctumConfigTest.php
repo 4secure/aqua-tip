@@ -24,3 +24,19 @@ test('session driver defaults to database', function () {
 test('session encryption is enabled', function () {
     expect(config('session.encrypt'))->toBeTrue();
 });
+
+test('session secure cookie defaults to true', function () {
+    $configContent = file_get_contents(base_path('config/session.php'));
+    // Verify the config file has env('SESSION_SECURE_COOKIE', true) as the default
+    expect($configContent)->toContain("env('SESSION_SECURE_COOKIE', true)");
+});
+
+test('session cookie name is non-descriptive', function () {
+    $configFile = require base_path('config/session.php');
+    expect($configFile['cookie'])->toBe('__session');
+});
+
+test('sanctum token expiration is 24 hours', function () {
+    $configFile = require base_path('config/sanctum.php');
+    expect($configFile['expiration'])->toBe(60 * 24);
+});
