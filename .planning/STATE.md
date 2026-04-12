@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Plan Overhaul & UX Polish
 status: verifying
-stopped_at: Completed 52-01-PLAN.md
-last_updated: "2026-04-11T17:15:38.697Z"
+stopped_at: Completed 49-01-PLAN.md
+last_updated: "2026-04-12T17:00:10.293Z"
 last_activity: 2026-04-11
 progress:
   total_phases: 16
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 50
 ---
 
@@ -55,6 +55,7 @@ Progress: [█████░░░░░] 50%
 | Phase 41 P01 | 2min | 2 tasks | 2 files |
 | Phase 41 P02 | 11min | 2 tasks | 3 files |
 | Phase 52 P01 | 2min | 2 tasks | 5 files |
+| Phase 49 P01 | 22min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Recent decisions affecting v5.0:
 - [Phase 41]: Credit sync is full reset - all users get fresh start at new cap
 - [Phase 41]: Made migration SQL driver-aware (pgsql vs sqlite) to unblock test suite
 - [Phase 52]: Kept dashboard icon key intact for backward compatibility
+- [Phase 49]: Config verification tests use file_get_contents + string matching instead of require to avoid env override in test
+- [Phase 49]: Throttle test expects 200 (anti-enumeration) since controller always returns 200 regardless of broker status
 
 ### Roadmap Evolution
 
@@ -101,5 +104,5 @@ None.
 ## Session Continuity
 
 Last activity: 2026-04-11
-Last session: 2026-04-11T17:11:11.988Z
-Stopped at: Completed 52-01-PLAN.md
+Last session: 2026-04-12T17:00:10.286Z
+Stopped at: Completed 49-01-PLAN.md

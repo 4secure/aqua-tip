@@ -209,7 +209,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 
 - [x] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers (completed 2026-04-11)
 - [x] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data (completed 2026-04-11)
-- [ ] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset
+- [x] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset (completed 2026-04-12)
 - [ ] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM
 - [ ] **Phase 51: Email, DNS & Final Hardening** - Enable SMTP TLS, switch to HTTPS geo calls, document DNS records
 
@@ -257,7 +257,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 49-01-PLAN.md — Config hardening, controller rewrites, test updates
+- [x] 49-01-PLAN.md — Config hardening, controller rewrites, test updates
 
 ### Phase 50: Frontend Security
 **Goal**: Frontend code does not expose users to XSS, open redirect, or tab-nabbing attacks
@@ -292,7 +292,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 |-------|----------------|--------|-----------|
 | 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
 | 48. API Security | 3/3 | Complete    | 2026-04-11 |
-| 49. Auth & Session Hardening | 0/1 | Not started | - |
+| 49. Auth & Session Hardening | 1/1 | Complete   | 2026-04-12 |
 | 50. Frontend Security | 0/0 | Not started | - |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
 
