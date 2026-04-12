@@ -140,16 +140,16 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - [ ] OpenCTI error messages sanitized in EnrichmentController and HealthController
 - [ ] HSTS header added to SecurityHeaders middleware
 - [ ] CSP header configured for backend and frontend
-- [ ] SESSION_SECURE_COOKIE defaults to true
+- [x] SESSION_SECURE_COOKIE defaults to true — Phase 49
 - [ ] OAuth error parameter whitelisted on LoginPage
 - [ ] OAuth redirect URLs validated against allowed provider domains
 - [ ] DOMPurify target attribute removed, rel=noopener noreferrer enforced
 - [ ] SMTP MAIL_VERIFY_PEER enabled in production
 - [ ] SRI on external Leaflet CSS or bundled locally
-- [ ] Forgot-password returns uniform response (no user/provider enumeration)
+- [x] Forgot-password returns uniform response (no user/provider enumeration) — Phase 49
 - [ ] Geolocation calls use HTTPS instead of HTTP
 - [ ] Raw OpenCTI data removed from search API responses
-- [ ] Sanctum token expiration shortened, tokens invalidated on password reset
+- [x] Sanctum token expiration shortened, tokens invalidated on password reset — Phase 49
 - [ ] Nginx hardened: server version hidden, HTTP methods restricted
 - [ ] SPF/DKIM/DMARC DNS records documented
 
@@ -272,4 +272,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 after Phase 52 rename-dashboard-to-threat-map completed — Dashboard renamed to Threat Map across navigation, /threat-map is primary route with /dashboard redirect, sidebar logo navigates to /threat-map*
+*Last updated: 2026-04-12 after Phase 49 auth-session-hardening completed — Session cookie secured (Secure flag, __session name), Sanctum tokens shortened to 24h, forgot-password anti-enumeration, nuclear token/session wipe on password reset*
