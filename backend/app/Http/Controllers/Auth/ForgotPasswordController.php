@@ -17,24 +17,14 @@ class ForgotPasswordController extends Controller
     {
         $user = User::where('email', $request->email)->first();
 
-        if ($user && $user->oauth_provider) {
-            $provider = ucfirst($user->oauth_provider);
-
-            return response()->json([
-                'message' => "This account uses {$provider} to sign in. Please use {$provider} instead.",
-            ], 422);
+        // Only send reset link to password-based users
+        if ($user && !$user->oauth_provider) {
+            Password::sendResetLink($request->only('email'));
         }
 
-        $status = Password::sendResetLink($request->only('email'));
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => __($status),
-            ]);
-        }
-
+        // Always return identical response (anti-enumeration)
         return response()->json([
-            'message' => __($status),
-        ], 422);
+            'message' => 'If an account exists with that email, a password reset link has been sent.',
+        ]);
     }
 }
