@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: Feature Gating & UX Polish
-status: planning
-stopped_at: Phase 54 context gathered
-last_updated: "2026-04-13T21:07:57.487Z"
-last_activity: 2026-04-14 -- Roadmap for v6.0 created
+status: verifying
+stopped_at: Completed 54-01-PLAN.md
+last_updated: "2026-04-13T22:00:12.858Z"
+last_activity: 2026-04-13
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Feature gating, pricing integration, UI polish, observable display, D3 zoom controls.
+**Current focus:** Phase 54 — ioc-display-for-email-url-crypto-types-and-relationship-graph-zoom-controls
 
 ## Current Position
 
-Phase: 54 - Feature Gating (not started)
-Plan: --
-Status: Roadmap created, ready for phase planning
-Last activity: 2026-04-14 -- Roadmap for v6.0 created
+Phase: 54 (ioc-display-for-email-url-crypto-types-and-relationship-graph-zoom-controls) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-04-13
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | v4.0 Plan Overhaul & UX Polish | 2 | 4 | 2 days |
 | v5.0 Security Hardening | 5 | 10 | 3 days |
 | v5.1 Threat Map Enhancements | 2 | 2 | 1 day |
+| Phase 54 P01 | 15min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 53]: barThickness 22px for 380px panel; chart placed between indicators and database widgets
 - [Phase 51]: SPF/DKIM/DMARC records target aquasecure.io sending domain, not aquasecure.ai web domain
 - [v6.0]: Pro plan confirmed at 50 credits/day (not 100)
+- [Phase 54]: Free plan features reduced from 6 to 2 items to match actual gating restrictions
+- [Phase 54]: Enterprise price_cents set to 0 (not null) to satisfy NOT NULL constraint in seeder
 
 ### Blockers/Concerns
 
@@ -88,5 +91,5 @@ All decisions logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last activity: 2026-04-14
-Last session: 2026-04-13T21:07:57.482Z
-Stopped at: Phase 54 context gathered
+Last session: 2026-04-13T22:00:12.853Z
+Stopped at: Completed 54-01-PLAN.md

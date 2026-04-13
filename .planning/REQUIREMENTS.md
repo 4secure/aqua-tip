@@ -9,9 +9,9 @@ Requirements for Feature Gating & UX Polish milestone.
 
 ### Feature Gating
 
-- [ ] **GATE-01**: Free plan seeder features list reflects "threat search only" restriction (not "all features")
-- [ ] **GATE-02**: Backend FeatureGate middleware blocks free plan users from non-search routes (threat-map, dark-web, threat-actors, threat-news)
-- [ ] **GATE-03**: Frontend route guards show UpgradeCTA for gated pages when user is on free plan
+- [x] **GATE-01**: Free plan seeder features list reflects "threat search only" restriction (not "all features")
+- [x] **GATE-02**: Backend FeatureGate middleware blocks free plan users from non-search routes (threat-map, dark-web, threat-actors, threat-news)
+- [x] **GATE-03**: Frontend route guards show UpgradeCTA for gated pages when user is on free plan
 
 ### Pricing & Enterprise
 
@@ -60,9 +60,9 @@ Deferred to future milestones. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GATE-01 | Phase 54 | Pending |
-| GATE-02 | Phase 54 | Pending |
-| GATE-03 | Phase 54 | Pending |
+| GATE-01 | Phase 54 | Complete |
+| GATE-02 | Phase 54 | Complete |
+| GATE-03 | Phase 54 | Complete |
 | PRICE-01 | Phase 55 | Pending |
 | PRICE-02 | Phase 55 | Pending |
 | PRICE-03 | Phase 55 | Pending |

@@ -167,7 +167,7 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
 
 **Milestone Goal:** Complete all deferred features and fixes -- feature gating, pricing integration, UI polish, observable display, and relationship graph controls.
 
-- [ ] **Phase 54: Feature Gating** - Free plan restricted to threat search only via backend middleware and frontend guards
+- [x] **Phase 54: Feature Gating** - Free plan restricted to threat search only via backend middleware and frontend guards (completed 2026-04-13)
 - [ ] **Phase 55: Pricing & Enterprise** - Auth-aware pricing layout and enterprise contact email
 - [ ] **Phase 56: Observable Display** - Email, URL, and crypto types render properly in threat search results
 - [ ] **Phase 57: UI Polish** - Settings centering and landing page globe/animation fixes
@@ -186,7 +186,7 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
   4. Paid plan users (Basic/Pro/Enterprise) access all features without restriction
 **Plans**: 1 plan
 Plans:
-- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
+- [x] 54-01-PLAN.md — Update free plan features list and verify gating
 **UI hint**: yes
 
 ### Phase 55: Pricing & Enterprise
@@ -248,7 +248,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 54. Feature Gating | 0/? | Not started | - |
+| 54. Feature Gating | 1/1 | Complete   | 2026-04-13 |
 | 55. Pricing & Enterprise | 0/? | Not started | - |
 | 56. Observable Display | 0/? | Not started | - |
 | 57. UI Polish | 0/? | Not started | - |
