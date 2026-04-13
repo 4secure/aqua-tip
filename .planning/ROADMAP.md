@@ -269,7 +269,11 @@ Plans:
   3. DOMPurify-sanitized HTML never contains target="_blank" without rel="noopener noreferrer"
   4. Leaflet CSS is served from local bundle -- no external CDN requests for map styles
   5. Google Tag Manager script only loads after user consent is confirmed
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 50-01-PLAN.md — OAuth error whitelist, redirect validation, DOMPurify tab-nabbing fix, Leaflet CSS bundling
+- [ ] 50-02-PLAN.md — GTM consent gating with cookie consent banner
 **UI hint**: yes
 
 ### Phase 51: Email, DNS & Final Hardening
@@ -293,7 +297,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 | 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
 | 48. API Security | 3/3 | Complete    | 2026-04-11 |
 | 49. Auth & Session Hardening | 1/1 | Complete    | 2026-04-12 |
-| 50. Frontend Security | 0/0 | Not started | - |
+| 50. Frontend Security | 0/2 | Not started | - |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
 
 **Cumulative:** 45 phases, 72 plans across 10 milestones in 25 days
