@@ -31,7 +31,7 @@ Requirements for Plan Overhaul & UX Polish milestone. Each maps to roadmap phase
 ### Dashboard & Visuals
 
 - [ ] **DASH-01**: "Dashboard" renamed to "Threat Map" in sidebar, breadcrumb, and page title
-- [ ] **DASH-02**: Category bar chart added to right panel alongside existing widgets
+- [x] **DASH-02**: Category bar chart added to right panel alongside existing widgets
 - [ ] **DASH-03**: Threat Database widget shows correct counts for email, URL, and crypto observable types
 - [ ] **DASH-04**: Top logo/icon navigates to Threat Map (auth) or Landing page (unauth)
 
@@ -41,7 +41,7 @@ Requirements for Plan Overhaul & UX Polish milestone. Each maps to roadmap phase
 
 ### Threat News
 
-- [ ] **NEWS-01**: Chart displays category-only distribution with labels on the side
+- [x] **NEWS-01**: Chart displays category-only distribution with labels on the side
 
 ### UI Polish
 
@@ -88,13 +88,13 @@ Requirements for Security Hardening release. Each maps to roadmap phases.
 - [ ] **FRONT-02**: OAuth redirect URL validated against allowed provider domains before redirect
 - [ ] **FRONT-03**: DOMPurify config removes target from ALLOWED_ATTR, enforces rel=noopener noreferrer via hook
 - [ ] **FRONT-04**: External Leaflet CSS bundled locally (eliminates CDN dependency and SRI need)
-- [ ] **FRONT-05**: Google Tag Manager gated behind consent check (GDPR compliance)
+- [x] **FRONT-05**: Google Tag Manager gated behind consent check (GDPR compliance)
 
 ### Email & DNS (EMAIL)
 
-- [x] **EMAIL-01**: SMTP MAIL_VERIFY_PEER enabled in production environment
-- [x] **EMAIL-02**: Geolocation API calls switched from HTTP to HTTPS
-- [ ] **EMAIL-03**: SPF/DKIM/DMARC DNS record configurations documented for tip.aquasecure.ai and api.tip.aquasecure.ai
+- [ ] **EMAIL-01**: SMTP MAIL_VERIFY_PEER enabled in production environment
+- [ ] **EMAIL-02**: Geolocation API calls switched from HTTP to HTTPS
+- [x] **EMAIL-03**: SPF/DKIM/DMARC DNS record configurations documented for tip.aquasecure.ai and api.tip.aquasecure.ai
 
 ## Future Requirements
 
@@ -140,11 +140,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 42 | Pending |
 | AUTH-02 | Phase 42 | Pending |
 | DASH-01 | Phase 45 | Pending |
-| DASH-02 | Phase 45 | Pending |
+| DASH-02 | Phase 45 | Complete |
 | DASH-03 | Phase 45 | Pending |
 | DASH-04 | Phase 45 | Pending |
 | SRCH-01 | Phase 45 | Pending |
-| NEWS-01 | Phase 45 | Pending |
+| NEWS-01 | Phase 45 | Complete |
 | UI-01 | Phase 46 | Pending |
 | UI-02 | Phase 46 | Pending |
 | UI-03 | Phase 46 | Pending |
@@ -173,10 +173,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FRONT-02 | Phase 50 | Pending |
 | FRONT-03 | Phase 50 | Pending |
 | FRONT-04 | Phase 50 | Pending |
-| FRONT-05 | Phase 50 | Pending |
-| EMAIL-01 | Phase 51 | Complete |
-| EMAIL-02 | Phase 51 | Complete |
-| EMAIL-03 | Phase 51 | Pending |
+| FRONT-05 | Phase 50 | Complete |
+| EMAIL-01 | Phase 51 | Pending |
+| EMAIL-02 | Phase 51 | Pending |
+| EMAIL-03 | Phase 51 | Complete |
 
 **Coverage:**
 - v4.0 requirements: 21 total (3 complete, 18 pending)
