@@ -20,6 +20,22 @@ function GoogleIcon() {
   );
 }
 
+const ALLOWED_OAUTH_HOSTS = [
+  'accounts.google.com',
+  'github.com',
+];
+
+function isAllowedOAuthRedirect(url) {
+  try {
+    const parsed = new URL(url);
+    return ALLOWED_OAUTH_HOSTS.some(
+      (host) => parsed.hostname === host || parsed.hostname.endsWith('.' + host)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function SocialAuthButtons({ setGeneralError }) {
   const [loadingProvider, setLoadingProvider] = useState(null);
 
@@ -29,7 +45,12 @@ export default function SocialAuthButtons({ setGeneralError }) {
 
     try {
       const url = await getSocialRedirectUrl(provider);
-      window.location.href = url;
+      if (isAllowedOAuthRedirect(url)) {
+        window.location.href = url;
+      } else {
+        setGeneralError('Invalid authentication redirect. Please try again.');
+        setLoadingProvider(null);
+      }
     } catch {
       setGeneralError('Unable to connect to authentication provider. Please try again.');
       setLoadingProvider(null);
