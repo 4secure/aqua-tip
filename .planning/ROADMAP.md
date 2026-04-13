@@ -184,7 +184,9 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
   2. Free plan user hitting /api/threat-actors, /api/threat-news, /api/threat-map/*, or /api/dark-web/* receives a 403 with upgrade message
   3. Free plan user navigating to gated pages in the frontend sees an upgrade CTA instead of page content
   4. Paid plan users (Basic/Pro/Enterprise) access all features without restriction
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
 **UI hint**: yes
 
 ### Phase 55: Pricing & Enterprise
@@ -196,7 +198,9 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
   2. Unauthenticated user viewing /pricing sees a standalone page without sidebar
   3. Enterprise "Contact Us" form submits successfully and triggers an email notification to the admin
   4. Unauthenticated user on the pricing page can click the topbar logo/icon to return to the landing page
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
 **UI hint**: yes
 
 ### Phase 56: Observable Display
@@ -207,7 +211,9 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
   1. Searching for an email address displays a formatted email observable with appropriate icon/styling
   2. Searching for a URL displays a clickable link that opens in a new tab
   3. Searching for a cryptocurrency address displays a formatted crypto observable with appropriate labeling
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
 **UI hint**: yes
 
 ### Phase 57: UI Polish
@@ -218,7 +224,9 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
   1. Settings page profile form is horizontally centered with consistent max-width
   2. Landing page globe renders immediately on first mount without waiting for scroll
   3. Landing page scroll animations play smoothly with no visible jank or delayed renders
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
 **UI hint**: yes
 
 ### Phase 58: D3 Graph Controls
@@ -229,7 +237,9 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
   1. User can click a zoom-in button to magnify the relationship graph
   2. User can click a zoom-out button to reduce the relationship graph
   3. Zoom controls are visible and accessible alongside the graph canvas
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
 **UI hint**: yes
 
 ## Progress
