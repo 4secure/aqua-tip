@@ -121,7 +121,7 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
     apiClient.get('/api/dashboard/categories')
       .then((res) => {
         if (cancelled) return;
-        const data = res.data?.data || [];
+        const data = res.data || [];
         setCategories(Array.isArray(data) ? data : []);
         setCategoriesError(null);
       })
