@@ -277,7 +277,11 @@ Plans:
   1. SMTP connections verify peer TLS certificates in production (MAIL_VERIFY_PEER enabled)
   2. All geolocation API calls use HTTPS -- no plaintext HTTP requests to ip-api.com or similar
   3. SPF, DKIM, and DMARC DNS record configurations are documented with exact values for tip.aquasecure.ai
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 51-01-PLAN.md — SMTP TLS verification + HTTPS geolocation API migration
+- [ ] 51-02-PLAN.md — SPF/DKIM/DMARC DNS record documentation
 
 ### Security Hardening Progress
 
@@ -291,7 +295,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 | 48. API Security | 3/3 | Complete    | 2026-04-11 |
 | 49. Auth & Session Hardening | 0/0 | Complete    | 2026-04-13 |
 | 50. Frontend Security | 1/2 | Complete    | 2026-04-13 |
-| 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
+| 51. Email, DNS & Final Hardening | 0/2 | Not started | - |
 
 **Cumulative:** 45 phases, 72 plans across 10 milestones in 25 days
 
