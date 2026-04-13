@@ -144,14 +144,14 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - [x] OAuth error parameter whitelisted on LoginPage — Phase 50
 - [x] OAuth redirect URLs validated against allowed provider domains — Phase 50
 - [x] DOMPurify target attribute removed, rel=noopener noreferrer enforced — Phase 50
-- [ ] SMTP MAIL_VERIFY_PEER enabled in production
+- [x] SMTP MAIL_VERIFY_PEER enabled in production — Phase 51
 - [x] Leaflet CSS bundled locally from node_modules (no CDN dependency) — Phase 50
 - [x] Forgot-password returns uniform response (no user/provider enumeration) — Phase 49
-- [ ] Geolocation calls use HTTPS instead of HTTP
+- [x] Geolocation calls use HTTPS instead of HTTP (ipapi.co) — Phase 51
 - [ ] Raw OpenCTI data removed from search API responses
 - [x] Sanctum token expiration shortened, tokens invalidated on password reset — Phase 49
 - [ ] Nginx hardened: server version hidden, HTTP methods restricted
-- [ ] SPF/DKIM/DMARC DNS records documented
+- [x] SPF/DKIM/DMARC DNS records documented — Phase 51
 
 ### Out of Scope
 
@@ -173,8 +173,9 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 Shipped v3.3 with ~37,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Framer Motion, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-41 phases, 72 plans completed across 9 milestones in 25 days.
+42 phases, 74 plans completed across 10 milestones in 25 days.
 Phase 50 complete — frontend security hardened: OAuth XSS/redirect, DOMPurify tab-nabbing, Leaflet CDN elimination, GTM consent gating.
+Phase 51 complete — SMTP TLS verification enabled, geolocation migrated to HTTPS ipapi.co, DNS anti-spoofing records documented.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
