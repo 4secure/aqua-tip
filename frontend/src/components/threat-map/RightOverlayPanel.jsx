@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { apiClient } from '../../api/client';
 import { TYPE_BADGE_COLORS, formatRelativeTime, STAT_CARD_CONFIG } from '../../data/dashboard-config';
+import AttackCategoryChart from './AttackCategoryChart';
 
 const SPRING_TRANSITION = { type: 'spring', stiffness: 300, damping: 30 };
 
@@ -69,6 +70,10 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
   const [countsLoading, setCountsLoading] = useState(true);
   const [countsError, setCountsError] = useState(null);
 
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(null);
+
   useEffect(() => {
     let cancelled = false;
     setIndicatorsLoading(true);
@@ -110,6 +115,25 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    setCategoriesLoading(true);
+    apiClient.get('/api/dashboard/categories')
+      .then((res) => {
+        if (cancelled) return;
+        const data = res.data?.data || [];
+        setCategories(Array.isArray(data) ? data : []);
+        setCategoriesError(null);
+      })
+      .catch((err) => {
+        if (!cancelled) setCategoriesError(err);
+      })
+      .finally(() => {
+        if (!cancelled) setCategoriesLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   const panelContent = (
     <>
       {/* Indicators section */}
@@ -141,6 +165,30 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
           indicators.slice(0, 5).map((ind) => (
             <IndicatorRow key={ind.id} indicator={ind} />
           ))
+        )}
+      </div>
+
+      {/* Top Attack Categories chart */}
+      <div className="glass-card-static p-3">
+        <h3 className="text-sm font-semibold text-text-secondary mb-2">Top Attack Categories</h3>
+        {categoriesLoading ? (
+          <div className="space-y-2">
+            {[60, 80, 50, 70, 65].map((w, i) => (
+              <div key={i} className="h-5 bg-surface-2 rounded animate-pulse" style={{ width: `${w}%` }} />
+            ))}
+          </div>
+        ) : categoriesError ? (
+          <div className="space-y-2">
+            {[60, 80, 50, 70, 65].map((w, i) => (
+              <div key={i} className="h-5 bg-surface-2 rounded animate-pulse" style={{ width: `${w}%` }} />
+            ))}
+          </div>
+        ) : categories.length === 0 ? (
+          <p className="text-xs text-text-muted text-center py-4">No category data</p>
+        ) : (
+          <div className="h-[200px]">
+            <AttackCategoryChart categories={categories} />
+          </div>
         )}
       </div>
 
