@@ -58,17 +58,29 @@ Deferred to future milestones. Tracked but not in current roadmap.
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| | | |
+| GATE-01 | Phase 54 | Pending |
+| GATE-02 | Phase 54 | Pending |
+| GATE-03 | Phase 54 | Pending |
+| PRICE-01 | Phase 55 | Pending |
+| PRICE-02 | Phase 55 | Pending |
+| PRICE-03 | Phase 55 | Pending |
+| PRICE-04 | Phase 55 | Pending |
+| OBS-01 | Phase 56 | Pending |
+| OBS-02 | Phase 56 | Pending |
+| OBS-03 | Phase 56 | Pending |
+| UI-01 | Phase 57 | Pending |
+| UI-02 | Phase 57 | Pending |
+| UI-03 | Phase 57 | Pending |
+| D3-01 | Phase 58 | Pending |
+| D3-02 | Phase 58 | Pending |
 
 **Coverage:**
 - v6.0 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after initial definition*
+*Last updated: 2026-04-14 after roadmap creation*
