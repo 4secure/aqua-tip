@@ -94,7 +94,7 @@ Requirements for Security Hardening release. Each maps to roadmap phases.
 
 - [ ] **EMAIL-01**: SMTP MAIL_VERIFY_PEER enabled in production environment
 - [ ] **EMAIL-02**: Geolocation API calls switched from HTTP to HTTPS
-- [ ] **EMAIL-03**: SPF/DKIM/DMARC DNS record configurations documented for tip.aquasecure.ai and api.tip.aquasecure.ai
+- [x] **EMAIL-03**: SPF/DKIM/DMARC DNS record configurations documented for tip.aquasecure.ai and api.tip.aquasecure.ai
 
 ## Future Requirements
 
@@ -176,7 +176,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FRONT-05 | Phase 50 | Complete |
 | EMAIL-01 | Phase 51 | Pending |
 | EMAIL-02 | Phase 51 | Pending |
-| EMAIL-03 | Phase 51 | Pending |
+| EMAIL-03 | Phase 51 | Complete |
 
 **Coverage:**
 - v4.0 requirements: 21 total (3 complete, 18 pending)
