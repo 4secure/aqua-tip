@@ -88,7 +88,7 @@ Requirements for Security Hardening release. Each maps to roadmap phases.
 - [ ] **FRONT-02**: OAuth redirect URL validated against allowed provider domains before redirect
 - [ ] **FRONT-03**: DOMPurify config removes target from ALLOWED_ATTR, enforces rel=noopener noreferrer via hook
 - [ ] **FRONT-04**: External Leaflet CSS bundled locally (eliminates CDN dependency and SRI need)
-- [ ] **FRONT-05**: Google Tag Manager gated behind consent check (GDPR compliance)
+- [x] **FRONT-05**: Google Tag Manager gated behind consent check (GDPR compliance)
 
 ### Email & DNS (EMAIL)
 
@@ -173,7 +173,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FRONT-02 | Phase 50 | Pending |
 | FRONT-03 | Phase 50 | Pending |
 | FRONT-04 | Phase 50 | Pending |
-| FRONT-05 | Phase 50 | Pending |
+| FRONT-05 | Phase 50 | Complete |
 | EMAIL-01 | Phase 51 | Pending |
 | EMAIL-02 | Phase 51 | Pending |
 | EMAIL-03 | Phase 51 | Pending |
