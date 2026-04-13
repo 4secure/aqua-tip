@@ -211,7 +211,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 - [x] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data (completed 2026-04-11)
 - [x] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset (completed 2026-04-13)
 - [x] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM (completed 2026-04-13)
-- [ ] **Phase 51: Email, DNS & Final Hardening** - Enable SMTP TLS, switch to HTTPS geo calls, document DNS records
+- [x] **Phase 51: Email, DNS & Final Hardening** - Enable SMTP TLS, switch to HTTPS geo calls, document DNS records (completed 2026-04-13)
 
 ### Phase 47: Infrastructure Hardening
 **Goal**: The platform's Nginx layer blocks all path traversal attacks, exposes no debug endpoints, and enforces security headers on every response
@@ -277,7 +277,7 @@ Plans:
   1. SMTP connections verify peer TLS certificates in production (MAIL_VERIFY_PEER enabled)
   2. All geolocation API calls use HTTPS -- no plaintext HTTP requests to ip-api.com or similar
   3. SPF, DKIM, and DMARC DNS record configurations are documented with exact values for tip.aquasecure.ai
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 51-01-PLAN.md — SMTP TLS verification + HTTPS geolocation API migration
@@ -295,7 +295,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 | 48. API Security | 3/3 | Complete    | 2026-04-11 |
 | 49. Auth & Session Hardening | 0/0 | Complete    | 2026-04-13 |
 | 50. Frontend Security | 1/2 | Complete    | 2026-04-13 |
-| 51. Email, DNS & Final Hardening | 1/2 | In Progress|  |
+| 51. Email, DNS & Final Hardening | 1/2 | Complete    | 2026-04-13 |
 
 **Cumulative:** 45 phases, 72 plans across 10 milestones in 25 days
 
