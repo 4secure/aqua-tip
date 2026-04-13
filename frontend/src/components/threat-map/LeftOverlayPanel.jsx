@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import ThreatMapCounters from './ThreatMapCounters';
 import ThreatMapCountries from './ThreatMapCountries';
 import ThreatMapDonut from './ThreatMapDonut';
+import ThreatMapFeed from './ThreatMapFeed';
 
 const SPRING_TRANSITION = { type: 'spring', stiffness: 300, damping: 30 };
 
@@ -17,12 +18,13 @@ const EVENT_ISOLATION = {
   onTouchStart: stopPropagation,
 };
 
-export default function LeftOverlayPanel({ collapsed, peeking, onPeekStart, onPeekEnd, counters, connected, countryCounts, typeCounts }) {
+export default function LeftOverlayPanel({ collapsed, peeking, onPeekStart, onPeekEnd, counters, connected, countryCounts, typeCounts, events, onEventClick }) {
   const panelContent = (
     <>
       <ThreatMapCounters counters={counters} connected={connected} />
       <ThreatMapCountries countryCounts={countryCounts} />
       <ThreatMapDonut typeCounts={typeCounts} />
+      <ThreatMapFeed events={events} onEventClick={onEventClick} />
     </>
   );
 
