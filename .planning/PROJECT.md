@@ -274,4 +274,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-12 after Phase 49 auth-session-hardening completed — Session cookie secured (Secure flag, __session name), Sanctum tokens shortened to 24h, forgot-password anti-enumeration, nuclear token/session wipe on password reset*
+*Last updated: 2026-04-13 after Phase 53 threat-news-bar-chart completed — "Top Attack Categories" horizontal bar chart added to Threat Map right overlay panel, fetching from /api/dashboard/categories with dark-theme Chart.js styling*
