@@ -84,10 +84,10 @@ Requirements for Security Hardening release. Each maps to roadmap phases.
 
 ### Frontend Security (FRONT)
 
-- [ ] **FRONT-01**: OAuth error parameter whitelisted to known error codes on LoginPage
-- [ ] **FRONT-02**: OAuth redirect URL validated against allowed provider domains before redirect
-- [ ] **FRONT-03**: DOMPurify config removes target from ALLOWED_ATTR, enforces rel=noopener noreferrer via hook
-- [ ] **FRONT-04**: External Leaflet CSS bundled locally (eliminates CDN dependency and SRI need)
+- [x] **FRONT-01**: OAuth error parameter whitelisted to known error codes on LoginPage
+- [x] **FRONT-02**: OAuth redirect URL validated against allowed provider domains before redirect
+- [x] **FRONT-03**: DOMPurify config removes target from ALLOWED_ATTR, enforces rel=noopener noreferrer via hook
+- [x] **FRONT-04**: External Leaflet CSS bundled locally (eliminates CDN dependency and SRI need)
 - [ ] **FRONT-05**: Google Tag Manager gated behind consent check (GDPR compliance)
 
 ### Email & DNS (EMAIL)
@@ -169,10 +169,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-03 | Phase 49 | Pending |
 | AUTH-04 | Phase 49 | Pending |
 | AUTH-05 | Phase 49 | Pending |
-| FRONT-01 | Phase 50 | Pending |
-| FRONT-02 | Phase 50 | Pending |
-| FRONT-03 | Phase 50 | Pending |
-| FRONT-04 | Phase 50 | Pending |
+| FRONT-01 | Phase 50 | Complete |
+| FRONT-02 | Phase 50 | Complete |
+| FRONT-03 | Phase 50 | Complete |
+| FRONT-04 | Phase 50 | Complete |
 | FRONT-05 | Phase 50 | Pending |
 | EMAIL-01 | Phase 51 | Pending |
 | EMAIL-02 | Phase 51 | Pending |
