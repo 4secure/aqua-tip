@@ -20,13 +20,9 @@ class PlanSeeder extends Seeder
                 'is_active' => true,
                 'features' => [
                     '5 searches per day',
-                    'All threat lookups',
-                    'Full indicator data',
-                    'Search history',
-                    'Priority data access',
-                    'Dark web monitoring',
+                    'Threat search',
                 ],
-                'description' => 'Get started with essential threat intelligence.',
+                'description' => 'Search threats with 5 daily lookups.',
             ],
             [
                 'slug' => 'basic',
