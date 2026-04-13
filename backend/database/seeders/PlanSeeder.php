@@ -64,7 +64,7 @@ class PlanSeeder extends Seeder
                 'slug' => 'enterprise',
                 'name' => 'Enterprise',
                 'daily_credit_limit' => 200,
-                'price_cents' => null,
+                'price_cents' => 0,
                 'is_popular' => false,
                 'sort_order' => 4,
                 'is_active' => true,
