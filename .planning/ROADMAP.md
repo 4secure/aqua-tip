@@ -209,7 +209,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 
 - [x] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers (completed 2026-04-11)
 - [x] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data (completed 2026-04-11)
-- [x] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset (completed 2026-04-12)
+- [ ] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset
 - [ ] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM
 - [ ] **Phase 51: Email, DNS & Final Hardening** - Enable SMTP TLS, switch to HTTPS geo calls, document DNS records
 
@@ -254,10 +254,7 @@ Plans:
   1. Session cookie has Secure flag set and uses a non-descriptive cookie name
   2. Sanctum tokens expire after 24 hours (not 7 days) and all tokens are invalidated on password reset
   3. Forgot-password endpoint returns identical response regardless of whether email exists or which OAuth provider was used
-**Plans**: 1 plan
-
-Plans:
-- [x] 49-01-PLAN.md — Config hardening, controller rewrites, test updates
+**Plans**: TBD
 
 ### Phase 50: Frontend Security
 **Goal**: Frontend code does not expose users to XSS, open redirect, or tab-nabbing attacks
@@ -269,11 +266,7 @@ Plans:
   3. DOMPurify-sanitized HTML never contains target="_blank" without rel="noopener noreferrer"
   4. Leaflet CSS is served from local bundle -- no external CDN requests for map styles
   5. Google Tag Manager script only loads after user consent is confirmed
-**Plans**: 2 plans
-
-Plans:
-- [ ] 50-01-PLAN.md — OAuth error whitelist, redirect validation, DOMPurify tab-nabbing fix, Leaflet CSS bundling
-- [ ] 50-02-PLAN.md — GTM consent gating with cookie consent banner
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 51: Email, DNS & Final Hardening
@@ -296,21 +289,21 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 |-------|----------------|--------|-----------|
 | 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
 | 48. API Security | 3/3 | Complete    | 2026-04-11 |
-| 49. Auth & Session Hardening | 1/1 | Complete    | 2026-04-12 |
-| 50. Frontend Security | 0/2 | Not started | - |
+| 49. Auth & Session Hardening | 0/0 | Not started | - |
+| 50. Frontend Security | 1/2 | In Progress|  |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
 
 **Cumulative:** 45 phases, 72 plans across 10 milestones in 25 days
 
 ### Phase 52: Rename Dashboard to Threat Map, fix top icon routing to Threat Map inside app
 
-**Goal:** Sidebar, breadcrumb, and routes consistently show "Threat Map" instead of "Dashboard", with sidebar logo routing to /threat-map inside the app
-**Requirements**: DASH-01, DASH-04
+**Goal:** [To be planned]
+**Requirements**: TBD
 **Depends on:** Phase 51
-**Plans:** 1/1 plans complete
+**Plans:** 1/2 plans executed
 
 Plans:
-- [x] 52-01-PLAN.md — Rename Dashboard to Threat Map in routes, nav, breadcrumb, and fix sidebar logo link
+- [ ] TBD (run /gsd:plan-phase 52 to break down)
 
 ### Phase 53: Threat News bar chart with categories and side labels
 

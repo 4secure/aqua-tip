@@ -25,15 +25,15 @@ Requirements for Plan Overhaul & UX Polish milestone. Each maps to roadmap phase
 
 ### Auth & Loading
 
-- [x] **AUTH-01**: Global loading screen displays until auth state resolves — no flash of login buttons or locked sidebar
-- [x] **AUTH-02**: "Connection lost" errors replaced with "Fetching data..." loading indicators across all pages
+- [ ] **AUTH-01**: Global loading screen displays until auth state resolves — no flash of login buttons or locked sidebar
+- [ ] **AUTH-02**: "Connection lost" errors replaced with "Fetching data..." loading indicators across all pages
 
 ### Dashboard & Visuals
 
-- [x] **DASH-01**: "Dashboard" renamed to "Threat Map" in sidebar, breadcrumb, and page title
+- [ ] **DASH-01**: "Dashboard" renamed to "Threat Map" in sidebar, breadcrumb, and page title
 - [ ] **DASH-02**: Category bar chart added to right panel alongside existing widgets
 - [ ] **DASH-03**: Threat Database widget shows correct counts for email, URL, and crypto observable types
-- [x] **DASH-04**: Top logo/icon navigates to Threat Map (auth) or Landing page (unauth)
+- [ ] **DASH-04**: Top logo/icon navigates to Threat Map (auth) or Landing page (unauth)
 
 ### Threat Search
 
@@ -76,18 +76,18 @@ Requirements for Security Hardening release. Each maps to roadmap phases.
 
 ### Authentication & Session (AUTH — v5.0)
 
-- [x] **AUTH-01**: SESSION_SECURE_COOKIE defaults to true in config/session.php
-- [x] **AUTH-02**: Sanctum token expiration shortened from 7 days to 24 hours
-- [x] **AUTH-03**: All existing tokens invalidated on password reset
-- [x] **AUTH-04**: Forgot-password returns uniform response regardless of email/provider status
-- [x] **AUTH-05**: Session cookie name changed to non-descriptive value
+- [ ] **AUTH-01**: SESSION_SECURE_COOKIE defaults to true in config/session.php
+- [ ] **AUTH-02**: Sanctum token expiration shortened from 7 days to 24 hours
+- [ ] **AUTH-03**: All existing tokens invalidated on password reset
+- [ ] **AUTH-04**: Forgot-password returns uniform response regardless of email/provider status
+- [ ] **AUTH-05**: Session cookie name changed to non-descriptive value
 
 ### Frontend Security (FRONT)
 
-- [ ] **FRONT-01**: OAuth error parameter whitelisted to known error codes on LoginPage
-- [ ] **FRONT-02**: OAuth redirect URL validated against allowed provider domains before redirect
-- [ ] **FRONT-03**: DOMPurify config removes target from ALLOWED_ATTR, enforces rel=noopener noreferrer via hook
-- [ ] **FRONT-04**: External Leaflet CSS bundled locally (eliminates CDN dependency and SRI need)
+- [x] **FRONT-01**: OAuth error parameter whitelisted to known error codes on LoginPage
+- [x] **FRONT-02**: OAuth redirect URL validated against allowed provider domains before redirect
+- [x] **FRONT-03**: DOMPurify config removes target from ALLOWED_ATTR, enforces rel=noopener noreferrer via hook
+- [x] **FRONT-04**: External Leaflet CSS bundled locally (eliminates CDN dependency and SRI need)
 - [ ] **FRONT-05**: Google Tag Manager gated behind consent check (GDPR compliance)
 
 ### Email & DNS (EMAIL)
@@ -137,12 +137,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRICE-03 | Phase 44 | Pending |
 | PRICE-04 | Phase 44 | Pending |
 | PRICE-05 | Phase 44 | Pending |
-| AUTH-01 | Phase 42 | Complete |
-| AUTH-02 | Phase 42 | Complete |
-| DASH-01 | Phase 45 | Complete |
+| AUTH-01 | Phase 42 | Pending |
+| AUTH-02 | Phase 42 | Pending |
+| DASH-01 | Phase 45 | Pending |
 | DASH-02 | Phase 45 | Pending |
 | DASH-03 | Phase 45 | Pending |
-| DASH-04 | Phase 45 | Complete |
+| DASH-04 | Phase 45 | Pending |
 | SRCH-01 | Phase 45 | Pending |
 | NEWS-01 | Phase 45 | Pending |
 | UI-01 | Phase 46 | Pending |
@@ -164,15 +164,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-05 | Phase 48 | Pending |
 | API-06 | Phase 48 | Complete |
 | API-07 | Phase 48 | Complete |
-| AUTH-01 | Phase 49 | Complete |
-| AUTH-02 | Phase 49 | Complete |
-| AUTH-03 | Phase 49 | Complete |
-| AUTH-04 | Phase 49 | Complete |
-| AUTH-05 | Phase 49 | Complete |
-| FRONT-01 | Phase 50 | Pending |
-| FRONT-02 | Phase 50 | Pending |
-| FRONT-03 | Phase 50 | Pending |
-| FRONT-04 | Phase 50 | Pending |
+| AUTH-01 | Phase 49 | Pending |
+| AUTH-02 | Phase 49 | Pending |
+| AUTH-03 | Phase 49 | Pending |
+| AUTH-04 | Phase 49 | Pending |
+| AUTH-05 | Phase 49 | Pending |
+| FRONT-01 | Phase 50 | Complete |
+| FRONT-02 | Phase 50 | Complete |
+| FRONT-03 | Phase 50 | Complete |
+| FRONT-04 | Phase 50 | Complete |
 | FRONT-05 | Phase 50 | Pending |
 | EMAIL-01 | Phase 51 | Pending |
 | EMAIL-02 | Phase 51 | Pending |

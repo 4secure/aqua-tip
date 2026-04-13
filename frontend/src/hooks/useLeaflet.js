@@ -1,3 +1,4 @@
+import 'leaflet/dist/leaflet.css';
 import { useRef, useEffect } from 'react';
 import L from 'leaflet';
 

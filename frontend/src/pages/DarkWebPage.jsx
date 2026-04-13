@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, AlertTriangle, ShieldCheck, RotateCcw, Radio } from 'lucide-react';
 import { Globe, Mail, Key, FileText } from 'lucide-react';
-import DOMPurify from 'dompurify';
+import { sanitizeHtml } from '../utils/sanitize';
 import { Icon } from '../data/icons';
 import { startDarkWebSearch, checkDarkWebStatus, fetchCredits } from '../api/dark-web';
 import { CreditBadge } from '../components/shared/CreditBadge';
@@ -17,7 +17,7 @@ function BreachCard({ breach }) {
   ].filter(f => f.value);
 
   const contextHtml = breach.context
-    ? DOMPurify.sanitize(breach.context, { ALLOWED_TAGS: ['b', 'br', 'code', 'a'], ALLOWED_ATTR: ['href', 'target', 'rel'] })
+    ? sanitizeHtml(breach.context)
     : null;
 
   return (

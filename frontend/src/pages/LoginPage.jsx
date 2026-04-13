@@ -6,6 +6,11 @@ import ParticleBackground from '../components/ui/ParticleBackground';
 import SocialAuthButtons from '../components/auth/SocialAuthButtons';
 import { useAuth } from '../contexts/AuthContext';
 
+const OAUTH_ERROR_MAP = {
+  'Authentication failed. Please try again.': 'Authentication failed. Please try again.',
+  'Unsupported provider.': 'Authentication provider is not supported.',
+};
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,7 +27,10 @@ export default function LoginPage() {
   useEffect(() => {
     const errorParam = searchParams.get('error');
     if (errorParam) {
-      setGeneralError(errorParam);
+      const safeMessage = OAUTH_ERROR_MAP[errorParam] || null;
+      if (safeMessage) {
+        setGeneralError(safeMessage);
+      }
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
