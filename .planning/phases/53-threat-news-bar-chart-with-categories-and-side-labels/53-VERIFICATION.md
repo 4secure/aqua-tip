@@ -1,26 +1,18 @@
 ---
 phase: 53-threat-news-bar-chart-with-categories-and-side-labels
 verified: 2026-04-13T14:30:00Z
-status: gaps_found
-score: 3/4 must-haves verified
-re_verification: false
-gaps:
-  - truth: "Right overlay panel displays a horizontal bar chart showing attack category distribution"
-    status: failed
-    reason: "Data-flow bug: RightOverlayPanel line 124 uses `res.data?.data` but apiClient returns raw JSON body (not axios). Backend returns `{ data: [...] }`, so `res` = `{ data: [...] }`, `res.data` = the array, `res.data?.data` = undefined. Falls back to `[]`, chart always shows 'No category data'."
-    artifacts:
-      - path: "frontend/src/components/threat-map/RightOverlayPanel.jsx"
-        issue: "Line 124: `const data = res.data?.data || [];` should be `const data = res.data || [];` to match apiClient response shape (same pattern as indicators on line 83 and counts on line 102)"
-    missing:
-      - "Fix response envelope access on line 124 from `res.data?.data` to `res.data` to match the apiClient pattern used by the other two fetches in the same file"
+status: passed
+score: 4/4 must-haves verified
+re_verification: true
+gaps: []
 ---
 
 # Phase 53: Threat News Bar Chart Verification Report
 
 **Phase Goal:** Add "Top Attack Categories" horizontal bar chart widget to Threat Map right overlay panel with category distribution from /api/dashboard/categories endpoint
 **Verified:** 2026-04-13T14:30:00Z
-**Status:** gaps_found
-**Re-verification:** No -- initial verification
+**Status:** passed
+**Re-verification:** Yes -- gap fixed inline (res.data?.data → res.data)
 
 ## Goal Achievement
 
@@ -28,19 +20,19 @@ gaps:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | Right overlay panel displays a horizontal bar chart showing attack category distribution | FAILED | AttackCategoryChart component exists and is wired, but data never reaches it due to incorrect response envelope access (`res.data?.data` vs `res.data`). Chart always renders "No category data". |
+| 1 | Right overlay panel displays a horizontal bar chart showing attack category distribution | VERIFIED | AttackCategoryChart component wired with correct `res.data` access (fixed from `res.data?.data`). Data flows to chart. |
 | 2 | Category names appear as Y-axis labels on the left side of the chart | VERIFIED | AttackCategoryChart.jsx line 29: `indexAxis: 'y'`, line 60: Y-axis ticks color `#9AA0AD`, line 62-64: label truncation at 18 chars |
 | 3 | Chart title reads "Top Attack Categories" | VERIFIED | RightOverlayPanel.jsx line 173: `<h3 ...>Top Attack Categories</h3>` |
 | 4 | Chart renders alongside existing Recent Indicators and Threat Database widgets | VERIFIED | RightOverlayPanel.jsx JSX order: Recent Indicators (line 140), Top Attack Categories (line 172), Threat Database (line 196) |
 
-**Score:** 3/4 truths verified
+**Score:** 4/4 truths verified
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
 | `frontend/src/components/threat-map/AttackCategoryChart.jsx` | Horizontal bar chart component using Chart.js | VERIFIED | 78 lines, default export, useMemo config, useChartJs hook, indexAxis y, barThickness 22, CATEGORY_COLORS, no onClick |
-| `frontend/src/components/threat-map/RightOverlayPanel.jsx` | Panel with categories fetch and chart widget | HOLLOW | Import, state, useEffect, and JSX all present, but data-flow is broken at line 124 |
+| `frontend/src/components/threat-map/RightOverlayPanel.jsx` | Panel with categories fetch and chart widget | VERIFIED | Import, state, useEffect, and JSX all present. Data-flow fixed (res.data). |
 
 ### Key Link Verification
 
@@ -53,7 +45,7 @@ gaps:
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 |----------|---------------|--------|--------------------|--------|
-| RightOverlayPanel.jsx | categories | apiClient.get('/api/dashboard/categories') | No -- `res.data?.data` extracts undefined from response shape `{ data: [...] }` | HOLLOW |
+| RightOverlayPanel.jsx | categories | apiClient.get('/api/dashboard/categories') | Yes -- uses `res.data` correctly (fixed) | FLOWING |
 | RightOverlayPanel.jsx | indicators | apiClient.get('/api/dashboard/indicators') | Yes -- uses `res.data` correctly (line 83) | FLOWING |
 | RightOverlayPanel.jsx | counts | apiClient.get('/api/dashboard/counts') | Yes -- uses `res.data` correctly (line 102) | FLOWING |
 
@@ -71,8 +63,8 @@ gaps:
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |-------------|------------|-------------|--------|----------|
-| DASH-02 | 53-01-PLAN | Category bar chart added to right panel alongside existing widgets | BLOCKED | Chart widget is in place but data-flow bug means it never shows chart data -- always shows "No category data" |
-| NEWS-01 | 53-01-PLAN | Chart displays category-only distribution with labels on the side | BLOCKED | Same data-flow bug prevents any categories from rendering |
+| DASH-02 | 53-01-PLAN | Category bar chart added to right panel alongside existing widgets | VERIFIED | Chart widget renders with data from /api/dashboard/categories |
+| NEWS-01 | 53-01-PLAN | Chart displays category-only distribution with labels on the side | VERIFIED | Horizontal bars with Y-axis category labels, indexAxis: 'y' |
 
 ### Anti-Patterns Found
 
