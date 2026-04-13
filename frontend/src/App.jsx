@@ -6,6 +6,7 @@ import FeatureGatedRoute from './components/auth/FeatureGatedRoute';
 import GuestRoute from './components/auth/GuestRoute';
 import AppLayout from './components/layout/AppLayout';
 import LoadingScreen from './components/ui/LoadingScreen';
+import CookieConsent from './components/ui/CookieConsent';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -76,6 +77,7 @@ export default function App() {
               </Route>
             </Route>
           </Routes>
+          <CookieConsent />
         </Suspense>
       </AuthProvider>
     </BrowserRouter>
