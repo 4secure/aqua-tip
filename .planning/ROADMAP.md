@@ -209,8 +209,8 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 
 - [x] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers (completed 2026-04-11)
 - [x] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data (completed 2026-04-11)
-- [x] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset (completed 2026-04-13)
-- [x] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM (completed 2026-04-13)
+- [ ] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset
+- [ ] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM
 - [ ] **Phase 51: Email, DNS & Final Hardening** - Enable SMTP TLS, switch to HTTPS geo calls, document DNS records
 
 ### Phase 47: Infrastructure Hardening
@@ -277,11 +277,7 @@ Plans:
   1. SMTP connections verify peer TLS certificates in production (MAIL_VERIFY_PEER enabled)
   2. All geolocation API calls use HTTPS -- no plaintext HTTP requests to ip-api.com or similar
   3. SPF, DKIM, and DMARC DNS record configurations are documented with exact values for tip.aquasecure.ai
-**Plans:** 2 plans
-
-Plans:
-- [ ] 51-01-PLAN.md — SMTP TLS verification + HTTPS geolocation API migration
-- [ ] 51-02-PLAN.md — SPF/DKIM/DMARC DNS record documentation
+**Plans**: TBD
 
 ### Security Hardening Progress
 
@@ -293,9 +289,9 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 |-------|----------------|--------|-----------|
 | 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
 | 48. API Security | 3/3 | Complete    | 2026-04-11 |
-| 49. Auth & Session Hardening | 0/0 | Complete    | 2026-04-13 |
-| 50. Frontend Security | 1/2 | Complete    | 2026-04-13 |
-| 51. Email, DNS & Final Hardening | 0/2 | Not started | - |
+| 49. Auth & Session Hardening | 0/0 | Not started | - |
+| 50. Frontend Security | 0/0 | Not started | - |
+| 51. Email, DNS & Final Hardening | 1/2 | In Progress|  |
 
 **Cumulative:** 45 phases, 72 plans across 10 milestones in 25 days
 
@@ -304,20 +300,20 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 51
-**Plans:** 1/1 plans complete
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 52 to break down)
 
 ### Phase 53: Threat News bar chart with categories and side labels
 
-**Goal:** Users see a "Top Attack Categories" horizontal bar chart in the Threat Map right overlay panel showing attack category distribution with category labels on the Y-axis
-**Requirements**: DASH-02, NEWS-01
+**Goal:** [To be planned]
+**Requirements**: TBD
 **Depends on:** Phase 52
-**Plans:** 1/1 plans complete
+**Plans:** 0 plans
 
 Plans:
-- [x] 53-01-PLAN.md — AttackCategoryChart component + RightOverlayPanel wiring
+- [ ] TBD (run /gsd:plan-phase 53 to break down)
 
 ### Phase 54: IOC display for email, URL, crypto types and relationship graph zoom controls
 

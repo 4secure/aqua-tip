@@ -150,7 +150,7 @@ class ThreatMapService
     }
 
     /**
-     * Geocode an IP address using ip-api.com with country centroid fallback.
+     * Geocode an IP address using ipapi.co with country centroid fallback.
      *
      * @param  string       $ip           The IP address to geocode
      * @param  string|null  $countryCode  Optional country code hint for centroid fallback
@@ -229,28 +229,26 @@ class ThreatMapService
             // DB read error — fall through to HTTP fallback
         }
 
-        // Fallback: ip-api.com HTTP
+        // Fallback: ipapi.co HTTPS
         try {
             $response = Http::timeout(2)
-                ->get("http://ip-api.com/json/{$ip}", [
-                    'fields' => 'status,lat,lon,city,country,countryCode',
-                ]);
+                ->get("https://ipapi.co/{$ip}/json/");
 
             if ($response->successful()) {
                 $body = $response->json();
 
-                if (($body['status'] ?? '') === 'success') {
+                if (!isset($body['error'])) {
                     return [
-                        'lat' => $body['lat'],
-                        'lng' => $body['lon'],
+                        'lat' => $body['latitude'],
+                        'lng' => $body['longitude'],
                         'city' => $body['city'] ?? null,
-                        'country' => $body['country'] ?? null,
-                        'countryCode' => $body['countryCode'] ?? null,
+                        'country' => $body['country_name'] ?? null,
+                        'countryCode' => $body['country_code'] ?? null,
                     ];
                 }
 
-                // ip-api failed but may have returned a country code
-                $countryCode = $countryCode ?? ($body['countryCode'] ?? null);
+                // ipapi.co failed but may have returned a country code
+                $countryCode = $countryCode ?? ($body['country_code'] ?? null);
             }
         } catch (\Throwable) {
             // Network error — fall through to centroid

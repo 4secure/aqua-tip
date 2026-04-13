@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Plan Overhaul & UX Polish
 status: executing
-stopped_at: Completed 53-01-PLAN.md
-last_updated: "2026-04-13T12:13:19.240Z"
-last_activity: 2026-04-13 -- Phase 51 execution started
+stopped_at: Completed 51-01-PLAN.md
+last_updated: "2026-04-13T12:19:51.795Z"
+last_activity: 2026-04-11
 progress:
   total_phases: 16
-  completed_phases: 8
-  total_plans: 18
-  completed_plans: 14
+  completed_phases: 4
+  total_plans: 13
+  completed_plans: 10
   percent: 50
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 51 — email-dns-final-hardening
+**Current focus:** Phase 48 — api-security
 
 ## Current Position
 
-Phase: 51 (email-dns-final-hardening) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 51
-Last activity: 2026-04-13 -- Phase 51 execution started
+Phase: 52
+Plan: Not started
+Status: Executing Phase 48
+Last activity: 2026-04-11
 
 Progress: [█████░░░░░] 50%
 
@@ -54,8 +54,7 @@ Progress: [█████░░░░░] 50%
 | v3.3 Threat Map Dashboard | 4 | 5 | 2 days |
 | Phase 41 P01 | 2min | 2 tasks | 2 files |
 | Phase 41 P02 | 11min | 2 tasks | 3 files |
-| Phase 50 P02 | 3min | 1 tasks | 3 files |
-| Phase 53 P01 | 4min | 2 tasks | 2 files |
+| Phase 51 P01 | 2min 45s | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -73,8 +72,8 @@ Recent decisions affecting v5.0:
 - [Phase 41]: Enterprise price_cents = null signals Contact Us (not 0)
 - [Phase 41]: Credit sync is full reset - all users get fresh start at new cap
 - [Phase 41]: Made migration SQL driver-aware (pgsql vs sqlite) to unblock test suite
-- [Phase 50]: GTM injected dynamically via createElement after cookie consent, noscript tag removed for GDPR safety
-- [Phase 53]: barThickness 22px for 380px panel; chart placed between indicators and database widgets
+- [Phase 51]: Used .env.production instead of .env.railway (file renamed in prior phase)
+- [Phase 51]: ipapi.co chosen over ip-api.com for free HTTPS geolocation (1000 req/day)
 
 ### Roadmap Evolution
 
@@ -103,5 +102,5 @@ None.
 ## Session Continuity
 
 Last activity: 2026-04-11
-Last session: 2026-04-13T12:08:02.535Z
-Stopped at: Completed 53-01-PLAN.md
+Last session: 2026-04-13T12:19:51.786Z
+Stopped at: Completed 51-01-PLAN.md
