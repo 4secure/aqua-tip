@@ -111,18 +111,20 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ PlanSeeder updated with new tier values and unified features — v4.0
 - ✓ Migration SQL made driver-aware (pgsql + sqlite) — v4.0
 
-## Current Milestone: None (all shipped)
+## Current Milestone: v6.0 Feature Gating & UX Polish
 
-All 12 milestones shipped. Run `/gsd:new-milestone` to start next.
+**Goal:** Complete all deferred features and fixes — feature gating, pricing integration, UI polish, observable display, and relationship graph controls.
+
+**Target features:**
+- Feature gating: free plan restricted to threat search only (backend middleware + frontend route guards + seeder fix)
+- Pricing page: auth-aware routing (inside app layout when authed, standalone when not) + wire enterprise contact form to send email
+- Settings page: center-align profile management form
+- Observable display: render email, URL, and crypto types properly in threat search results
+- D3 relationship graph: add zoom in/out button controls
+- Landing page: smooth animation, globe loads on first render
+- Pro plan: confirmed at 50 credits/day (no change needed)
 
 **Shipped milestones:** v1.0, v1.1, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2, v3.3, v4.0, v5.0, v5.1
-
-**Deferred work (never started, carry forward to next milestone as needed):**
-- Feature gating: free plan restricted to threat search only (backend + frontend)
-- Pricing page update: new tiers, enterprise contact form, auth-aware routing
-- UI polish: settings center alignment, breadcrumb capitalization, landing page globe
-- IOC display: email/URL/crypto observable types
-- D3 zoom controls: relationship graph zoom in/out buttons
 
 ### Out of Scope
 
@@ -150,6 +152,7 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 v4.0 shipped plan restructuring and auth loading fixes. Feature gating deferred.
 v5.0 shipped comprehensive security hardening (LFI, IDOR, rate limiting, headers, OAuth, SMTP TLS, DNS records).
 v5.1 shipped Threat Map rename and attack category bar chart.
+v6.0 in progress — feature gating, pricing integration, UI polish, observable display, D3 zoom.
 
 ## Constraints
 
@@ -243,4 +246,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-13 — all milestones marked complete (v1.0 through v5.1). Deferred v4.0 work (feature gating, pricing, UI polish) carried forward for next milestone.*
+*Last updated: 2026-04-14 — milestone v6.0 started. All deferred v4.0 work now active.*

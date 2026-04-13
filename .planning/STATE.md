@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v5.1
-milestone_name: Threat Map Enhancements
-status: completed
-stopped_at: All milestones shipped
-last_updated: "2026-04-13T18:00:00.000Z"
-last_activity: 2026-04-13
+milestone: v6.0
+milestone_name: Feature Gating & UX Polish
+status: in_progress
+stopped_at: Defining requirements
+last_updated: "2026-04-14T00:00:00.000Z"
+last_activity: 2026-04-14
 progress:
-  total_phases: 53
-  completed_phases: 53
-  total_plans: 76
-  completed_plans: 76
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-13)
+See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** All milestones shipped. Ready for next milestone.
+**Current focus:** Feature gating, pricing integration, UI polish, observable display, D3 zoom controls.
 
 ## Current Position
 
-Phase: None (between milestones)
-Plan: N/A
-Status: All milestones complete
-Last activity: 2026-04-13
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-14 — Milestone v6.0 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -71,17 +71,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 50]: GTM injected dynamically via createElement after cookie consent, noscript tag removed for GDPR safety
 - [Phase 53]: barThickness 22px for 380px panel; chart placed between indicators and database widgets
 - [Phase 51]: SPF/DKIM/DMARC records target aquasecure.io sending domain, not aquasecure.ai web domain
-
-### Deferred Work (not started, carried forward from v4.0)
-
-These items were planned in v4.0 phases 43-46 but never executed. Pick up in next milestone:
-
-- **Feature gating**: Free plan restricted to threat search only (backend middleware + frontend route guards)
-- **Pricing page update**: New tiers, enterprise contact form, auth-aware routing
-- **UI polish**: Settings center alignment, breadcrumb capitalization, landing page globe animations
-- **IOC display**: Email/URL/crypto observable type rendering
-- **D3 zoom controls**: Relationship graph zoom in/out buttons
-- **Trial credits**: 10 credits/day configuration (may already be done via Phase 41)
+- [v6.0]: Pro plan confirmed at 50 credits/day (not 100)
 
 ### Blockers/Concerns
 
@@ -97,6 +87,6 @@ These items were planned in v4.0 phases 43-46 but never executed. Pick up in nex
 
 ## Session Continuity
 
-Last activity: 2026-04-13
-Last session: 2026-04-13T18:00:00.000Z
-Stopped at: All milestones shipped — ready for new milestone
+Last activity: 2026-04-14
+Last session: 2026-04-14T00:00:00.000Z
+Stopped at: Milestone v6.0 — defining requirements
