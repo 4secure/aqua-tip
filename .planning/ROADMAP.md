@@ -209,7 +209,7 @@ Phases execute in numeric order: 41 → 42 → 43 → 44 → 45 → 46
 
 - [x] **Phase 47: Infrastructure Hardening** - Block LFI, remove debug routes, lock down Nginx, add security headers (completed 2026-04-11)
 - [x] **Phase 48: API Security** - Fix IDOR, add rate limiting, sanitize error responses, strip raw data (completed 2026-04-11)
-- [ ] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset
+- [x] **Phase 49: Auth & Session Hardening** - Secure cookies, shorten tokens, fix enumeration, harden password reset (completed 2026-04-13)
 - [x] **Phase 50: Frontend Security** - Whitelist OAuth errors, validate redirects, fix DOMPurify, bundle Leaflet CSS, gate GTM (completed 2026-04-13)
 - [ ] **Phase 51: Email, DNS & Final Hardening** - Enable SMTP TLS, switch to HTTPS geo calls, document DNS records
 
@@ -289,7 +289,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 |-------|----------------|--------|-----------|
 | 47. Infrastructure Hardening | 2/2 | Complete    | 2026-04-11 |
 | 48. API Security | 3/3 | Complete    | 2026-04-11 |
-| 49. Auth & Session Hardening | 0/0 | Not started | - |
+| 49. Auth & Session Hardening | 0/0 | Complete    | 2026-04-13 |
 | 50. Frontend Security | 1/2 | Complete    | 2026-04-13 |
 | 51. Email, DNS & Final Hardening | 0/0 | Not started | - |
 
@@ -300,7 +300,7 @@ Phases execute in numeric order: 47 → 48 → 49 → 50 → 51
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 51
-**Plans:** 2/2 plans complete
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 52 to break down)

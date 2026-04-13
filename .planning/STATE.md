@@ -4,12 +4,12 @@ milestone: v4.0
 milestone_name: Plan Overhaul & UX Polish
 status: executing
 stopped_at: Completed 50-02-PLAN.md
-last_updated: "2026-04-13T11:52:14.327Z"
+last_updated: "2026-04-13T12:04:06.229Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 16
   completed_phases: 7
-  total_plans: 15
+  total_plans: 16
   completed_plans: 13
   percent: 50
 ---
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 48 — api-security
+**Current focus:** Phase 53 — threat-news-bar-chart-with-categories-and-side-labels
 
 ## Current Position
 
-Phase: 52
+Phase: 50
 Plan: Not started
-Status: Executing Phase 48
+Status: Executing Phase 53
 Last activity: 2026-04-13
 
 Progress: [█████░░░░░] 50%
