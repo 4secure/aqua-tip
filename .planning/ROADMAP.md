@@ -307,13 +307,13 @@ Plans:
 
 ### Phase 53: Threat News bar chart with categories and side labels
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Users see a "Top Attack Categories" horizontal bar chart in the Threat Map right overlay panel showing attack category distribution with category labels on the Y-axis
+**Requirements**: DASH-02, NEWS-01
 **Depends on:** Phase 52
-**Plans:** 0 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 53 to break down)
+- [ ] 53-01-PLAN.md — AttackCategoryChart component + RightOverlayPanel wiring
 
 ### Phase 54: IOC display for email, URL, crypto types and relationship graph zoom controls
 
