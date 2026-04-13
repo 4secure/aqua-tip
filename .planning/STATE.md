@@ -1,43 +1,43 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: Plan Overhaul & UX Polish
-status: executing
-stopped_at: Completed 51-02-PLAN.md
-last_updated: "2026-04-13T12:36:29.889Z"
+milestone: v5.1
+milestone_name: Threat Map Enhancements
+status: completed
+stopped_at: All milestones shipped
+last_updated: "2026-04-13T18:00:00.000Z"
 last_activity: 2026-04-13
 progress:
-  total_phases: 16
-  completed_phases: 9
-  total_plans: 18
-  completed_plans: 16
-  percent: 50
+  total_phases: 53
+  completed_phases: 53
+  total_plans: 76
+  completed_plans: 76
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-11)
+See: .planning/PROJECT.md (updated 2026-04-13)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 53 — threat-news-bar-chart-with-categories-and-side-labels
+**Current focus:** All milestones shipped. Ready for next milestone.
 
 ## Current Position
 
-Phase: 54
-Plan: Not started
-Status: Executing Phase 53
+Phase: None (between milestones)
+Plan: N/A
+Status: All milestones complete
 Last activity: 2026-04-13
 
-Progress: [█████░░░░░] 50%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 71 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12, v3.3: 5, v4.0: 1)
-- Total milestones: 9 shipped in 25 days
+- Total plans completed: 76 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12, v3.3: 5, v4.0: 4, v5.0: 10, v5.1: 2)
+- Total milestones: 12 shipped in 31 days
 
 **By Milestone:**
 
@@ -52,22 +52,16 @@ Progress: [█████░░░░░] 50%
 | v3.1 Font & UI Polish | 3 | 3 | 3 days |
 | v3.2 App Layout Page Tweaks | 7 | 12 | 8 days |
 | v3.3 Threat Map Dashboard | 4 | 5 | 2 days |
-| Phase 41 P01 | 2min | 2 tasks | 2 files |
-| Phase 41 P02 | 11min | 2 tasks | 3 files |
-| Phase 50 P02 | 3min | 1 tasks | 3 files |
-| Phase 53 P01 | 4min | 2 tasks | 2 files |
-| Phase 51 P02 | 1min | 1 tasks | 1 files |
+| v4.0 Plan Overhaul & UX Polish | 2 | 4 | 2 days |
+| v5.0 Security Hardening | 5 | 10 | 3 days |
+| v5.1 Threat Map Enhancements | 2 | 2 | 1 day |
 
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
-Recent decisions affecting v5.0:
 
-- v5.0 roadmap lives in ROADMAP-v5.md (v4.0 owns ROADMAP.md in parallel)
-- Phase numbering continues from v4.0 (47-51)
-- Confirmed LFI (path traversal serving /etc/passwd) is highest priority -- Phase 47 first
 - Do NOT create a `trial` plan slug. Trial remains `plan_id = null` + `trial_ends_at`.
 - Zero new dependencies -- all v4.0 features use existing stack.
 - Feature gating enforced on both frontend (UX) and backend (security) simultaneously.
@@ -78,17 +72,16 @@ Recent decisions affecting v5.0:
 - [Phase 53]: barThickness 22px for 380px panel; chart placed between indicators and database widgets
 - [Phase 51]: SPF/DKIM/DMARC records target aquasecure.io sending domain, not aquasecure.ai web domain
 
-### Roadmap Evolution
+### Deferred Work (not started, carried forward from v4.0)
 
-- Phase 52 added: Rename Dashboard to Threat Map, fix top icon routing to Threat Map inside app
-- Phase 53 added: Threat News bar chart with categories and side labels
-- Phase 54 added: IOC display for email, URL, crypto types and relationship graph zoom controls
-- Phase 55 added: Profile settings center alignment, pricing dual routing, and pricing contact email backend
-- Phase 56 added: Trial plan 10 credits per day configuration
+These items were planned in v4.0 phases 43-46 but never executed. Pick up in next milestone:
 
-### Pending Todos
-
-None.
+- **Feature gating**: Free plan restricted to threat search only (backend middleware + frontend route guards)
+- **Pricing page update**: New tiers, enterprise contact form, auth-aware routing
+- **UI polish**: Settings center alignment, breadcrumb capitalization, landing page globe animations
+- **IOC display**: Email/URL/crypto observable type rendering
+- **D3 zoom controls**: Relationship graph zoom in/out buttons
+- **Trial credits**: 10 credits/day configuration (may already be done via Phase 41)
 
 ### Blockers/Concerns
 
@@ -104,6 +97,6 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-04-11
-Last session: 2026-04-13T12:18:56.927Z
-Stopped at: Completed 51-02-PLAN.md
+Last activity: 2026-04-13
+Last session: 2026-04-13T18:00:00.000Z
+Stopped at: All milestones shipped — ready for new milestone

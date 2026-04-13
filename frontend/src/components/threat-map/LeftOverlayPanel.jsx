@@ -21,10 +21,18 @@ const EVENT_ISOLATION = {
 export default function LeftOverlayPanel({ collapsed, peeking, onPeekStart, onPeekEnd, counters, connected, countryCounts, typeCounts, events, onEventClick }) {
   const panelContent = (
     <>
-      <ThreatMapCounters counters={counters} connected={connected} />
-      <ThreatMapCountries countryCounts={countryCounts} />
-      <ThreatMapDonut typeCounts={typeCounts} />
-      <ThreatMapFeed events={events} onEventClick={onEventClick} />
+      <div className="flex-shrink-0">
+        <ThreatMapCounters counters={counters} connected={connected} />
+      </div>
+      <div className="flex-1 min-h-0">
+        <ThreatMapCountries countryCounts={countryCounts} />
+      </div>
+      <div className="flex-shrink-0">
+        <ThreatMapDonut typeCounts={typeCounts} />
+      </div>
+      <div className="flex-1 min-h-0">
+        <ThreatMapFeed events={events} onEventClick={onEventClick} />
+      </div>
     </>
   );
 
@@ -54,7 +62,7 @@ export default function LeftOverlayPanel({ collapsed, peeking, onPeekStart, onPe
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -340, opacity: 0 }}
                 transition={SPRING_TRANSITION}
-                className="w-[340px] max-h-full overflow-hidden space-y-4 pt-4 pl-4"
+                className="w-[340px] h-full flex flex-col gap-4 pt-4 pl-4"
                 {...EVENT_ISOLATION}
               >
                 {panelContent}
@@ -71,7 +79,7 @@ export default function LeftOverlayPanel({ collapsed, peeking, onPeekStart, onPe
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -20, opacity: 0 }}
             transition={SPRING_TRANSITION}
-            className="absolute top-4 left-4 z-[1000] w-[340px] max-h-[calc(100vh-120px)] overflow-hidden space-y-4"
+            className="absolute top-4 left-4 z-[1000] w-[340px] h-[calc(100vh-120px)] flex flex-col gap-4"
             {...EVENT_ISOLATION}
           >
             {panelContent}

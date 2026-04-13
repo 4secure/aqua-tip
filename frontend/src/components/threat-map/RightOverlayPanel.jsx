@@ -136,75 +136,83 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
 
   const panelContent = (
     <>
-      {/* Indicators section */}
-      <div className="glass-card-static p-3">
-        <h3 className="text-sm font-semibold text-text-secondary mb-2">Recent Indicators</h3>
-        {indicatorsLoading ? (
-          <div className="space-y-2">
-            {SKELETON_WIDTHS.map((w, i) => (
-              <div
-                key={i}
-                className="h-6 bg-surface-2 rounded animate-pulse"
-                style={{ width: `${w}%` }}
+      {/* Indicators section — flexible, scrolls internally */}
+      <div className="flex-1 min-h-0">
+        <div className="glass-card-static p-3 h-full flex flex-col min-h-0">
+          <h3 className="text-sm font-semibold text-text-secondary mb-2 flex-shrink-0">Recent Indicators</h3>
+          {indicatorsLoading ? (
+            <div className="space-y-2">
+              {SKELETON_WIDTHS.map((w, i) => (
+                <div
+                  key={i}
+                  className="h-6 bg-surface-2 rounded animate-pulse"
+                  style={{ width: `${w}%` }}
+                />
+              ))}
+            </div>
+          ) : indicatorsError ? (
+            <div className="space-y-2">
+              {SKELETON_WIDTHS.map((w, i) => (
+                <div
+                  key={i}
+                  className="h-6 bg-surface-2 rounded animate-pulse"
+                  style={{ width: `${w}%` }}
+                />
+              ))}
+            </div>
+          ) : indicators.length === 0 ? (
+            <p className="text-xs text-text-muted text-center py-4">No indicators found</p>
+          ) : (
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {indicators.slice(0, 5).map((ind) => (
+                <IndicatorRow key={ind.id} indicator={ind} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Top Attack Categories chart — fixed height */}
+      <div className="flex-shrink-0">
+        <div className="glass-card-static p-3">
+          <h3 className="text-sm font-semibold text-text-secondary mb-2">Top Attack Categories</h3>
+          {categoriesLoading ? (
+            <div className="space-y-2">
+              {[60, 80, 50, 70, 65].map((w, i) => (
+                <div key={i} className="h-5 bg-surface-2 rounded animate-pulse" style={{ width: `${w}%` }} />
+              ))}
+            </div>
+          ) : categoriesError ? (
+            <div className="space-y-2">
+              {[60, 80, 50, 70, 65].map((w, i) => (
+                <div key={i} className="h-5 bg-surface-2 rounded animate-pulse" style={{ width: `${w}%` }} />
+              ))}
+            </div>
+          ) : categories.length === 0 ? (
+            <p className="text-xs text-text-muted text-center py-4">No category data</p>
+          ) : (
+            <div className="h-[200px]">
+              <AttackCategoryChart categories={categories} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Threat Database section — flexible, scrolls internally */}
+      <div className="flex-1 min-h-0">
+        <div className="glass-card-static p-3 h-full flex flex-col min-h-0">
+          <h3 className="text-sm font-semibold text-text-secondary mb-2 flex-shrink-0">Threat Database</h3>
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {STAT_CARD_CONFIG.map((config) => (
+              <StatRow
+                key={config.entity_type}
+                config={config}
+                count={counts[config.entity_type]}
+                loading={countsLoading}
+                error={countsError}
               />
             ))}
           </div>
-        ) : indicatorsError ? (
-          <div className="space-y-2">
-            {SKELETON_WIDTHS.map((w, i) => (
-              <div
-                key={i}
-                className="h-6 bg-surface-2 rounded animate-pulse"
-                style={{ width: `${w}%` }}
-              />
-            ))}
-          </div>
-        ) : indicators.length === 0 ? (
-          <p className="text-xs text-text-muted text-center py-4">No indicators found</p>
-        ) : (
-          indicators.slice(0, 5).map((ind) => (
-            <IndicatorRow key={ind.id} indicator={ind} />
-          ))
-        )}
-      </div>
-
-      {/* Top Attack Categories chart */}
-      <div className="glass-card-static p-3">
-        <h3 className="text-sm font-semibold text-text-secondary mb-2">Top Attack Categories</h3>
-        {categoriesLoading ? (
-          <div className="space-y-2">
-            {[60, 80, 50, 70, 65].map((w, i) => (
-              <div key={i} className="h-5 bg-surface-2 rounded animate-pulse" style={{ width: `${w}%` }} />
-            ))}
-          </div>
-        ) : categoriesError ? (
-          <div className="space-y-2">
-            {[60, 80, 50, 70, 65].map((w, i) => (
-              <div key={i} className="h-5 bg-surface-2 rounded animate-pulse" style={{ width: `${w}%` }} />
-            ))}
-          </div>
-        ) : categories.length === 0 ? (
-          <p className="text-xs text-text-muted text-center py-4">No category data</p>
-        ) : (
-          <div className="h-[200px]">
-            <AttackCategoryChart categories={categories} />
-          </div>
-        )}
-      </div>
-
-      {/* Threat Database section */}
-      <div className="glass-card-static p-3">
-        <h3 className="text-sm font-semibold text-text-secondary mb-2">Threat Database</h3>
-        <div className="max-h-[140px] overflow-y-auto">
-          {STAT_CARD_CONFIG.map((config) => (
-            <StatRow
-              key={config.entity_type}
-              config={config}
-              count={counts[config.entity_type]}
-              loading={countsLoading}
-              error={countsError}
-            />
-          ))}
         </div>
       </div>
     </>
@@ -236,7 +244,7 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 380, opacity: 0 }}
                 transition={SPRING_TRANSITION}
-                className="w-[380px] max-h-full overflow-hidden space-y-4 pt-4 pr-4"
+                className="w-[380px] h-full flex flex-col gap-4 pt-4 pr-4"
                 {...EVENT_ISOLATION}
               >
                 {panelContent}
@@ -253,7 +261,7 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 20, opacity: 0 }}
             transition={SPRING_TRANSITION}
-            className="absolute top-4 right-4 z-[1000] w-[380px] max-h-[calc(100vh-120px)] overflow-hidden space-y-4"
+            className="absolute top-4 right-4 z-[1000] w-[380px] h-[calc(100vh-120px)] flex flex-col gap-4"
             {...EVENT_ISOLATION}
           >
             {panelContent}

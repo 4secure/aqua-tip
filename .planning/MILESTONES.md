@@ -1,5 +1,57 @@
 # Milestones
 
+## v5.1 Threat Map Enhancements (Shipped: 2026-04-13)
+
+**Phases completed:** 2 phases, 2 plans
+**Timeline:** 1 day (2026-04-13)
+
+**Key accomplishments:**
+
+1. /threat-map as canonical route with /dashboard redirect; sidebar nav shows Threat Map label with map icon
+2. Sidebar logo links to /threat-map inside app layout; topbar breadcrumb maps /threat-map to "Threat Map"
+3. Horizontal bar chart (AttackCategoryChart) for attack category distribution in right overlay panel
+4. Categories data fetching from /api/dashboard/categories with dark-theme Chart.js styling
+
+---
+
+## v5.0 Security Hardening (Shipped: 2026-04-13)
+
+**Phases completed:** 5 phases, 10 plans
+**Timeline:** 3 days (2026-04-11 → 2026-04-13)
+
+**Key accomplishments:**
+
+1. Nginx path traversal blocking, FastCGI lockdown to /index.php only, server version hidden, HTTP methods restricted
+2. HSTS and CSP security headers on every response, request body size capped at 2M
+3. Debug routes (/my-ip, /debug-opencti) removed from web.php
+4. IDOR fix on dark-web task status with ownership table; rate limiting on search/credit/OAuth/verification endpoints
+5. OpenCTI error messages sanitized, raw observable data stripped from search API responses
+6. Secure cookies, 24h token expiry (down from 7d), tokens invalidated on password reset
+7. Forgot-password returns uniform response regardless of email existence or OAuth provider
+8. OAuth error whitelist on LoginPage, redirect URL validation against provider allowlist
+9. DOMPurify tab-nabbing fix (rel=noopener noreferrer), Leaflet CSS bundled locally
+10. GTM consent gating, SMTP TLS verification, HTTPS geolocation, SPF/DKIM/DMARC documented
+
+---
+
+## v4.0 Plan Overhaul & UX Polish (Shipped: 2026-04-11)
+
+**Phases completed:** 2 phases, 4 plans
+**Timeline:** 2 days (2026-04-10 → 2026-04-11)
+
+**Key accomplishments:**
+
+1. Plan tier values restructured: Free (5/day), Basic ($10, 30/day), Pro ($29, 100/day), Enterprise (500/day, contact us)
+2. Enterprise price_cents nullable to signal "Contact Us" instead of a price
+3. Credit sync migration resets all existing users to new plan limits
+4. PlanSeeder updated with new tier values, migration SQL made driver-aware (pgsql + sqlite)
+5. Branded loading screen (logo + spinner) until auth state fully resolves — eliminates FOUC
+6. "Fetching data..." indicators replace misleading "Connection lost" errors during page load
+
+**Deferred (not started):** Feature gating, pricing page update, UI polish, IOC display, D3 zoom controls
+
+---
+
 ## v3.3 Threat Map Dashboard (Shipped: 2026-04-06)
 
 **Phases completed:** 4 phases, 5 plans

@@ -111,47 +111,18 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ PlanSeeder updated with new tier values and unified features — v4.0
 - ✓ Migration SQL made driver-aware (pgsql + sqlite) — v4.0
 
-## Current Milestone: v5.0 Security Hardening
+## Current Milestone: None (all shipped)
 
-**Goal:** Fix all critical, high, and medium security vulnerabilities identified in comprehensive audit — covering confirmed LFI, debug route removal, API protection, error disclosure, security headers, frontend XSS/redirect vectors, and infrastructure hardening.
+All 12 milestones shipped. Run `/gsd:new-milestone` to start next.
 
-**Target features:**
-- Nginx path traversal blocking (confirmed LFI serving /etc/passwd)
-- Remove unauthenticated debug routes (/my-ip, /debug-opencti)
-- IDOR fix on dark-web task status endpoint
-- Rate limiting on search endpoints
-- Sanitize OpenCTI error messages leaked to users
-- Security headers: HSTS, CSP, SRI
-- Session cookie secure default
-- OAuth error whitelist and redirect URL validation
-- DOMPurify tab-nabbing fix
-- SMTP TLS verification
-- User enumeration fix on forgot-password
-- HTTPS for geolocation calls
-- Remove raw OpenCTI data from responses
-- SPF/DKIM/DMARC DNS records
+**Shipped milestones:** v1.0, v1.1, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2, v3.3, v4.0, v5.0, v5.1
 
-### Active
-
-- [ ] Nginx blocks all path traversal (.. sequences) before reaching PHP
-- [ ] Debug routes /my-ip and /debug-opencti removed
-- [ ] Dark-web task status validates user ownership (IDOR fix)
-- [ ] Rate limiting on /ip-search, /threat-search, /credits endpoints
-- [ ] OpenCTI error messages sanitized in EnrichmentController and HealthController
-- [ ] HSTS header added to SecurityHeaders middleware
-- [ ] CSP header configured for backend and frontend
-- [x] SESSION_SECURE_COOKIE defaults to true — Phase 49
-- [x] OAuth error parameter whitelisted on LoginPage — Phase 50
-- [x] OAuth redirect URLs validated against allowed provider domains — Phase 50
-- [x] DOMPurify target attribute removed, rel=noopener noreferrer enforced — Phase 50
-- [x] SMTP MAIL_VERIFY_PEER enabled in production — Phase 51
-- [x] Leaflet CSS bundled locally from node_modules (no CDN dependency) — Phase 50
-- [x] Forgot-password returns uniform response (no user/provider enumeration) — Phase 49
-- [x] Geolocation calls use HTTPS instead of HTTP (ipapi.co) — Phase 51
-- [ ] Raw OpenCTI data removed from search API responses
-- [x] Sanctum token expiration shortened, tokens invalidated on password reset — Phase 49
-- [ ] Nginx hardened: server version hidden, HTTP methods restricted
-- [x] SPF/DKIM/DMARC DNS records documented — Phase 51
+**Deferred work (never started, carry forward to next milestone as needed):**
+- Feature gating: free plan restricted to threat search only (backend + frontend)
+- Pricing page update: new tiers, enterprise contact form, auth-aware routing
+- UI polish: settings center alignment, breadcrumb capitalization, landing page globe
+- IOC display: email/URL/crypto observable types
+- D3 zoom controls: relationship graph zoom in/out buttons
 
 ### Out of Scope
 
@@ -171,16 +142,14 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ## Context
 
-Shipped v3.3 with ~37,000+ LOC (JS/JSX + PHP).
+53 phases, 76 plans completed across 12 milestones in 31 days.
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Framer Motion, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-42 phases, 74 plans completed across 10 milestones in 25 days.
-Phase 50 complete — frontend security hardened: OAuth XSS/redirect, DOMPurify tab-nabbing, Leaflet CDN elimination, GTM consent gating.
-Phase 51 complete — SMTP TLS verification enabled, geolocation migrated to HTTPS ipapi.co, DNS anti-spoofing records documented.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
-v4.0 introduces first feature-gated tier (Free = threat search only) and auth-aware layout routing for pricing page.
-v5.0 comprehensive security audit revealed confirmed LFI (path traversal serving /etc/passwd), unauthenticated debug routes, IDOR, missing rate limiting, error message leakage, and missing security headers.
+v4.0 shipped plan restructuring and auth loading fixes. Feature gating deferred.
+v5.0 shipped comprehensive security hardening (LFI, IDOR, rate limiting, headers, OAuth, SMTP TLS, DNS records).
+v5.1 shipped Threat Map rename and attack category bar chart.
 
 ## Constraints
 
@@ -274,4 +243,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-13 after Phase 53 threat-news-bar-chart completed — "Top Attack Categories" horizontal bar chart added to Threat Map right overlay panel, fetching from /api/dashboard/categories with dark-theme Chart.js styling*
+*Last updated: 2026-04-13 — all milestones marked complete (v1.0 through v5.1). Deferred v4.0 work (feature gating, pricing, UI polish) carried forward for next milestone.*
