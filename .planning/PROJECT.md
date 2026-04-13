@@ -141,11 +141,11 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - [ ] HSTS header added to SecurityHeaders middleware
 - [ ] CSP header configured for backend and frontend
 - [x] SESSION_SECURE_COOKIE defaults to true — Phase 49
-- [ ] OAuth error parameter whitelisted on LoginPage
-- [ ] OAuth redirect URLs validated against allowed provider domains
-- [ ] DOMPurify target attribute removed, rel=noopener noreferrer enforced
+- [x] OAuth error parameter whitelisted on LoginPage — Phase 50
+- [x] OAuth redirect URLs validated against allowed provider domains — Phase 50
+- [x] DOMPurify target attribute removed, rel=noopener noreferrer enforced — Phase 50
 - [ ] SMTP MAIL_VERIFY_PEER enabled in production
-- [ ] SRI on external Leaflet CSS or bundled locally
+- [x] Leaflet CSS bundled locally from node_modules (no CDN dependency) — Phase 50
 - [x] Forgot-password returns uniform response (no user/provider enumeration) — Phase 49
 - [ ] Geolocation calls use HTTPS instead of HTTP
 - [ ] Raw OpenCTI data removed from search API responses
@@ -173,7 +173,8 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 Shipped v3.3 with ~37,000+ LOC (JS/JSX + PHP).
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Framer Motion, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
-40 phases, 70 plans completed across 9 milestones in 25 days.
+41 phases, 72 plans completed across 9 milestones in 25 days.
+Phase 50 complete — frontend security hardened: OAuth XSS/redirect, DOMPurify tab-nabbing, Leaflet CDN elimination, GTM consent gating.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
 OpenCTI instance at http://192.168.251.20:8080 provides live threat data via GraphQL and SSE.
