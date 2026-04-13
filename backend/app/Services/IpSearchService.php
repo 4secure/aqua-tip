@@ -15,7 +15,7 @@ class IpSearchService
      * Search for threat intelligence data about an IP address.
      *
      * Queries OpenCTI for observable data, relationships, indicators,
-     * sightings, and notes. Falls back to ip-api.com for geolocation.
+     * sightings, and notes. Falls back to ipapi.co for geolocation.
      * Results are cached for 15 minutes.
      *
      * @param  string  $ip  The IP address to search
@@ -350,15 +350,13 @@ class IpSearchService
     }
 
     /**
-     * Fetch geolocation data from ip-api.com as fallback.
+     * Fetch geolocation data from ipapi.co (HTTPS) as fallback.
      */
     private function fetchGeoFromIpApi(string $ip): ?array
     {
         try {
             $response = Http::timeout(5)
-                ->get("http://ip-api.com/json/{$ip}", [
-                    'fields' => 'status,message,country,countryCode,city,regionName,lat,lon,isp,org,as,asname',
-                ]);
+                ->get("https://ipapi.co/{$ip}/json/");
 
             if (! $response->successful()) {
                 return null;
@@ -366,21 +364,21 @@ class IpSearchService
 
             $body = $response->json();
 
-            if (($body['status'] ?? '') !== 'success') {
+            if (isset($body['error'])) {
                 return null;
             }
 
             return [
-                'country' => $body['country'] ?? null,
-                'country_code' => $body['countryCode'] ?? null,
+                'country' => $body['country_name'] ?? null,
+                'country_code' => $body['country_code'] ?? null,
                 'city' => $body['city'] ?? null,
-                'region' => $body['regionName'] ?? null,
-                'lat' => $body['lat'] ?? null,
-                'lon' => $body['lon'] ?? null,
-                'isp' => $body['isp'] ?? null,
+                'region' => $body['region'] ?? null,
+                'lat' => $body['latitude'] ?? null,
+                'lon' => $body['longitude'] ?? null,
+                'isp' => $body['org'] ?? null,
                 'org' => $body['org'] ?? null,
-                'as' => $body['as'] ?? null,
-                'asname' => $body['asname'] ?? null,
+                'as' => $body['asn'] ?? null,
+                'asname' => $body['org'] ?? null,
             ];
         } catch (\Throwable) {
             return null;
