@@ -15,10 +15,10 @@ Requirements for Feature Gating & UX Polish milestone.
 
 ### Pricing & Enterprise
 
-- [ ] **PRICE-01**: Pricing page renders inside AppLayout (with sidebar) when user is authenticated
-- [ ] **PRICE-02**: Pricing page renders standalone (no sidebar) when user is unauthenticated
+- [x] **PRICE-01**: Pricing page renders inside AppLayout (with sidebar) when user is authenticated
+- [x] **PRICE-02**: Pricing page renders standalone (no sidebar) when user is unauthenticated
 - [x] **PRICE-03**: Enterprise contact form submits to backend endpoint and sends email notification
-- [ ] **PRICE-04**: Topbar icon navigates to landing page when viewing pricing as unauthenticated user
+- [x] **PRICE-04**: Topbar icon navigates to landing page when viewing pricing as unauthenticated user
 
 ### Observable Display
 
@@ -63,10 +63,10 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | GATE-01 | Phase 54 | Complete |
 | GATE-02 | Phase 54 | Complete |
 | GATE-03 | Phase 54 | Complete |
-| PRICE-01 | Phase 55 | Pending |
-| PRICE-02 | Phase 55 | Pending |
+| PRICE-01 | Phase 55 | Complete |
+| PRICE-02 | Phase 55 | Complete |
 | PRICE-03 | Phase 55 | Complete |
-| PRICE-04 | Phase 55 | Pending |
+| PRICE-04 | Phase 55 | Complete |
 | OBS-01 | Phase 56 | Pending |
 | OBS-02 | Phase 56 | Pending |
 | OBS-03 | Phase 56 | Pending |

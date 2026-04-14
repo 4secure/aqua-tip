@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: Feature Gating & UX Polish
 status: executing
-stopped_at: Completed 55-01-PLAN.md
-last_updated: "2026-04-14T02:30:20.233Z"
+stopped_at: Completed 55-02-PLAN.md
+last_updated: "2026-04-14T08:12:16.272Z"
 last_activity: 2026-04-14 -- Phase 55 planning complete
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
-  percent: 67
+  completed_plans: 3
+  percent: 100
 ---
 
 # Project State
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | v5.1 Threat Map Enhancements | 2 | 2 | 1 day |
 | Phase 54 P01 | 15min | 2 tasks | 1 files |
 | Phase 55 P01 | 3min | 2 tasks | 5 files |
+| Phase 55 P02 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 54]: Free plan features reduced from 6 to 2 items to match actual gating restrictions
 - [Phase 54]: Enterprise price_cents set to 0 (not null) to satisfy NOT NULL constraint in seeder
 - [Phase 55]: Synchronous mail send (not queued) for enterprise contact endpoint
+- [Phase 55]: ConditionalAppLayout pattern for dual-routing pages (auth=AppLayout, guest=standalone)
 
 ### Blockers/Concerns
 
@@ -93,5 +95,5 @@ All decisions logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last activity: 2026-04-14
-Last session: 2026-04-14T02:30:20.227Z
-Stopped at: Completed 55-01-PLAN.md
+Last session: 2026-04-14T08:12:03.060Z
+Stopped at: Completed 55-02-PLAN.md
