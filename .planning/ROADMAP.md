@@ -205,17 +205,17 @@ Plans:
 **UI hint**: yes
 
 ### Phase 56: Observable Display
-**Goal**: Users searching for email addresses, URLs, or cryptocurrency observables see properly formatted results
+**Goal**: Threat Database widget on Threat Map page displays real counts for all 7 observable types (currently only 4 are queried)
 **Depends on**: Nothing (independent of gating; works on existing threat search)
 **Requirements**: OBS-01, OBS-02, OBS-03
 **Success Criteria** (what must be TRUE):
-  1. Searching for an email address displays a formatted email observable with appropriate icon/styling
-  2. Searching for a URL displays a clickable link that opens in a new tab
-  3. Searching for a cryptocurrency address displays a formatted crypto observable with appropriate labeling
+  1. DashboardService fetchCounts() queries all 7 STIX observable types from OpenCTI
+  2. Threat Database widget shows non-zero counts for Email, URL, and Crypto Wallet when OpenCTI has data
+  3. Unit test asserts all 7 entity types with correct names and labels
 **Plans**: 1 plan
 Plans:
-- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
-**UI hint**: yes
+- [ ] 56-01-PLAN.md — Add 3 missing entity types to DashboardService and update tests
+**UI hint**: no
 
 ### Phase 57: UI Polish
 **Goal**: Settings page and landing page deliver a polished, glitch-free experience
@@ -251,6 +251,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 54. Feature Gating | 1/1 | Complete    | 2026-04-14 |
 | 55. Pricing & Enterprise | 2/2 | Complete   | 2026-04-14 |
-| 56. Observable Display | 0/? | Not started | - |
+| 56. Observable Display | 0/1 | Not started | - |
 | 57. UI Polish | 0/? | Not started | - |
 | 58. D3 Graph Controls | 0/? | Not started | - |
