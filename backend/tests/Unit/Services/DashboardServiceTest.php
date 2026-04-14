@@ -29,26 +29,32 @@ function makeCountsResponse(int $globalCount): array
     ];
 }
 
-test('getCounts returns 4 entity type counts from OpenCTI', function () {
+test('getCounts returns 7 entity type counts from OpenCTI', function () {
     $mock = Mockery::mock(OpenCtiService::class);
     $mock->shouldReceive('query')
-        ->times(4)
+        ->times(7)
         ->andReturn(
             makeCountsResponse(100),
             makeCountsResponse(200),
             makeCountsResponse(300),
             makeCountsResponse(400),
+            makeCountsResponse(500),
+            makeCountsResponse(600),
+            makeCountsResponse(700),
         );
 
     $service = createDashboardService($mock);
     $result = $service->getCounts();
 
-    expect($result)->toHaveCount(4);
+    expect($result)->toHaveCount(7);
 
     expect($result[0])->toMatchArray(['entity_type' => 'IPv4-Addr', 'label' => 'IP Addresses', 'count' => 100]);
     expect($result[1])->toMatchArray(['entity_type' => 'Domain-Name', 'label' => 'Domains', 'count' => 200]);
     expect($result[2])->toMatchArray(['entity_type' => 'Hostname', 'label' => 'Hostnames', 'count' => 300]);
     expect($result[3])->toMatchArray(['entity_type' => 'X509-Certificate', 'label' => 'Certificates', 'count' => 400]);
+    expect($result[4])->toMatchArray(['entity_type' => 'Email-Addr', 'label' => 'Email', 'count' => 500]);
+    expect($result[5])->toMatchArray(['entity_type' => 'Cryptocurrency-Wallet', 'label' => 'Crypto Wallet', 'count' => 600]);
+    expect($result[6])->toMatchArray(['entity_type' => 'Url', 'label' => 'URL', 'count' => 700]);
 });
 
 test('getCounts returns stale cache when OpenCTI fails', function () {
@@ -190,7 +196,7 @@ test('getCategories handles observables with no labels', function () {
 test('getCounts caches result for 5 minutes', function () {
     $mock = Mockery::mock(OpenCtiService::class);
     $mock->shouldReceive('query')
-        ->times(4)
+        ->times(7)
         ->andReturn(makeCountsResponse(10));
 
     $service = createDashboardService($mock);
