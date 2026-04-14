@@ -29,6 +29,7 @@ use App\Http\Controllers\Plan\PlanIndexController;
 use App\Http\Controllers\Plan\PlanSelectionController;
 use App\Http\Controllers\Profile\UpdateController as ProfileUpdateController;
 use App\Http\Controllers\SearchHistory\IndexController as SearchHistoryIndexController;
+use App\Http\Controllers\Enterprise\ContactController as EnterpriseContactController;
 use Illuminate\Support\Facades\Route;
 
 // Guest auth routes with rate limiting
@@ -103,3 +104,7 @@ Route::get('/credits', CreditStatusController::class)->middleware('throttle:api-
 
 // Threat map snapshot (public, used by dashboard map)
 Route::get('/threat-map/snapshot', ThreatMapSnapshotController::class);
+
+// Enterprise contact (public, rate limited)
+Route::post('/enterprise/contact', EnterpriseContactController::class)
+    ->middleware('throttle:5,1');
