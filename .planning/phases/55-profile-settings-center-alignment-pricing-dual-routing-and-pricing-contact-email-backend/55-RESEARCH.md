@@ -314,12 +314,13 @@ No test infrastructure exists. All verification is manual for this project.
 | A1 | Laravel queue is not configured (sync mail is acceptable) | Pitfall 3 | Slow response if SMTP server is slow; easily fixed later with `Mail::queue()` |
 | A2 | No admin User model exists for Notification routing | Pattern 2 | If admin User exists, could use Notification instead; Mailable works regardless |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Queue configuration**
    - What we know: Mail is configured as SMTP in `.env`. No evidence of queue driver being set up.
    - What's unclear: Whether `QUEUE_CONNECTION` is set to anything other than `sync`.
    - Recommendation: Use synchronous `Mail::send()` for now. The contact form is low-volume. Can switch to `Mail::queue()` later.
+   - RESOLVED: Use synchronous `Mail::send()` -- no queue driver confirmed, low-volume endpoint, acceptable latency for contact form submissions.
 
 ## Environment Availability
 
