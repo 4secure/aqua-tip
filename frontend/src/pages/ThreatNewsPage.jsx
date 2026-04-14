@@ -22,7 +22,6 @@ import CategoryTreemap from '../components/threat-news/CategoryTreemap';
 const CATEGORY_COLORS = [
   { bg: 'bg-violet/20', text: 'text-violet' },
   { bg: 'bg-cyan/20', text: 'text-cyan' },
-  { bg: 'bg-amber/20', text: 'text-amber' },
   { bg: 'bg-red/20', text: 'text-red' },
   { bg: 'bg-surface-2', text: 'text-text-muted' },
 ];
@@ -535,8 +534,8 @@ export default function ThreatNewsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header + Treemap */}
-      <div className="flex items-start justify-between gap-6">
+      {/* Header + Treemap: bottom-aligned so chart sits above heading level */}
+      <div className="flex items-end justify-between gap-6">
         <div className="shrink-0">
           <h1 className="font-sans text-2xl font-bold text-text-primary mb-1">
             Threat News
@@ -545,14 +544,23 @@ export default function ThreatNewsPage() {
             Browse threat intelligence reports
           </p>
         </div>
-        {!loading && !error && items.length > 0 && (
+        {loading ? (
+          <div className="w-full min-w-[300px] max-w-[640px] h-[180px] bg-surface/60 border border-border rounded-xl animate-pulse flex gap-2 p-3">
+            <div className="flex-[3] bg-surface-2 rounded-lg" />
+            <div className="flex-[2] bg-surface-2 rounded-lg" />
+            <div className="flex-1 flex flex-col gap-2">
+              <div className="flex-[2] bg-surface-2 rounded-lg" />
+              <div className="flex-1 bg-surface-2 rounded-lg" />
+            </div>
+          </div>
+        ) : !error && items.length > 0 ? (
           <CategoryTreemap
             items={items}
             categories={categories}
             activeLabel={label}
             onCategoryClick={handleChartCategoryClick}
           />
-        )}
+        ) : null}
       </div>
 
       {/* Toolbar: Search + Category Dropdown + Date Selector */}

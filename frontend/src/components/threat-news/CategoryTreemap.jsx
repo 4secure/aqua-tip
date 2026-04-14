@@ -1,13 +1,12 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import * as d3 from 'd3';
 
+// Matches CATEGORY_COLORS in ThreatNewsPage (same order, same length)
 const CHART_HEX_COLORS = [
-  '#FF3B5C',  // red
   '#7A44E4',  // violet
   '#00E5FF',  // cyan
-  '#FFB020',  // amber
-  '#00C48C',  // green
-  '#9B6BF7',  // violet-light
+  '#FF3B5C',  // red
+  '#5A6173',  // surface-2 / muted
 ];
 
 function chartColorForCategory(labelValue) {
@@ -33,7 +32,7 @@ export default function CategoryTreemap({
   onCategoryClick,
 }) {
   const containerRef = useRef(null);
-  const [size, setSize] = useState({ width: 400, height: 120 });
+  const [size, setSize] = useState({ width: 600, height: 180 });
   const [hoveredCategory, setHoveredCategory] = useState(null);
 
   useEffect(() => {
@@ -43,7 +42,7 @@ export default function CategoryTreemap({
     const observer = new ResizeObserver((entries) => {
       const { width } = entries[0].contentRect;
       if (width > 0) {
-        setSize({ width, height: 120 });
+        setSize({ width, height: 180 });
       }
     });
     observer.observe(el);
@@ -52,14 +51,17 @@ export default function CategoryTreemap({
 
   const categoryCounts = useMemo(() => {
     const counts = {};
+    const idByName = {};
     for (const item of items) {
       const labels = item.labels || [];
       for (const label of labels) {
         counts[label.value] = (counts[label.value] || 0) + 1;
+        if (!idByName[label.value]) idByName[label.value] = label.id;
       }
     }
     return Object.entries(counts)
-      .map(([name, count]) => ({ name, count }))
+      .filter(([, count]) => count > 1)
+      .map(([name, count]) => ({ name, count, id: idByName[name] }))
       .sort((a, b) => b.count - a.count);
   }, [items]);
 
@@ -81,20 +83,17 @@ export default function CategoryTreemap({
     ? (categories.find((c) => c.id === activeLabel)?.value || '')
     : '';
 
-  const handleClick = useCallback((categoryName) => {
-    const cat = categories.find((c) => c.value === categoryName);
-    if (cat) {
-      onCategoryClick(
-        cat.id === activeLabel ? '' : cat.id,
-        categoryName,
-      );
-    }
-  }, [categories, activeLabel, onCategoryClick]);
+  const handleClick = useCallback((catId, categoryName) => {
+    onCategoryClick(
+      catId === activeLabel ? '' : catId,
+      categoryName,
+    );
+  }, [activeLabel, onCategoryClick]);
 
   if (categoryCounts.length === 0) return null;
 
   return (
-    <div ref={containerRef} className="w-full min-w-[200px] max-w-[480px]">
+    <div ref={containerRef} className="w-full min-w-[300px] max-w-[640px]">
       <svg
         width={size.width}
         height={size.height}
@@ -116,7 +115,7 @@ export default function CategoryTreemap({
           return (
             <g
               key={name}
-              onClick={() => handleClick(name)}
+              onClick={() => handleClick(leaf.data.id, name)}
               onMouseEnter={() => setHoveredCategory(name)}
               onMouseLeave={() => setHoveredCategory(null)}
               className="cursor-pointer"
