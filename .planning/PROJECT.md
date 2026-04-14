@@ -110,6 +110,8 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Credit sync migration for existing users to new limits — v4.0
 - ✓ PlanSeeder updated with new tier values and unified features — v4.0
 - ✓ Migration SQL made driver-aware (pgsql + sqlite) — v4.0
+- ✓ Free plan features list corrected to 2 items (threat search only) — v6.0
+- ✓ Feature gating verified: backend 403 + frontend UpgradeCTA for free users — v6.0
 
 ## Current Milestone: v6.0 Feature Gating & UX Polish
 
@@ -144,7 +146,7 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ## Context
 
-53 phases, 76 plans completed across 12 milestones in 31 days.
+54 phases, 77 plans completed across 12 milestones in 31 days.
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Framer Motion, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
@@ -246,4 +248,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 — milestone v6.0 started. All deferred v4.0 work now active.*
+*Last updated: 2026-04-14 — Phase 54 complete (free plan feature gating). v6.0 in progress.*
