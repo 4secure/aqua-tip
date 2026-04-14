@@ -8,7 +8,7 @@ function countryFlag(code) {
   );
 }
 
-const ROW_COLORS = ['bg-red', 'bg-red', 'bg-amber', 'bg-amber', 'bg-cyan'];
+const ROW_COLORS = ['bg-red', 'bg-red', 'bg-amber', 'bg-amber', 'bg-cyan', 'bg-cyan', 'bg-violet', 'bg-violet', 'bg-green', 'bg-green'];
 
 export default function ThreatMapCountries({ countryCounts }) {
   const maxCount = countryCounts.length > 0 ? countryCounts[0].count : 1;

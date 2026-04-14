@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { apiClient } from '../api/client';
 
-const MAX_EVENTS = 50;
+const MAX_EVENTS = 100;
 const MAX_RETRIES = 10;
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -16,7 +16,7 @@ function aggregateCountryCounts(events) {
   }
   return Object.values(map)
     .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
+    .slice(0, 10);
 }
 
 function aggregateTypeCounts(events) {

@@ -348,6 +348,8 @@ function ThreatActorCard({ actor, onClick }) {
 
 function RelationshipGraph({ relationships, actorName, actorId }) {
   const containerRef = useRef(null);
+  const zoomRef = useRef(null);
+  const svgSelRef = useRef(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -376,7 +378,6 @@ function RelationshipGraph({ relationships, actorName, actorId }) {
       const DEFAULT_COLOR = '#5A6173';
       const eColor = (type) => ENTITY_COLORS[type] || DEFAULT_COLOR;
 
-      // Build nodes
       const nodeMap = new Map();
       nodeMap.set(actorId, { id: actorId, type: 'Intrusion-Set', label: actorName });
 
@@ -407,6 +408,15 @@ function RelationshipGraph({ relationships, actorName, actorId }) {
         }));
 
       const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+      svgSelRef.current = svg;
+
+      const g = svg.append('g');
+
+      const zoomBehavior = d3.zoom()
+        .scaleExtent([0.3, 5])
+        .on('zoom', (event) => { g.attr('transform', event.transform); });
+      svg.call(zoomBehavior);
+      zoomRef.current = zoomBehavior;
 
       const simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links).id(d => d.id).distance(100))
@@ -414,18 +424,31 @@ function RelationshipGraph({ relationships, actorName, actorId }) {
         .force('center', d3.forceCenter(width / 2, height / 2))
         .force('collision', d3.forceCollide().radius(35));
 
-      const link = svg.append('g').selectAll('line').data(links).join('line')
+      const link = g.append('g').selectAll('line').data(links).join('line')
         .attr('stroke', '#2A2D3E').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,4');
 
-      const linkLabel = svg.append('g').selectAll('text').data(links).join('text')
+      const linkLabel = g.append('g').selectAll('text').data(links).join('text')
         .text(d => d.label).attr('fill', '#5A6173').attr('font-size', '8px')
         .attr('font-family', 'JetBrains Mono').attr('text-anchor', 'middle');
 
-      const node = svg.append('g').selectAll('g').data(nodes).join('g')
-        .call(d3.drag()
-          .on('start', (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
-          .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
-          .on('end', (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
+      const dragHandler = d3.drag()
+        .on('start', (event, d) => {
+          if (!event.active) simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        })
+        .on('drag', (event, d) => {
+          const t = d3.zoomTransform(svg.node());
+          d.fx = (event.sourceEvent.offsetX - t.x) / t.k;
+          d.fy = (event.sourceEvent.offsetY - t.y) / t.k;
+        })
+        .on('end', (event, d) => {
+          if (!event.active) simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+        });
+
+      const node = g.append('g').selectAll('g').data(nodes).join('g').call(dragHandler);
 
       node.append('circle')
         .attr('r', d => d.id === actorId ? 18 : 12)
@@ -446,17 +469,42 @@ function RelationshipGraph({ relationships, actorName, actorId }) {
         node.attr('transform', d => `translate(${d.x},${d.y})`);
       });
 
-      cleanup = () => { simulation.stop(); svg.remove(); };
+      cleanup = () => { simulation.stop(); svg.remove(); zoomRef.current = null; svgSelRef.current = null; };
     });
 
     return () => { if (cleanup) cleanup(); };
   }, [relationships, actorName, actorId]);
 
+  const handleZoom = useCallback((direction) => {
+    if (!zoomRef.current || !svgSelRef.current) return;
+    import('d3').then(d3 => {
+      const factor = direction === 'in' ? 1.4 : 1 / 1.4;
+      svgSelRef.current.transition().duration(300).call(zoomRef.current.scaleBy, factor);
+    });
+  }, []);
+
   return (
     <div
       ref={containerRef}
-      style={{ height: 'calc(95vh - 200px)', background: '#0A0B10', borderRadius: '0.75rem', border: '1px solid #1E2030' }}
-    />
+      style={{ height: 'calc(95vh - 200px)', background: '#0A0B10', borderRadius: '0.75rem', border: '1px solid #1E2030', position: 'relative' }}
+    >
+      <div style={{ position: 'absolute', bottom: 12, right: 12, display: 'flex', flexDirection: 'column', gap: 4, zIndex: 10 }}>
+        <button
+          onClick={() => handleZoom('in')}
+          className="w-8 h-8 rounded-lg bg-surface-2/80 border border-border hover:border-violet/40 text-text-primary flex items-center justify-center text-lg font-mono transition-colors backdrop-blur-sm"
+          title="Zoom in"
+        >
+          +
+        </button>
+        <button
+          onClick={() => handleZoom('out')}
+          className="w-8 h-8 rounded-lg bg-surface-2/80 border border-border hover:border-violet/40 text-text-primary flex items-center justify-center text-lg font-mono transition-colors backdrop-blur-sm"
+          title="Zoom out"
+        >
+          −
+        </button>
+      </div>
+    </div>
   );
 }
 
