@@ -227,7 +227,7 @@ Plans:
   3. Landing page scroll animations play smoothly with no visible jank or delayed renders
 **Plans**: 1 plan
 Plans:
-- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
+- [ ] 57-01-PLAN.md — Settings centering, globe bundle/scroll fix, scrollbar, favicon, sidebar z-index
 **UI hint**: yes
 
 ### Phase 58: D3 Graph Controls
@@ -240,7 +240,7 @@ Plans:
   3. Zoom controls are visible and accessible alongside the graph canvas
 **Plans**: 1 plan
 Plans:
-- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
+- [ ] 58-01-PLAN.md — Zoom in/out button controls on relationship graph
 **UI hint**: yes
 
 ## Progress
@@ -252,5 +252,5 @@ Plans:
 | 54. Feature Gating | 1/1 | Complete    | 2026-04-14 |
 | 55. Pricing & Enterprise | 2/2 | Complete   | 2026-04-14 |
 | 56. Observable Display | 1/1 | Complete   | 2026-04-14 |
-| 57. UI Polish | 0/? | Not started | - |
+| 57. UI Polish | 0/1 | Not started | - |
 | 58. D3 Graph Controls | 0/? | Not started | - |
