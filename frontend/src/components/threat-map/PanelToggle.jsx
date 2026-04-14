@@ -1,5 +1,3 @@
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-
 function stopPropagation(e) {
   e.stopPropagation();
 }
@@ -12,12 +10,11 @@ export default function PanelToggle({ collapsed, onToggle }) {
       onWheel={stopPropagation}
       onDoubleClick={stopPropagation}
       onTouchStart={stopPropagation}
-      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] glass-card-static px-3 py-2 rounded-full cursor-pointer hover:border-violet/30 transition-colors"
+      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] glass-card-static px-4 py-2 rounded-full cursor-pointer hover:border-violet/30 transition-colors"
     >
-      {collapsed
-        ? <PanelLeftOpen className="w-4 h-4 text-text-secondary" />
-        : <PanelLeftClose className="w-4 h-4 text-text-secondary" />
-      }
+      <span className="text-xs font-semibold text-text-secondary">
+        {collapsed ? 'Show Widgets' : 'Hide Widgets'}
+      </span>
     </button>
   );
 }
