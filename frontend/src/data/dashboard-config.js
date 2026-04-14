@@ -3,7 +3,7 @@ export const STAT_CARD_CONFIG = [
   { entity_type: 'Domain-Name', label: 'Domains', color: 'violet' },
   { entity_type: 'Hostname', label: 'Hostnames', color: 'cyan' },
   { entity_type: 'X509-Certificate', label: 'Certificates', color: 'amber' },
-  { entity_type: 'Email-Addr', label: 'Email', color: 'amber' },
+  { entity_type: 'Email-Addr', label: 'Email', color: 'cyan' },
   { entity_type: 'Cryptocurrency-Wallet', label: 'Crypto Wallet', color: 'green' },
   { entity_type: 'Url', label: 'URL', color: 'violet' },
 ];

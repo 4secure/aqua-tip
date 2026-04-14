@@ -41,11 +41,19 @@ function IndicatorRow({ indicator }) {
   );
 }
 
+const DOT_COLORS = {
+  red: 'bg-red',
+  violet: 'bg-violet',
+  cyan: 'bg-cyan',
+  amber: 'bg-amber',
+  green: 'bg-green',
+};
+
 function StatRow({ config, count, loading, error }) {
   return (
     <div className="flex items-center justify-between py-2 px-3 border-b border-border/30 last:border-0">
       <div className="flex items-center gap-2">
-        <div className={`w-2 h-2 rounded-full bg-${config.color}`} />
+        <div className={`w-2 h-2 rounded-full ${DOT_COLORS[config.color] || 'bg-violet'}`} />
         <span className="text-xs text-text-secondary">{config.label}</span>
       </div>
       {loading ? (
@@ -80,7 +88,8 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
     apiClient.get('/api/dashboard/indicators')
       .then((res) => {
         if (cancelled) return;
-        setIndicators(Array.isArray(res.data) ? res.data : []);
+        const raw = res.data?.data ?? res.data;
+        setIndicators(Array.isArray(raw) ? raw : []);
         setIndicatorsError(null);
       })
       .catch((err) => {
@@ -99,7 +108,8 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
       .then((res) => {
         if (cancelled) return;
         const lookup = {};
-        const items = Array.isArray(res.data) ? res.data : [];
+        const raw = res.data?.data ?? res.data;
+        const items = Array.isArray(raw) ? raw : [];
         for (const item of items) {
           lookup[item.entity_type] = item.count;
         }
@@ -121,8 +131,8 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
     apiClient.get('/api/dashboard/categories')
       .then((res) => {
         if (cancelled) return;
-        const data = res.data || [];
-        setCategories(Array.isArray(data) ? data : []);
+        const raw = res.data?.data ?? res.data;
+        setCategories(Array.isArray(raw) ? raw : []);
         setCategoriesError(null);
       })
       .catch((err) => {
