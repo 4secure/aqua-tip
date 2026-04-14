@@ -169,7 +169,7 @@ See `.planning/milestones/v3.3-ROADMAP.md` for full details.
 
 - [x] **Phase 54: Feature Gating** - Free plan restricted to threat search only via backend middleware and frontend guards (completed 2026-04-13)
 - [x] **Phase 55: Pricing & Enterprise** - Auth-aware pricing layout and enterprise contact email (completed 2026-04-14)
-- [ ] **Phase 56: Observable Display** - Email, URL, and crypto types render properly in threat search results
+- [x] **Phase 56: Observable Display** - Email, URL, and crypto types render properly in threat search results (completed 2026-04-14)
 - [ ] **Phase 57: UI Polish** - Settings centering and landing page globe/animation fixes
 - [ ] **Phase 58: D3 Graph Controls** - Zoom in/out button controls on relationship graph
 
@@ -214,7 +214,7 @@ Plans:
   3. Unit test asserts all 7 entity types with correct names and labels
 **Plans**: 1 plan
 Plans:
-- [ ] 56-01-PLAN.md — Add 3 missing entity types to DashboardService and update tests
+- [x] 56-01-PLAN.md — Add 3 missing entity types to DashboardService and update tests
 **UI hint**: no
 
 ### Phase 57: UI Polish
@@ -251,6 +251,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 54. Feature Gating | 1/1 | Complete    | 2026-04-14 |
 | 55. Pricing & Enterprise | 2/2 | Complete   | 2026-04-14 |
-| 56. Observable Display | 0/1 | Not started | - |
+| 56. Observable Display | 1/1 | Complete   | 2026-04-14 |
 | 57. UI Polish | 0/? | Not started | - |
 | 58. D3 Graph Controls | 0/? | Not started | - |
