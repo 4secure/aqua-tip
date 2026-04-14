@@ -144,7 +144,7 @@ export default function ThreatMapPage() {
   }, []);
 
   return (
-    <div className="relative -m-6" style={{ height: 'calc(100vh - 60px)' }}>
+    <div className="relative -m-6" style={{ height: 'calc(100vh - 60px)', position: 'relative', zIndex: 0 }}>
       <div ref={mapContainerRef} style={{ width: '100%', height: '100%', background: '#262626' }}></div>
 
       <ThreatMapStatus connected={connected} />

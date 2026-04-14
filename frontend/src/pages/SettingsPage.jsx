@@ -191,7 +191,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Single glassmorphism card */}
-      <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-6 max-w-2xl">
+      <div className="bg-surface/60 border border-border backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto">
         {/* Profile header with avatar */}
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
           {user?.avatar_url ? (

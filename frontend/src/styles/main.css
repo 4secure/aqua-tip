@@ -7,25 +7,29 @@
 @layer base {
   * {
     scrollbar-width: thin;
-    scrollbar-color: #2A2D3E #0A0B10;
+    scrollbar-color: #1E2030 transparent;
   }
 
   *::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
 
   *::-webkit-scrollbar-track {
-    background: #0A0B10;
+    background: transparent;
   }
 
   *::-webkit-scrollbar-thumb {
-    background: #2A2D3E;
-    border-radius: 3px;
+    background: #1E2030;
+    border-radius: 2px;
   }
 
   *::-webkit-scrollbar-thumb:hover {
-    background: #3A3D4E;
+    background: #2A2D3E;
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none;
   }
 
   body {

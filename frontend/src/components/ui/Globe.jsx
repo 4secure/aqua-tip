@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, memo } from "react";
+import { useEffect, useRef, memo } from "react";
 import * as d3 from "d3";
+import landData from '../../data/ne_110m_land.json';
 
 // Dark-theme-only hardcoded colors
 const OCEAN_BG_COLOR = "#070511";
@@ -12,13 +13,9 @@ const PING_COLORS = [
   [234, 179, 8], // yellow
 ];
 
-const GEOJSON_URL =
-  "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/refs/heads/master/110m/physical/ne_110m_land.json";
-
 export const Globe = memo(function Globe({ width = 600, height = 700, className = "" }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -117,6 +114,23 @@ export const Globe = memo(function Globe({ width = 600, height = 700, className 
     let landFeatures;
     let isVisible = true;
     const dotRadius = 1.2;
+
+    // Synchronous land data initialization (bundled locally for instant first paint)
+    landFeatures = landData;
+    const tempDots = [];
+    for (const feature of landFeatures.features) {
+      const dots = generateDotsInPolygon(feature, 18);
+      for (const [lng, lat] of dots) {
+        tempDots.push(lng, lat);
+      }
+    }
+    dotCount = tempDots.length / 2;
+    dotLngs = new Float64Array(dotCount);
+    dotLats = new Float64Array(dotCount);
+    for (let i = 0; i < dotCount; i++) {
+      dotLngs[i] = tempDots[i * 2];
+      dotLats[i] = tempDots[i * 2 + 1];
+    }
 
     const render = () => {
       context.clearRect(0, 0, containerWidth, containerHeight);
@@ -224,43 +238,25 @@ export const Globe = memo(function Globe({ width = 600, height = 700, className 
       }
     };
 
-    const loadWorldData = async () => {
-      try {
-        const response = await fetch(GEOJSON_URL);
-        if (!response.ok) throw new Error("Failed to load land data");
-
-        landFeatures = await response.json();
-
-        const tempDots = [];
-        for (const feature of landFeatures.features) {
-          const dots = generateDotsInPolygon(feature, 18);
-          for (const [lng, lat] of dots) {
-            tempDots.push(lng, lat);
-          }
-        }
-
-        // Store as typed arrays for cache-friendly iteration
-        dotCount = tempDots.length / 2;
-        dotLngs = new Float64Array(dotCount);
-        dotLats = new Float64Array(dotCount);
-        for (let i = 0; i < dotCount; i++) {
-          dotLngs[i] = tempDots[i * 2];
-          dotLats[i] = tempDots[i * 2 + 1];
-        }
-
-        render();
-      } catch (err) {
-        setError("Failed to load land map data");
-      }
-    };
-
     // Rotation and interaction
     const rotation = [0, 0];
     let autoRotate = true;
     const rotationSpeed = 0.2;
 
+    // Pause rotation during scroll to prevent D3/Framer Motion frame contention
+    let isScrolling = false;
+    let scrollTimer = null;
+
+    const handleScroll = () => {
+      isScrolling = true;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
     const rotationTimer = d3.timer(() => {
-      if (!isVisible) return;
+      if (!isVisible || isScrolling) return;
       if (autoRotate) {
         rotation[0] += rotationSpeed;
         projection.rotate(rotation);
@@ -305,8 +301,6 @@ export const Globe = memo(function Globe({ width = 600, height = 700, className 
 
     canvas.addEventListener("mousedown", handleMouseDown);
 
-    loadWorldData();
-
     const pingInterval = setInterval(() => {
       if (dotCount === 0) return;
       const idx = Math.floor(Math.random() * dotCount);
@@ -326,21 +320,10 @@ export const Globe = memo(function Globe({ width = 600, height = 700, className 
       clearInterval(pingInterval);
       observer.disconnect();
       canvas.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimer);
     };
   }, [width, height]);
-
-  if (error) {
-    return (
-      <div className={className}>
-        <div style={{ textAlign: "center" }}>
-          <p className="text-red font-sans font-semibold mb-2">
-            Error loading Earth visualization
-          </p>
-          <p className="text-text-secondary text-sm font-mono">{error}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
