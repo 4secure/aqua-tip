@@ -3,11 +3,13 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Loader2, X, CheckCircle } from 'lucide-react';
 import { GradientButton } from '../ui/GradientButton';
+import { apiClient, csrfCookie } from '../../api/client';
 
 export default function PlanContactModal({ isOpen, onClose, planName }) {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -27,6 +29,7 @@ export default function PlanContactModal({ isOpen, onClose, planName }) {
     if (!isOpen) {
       setForm({ name: '', email: '', message: '' });
       setSent(false);
+      setError(null);
     }
   }, [isOpen]);
 
@@ -38,10 +41,19 @@ export default function PlanContactModal({ isOpen, onClose, planName }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
-    // TODO: wire to backend endpoint when ready
-    await new Promise((r) => setTimeout(r, 1000));
-    setSending(false);
-    setSent(true);
+    setError(null);
+    try {
+      await csrfCookie();
+      await apiClient.post('/api/enterprise/contact', {
+        ...form,
+        plan_name: planName,
+      });
+      setSent(true);
+    } catch (err) {
+      setError(err.message || 'Failed to send message. Please try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return createPortal(
@@ -140,6 +152,10 @@ export default function PlanContactModal({ isOpen, onClose, planName }) {
                       placeholder="Tell us about your needs..."
                     />
                   </div>
+
+                  {error && (
+                    <p className="text-red text-sm font-mono">{error}</p>
+                  )}
 
                   <div className="flex gap-3 pt-1">
                     <button

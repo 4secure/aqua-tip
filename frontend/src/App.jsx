@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import FeatureGatedRoute from './components/auth/FeatureGatedRoute';
 import GuestRoute from './components/auth/GuestRoute';
@@ -30,6 +30,16 @@ function LazyFallback() {
   return <LoadingScreen />;
 }
 
+function ConditionalAppLayout() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <LoadingScreen />;
+
+  if (user) return <AppLayout />;
+
+  return <Outlet />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -54,7 +64,11 @@ export default function App() {
             <Route path="/eula" element={<EulaPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/contact" element={<ContactUsPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
+
+            {/* Auth-conditional layout (shows AppLayout when logged in, standalone when not) */}
+            <Route element={<ConditionalAppLayout />}>
+              <Route path="/pricing" element={<PricingPage />} />
+            </Route>
 
             {/* All app routes with shared layout */}
             <Route element={<AppLayout />}>

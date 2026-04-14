@@ -61,40 +61,32 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-primary">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 flex items-center justify-between px-12 h-16 bg-primary border-b border-border backdrop-blur-sm">
-        <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Aqua Tip" className="w-[22px] h-[22px]" />
-            <span className="font-sans text-lg font-bold text-text-primary tracking-tight">
-              AQUA TIP
-            </span>
-          </Link>
-        </div>
-        <div className="flex items-center gap-4">
-          {user ? (
-            <Link to="/threat-search">
+      {/* Navbar -- only shown for unauthenticated users (AppLayout provides topbar/sidebar when logged in) */}
+      {!user && (
+        <nav className="sticky top-0 z-50 flex items-center justify-between px-12 h-16 bg-primary border-b border-border backdrop-blur-sm">
+          <div className="flex items-center gap-8">
+            <Link to="/" className="flex items-center gap-2">
+              <img src="/logo.png" alt="Aqua Tip" className="w-[22px] h-[22px]" />
+              <span className="font-sans text-lg font-bold text-text-primary tracking-tight">
+                AQUA TIP
+              </span>
+            </Link>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/login"
+              className="font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Log In
+            </Link>
+            <Link to="/register">
               <GradientButton size="sm">
-                Threat Lookup <ArrowRight className="w-3.5 h-3.5" />
+                Sign Up <ArrowRight className="w-3.5 h-3.5" />
               </GradientButton>
             </Link>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-              >
-                Log In
-              </Link>
-              <Link to="/register">
-                <GradientButton size="sm">
-                  Sign Up <ArrowRight className="w-3.5 h-3.5" />
-                </GradientButton>
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
+          </div>
+        </nav>
+      )}
 
       <div className="px-12 py-16 space-y-6">
       {/* Header */}
