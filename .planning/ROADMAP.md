@@ -198,9 +198,10 @@ Plans:
   2. Unauthenticated user viewing /pricing sees a standalone page without sidebar
   3. Enterprise "Contact Us" form submits successfully and triggers an email notification to the admin
   4. Unauthenticated user on the pricing page can click the topbar logo/icon to return to the landing page
-**Plans**: 1 plan
+**Plans**: 2 plans
 Plans:
-- [ ] 54-01-PLAN.md — Update free plan features list and verify gating
+- [ ] 55-01-PLAN.md — Enterprise contact backend (controller, mailable, route)
+- [ ] 55-02-PLAN.md — Dual routing for pricing page and contact modal wiring
 **UI hint**: yes
 
 ### Phase 56: Observable Display
@@ -249,7 +250,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 54. Feature Gating | 1/1 | Complete    | 2026-04-14 |
-| 55. Pricing & Enterprise | 0/? | Not started | - |
+| 55. Pricing & Enterprise | 0/2 | Not started | - |
 | 56. Observable Display | 0/? | Not started | - |
 | 57. UI Polish | 0/? | Not started | - |
 | 58. D3 Graph Controls | 0/? | Not started | - |
