@@ -17,7 +17,7 @@ import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { useAuth } from '../contexts/AuthContext';
-import CategoryDistributionChart from '../components/threat-news/CategoryDistributionChart';
+import CategoryTreemap from '../components/threat-news/CategoryTreemap';
 
 const CATEGORY_COLORS = [
   { bg: 'bg-violet/20', text: 'text-violet' },
@@ -535,14 +535,24 @@ export default function ThreatNewsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="font-sans text-2xl font-bold text-text-primary mb-1">
-          Threat News
-        </h1>
-        <p className="font-mono text-sm text-text-muted">
-          Browse threat intelligence reports
-        </p>
+      {/* Header + Treemap */}
+      <div className="flex items-start justify-between gap-6">
+        <div className="shrink-0">
+          <h1 className="font-sans text-2xl font-bold text-text-primary mb-1">
+            Threat News
+          </h1>
+          <p className="font-mono text-sm text-text-muted">
+            Browse threat intelligence reports
+          </p>
+        </div>
+        {!loading && !error && items.length > 0 && (
+          <CategoryTreemap
+            items={items}
+            categories={categories}
+            activeLabel={label}
+            onCategoryClick={handleChartCategoryClick}
+          />
+        )}
       </div>
 
       {/* Toolbar: Search + Category Dropdown + Date Selector */}
@@ -595,17 +605,6 @@ export default function ThreatNewsPage() {
             <X size={14} className="text-violet" />
           </button>
         </div>
-      )}
-
-      {/* Category Distribution Chart */}
-      {!loading && !error && items.length > 0 && (
-        <CategoryDistributionChart
-          items={items}
-          categories={categories}
-          activeLabel={label}
-          onCategoryClick={handleChartCategoryClick}
-          timezone={timezone}
-        />
       )}
 
       {/* Error State */}
