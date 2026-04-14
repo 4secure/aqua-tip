@@ -12,7 +12,7 @@ class DashboardService
     ) {}
 
     /**
-     * Get observable counts by entity type (IPv4-Addr, Domain-Name, Hostname, X509-Certificate).
+     * Get observable counts by entity type (IPv4-Addr, Domain-Name, Hostname, X509-Certificate, Email-Addr, Cryptocurrency-Wallet, Url).
      *
      * Uses 5-min cache with stale-cache fallback when OpenCTI is unreachable.
      *
@@ -96,7 +96,7 @@ class DashboardService
     }
 
     /**
-     * Fetch entity type counts from OpenCTI via 4 sequential GraphQL queries.
+     * Fetch entity type counts from OpenCTI via 7 sequential GraphQL queries.
      *
      * @return array<int, array{entity_type: string, label: string, count: int}>
      */
@@ -107,6 +107,9 @@ class DashboardService
             'Domain-Name' => 'Domains',
             'Hostname' => 'Hostnames',
             'X509-Certificate' => 'Certificates',
+            'Email-Addr' => 'Email',
+            'Cryptocurrency-Wallet' => 'Crypto Wallet',
+            'Url' => 'URL',
         ];
 
         $graphql = <<<'GRAPHQL'
