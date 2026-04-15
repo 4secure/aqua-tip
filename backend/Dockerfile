@@ -33,6 +33,11 @@ RUN composer dump-autoload --optimize && \
     php artisan route:clear && \
     php artisan view:clear
 
+# Download MaxMind GeoLite2-City DB for local geo resolution
+RUN mkdir -p /var/www/storage/app/geoip && \
+    curl -sSL "https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/GeoLite2-City.mmdb" \
+    -o /var/www/storage/app/geoip/GeoLite2-City.mmdb
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
     chmod -R 775 /var/www/storage /var/www/bootstrap/cache

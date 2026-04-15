@@ -24,17 +24,32 @@ class SnapshotController extends Controller
             ], 502);
         }
 
-        $countries = collect($events)
+        $eventsCollection = collect($events);
+
+        $countries = $eventsCollection
             ->pluck('countryCode')
             ->filter()
             ->unique()
             ->count();
 
-        $types = collect($events)
+        $types = $eventsCollection
             ->pluck('type')
             ->filter()
             ->unique()
             ->count();
+
+        $countryCounts = $eventsCollection
+            ->filter(fn ($e) => !empty($e['countryCode']))
+            ->groupBy('countryCode')
+            ->map(fn ($group) => [
+                'code' => $group[0]['countryCode'],
+                'name' => $group[0]['country'] ?? $group[0]['countryCode'],
+                'count' => $group->count(),
+            ])
+            ->sortByDesc('count')
+            ->values()
+            ->slice(0, 10)
+            ->all();
 
         return response()->json([
             'data' => [
@@ -44,6 +59,7 @@ class SnapshotController extends Controller
                     'countries' => $countries,
                     'types' => $types,
                 ],
+                'countryCounts' => $countryCounts,
             ],
         ]);
     }

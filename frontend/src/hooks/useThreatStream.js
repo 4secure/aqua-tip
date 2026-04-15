@@ -50,6 +50,7 @@ export function useThreatStream() {
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
   const [snapshotLoaded, setSnapshotLoaded] = useState(false);
+  const [snapshotCountryCounts, setSnapshotCountryCounts] = useState([]);
 
   const recalculate = useCallback((eventList) => {
     setCounters(deriveCounters(eventList));
@@ -69,6 +70,9 @@ export function useThreatStream() {
           setCounters(response.data.counters);
         } else {
           recalculate(initialEvents);
+        }
+        if (response?.data?.countryCounts) {
+          setSnapshotCountryCounts(response.data.countryCounts);
         }
         setSnapshotLoaded(true);
       } catch {
@@ -167,7 +171,8 @@ export function useThreatStream() {
     };
   }, [snapshotLoaded]);
 
-  const countryCounts = aggregateCountryCounts(events);
+  const clientCountryCounts = aggregateCountryCounts(events);
+  const countryCounts = clientCountryCounts.length > 0 ? clientCountryCounts : snapshotCountryCounts;
   const typeCounts = aggregateTypeCounts(events);
 
   return { events, counters, countryCounts, typeCounts, connected };

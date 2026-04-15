@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Data\CountryCentroids;
+use App\Models\IpGeo;
 use GeoIp2\Database\Reader;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -158,11 +159,48 @@ class ThreatMapService
      */
     public function resolveGeo(string $ip, ?string $countryCode = null): ?array
     {
-        return Cache::remember(
+        // Layer 2: Check persistent ip_geo DB table first (survives cache expiration)
+        try {
+            $cached = IpGeo::find($ip);
+
+            if ($cached !== null) {
+                return [
+                    'lat' => $cached->lat,
+                    'lng' => $cached->lng,
+                    'city' => $cached->city,
+                    'country' => $cached->country_name,
+                    'countryCode' => $cached->country_code,
+                ];
+            }
+        } catch (\Throwable) {
+            // Table may not exist yet — fall through
+        }
+
+        $geo = Cache::remember(
             'geo:' . md5($ip),
             now()->addHours(1),
             fn () => $this->fetchGeo($ip, $countryCode),
         );
+
+        // Persist to ip_geo table for future cold starts (fire-and-forget)
+        if ($geo !== null && !empty($geo['countryCode'])) {
+            try {
+                IpGeo::updateOrCreate(
+                    ['ip' => $ip],
+                    [
+                        'country_code' => $geo['countryCode'],
+                        'country_name' => $geo['country'],
+                        'city' => $geo['city'],
+                        'lat' => $geo['lat'],
+                        'lng' => $geo['lng'],
+                    ],
+                );
+            } catch (\Throwable) {
+                // Non-critical — don't break geo resolution
+            }
+        }
+
+        return $geo;
     }
 
     /**
