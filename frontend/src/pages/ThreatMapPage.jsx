@@ -157,7 +157,6 @@ export default function ThreatMapPage() {
         counters={counters}
         connected={connected}
         countryCounts={countryCounts}
-        typeCounts={typeCounts}
         events={events}
         onEventClick={handleEventClick}
       />

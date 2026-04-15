@@ -174,7 +174,7 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
             <p className="text-xs text-text-muted text-center py-4">No indicators found</p>
           ) : (
             <div className="flex-1 min-h-0 overflow-y-auto">
-              {indicators.slice(0, 5).map((ind) => (
+              {indicators.slice(0, 10).map((ind) => (
                 <IndicatorRow key={ind.id} indicator={ind} />
               ))}
             </div>
@@ -264,20 +264,22 @@ export default function RightOverlayPanel({ collapsed, peeking, onPeekStart, onP
         </div>
       )}
 
-      {!collapsed && (
-        <AnimatePresence>
+      {/* Expanded panel — AnimatePresence always mounted so exit animates */}
+      <AnimatePresence>
+        {!collapsed && (
           <motion.div
-            initial={{ x: 20, opacity: 0 }}
+            key="right-expanded"
+            initial={{ x: 380, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 20, opacity: 0 }}
+            exit={{ x: 380, opacity: 0 }}
             transition={SPRING_TRANSITION}
             className="absolute top-4 right-4 z-[1000] w-[380px] h-[calc(100vh-120px)] flex flex-col gap-4"
             {...EVENT_ISOLATION}
           >
             {panelContent}
           </motion.div>
-        </AnimatePresence>
-      )}
+        )}
+      </AnimatePresence>
     </>
   );
 }
