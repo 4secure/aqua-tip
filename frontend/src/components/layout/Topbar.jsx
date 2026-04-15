@@ -58,7 +58,7 @@ export default function Topbar({ collapsed, onHamburgerClick }) {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="text-text-muted">Aqua-Tip</span>
+        <span className="text-text-muted">Aqua-TIP</span>
         <span className="text-text-muted">/</span>
         <span className="text-text-primary font-medium">{pageName}</span>
       </div>
