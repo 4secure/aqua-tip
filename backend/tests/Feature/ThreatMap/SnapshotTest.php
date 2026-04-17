@@ -3,8 +3,11 @@
 use App\Models\User;
 use App\Services\ThreatMapService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 
 uses(RefreshDatabase::class);
+
+beforeEach(fn () => Cache::flush());
 
 function fakeThreatMapSnapshot(): array
 {
@@ -53,10 +56,12 @@ function mockThreatMapService(array $snapshot = null): void
     });
 }
 
-test('GET /api/threat-map/snapshot returns 401 for unauthenticated user', function () {
+test('GET /api/threat-map/snapshot is publicly accessible and returns 200 (no auth required)', function () {
+    mockThreatMapService();
+
     $response = $this->getJson('/api/threat-map/snapshot');
 
-    $response->assertStatus(401);
+    $response->assertStatus(200);
 });
 
 test('GET /api/threat-map/snapshot returns 200 with correct structure', function () {
