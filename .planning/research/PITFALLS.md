@@ -1,321 +1,411 @@
-# Pitfalls Research
+# Domain Pitfalls — v6.1 Threat Map Buffer & Threat Actor Depth
 
-**Domain:** Adding plan restructuring, feature gating, auth FOUC fix, D3 zoom, contact form, chart changes, and UI polish to a live Laravel+React SPA
-**Project:** AQUA TIP v4.0 -- Plan Overhaul & UX Polish
-**Researched:** 2026-04-10
-**Confidence:** HIGH (direct codebase analysis of PlanSeeder.php, CreditResolver.php, AuthContext.jsx, App.jsx, ProtectedRoute.jsx, ThreatSearchPage.jsx D3Graph, api.php routes, Plan model)
+**Domain:** Adding persistent marker buffer, markercluster, victimology tab, and Campaigns page to an existing React 19 + vanilla Leaflet + Laravel SSE + OpenCTI stack
+**Researched:** 2026-04-17
+**Confidence:** HIGH (derived from direct codebase inspection + stack-specific analysis)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Plan Seeder Overwrites Create Credit Limit Desync for Active Users
+### PITFALL-01 [Buffer] — Stale Closure in SSE onmessage Captures MAX_EVENTS at Mount Time
 
-**What goes wrong:**
-The current `PlanSeeder` uses `updateOrCreate` keyed on `slug`. Changing `daily_credit_limit` for existing slugs (e.g., `free` from 1 to 5, `basic` from 15 to 30) updates the `plans` table immediately. But the `credits` table stores a denormalized `limit` column set at last lazy reset. Mid-day users retain the old `limit` in their credit row until their next midnight UTC reset via `CreditResolver::lazyReset()`. The credit badge shows "1/1" while the pricing page advertises "5/day".
+**Feature area:** Buffer / Lifecycle
+**What goes wrong:** `useThreatStream.js` currently hardcodes `MAX_EVENTS = 100` at module level. When the buffer-size dropdown changes (100 → 500 → 2000), the new limit must reach the `onmessage` closure. The current pattern sets state with `setEvents((prev) => [newEvent, ...prev].slice(0, MAX_EVENTS))` — if `MAX_EVENTS` becomes a `useRef` or state value, and the closure is defined inside the `useEffect` that only runs on `snapshotLoaded`, the closure captures the initial ref value. Updating the ref later does not re-run the effect, so the old slice limit persists until the SSE reconnects.
 
-**Why it happens:**
-Credit limits are denormalized into the `credits` table at reset time (`lazyReset` reads `resolveLimit()` which reads `plan.daily_credit_limit`). The seeder changes the source of truth, but the cached `credits.limit` is stale until next reset.
+**Why it happens:** The SSE `useEffect` depends only on `[snapshotLoaded]`. Adding `bufferSize` to the dependency array would close and re-open the SSE connection every time the dropdown changes — that is the wrong fix. Passing the limit via a `useRef` (not state) avoids re-opening, but only works if the closure reads `bufferRef.current` rather than a captured value.
 
-**How to avoid:**
-1. After running the seeder, execute a data migration that recalculates every active credit row:
-   ```sql
-   UPDATE credits SET limit = plans.daily_credit_limit, remaining = LEAST(remaining, plans.daily_credit_limit)
-   FROM users JOIN plans ON users.plan_id = plans.id
-   WHERE credits.user_id = users.id AND credits.user_id IS NOT NULL;
-   ```
-2. The `LEAST(remaining, plans.daily_credit_limit)` prevents users from retaining more credits than the new lower limit allows (e.g., user had 10 remaining on old 15-limit plan, new limit is 5 -- cap to 5).
-3. For users whose limit INCREASED (free 1 -> 5), add the difference to remaining: `remaining = remaining + (new_limit - old_limit)`.
-4. Wrap seeder + credit sync in an artisan command so they always run atomically.
+**Consequences:** Buffer size dropdown appears to work (localStorage saves correctly) but actual truncation still happens at 100 events until page reload.
 
-**Warning signs:**
-- Credit badge shows old limit after deploy
-- Users report limits changed "the next day" instead of immediately
-- `credits.limit` != `plans.daily_credit_limit` for users on that plan
+**Prevention:**
+- Store buffer size in a `useRef` — `const bufferLimitRef = useRef(bufferSize)` — and keep it synced with an effect: `useEffect(() => { bufferLimitRef.current = bufferSize; }, [bufferSize])`.
+- In `onmessage`, read `bufferLimitRef.current` for the slice: `[newEvent, ...prev].slice(0, bufferLimitRef.current)`.
+- Do NOT add `bufferSize` to the SSE effect dependency array.
 
-**Phase to address:**
-Phase 1 (Plan seeder + CreditResolver update) -- credit sync migration MUST ship alongside the seeder, not as a follow-up.
+**Detection:** After changing dropdown, check `events.length` in React DevTools. If it never exceeds 100 regardless of new setting, the closure is stale.
+
+**Phase:** Buffer dropdown implementation phase (whichever phase adds the `bufferSize` state and the localStorage persist).
 
 ---
 
-### Pitfall 2: "Trial" Plan Slug Conflicts with Existing Trial-as-User-State Logic
+### PITFALL-02 [Buffer] — Persistent Markers Accumulate Without Leaflet Layer Cleanup
 
-**What goes wrong:**
-The v4.0 spec introduces a "Trial" tier (30d, 10/day). The current system handles trial as a user state: `trial_ends_at` timestamp + `plan_id = null`. `CreditResolver::resolveLimit()` checks `plan_id !== null` first (returns plan limit), then checks trial state. If a `trial` plan slug is created and assigned to users via `plan_id`, the trial expiry check in `checkTrialExpiry()` never fires because it requires `plan_id === null`. Trial users never auto-downgrade to Free.
+**Feature area:** Buffer / Memory Leak
+**What goes wrong:** The current design adds `addPulseMarker` temporary markers that self-remove via `setTimeout`. For the new persistent buffer, each of the 100–2000 events must map to a persistent Leaflet marker tracked in a `Map<id, L.Marker>`. Without an explicit eviction path, removing the oldest marker when the buffer overflows is missed: the `events` state array is trimmed but the corresponding Leaflet layer is not removed from the map.
 
-**Why it happens:**
-Trial is implemented as "no plan with a timer" (lines 91-97 of CreditResolver.php). Making it a plan row changes the invariant that trial = no plan.
+**Why it happens:** React state (the events array) and Leaflet layer state are two independent systems. Reconciling them requires a side-by-side map of `event.id → marker`. If the sync logic only adds on new events without removing on eviction, the Leaflet DOM accumulates orphan marker nodes. At 2000 markers, each being a `L.divIcon` with DOM, this is ~2000 extra DOM elements permanently in the tile pane.
 
-**How to avoid:**
-Keep trial as a user state, not a plan row. Specifically:
-1. Do NOT create a `trial` slug in the PlanSeeder.
-2. Keep `CreditResolver::TRIAL_DAILY_LIMIT = 10` (already matches the v4.0 spec).
-3. The pricing page displays "Trial" as a virtual card (not from the database), only for users currently in trial.
-4. New users continue to get `plan_id = null` + `trial_ends_at = now + 30 days`.
-5. On trial expiry, `checkTrialExpiry()` assigns the free plan (already implemented correctly).
+**Consequences:** Memory grows monotonically. At 2000 markers, scrolling/panning slows visibly. Eventually the browser tab may crash on low-RAM devices. z-index conflicts with overlay panels at high marker density.
 
-**Warning signs:**
-- `Plan::where('slug', 'trial')` exists in the database
-- Trial users have a non-null `plan_id`
-- Trial countdown banner disappears because user "has a plan"
-- Trial users never downgrade after 30 days
+**Prevention:**
+- Maintain a `markerRegistryRef: Map<string, L.Marker>` keyed by `event.id`.
+- On each `events` update (via `useEffect([events])` in `ThreatMapPage`):
+  1. Compute evicted IDs: IDs in `markerRegistryRef` but not in current `events`.
+  2. Call `map.removeLayer(marker)` for each evicted ID, then delete from registry.
+  3. Add marker only if ID not already in registry (avoid double-add on re-render).
+- This is a full diff-based reconciliation, not a clear-and-redraw loop.
 
-**Phase to address:**
-Phase 1 (Plan restructure) -- this is a design decision that must be made BEFORE any code is written. Document in the phase plan.
+**Detection:** Open Chrome DevTools → Memory → Heap snapshot. After 10 minutes of live stream, search for `L.Marker` count. Should stay at or below buffer limit.
+
+**Phase:** Persistent marker implementation phase.
 
 ---
 
-### Pitfall 3: Feature Gating Breaks Guest Search or Free Users Access Everything
+### PITFALL-03 [Buffer] — Race Condition: Dropdown Change During Active SSE Burst
 
-**What goes wrong:**
-Two failure modes:
-1. Threat search (`/threat-search`) is accidentally made auth-required, breaking guest access (guests currently get 1 search/day via IP-based credits).
-2. Feature gating is only implemented in the frontend (hiding sidebar links), so Free users can still call `/api/threat-actors`, `/api/threat-news`, etc. directly.
+**Feature area:** Buffer / Race
+**What goes wrong:** The user changes the dropdown from 2000 → 100 while a burst of events is arriving via SSE. Two things happen concurrently: (a) the state setter for `bufferSize` queues a React batch, (b) `onmessage` fires multiple times queuing `setEvents` batches. If React batches these updates, the `bufferLimitRef` may not reflect the new value before several `setEvents` calls run with the old slice value. The array briefly exceeds the new intended limit.
 
-**Why it happens:**
-The spec says "Free plan = threat search only." This is ambiguous: does it mean "Free users can ONLY access threat search" (restricting other features) or "threat search is available to Free users" (others need higher plans)? The correct reading is the former: Free users lose access to Threat Actors, Threat News, Dark Web, and the Dashboard/Threat Map. But the implementation must gate on the backend, not just the frontend.
+**Consequences:** Minor — the next `setEvents` call corrects it. But if the "pulse-then-settle" animation triggers on every new event arrival during this window, 2000+ markers could briefly attempt to animate simultaneously, causing a frame drop.
 
-**How to avoid:**
-1. Create a `PlanGate` middleware that checks `$user->plan->slug` against a route's required plan level.
-2. Apply it to backend routes: `threat-actors`, `threat-news`, `dark-web`, `threat-map/stream`, `search-history` should require plan level >= basic.
-3. Keep `/api/threat-search` and `/api/credits` ungated (they use credit-based rate limiting already).
-4. Frontend: show the page with a blurred overlay + upgrade CTA for Free users, not a blank 403. This is better UX than hiding the sidebar link entirely.
-5. Keep sidebar links visible but visually dimmed with a lock icon for gated features.
+**Prevention:** After updating `bufferLimitRef.current`, also trim the current events state immediately: `setEvents(prev => prev.slice(0, newLimit))`. This single explicit trim prevents any animation burst.
 
-**Warning signs:**
-- Guest users see "login required" on `/threat-search`
-- Free users can still fetch `/api/threat-actors` (returns 200 instead of 403)
-- Backend returns 403 but frontend shows a broken white page
-
-**Phase to address:**
-Phase 2 (Feature gating) -- backend middleware + frontend upgrade CTA must ship together. Test both the API response AND the UI for Free users.
+**Phase:** Buffer dropdown implementation phase.
 
 ---
 
-### Pitfall 4: Auth FOUC Fix Only Covers Guarded Routes, Not Public Pages
+### PITFALL-04 [Buffer] — Pulse Animation on Evicted Markers Colliding With New Arrivals
 
-**What goes wrong:**
-The FOUC fix targets auth loading state. `ProtectedRoute` and `GuestRoute` already show spinners during `loading`. But Landing (`/`), Pricing (`/pricing`), Threat Search (`/threat-search`), and Contact (`/contact`) are outside both guards. They call `useAuth()` and immediately render with `user = null`, then re-render 200-500ms later when auth resolves. The pricing page navbar flickers from "Log In / Sign Up" to "Threat Lookup" button. The threat search page flickers the guest CTA.
+**Feature area:** Buffer / Animation
+**What goes wrong:** Two events share the same lat/lng (e.g., both are from the same IP or country centroid). One is evicted (marker removed), the other arrives milliseconds later (new marker added). If the eviction triggers a CSS fade-out transition and the add triggers a pulse-ring animation simultaneously at identical coordinates, both DOM elements exist at the same pixel position during the transition. Depending on z-index and pointer-events settings, the fade-out marker can absorb click events intended for the incoming pulse.
 
-**Why it happens:**
-Only route guards consume the `loading` state. Pages outside guards render immediately with stale auth context (user = null while the `/api/user` request is in flight).
+**Consequences:** Click-to-fly-to interaction on ThreatMapFeed broken for same-coord events during eviction window.
 
-**How to avoid:**
-Add a single global auth gate in `App.jsx` that blocks ALL route rendering until auth resolves:
-```jsx
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AuthGate>  {/* renders children only when loading=false */}
-          <Suspense fallback={<LazyFallback />}>
-            <Routes>...</Routes>
-          </Suspense>
-        </AuthGate>
-      </AuthProvider>
-    </BrowserRouter>
-  );
-}
-```
-The `AuthGate` component is 5 lines: if `loading`, show spinner; else render `children`. This is a single-point fix -- do NOT add loading checks to individual pages.
+**Prevention:**
+- When evicting a marker, use a 300ms CSS fade-out (add a class, then removeLayer in a setTimeout). During those 300ms, skip adding a new marker at the same coordinate if one is already in the eviction queue.
+- Track eviction-pending coordinates in a `Set<string>` keyed by `${lat.toFixed(3)},${lng.toFixed(3)}`. Check before adding a new marker.
 
-**Warning signs:**
-- Pricing navbar flickers between auth states on hard refresh
-- Threat search shows "Sign in for more lookups" CTA then hides it
-- Landing page buttons change text after 200ms
-
-**Phase to address:**
-Phase 3 (Auth FOUC fix) -- a single `AuthGate` wrapper component in App.jsx. Test on ALL page types: guarded, public, guest-only, and lazy-loaded.
+**Phase:** Pulse-then-settle-then-evict lifecycle phase.
 
 ---
 
-### Pitfall 5: D3 Zoom Captures Node Drag Events, Breaking Graph Interaction
+### PITFALL-05 [Cluster] — MarkerClusterGroup Breaks Custom divIcon Pulse CSS
 
-**What goes wrong:**
-The current `D3Graph` component uses `d3.drag()` on node `<g>` elements (ThreatSearchPage.jsx lines 102-106). Adding `d3.zoom()` on the SVG creates an event conflict: both behaviors listen for pointer/mouse events. Dragging a node triggers both node repositioning AND canvas panning simultaneously. The node flies off-screen while the viewport shifts.
+**Feature area:** Cluster
+**What goes wrong:** `leaflet.markercluster` wraps markers in a `MarkerClusterGroup` layer. When the cluster is active, Leaflet injects its own CSS classes (`leaflet-cluster-anim`, `leaflet-markercluster-icon`) onto the cluster icons. These use absolute positioning and `transform` animations that can interfere with the existing `map-event-pulse` and `map-event-pulse--cyan/red/violet/amber` CSS animations defined in `animations.css`. Specifically, MarkerCluster applies a `transition: transform 0.3s ease-out` to spiderfy/unspiderfy; if the pulse ring also uses `transform: scale()`, both transitions compete on the same element.
 
-**Why it happens:**
-D3 zoom captures all pointer events on its target element (the SVG). Node drag events bubble up from `<g>` to `<svg>`, where zoom intercepts them as pan gestures.
+**Consequences:** Pulse rings appear at wrong scale during cluster expansion. In the worst case, the pulse rings freeze if the cluster transition interrupts `animation: pulse-ring 1.6s ease-out`.
 
-**How to avoid:**
-1. Create a zoom layer: `const g = svg.append('g')` -- put all content (links, nodes) inside this `<g>`.
-2. Apply zoom to the SVG: `svg.call(zoom.on('zoom', (e) => g.attr('transform', e.transform)))`.
-3. Apply drag to nodes as before, but add `event.sourceEvent.stopPropagation()` in the drag start handler to prevent zoom from seeing node drags.
-4. Disable double-click zoom: `svg.on('dblclick.zoom', null)`.
-5. Add visible +/- buttons that call `zoom.scaleBy(svg.transition(), 1.3)` and `zoom.scaleBy(svg.transition(), 0.7)`.
-6. Add a reset button: `svg.transition().call(zoom.transform, d3.zoomIdentity)`.
+**Prevention:**
+- Existing pulse markers (`addPulseMarker`) are temporary (setTimeout removes them in 1600ms). They should NOT be added to the `MarkerClusterGroup` — add them directly to the map as today. Only persistent buffer markers belong in the cluster group.
+- The cluster icon styling must be explicitly overridden for the dark theme. Add a custom `iconCreateFunction` to `MarkerClusterGroup` that returns a `L.divIcon` with the project's glassmorphism classes, not the default MarkerCluster CSS.
+- Scope MarkerCluster CSS overrides to `.leaflet-cluster-icon` to avoid bleed into pulse ring classes.
 
-**Warning signs:**
-- Dragging a node pans the entire canvas
-- Scroll wheel does nothing (zoom not attached to SVG)
-- Zoom works but node positions don't update (transform on wrong element)
-
-**Phase to address:**
-Phase 5 (D3 zoom controls) -- the D3Graph component is self-contained, changes are isolated. But the entire component needs restructuring (zoom layer pattern), not just adding zoom.
+**Phase:** MarkerCluster integration phase.
 
 ---
 
-### Pitfall 6: Contact Form Email Spam Abuse Within Hours of Deploy
+### PITFALL-06 [Cluster] — Toggling Cluster On/Off Mid-Session Leaks the Old Layer
 
-**What goes wrong:**
-A public contact form endpoint that sends email is an immediate bot target. Without rate limiting AND bot detection, the SMTP provider flags the account for spam, and the inbox fills with garbage within the first day.
+**Feature area:** Cluster
+**What goes wrong:** When buffer size crosses the 500 threshold, the plan is to auto-enable clustering. The naive implementation is: "create a new `MarkerClusterGroup`, move markers into it, add to map." But the old `L.layerGroup` or previous `MarkerClusterGroup` must be explicitly removed. If the toggle logic creates a new cluster group without calling `map.removeLayer(oldGroup)`, both groups exist on the map simultaneously. The old group's markers render without clustering; the new group renders with it — double-render.
 
-**Why it happens:**
-Contact forms are the #1 exploited endpoint on public websites. Bots submit hundreds of requests per hour.
+**Consequences:** Each marker appears twice on the map. Event click handlers fire twice. Memory doubles.
 
-**How to avoid:**
-1. **Rate limit:** `throttle:3,60` middleware (3 submissions per IP per hour).
-2. **Honeypot field:** Hidden `website` input. Reject (silently return 200) if filled.
-3. **Time check:** Embed a `_rendered_at` timestamp. Reject submissions under 3 seconds.
-4. **Queue email:** `Mail::to(...)->queue(new EnterpriseContactMail(...))` -- never block HTTP response on SMTP.
-5. **Input validation:** Name max 100 chars, email validated, message max 2000 chars, strip HTML.
-6. **Do NOT use CAPTCHA** -- honeypot + rate limit + time check catches 99% of bots without UX friction.
+**Prevention:**
+- Store the active marker container in a single `markerGroupRef`. Whether it's a `L.layerGroup` or `L.markerClusterGroup`, always call `map.removeLayer(markerGroupRef.current)` before replacing. Then reassign `markerGroupRef.current` and call `map.addLayer(newGroup)`.
+- Transfer existing markers from old group to new group by iterating `markerRegistryRef` and calling `newGroup.addLayer(marker)` for each. Do not re-create marker DOM.
 
-**Warning signs:**
-- 50+ identical submissions in the first day
-- SMTP provider (Resend/Postmark/Mailgun) sends abuse warning
-- Contact endpoint response time is 2-5 seconds (blocking SMTP send)
-
-**Phase to address:**
-Phase 6 (Enterprise contact form) -- all three protections (rate limit, honeypot, time check) must ship together. Email must be queued.
+**Phase:** MarkerCluster integration phase.
 
 ---
 
-### Pitfall 7: Pricing Page Dual-Layout Causes Flash or Route Conflicts
+### PITFALL-07 [Cluster] — Z-Index Conflict Between Cluster Popups and Overlay Panels
 
-**What goes wrong:**
-v4.0 wants auth-aware pricing: authenticated users see pricing within AppLayout (with sidebar), guests see standalone pricing (own navbar). If implemented as conditional rendering based on auth state, the auth FOUC problem resurfaces on just this page. If implemented as two separate routes, React Router precedence issues arise.
+**Feature area:** Cluster / Overlay Panels
+**What goes wrong:** The overlay panels in `LeftOverlayPanel.jsx` and `RightOverlayPanel.jsx` use `z-[1000]`. Leaflet's default `z-index` for `.leaflet-pane` is 400, and for popups it is 700. However, `leaflet.markercluster` renders spiderfy legs and cluster label overlays in `.leaflet-marker-pane` (z-index 600) and popup pane (700). The overlay panels at z-1000 correctly sit above these. The problem is the other direction: `AnimatePresence` from Framer Motion on the panels creates a new `transform` stacking context. Any child with a high z-index inside a `transform` stacking context is clipped to that context — meaning the MarkerCluster popup can render "above" the Framer Motion transform context on some browsers if `z-index` on the Framer wrapper is not explicitly set.
 
-**Why it happens:**
-Pricing is currently a standalone public route (App.jsx line 58) with its own navbar that already handles auth-awareness (shows different buttons for auth vs guest). Moving it inside AppLayout for auth users requires either route duplication or layout-level conditional logic.
+**Consequences:** Cluster popups appear to float above the left panel on click, making the panel feel broken.
 
-**How to avoid:**
-The current approach is already sufficient and simpler:
-1. **Keep pricing as a single standalone route** at `/pricing` (outside AppLayout).
-2. The existing `PricingPage` navbar already shows "Threat Lookup" for auth users and "Log In / Sign Up" for guests.
-3. If sidebar presence is truly needed for auth users, add a "Back to Threat Map" link in the pricing page navbar for auth users -- this gives navigation context without duplicating layouts.
-4. If you MUST have sidebar: create two `<Route>` entries (`/pricing` inside AppLayout wrapped in a soft auth check, and `/pricing` standalone as fallback). But this adds complexity for minimal UX gain.
+**Prevention:**
+- The existing `motion.div` wrappers already handle this correctly via absolute positioning at `z-[1000]`. Verify that any new `MarkerClusterGroup` popup uses Leaflet's standard popup pane (z-700), which stays below the panel.
+- Explicitly set `zIndexOffset` on the `MarkerClusterGroup` options: `{ zIndexOffset: -100 }` to ensure cluster markers sit below panels.
 
-**Warning signs:**
-- Pricing page shows sidebar then hides it (or vice versa) on load
-- Browser back button from pricing goes to wrong page depending on auth state
-- Auth FOUC returns on pricing page despite the global fix
-
-**Phase to address:**
-Phase 7 (Pricing routing) -- evaluate whether dual-layout is truly needed before implementing. The simpler solution (keep current standalone page) may satisfy the requirement.
+**Phase:** MarkerCluster integration phase.
 
 ---
 
-## Technical Debt Patterns
+### PITFALL-08 [Cluster] — Click Propagation: Cluster Click Fires Map Click Handler
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Hardcoding plan slugs in frontend (`if (plan.slug === 'free')`) | Quick feature gating without API changes | Every plan rename or new plan requires frontend deploy | MVP only -- extract to a `user.permissions` or `user.features` array from the API |
-| Frontend-only feature gating (hiding sidebar links) | No backend middleware needed | Users bypass via direct URL or API calls | Never for paid features -- always enforce server-side |
-| Skipping credit sync after plan seeder | Faster deploy | Users see wrong limits until next midnight | Never -- always sync credits atomically with plan changes |
-| Inline D3 zoom in existing 130-line D3Graph function | Less files to change | Function becomes 200+ lines, untestable | Acceptable if zoom logic is extracted to a `useD3Zoom` hook |
-| Contact form without queued email | No queue driver setup needed | Blocks HTTP response 2-5s on SMTP, timeouts on Railway | Never in production |
+**Feature area:** Cluster
+**What goes wrong:** The existing `ThreatMapPage` has `handleEventClick` which calls `map.flyTo` when an event in the feed panel is clicked. The `addHighlightPulse` function is triggered. When MarkerCluster is active, clicking a cluster icon fires a Leaflet map click event in addition to the cluster-specific `clusterclick` event. Without `e.originalEvent.stopPropagation()` in the cluster click handler, this can trigger unintended map interactions (e.g., a `flyTo` from a ghost coordinate).
 
-## Integration Gotchas
+**Prevention:**
+- In the `MarkerClusterGroup` setup, add: `clusterGroup.on('clusterclick', (e) => { e.originalEvent.stopPropagation(); })`.
+- For individual marker clicks within the cluster, use `marker.on('click', (e) => { L.DomEvent.stopPropagation(e); })`.
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| Plan seeder on Railway | Running `db:seed --class=PlanSeeder` without credit sync | Create an artisan command that runs seeder + credit sync atomically |
-| Sanctum auth FOUC | Adding `/api/user` calls to individual pages | Single global auth gate in App.jsx; AuthProvider already makes one call |
-| D3 zoom + D3 drag | Both on same SVG element without event isolation | Zoom on SVG, drag on nodes with `stopPropagation`, content in zoom `<g>` layer |
-| Laravel Mail on Railway | Using `MAIL_MAILER=smtp` without provider config | Configure Resend/Postmark/Mailgun; add `MAIL_MAILER` + credentials to Railway env vars |
-| Chart.js canvas reuse | Creating new Chart instance without destroying old one on re-render | Verify `chart.destroy()` in useEffect cleanup; `useChartJs` hook handles lazy load but check instance lifecycle |
-| Feature gate middleware + public routes | Applying plan-check middleware to `/api/threat-search` (which is public) | Only gate browse routes (threat-actors, threat-news, etc.); threat-search and credits remain public with credit-based rate limiting |
+**Phase:** MarkerCluster integration phase.
 
-## Performance Traps
+---
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Multiple Chart.js canvases on dashboard right panel + Threat News | Janky transitions, high memory | Lazy-load Chart.js per page (existing `useChartJs` pattern); destroy on unmount | 4+ charts on same viewport |
-| D3 simulation keeps running after tab switch | 30%+ CPU in background | `simulation.stop()` in useEffect cleanup (current code does this); verify zoom doesn't restart it | Any tab with D3 graph |
-| Auth check waterfall: CSRF cookie then `/api/user` | 400-800ms before any page renders | Ensure `fetchCurrentUser` skips CSRF call if cookie already exists; global spinner hides this | Every page load for returning users |
-| Contact form without submit debounce | Duplicate emails on double-click | Disable button on submit; re-enable on response/error; backend rate limit catches remainder | Immediately |
+## Moderate Pitfalls
 
-## Security Mistakes
+### PITFALL-09 [Campaigns] — Campaign Entity Has Different Fields Than IntrusionSet in OpenCTI
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Feature gating only in frontend | Free users call gated API endpoints directly | Backend `PlanGate` middleware on all gated routes; frontend gating is UX, backend is security |
-| Contact form email header injection | Attacker injects SMTP headers via name/message field | Laravel Mailable handles this, but validate: name max 100, message max 2000, email format validated |
-| Trial plan slug selectable via plan API | Users self-assign trial to reset trial period | If trial becomes a plan, exclude from `PlanSelectionController` validation (like enterprise). Better: keep trial as user state, not a plan |
-| Plan IDs exposed in API allow self-upgrade | Attacker assigns enterprise plan_id to themselves | `PlanSelectionController` already validates `in:free,basic,pro`; verify enterprise excluded; never trust client-provided plan_id |
-| Contact form leaks internal email address | Attacker learns support inbox, uses for social engineering | Return generic "Message sent" response; do not expose recipient email in API response or frontend code |
+**Feature area:** Campaigns (Backend)
+**What goes wrong:** The Campaigns page will list `Campaign` STIX entities from OpenCTI. The existing `ThreatActorService` queries `intrusionSets(...)` with fields like `aliases`, `primary_motivation`, `resource_level`, `goals`. The `Campaign` type does NOT have `aliases` or `primary_motivation`. It has `first_seen`, `last_seen`, `objective` (not `goals`), and a `description`. Querying `campaigns { aliases }` will return a GraphQL error or a null field, but if the backend silently swallows it (the current `OpenCtiService` throws on `$body['errors']`), it becomes a 500.
 
-## UX Pitfalls
+**Consequences:** CampaignService crashes on first query if any Campaign-specific field is assumed to match IntrusionSet.
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Feature gate shows blank 403 page | Free users confused and frustrated | Show page with blurred overlay + "Upgrade to Basic to access" CTA |
-| Plan upgrade takes effect at midnight | User pays for Basic, still sees Free limits today | On plan change, immediately recalculate and update credit row; call `refreshUser()` in AuthContext |
-| Auth FOUC spinner too long (>500ms) | Page feels slow on every visit | No artificial minimum delay; if auth resolves in <100ms, spinner barely flashes |
-| Credit badge stale after plan change | User selected Basic but sidebar still shows "Free" | `POST /api/plan` success handler must call `refreshUser()` to re-fetch user with updated plan |
-| D3 zoom with no visual controls | Users don't discover scroll-to-zoom | Add visible +/- buttons in graph corner; scroll-zoom alone is not discoverable |
-| Contact form "Message sent" with no feedback | User unsure if submission worked | Show success toast/banner; disable re-submit for 60 seconds |
+**Prevention:**
+- Write a dedicated `CampaignService` (do not extend or reuse `ThreatActorService`).
+- Campaign GraphQL query fields: `id, name, description, first_seen, last_seen, objective, aliases, modified`. Verify each field exists on `Campaign` type in the OpenCTI GraphQL schema before use.
+- The ordering enum for campaigns is `CampaignsOrdering`, not `IntrusionSetsOrdering`. Using the wrong enum causes a GraphQL type error.
 
-## "Looks Done But Isn't" Checklist
+**Phase:** Campaigns backend service phase.
 
-- [ ] **Plan seeder:** Verify `credits.limit` matches `plans.daily_credit_limit` for ALL users after seeder runs (query: `SELECT count(*) FROM credits c JOIN users u ON c.user_id = u.id JOIN plans p ON u.plan_id = p.id WHERE c.limit != p.daily_credit_limit` returns 0)
-- [ ] **Feature gating backend:** `curl` with free-plan session cookie to `/api/threat-actors` returns 403, not 200
-- [ ] **Feature gating frontend:** Free user sees upgrade CTA on gated pages, not blank white page
-- [ ] **Auth FOUC:** Hard-refresh `/pricing` -- navbar does NOT flicker between guest/auth states
-- [ ] **Auth FOUC:** Hard-refresh `/threat-search` -- guest CTA does NOT appear then disappear
-- [ ] **D3 zoom:** Drag a node -- canvas does NOT pan simultaneously
-- [ ] **D3 zoom:** New search results load -- zoom transform resets to default (no lingering zoom from previous search)
-- [ ] **Contact form:** Submit with honeypot field filled -- 200 response, no email sent
-- [ ] **Contact form:** Check email is queued (not blocking response) -- response time < 500ms
-- [ ] **Dashboard rename:** Grep for "Dashboard" in all sidebar labels, page titles, breadcrumbs -- all say "Threat Map"
-- [ ] **Chart cleanup:** Navigate between Threat News and Threat Map repeatedly -- no "Canvas is already in use" console errors
-- [ ] **Plan change:** User selects Basic on pricing page -- credit badge and plan chip in topbar update immediately without page refresh
-- [ ] **Trial user:** Verify trial user with `plan_id = null` sees correct 10/day limit and trial banner
+---
 
-## Recovery Strategies
+### PITFALL-10 [Campaigns] — Cache Key Collision With Existing threat_actors Cache
 
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| Plan seeder credit desync | LOW | Run artisan command to recalculate all credit rows from current plan data |
-| Trial plan slug conflict | MEDIUM | Remove trial plan row; set affected users back to `plan_id = null`; verify `trial_ends_at` still correct |
-| Feature gating frontend-only | HIGH | Retrofit `PlanGate` middleware on all gated API routes; audit logs for free-plan users accessing gated data |
-| Auth FOUC on public pages | LOW | Add `AuthGate` wrapper in App.jsx (5 lines); revert is equally easy (remove wrapper) |
-| D3 zoom + drag conflict | LOW | Add `event.sourceEvent.stopPropagation()` in drag start; wrap content in zoom `<g>` layer |
-| Contact form spammed | MEDIUM | Add rate limit + honeypot immediately; rotate SMTP credentials if provider flagged |
-| Credit badge stale after upgrade | LOW | Add `refreshUser()` call in plan selection success handler |
-| Chart canvas not destroyed | LOW | Add `chart.destroy()` in useEffect cleanup return |
+**Feature area:** Campaigns (Backend)
+**What goes wrong:** `ThreatActorService::list()` generates cache keys as `'threat_actors:' . md5(json_encode(func_get_args()))`. If a `CampaignService::list()` uses a similar `'threat_actors:' . md5(...)` pattern by copy-paste, the cache keys can collide when argument sets hash to the same MD5 (extremely unlikely, but the prefix collision is a naming bug that makes cache inspection confusing and risks namespace collision with future services).
 
-## Pitfall-to-Phase Mapping
+**Prevention:**
+- Use a distinct prefix: `'campaigns:'` for `CampaignService`. Never share cache key prefixes across different STIX entity types.
+- Add a cache tag or version suffix if Laravel cache tagging is available: `Cache::tags(['campaigns'])->remember(...)`.
 
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Plan seeder credit desync | Phase 1: Plan restructure | `SELECT count(*) FROM credits c JOIN users u ON ... WHERE c.limit != p.daily_credit_limit` returns 0 |
-| Trial plan slug conflict | Phase 1: Plan restructure | No `plans` row with `slug = 'trial'`; trial users have `plan_id IS NULL` |
-| Feature gating frontend-only | Phase 2: Feature gating | `GET /api/threat-actors` with free-plan auth returns 403 |
-| Auth FOUC on public pages | Phase 3: Auth FOUC fix | Hard-refresh `/pricing` -- zero navbar flicker |
-| Chart cleanup on navigation | Phase 4: Chart changes | Navigate between chart pages 5x -- zero console errors |
-| D3 zoom + drag conflict | Phase 5: D3 zoom | Drag node -- canvas stays still; scroll wheel -- canvas zooms |
-| Contact form spam | Phase 6: Contact form | Honeypot-filled submission silently rejected; response < 500ms |
-| Pricing dual-layout flash | Phase 7: Pricing routing | Auth user navigates to `/pricing` -- consistent layout, no flash |
-| Plan change credit badge stale | Phase 1: Plan restructure | Select new plan on pricing page -- topbar plan chip updates instantly |
+**Phase:** Campaigns backend service phase.
+
+---
+
+### PITFALL-11 [Campaigns] — Credit Gating Misalignment for Campaigns Endpoint
+
+**Feature area:** Campaigns (Backend) / Auth
+**What goes wrong:** Looking at `api.php`, `GET /threat-actors` is inside the `feature-gate` middleware group. A new `GET /campaigns` route must also be placed inside `feature-gate`. If it's accidentally placed outside (e.g., adjacent to the `/threat-actors` routes but not inside the `Route::middleware('feature-gate')->group(...)` closure), free-plan users can access it without the upgrade wall.
+
+**Consequences:** Free plan users bypass feature gating on Campaigns. Revenue impact if campaigns is a paid differentiator.
+
+**Prevention:**
+- During route registration, explicitly verify the route is nested inside the `feature-gate` group by running `php artisan route:list | grep campaigns` and confirming the middleware column shows `feature-gate`.
+- Add a Pest test: unauthenticated / free-plan user hitting `GET /api/campaigns` should receive 403.
+
+**Phase:** Campaigns backend route registration phase.
+
+---
+
+### PITFALL-12 [Victimology] — STIX `targets` vs `uses` Relationship Direction Confusion
+
+**Feature area:** Victimology (Backend)
+**What goes wrong:** OpenCTI uses directed relationships. `IntrusionSet --targets--> Country/Region/Sector` is the correct STIX direction. The existing code already uses this correctly in `ThreatActorService` for `targetedCountries` and `targetedSectors` on the list endpoint. However, when building the Victimology tab enrichment query (which needs `Organization` in addition to `Country`, `Region`, `Sector`), the risk is adding `Organization` with the wrong relationship filter. An `IntrusionSet` targeting an organization uses `relationship_type: "targets"` and `toTypes: ["Organization"]`. But `Organization` in OpenCTI is under the `Identity` abstract type — the concrete type name in `toTypes` must be `"Identity"` (or the specific subtype if the OpenCTI version supports it), not `"Organization"`. Using `"Organization"` as a `toType` may return zero results silently if OpenCTI resolves types differently.
+
+**Consequences:** Victimology tab shows countries and sectors but zero organizations, incorrectly appearing as though no organizations are targeted.
+
+**Prevention:**
+- Test the GraphQL query in OpenCTI's built-in GraphQL explorer first. Query: `intrusionSet(id: $id) { stixCoreRelationships(relationship_type: "targets", toTypes: ["Organization"], first: 20) { edges { node { to { ... on Organization { id name } } } } } }`.
+- If zero results, try `toTypes: ["Identity"]` and filter by `entity_type === 'Organization'` in the normalization step.
+- Use the same `... on Organization { id name }` concrete type fragment pattern already used for `... on Country` and `... on Sector` in the existing code.
+
+**Phase:** Victimology backend enrichment query phase.
+
+---
+
+### PITFALL-13 [Victimology] — N+1 Queries From Polymorphic Relationship Expansion
+
+**Feature area:** Victimology (Backend)
+**What goes wrong:** The enrichment query in `executeEnrichmentQuery` already fetches `allRelationships: stixCoreRelationships(first: 100)` plus separate sub-queries for attackPatterns, tools, malware, campaigns — all in a single GraphQL request. Adding victimology (countries, regions, sectors, organizations as separate sub-queries) expands this single request further. OpenCTI GraphQL resolves each sub-query independently against its data store. A single enrichment call with 6+ sub-queries (each with `first: 20-100`) can take 5-15 seconds on a busy OpenCTI instance, hitting the `OpenCtiService` 15-second timeout.
+
+**Consequences:** Enrichment endpoint times out, returning 502. The modal shows "Failed to load enrichment data" on the Victimology tab even though the actor exists.
+
+**Prevention:**
+- Consolidate victimology fields into one sub-query using `toTypes: ["Country", "Region", "Sector", "Identity"]` on a single `stixCoreRelationships` call, then split by `entity_type` in PHP normalization. This is one sub-query instead of four.
+- Increase the timeout for enrichment queries specifically (not globally): add a second method in `OpenCtiService` like `queryLong(string $graphql, array $variables, int $timeout = 30)`.
+- Cache enrichment at 15 minutes (already done for TTP enrichment). Verify the new victimology data is included in the same cache key so the combined enrichment is cached together.
+
+**Phase:** Victimology backend enrichment query phase.
+
+---
+
+### PITFALL-14 [Victimology] — Modal Fetches Enrichment on Open, Tab Switch Causes Double Fetch
+
+**Feature area:** Victimology (Frontend)
+**What goes wrong:** The current `ThreatActorModal` fetches enrichment on modal open via `useEffect([actor.id])`, eagerly loading TTPs, tools, malware, campaigns, and relationships before the user clicks any tab. The new Victimology tab adds more data to this payload. This is fine for performance (one fetch vs lazy per-tab). The pitfall is adding a *second* lazy fetch specifically for victimology — if someone splits victimology into a separate `/enrichment/victimology` endpoint and calls it on tab switch, the user clicking Overview → Victimology → Overview → Victimology fires the fetch 2+ times. Without a `cancelled` guard and caching the result in state, this causes multiple in-flight requests.
+
+**Prevention:**
+- Keep the single-fetch-on-open pattern. Include victimology in the existing enrichment response. Do not add a separate lazy fetch just for the Victimology tab.
+- If the payload becomes too large (>5s load), split into two phases: fetch Overview/TTPs/Tools/Malware on open, fetch Relationships/Victimology/Campaigns lazily on first tab click. Store each phase result in separate state keys with their own `loaded` booleans. Never re-fetch if `loaded === true`.
+
+**Phase:** Victimology tab frontend implementation phase.
+
+---
+
+### PITFALL-15 [Modal Tab Refactor] — Removing Campaigns Tab Without Cleaning activeTab State
+
+**Feature area:** Modal Tab Refactor (Frontend)
+**What goes wrong:** `ThreatActorModal` currently has `TABS` array with `key: 'campaigns'`. When the Victimology tab replaces it, the `activeTab` state default is `'overview'`. But if any deep-link, sessionStorage, or URL param preserved `activeTab: 'campaigns'` from a previous session, and the Campaigns tab key no longer exists in `TABS`, the tab bar renders with no active tab highlighted and no tab content rendered — a blank modal body.
+
+**In this codebase** there is no URL-based tab state for the modal (the modal is triggered by `setSelectedActor(actor)` with no query param). So the risk is low but not zero — the `setActiveTab('overview')` is called in the `useEffect([actor.id])` on modal open, which resets it correctly every time. This is already safe.
+
+**Prevention:**
+- Confirm the `setActiveTab('overview')` reset in the actor.id effect is present (it is — line 546 in current code). Keep it.
+- When renaming the `campaigns` tab key to `victimology`, do a grep for `'campaigns'` in the modal component to catch any other references (empty state icons, error messages that reference the tab name by key).
+
+**Detection:** `grep -r "activeTab.*campaigns\|campaigns.*activeTab" frontend/src/` should return zero results after the refactor.
+
+**Phase:** Campaigns-to-Victimology tab rename phase.
+
+---
+
+### PITFALL-16 [Page Toggle] — Browser Back Button Breaks When Toggle Uses State Instead of URL
+
+**Feature area:** Page Toggle (Frontend)
+**What goes wrong:** The toggle between Threat Actors and Campaigns on the `ThreatActorsPage` will be implemented as a toolbar pill. If the toggle state is kept in React `useState`, navigating away and back restores the default view (Threat Actors), not the user's last selected view. Worse, if the toggle is implemented as a URL query param (`?view=campaigns`), the browser back button will cycle through view states — user clicks back to exit the page but instead just toggles back to Threat Actors view. This is the same problem as the existing `after`/`search` cursor params: back button walks through pagination history.
+
+**Why it's specific to this stack:** `ThreatActorsPage` already uses `useSearchParams` heavily. Adding a `view` param to the same URL means it interacts with the `after` cursor: switching from Campaigns back to Actors should reset `after` to page 1, but the back button would restore the old `after` cursor from history, causing a stale cursor for the wrong entity type.
+
+**Prevention:**
+- Use a URL query param `?view=actors|campaigns` for shareability and refresh persistence.
+- When toggling view, explicitly reset `after` and `search` params: `setSearchParams({ view: newView })` — do NOT spread existing params. This prevents stale Actors pagination cursors bleeding into Campaigns and vice versa.
+- Accept that the back button walks through view states — this is standard SPA behavior. Document it as intentional.
+
+**Phase:** Page toggle implementation phase.
+
+---
+
+### PITFALL-17 [Page Toggle] — Filter State Leaking Between Actors and Campaigns Views
+
+**Feature area:** Page Toggle (Frontend)
+**What goes wrong:** If the search input and pagination cursor are shared in URL params, switching from a filtered Actors view (`?search=apt28&after=XYZ`) to Campaigns preserves the search term. The `?search=apt28` is then sent to the Campaigns API, which may have different search fields. More critically, the `?after=XYZ` cursor is an OpenCTI intrusion-set cursor — it is NOT valid for campaigns pagination. Sending an actors cursor to the campaigns endpoint causes an OpenCTI error (invalid cursor type), which surfaces as a 500 or empty page.
+
+**Prevention:**
+- When switching views, clear ALL pagination/filter params and keep only `view`. Implementation: `setSearchParams({ view: newView })` — always start a fresh param object.
+- On the backend, validate that the `after` cursor format is valid for the entity type being queried. OpenCTI cursors are base64-encoded — at minimum check they decode to a valid JSON structure with the right type marker.
+
+**Phase:** Page toggle + Campaigns backend pagination phase.
+
+---
+
+### PITFALL-18 [localStorage] — Buffer Size Reverts to 100 After Storage Clear
+
+**Feature area:** localStorage / Buffer
+**What goes wrong:** The buffer size is persisted to localStorage (e.g., `aqua-tip:threat-map-buffer-size`). If a user clears browser storage mid-session (via DevTools or browser settings), the localStorage read returns `null`. The existing pattern (from `panels-collapsed`) uses `try/catch` with a boolean default. For buffer size, the fallback must be a valid integer (100), not `null` or `undefined`. If the fallback is not applied correctly, `parseInt(null)` returns `NaN`, and `NaN` passed to the `.slice(0, NaN)` call returns an empty array — the entire event buffer empties instantly.
+
+**Consequences:** All 2000 buffered markers disappear from the map. User sees empty map with no indication of why.
+
+**Prevention:**
+- In the localStorage read: `const stored = localStorage.getItem('aqua-tip:threat-map-buffer-size'); const parsed = parseInt(stored, 10); return [100, 500, 1000, 2000].includes(parsed) ? parsed : 100;`
+- Whitelist valid values rather than trusting any stored integer. This also handles corrupted storage (e.g., user manually set it to `99999`).
+
+**Phase:** Buffer dropdown + localStorage persist phase.
+
+---
+
+### PITFALL-19 [SSE Buffer Scaling] — Backend MAP_EVENT_BUFFER at 2000 Causes Snapshot Timeout
+
+**Feature area:** SSE / Backend
+**What goes wrong:** The current `fetchSnapshot()` in `ThreatMapService` calls `stixCyberObservables(first: 100, ...)` — a single GraphQL query returning 100 items. Scaling to 2000 means either (a) one query with `first: 2000` or (b) multiple paginated queries. Option (a): OpenCTI has a default `first` limit (often 500 or 1000 depending on version). Requesting `first: 2000` may silently cap at 500 or raise a GraphQL error. Option (b): paginating 4 pages of 500 inside `fetchSnapshot()` multiplies the already slow geo-enrichment loop — 2000 IPs × geo lookup = potentially 2000 cache reads (fast) or HTTP calls (2s × 2000 = 4000s).
+
+**Consequences:** Snapshot endpoint times out at 15 seconds (the `OpenCtiService` timeout). Users see the threat map load with 0 initial markers then populate slowly via SSE.
+
+**Prevention:**
+- For buffer > 500, do NOT attempt to pre-populate the full buffer from the snapshot. Load the snapshot with a fixed cap of 200-300 events (fast). The rest of the buffer fills naturally via SSE stream within seconds.
+- Document this as a design decision: the snapshot provides the initial paint; the buffer fills to its configured size over time via SSE.
+- If full pre-population is required, run geo enrichment only for IPs not already in the `ip_geo` table (warm cache path is microseconds). Skip geo lookup entirely for IPs that resolve to null (already flagged in cache as non-geo). This limits cold-path HTTP calls.
+
+**Phase:** Backend snapshot scaling phase.
+
+---
+
+### PITFALL-20 [SSE Buffer Scaling] — Frontend Reconnect Storm After Large Snapshot + SSE Failure
+
+**Feature area:** SSE / Frontend
+**What goes wrong:** `useThreatStream` opens the SSE connection only after `snapshotLoaded = true`. At buffer=2000, the snapshot may contain 2000 events. If multiple users navigate to the threat map simultaneously (or the tab is hidden and shown again many times), and the SSE connection fails right after the large snapshot, the `onerror` handler fires `MAX_RETRIES = 10` retries with exponential backoff. All users reconnect at similar times (they all loaded the page around the same time), causing a reconnect storm against the Laravel SSE endpoint.
+
+**Consequences:** Laravel spawns N concurrent streaming PHP workers (N = simultaneous reconnect attempts). Each worker holds a connection open to OpenCTI for up to 300 seconds. If Railway has connection limits, this exhausts them.
+
+**Prevention:**
+- Add jitter to the reconnect backoff: `const delay = Math.min(1000 * Math.pow(2, retryCount), 30000) + Math.random() * 1000;` (already missing jitter in the current code).
+- The `visibilitychange` handler in `useThreatStream` already disconnects on tab hide and reconnects on tab show. This is correct behavior. Ensure the `retryCountRef.current = 0` reset on tab-show re-entry doesn't bypass the jitter.
+
+**Phase:** SSE reconnect hardening phase (or as part of buffer scaling phase).
+
+---
+
+## Minor Pitfalls
+
+### PITFALL-21 [Cluster] — Dark Theme Regression From Default MarkerCluster CSS
+
+**Feature area:** Cluster
+**What goes wrong:** `leaflet.markercluster` ships with `MarkerCluster.css` and `MarkerCluster.Default.css`. These inject light-theme cluster icons (white background, gray count badges). Importing them without overrides causes visible white circles on the dark map.
+
+**Prevention:**
+- Import `MarkerCluster.css` only (not `MarkerCluster.Default.css`).
+- Provide a custom `iconCreateFunction` that returns a `L.divIcon` using the project's design tokens (bg-surface/80, border-border, text-cyan for count).
+- Add the CSS override to `animations.css` or `components.css`, not inline JS.
+
+**Phase:** MarkerCluster integration phase.
+
+---
+
+### PITFALL-22 [Victimology] — Region Entity Has No `name` Field in Some OpenCTI Versions
+
+**Feature area:** Victimology (Backend)
+**What goes wrong:** The existing `flattenRelationshipTargets` method extracts `$edge['node']['to']['name']`. For `Country` and `Sector`, this is correct. For `Region`, the STIX Location type uses `name` as well, but some older OpenCTI versions expose it as `x_opencti_location_type` for disambiguation. If the OpenCTI instance is on an older minor version, `... on Region { name }` may return null for some regions.
+
+**Prevention:**
+- In the victimology GraphQL fragment for Region: `... on Region { id name x_opencti_location_type }`. Use `name` with a null fallback to `x_opencti_location_type` in normalization.
+- Test against the actual OpenCTI instance at `192.168.251.20:8080` before writing the normalized format.
+
+**Phase:** Victimology backend enrichment query phase.
+
+---
+
+### PITFALL-23 [Buffer] — Framer Motion + Leaflet Event Clash on Panel Hover During Burst
+
+**Feature area:** Buffer / Animation
+**What goes wrong:** The `LeftOverlayPanel` uses `motion.div` with `SPRING_TRANSITION` for slide-in animation. When a burst of 50+ new events arrives simultaneously (e.g., on SSE reconnect delivering the backlog), React batches state updates and triggers re-renders. Each re-render of `ThreatMapPage` causes the overlay panels to check their `events` prop. If Framer Motion's `AnimatePresence` is animating at the same moment (e.g., the user triggered a peek-hover), both Framer's `requestAnimationFrame` loop and the Leaflet marker add/remove loop compete for the main thread.
+
+**Consequences:** Visible jank during reconnect bursts. The panel slide animation stutters.
+
+**Prevention:**
+- The marker reconciliation (`useEffect([events])`) should use `requestAnimationFrame` to defer Leaflet DOM operations out of the React commit phase: `requestAnimationFrame(() => { /* add/remove markers */ })`.
+- This is a micro-optimization — only implement if jank is observed in testing.
+
+**Phase:** Persistent marker implementation phase (flagged for monitoring, not mandatory upfront).
+
+---
+
+### PITFALL-24 [Toggle] — `?view=campaigns` Conflicts With FeatureGate Redirect URL
+
+**Feature area:** Page Toggle / Auth
+**What goes wrong:** The `FeatureGatedRoute` wraps `ThreatActorsPage`. If a free-plan user receives the UpgradeCTA, the current URL is preserved for redirect after upgrade. With query params (`?view=campaigns&search=apt28`), the redirect URL can become long and may be passed through multiple redirects (login → verify → onboard → pricing → gated page). If any step in the redirect chain strips query params, the user lands on the Actors default view, not their intended Campaigns view.
+
+**Consequences:** Minor UX confusion — user upgrades and is dropped on Threat Actors instead of Campaigns.
+
+**Prevention:** This is low severity for v6.1. Accept the behavior. Document that view restoration after auth redirect is not guaranteed.
+
+**Phase:** Not a blocker. Monitor.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Buffer dropdown + localStorage | PITFALL-01 (stale closure), PITFALL-18 (NaN fallback) | useRef for buffer limit, whitelist valid values |
+| Persistent marker reconciliation | PITFALL-02 (orphan layers), PITFALL-23 (frame jank) | markerRegistryRef diff, defer via rAF |
+| Pulse-then-settle-then-evict | PITFALL-04 (same-coord collision) | Eviction-pending coordinate Set |
+| MarkerCluster integration | PITFALL-05 (CSS conflict), PITFALL-06 (layer leak), PITFALL-07 (z-index), PITFALL-08 (click propagation) | Custom iconCreateFunction, single markerGroupRef, zIndexOffset |
+| MarkerCluster dark theme | PITFALL-21 (CSS regression) | Override MarkerCluster.Default.css entirely |
+| Campaigns backend service | PITFALL-09 (wrong fields), PITFALL-10 (cache key collision), PITFALL-11 (feature gate miss) | Dedicated CampaignService, verify middleware, Pest test |
+| Campaigns pagination | PITFALL-17 (stale cursor bleed) | setSearchParams({ view: newView }) clears all params |
+| Victimology backend enrichment | PITFALL-12 (targets vs uses), PITFALL-13 (N+1), PITFALL-22 (Region name) | Single toTypes query, increase timeout for enrichment |
+| Victimology frontend tab | PITFALL-14 (double fetch), PITFALL-15 (stale activeTab key) | Single fetch on open, grep for 'campaigns' key references |
+| Page toggle (URL param) | PITFALL-16 (back button), PITFALL-17 (filter leak) | Accept back-walks-views, reset all params on toggle |
+| SSE buffer at 2000 | PITFALL-19 (snapshot timeout), PITFALL-20 (reconnect storm) | Cap snapshot at 200-300, add jitter to retry backoff |
+| Race condition on dropdown change | PITFALL-03 (burst during dropdown change) | Immediate trim: setEvents(prev => prev.slice(0, newLimit)) |
 
 ## Sources
 
-- Direct codebase analysis: `backend/database/seeders/PlanSeeder.php` (updateOrCreate on slug, plan data structure)
-- Direct codebase analysis: `backend/app/Services/CreditResolver.php` (resolveLimit, lazyReset, checkTrialExpiry, TRIAL_DAILY_LIMIT)
-- Direct codebase analysis: `frontend/src/contexts/AuthContext.jsx` (loading state, refreshUser callback, user state)
-- Direct codebase analysis: `frontend/src/App.jsx` (route structure, guarded vs public routes, lazy loading)
-- Direct codebase analysis: `frontend/src/components/auth/ProtectedRoute.jsx` (loading spinner pattern)
-- Direct codebase analysis: `frontend/src/components/auth/GuestRoute.jsx` (loading spinner pattern)
-- Direct codebase analysis: `frontend/src/pages/ThreatSearchPage.jsx` lines 36-138 (D3Graph with drag behavior, SVG direct append)
-- Direct codebase analysis: `frontend/src/pages/PricingPage.jsx` (auth-aware navbar, plan fetching)
-- Direct codebase analysis: `backend/routes/api.php` (public vs auth routes, deduct-credit middleware)
-- Direct codebase analysis: `backend/app/Models/Plan.php` (fillable fields, casts)
-- D3 zoom + drag event isolation: D3 documentation zoom.filter and event.sourceEvent pattern (training data, MEDIUM confidence -- well-established pattern)
-- Laravel Mail queue: Laravel 11 queue documentation (training data, HIGH confidence)
-- Contact form spam prevention: established web security patterns (training data, HIGH confidence)
-
----
-*Pitfalls research for: AQUA TIP v4.0 -- Plan Overhaul & UX Polish*
-*Researched: 2026-04-10*
+All findings derived from direct inspection of:
+- `frontend/src/hooks/useThreatStream.js` — SSE connection, buffer management, closure behavior
+- `frontend/src/pages/ThreatMapPage.jsx` — marker lifecycle, Framer Motion + Leaflet interaction
+- `frontend/src/pages/ThreatActorsPage.jsx` — tab state, modal enrichment fetch pattern
+- `frontend/src/hooks/useLeaflet.js` — Leaflet initialization, markerLayerRef pattern
+- `frontend/src/components/threat-map/LeftOverlayPanel.jsx` — z-index, Framer Motion stacking context
+- `backend/app/Services/ThreatActorService.php` — GraphQL queries, cache key patterns, enrichment structure
+- `backend/app/Services/ThreatMapService.php` — snapshot size, geo enrichment loop, SSE parsing
+- `backend/app/Http/Controllers/ThreatMap/StreamController.php` — SSE relay, seenIds management
+- `backend/app/Http/Controllers/ThreatMap/SnapshotController.php` — snapshot response shape
+- `backend/routes/api.php` — feature-gate middleware placement, route structure
+- `.planning/PROJECT.md` — architectural decisions log, prior pitfalls already avoided

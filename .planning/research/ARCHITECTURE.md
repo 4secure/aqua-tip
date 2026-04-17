@@ -1,485 +1,807 @@
-# Architecture Patterns
+# Architecture Research
 
-**Domain:** v4.0 Feature Integration into Existing Threat Intelligence Platform
-**Researched:** 2026-04-10
-**Confidence:** HIGH (all recommendations based on direct codebase analysis of existing patterns)
+**Domain:** Threat Intelligence Platform — v6.1 Feature Integration
+**Researched:** 2026-04-17
+**Confidence:** HIGH (all findings derived from direct codebase inspection)
 
-## Recommended Architecture
+## Integration Analysis: v6.1 Features into Existing Architecture
 
-Five new features integrating into the existing React 19 SPA + Laravel 12 backend. Every feature touches existing code; no greenfield systems.
+This document answers the specific architectural questions for v6.1: Threat Map Buffer &
+Threat Actor Depth. All integration points reference exact files. Confidence is HIGH because
+analysis is based entirely on reading the live codebase, not documentation or assumptions.
 
-### Integration Map
+---
 
+## 1. Threat Map Buffer Refactor
+
+### Where Buffer State Lives
+
+The buffer belongs in a new `useThreatMapBuffer` hook, extracted from the current
+`useThreatStream.js`. Here is why:
+
+`useThreatStream.js` currently owns two distinct concerns: SSE connection lifecycle and the
+`events` array (which is both the "buffer" and the "feed"). These must be separated.
+
+**New hook: `frontend/src/hooks/useThreatMapBuffer.js`**
+
+This hook accepts a `maxSize` parameter (from the dropdown) and receives raw events piped in
+from `useThreatStream`. It owns:
+
+- `markers` — the array of settled marker objects rendered on the map
+- `arrivingId` — the ID of the most recently arrived event (drives pulse animation)
+- `evictingId` — the ID of the oldest marker being rotated out (drives fade animation)
+
+`ThreatMapPage.jsx` wires them together:
 ```
-Feature                        Frontend Touch Points              Backend Touch Points
------------------------------  ---------------------------------  ----------------------------------
-1. Feature Gating (Free tier)  Sidebar, mock-data.js, new util    Plan model (allowed_routes col),
-                               new PlanGatedRoute                 new CheckFeatureAccess middleware
-2. Auth FOUC Fix               App.jsx (AppContent wrapper)       None (pure frontend)
-3. Contact Form Email          ContactUsPage.jsx, apiClient       New ContactController + Mailable,
-                                                                  api.php route, throttle
-4. D3 Zoom Controls            ThreatSearchPage.jsx (D3Graph fn)  None (pure frontend)
-5. Pricing Dual Layout         App.jsx (route move),              None (pure frontend)
-                               PricingPage.jsx (conditional nav)
-```
-
-### Component Boundaries
-
-| Component | Responsibility | Communicates With |
-|-----------|---------------|-------------------|
-| `AuthContext` | Holds user + plan data, `loading` state for FOUC gate | Every component via `useAuth()` |
-| `Plan` model | Stores plan metadata including allowed routes | `CreditResolver`, `CheckFeatureAccess` middleware |
-| `CheckFeatureAccess` middleware | Blocks API calls to gated features for Free tier | `Plan` model, request user |
-| `Sidebar` | Renders nav items with plan-aware lock/upgrade icons | `useAuth()` for plan slug |
-| `PlanGatedRoute` | Redirects Free users away from restricted routes | `useAuth()` for plan data |
-| `planAccess.js` utility | Pure function: plan hierarchy comparison | Nav data, route guards |
-| `ContactController` | Validates + dispatches contact email | Laravel Mail (existing config) |
-| `D3Graph` (modified) | Force-directed graph with zoom/pan controls | D3 library (already loaded) |
-| `PricingPage` (modified) | Dual layout: hides own navbar when inside AppLayout | `useAuth()`, React Router |
-
-## Feature 1: Free Plan Feature Gating
-
-### Problem
-Free plan users should only access Threat Search. Plan info already exists on the user object (`user.plan.slug`, `user.plan.features`) but no route/feature restriction exists beyond auth vs guest.
-
-### Architecture Decision: Frontend-Primary Gating with Backend Enforcement
-
-Use frontend gating for UX (sidebar locks, redirects) and backend middleware for enforcement (API 403s).
-
-### Frontend Changes
-
-**1. Extend `NAV_CATEGORIES` in `mock-data.js`:**
-Add a `minPlan` field to nav items. `null` means everyone (including guests).
-
-```javascript
-{ label: 'Threat Search', icon: 'search', href: '/threat-search', public: true, minPlan: null },
-{ label: 'Dashboard', icon: 'dashboard', href: '/dashboard', public: false, minPlan: 'basic' },
-{ label: 'Threat Actors', icon: 'users', href: '/threat-actors', public: false, minPlan: 'basic' },
-{ label: 'Threat News', icon: 'rss', href: '/threat-news', public: false, minPlan: 'basic' },
-{ label: 'Dark Web', icon: 'incognito', href: '/dark-web', public: false, minPlan: 'pro' },
+useThreatStream() → { events, connected, ... }
+useThreatMapBuffer(events, maxSize) → { markers, arrivingId }
 ```
 
-**2. Plan access utility (new file `utils/planAccess.js`):**
+`useThreatStream.js` stays largely unchanged: it keeps the SSE connection, snapshot load,
+reconnect logic, and the raw event ring. Its `MAX_EVENTS` constant (currently hardcoded to 100)
+must be replaced with a dynamic value driven by the buffer size dropdown.
 
-```javascript
-const PLAN_HIERARCHY = { free: 0, trial: 1, basic: 1, pro: 2, enterprise: 3 };
+### Marker State Shape
 
-export function canAccessFeature(userPlanSlug, isTrialActive, minPlan) {
-  if (!minPlan) return true;
-  const effectiveSlug = isTrialActive ? 'trial' : (userPlanSlug ?? 'free');
-  return (PLAN_HIERARCHY[effectiveSlug] ?? 0) >= (PLAN_HIERARCHY[minPlan] ?? 0);
+Three lifecycle states per marker, all in one flat array in `useThreatMapBuffer`:
+
+```js
+{
+  id: string,           // STIX ID — stable identity, used as Leaflet key
+  lat: number,
+  lng: number,
+  color: string,        // 'red' | 'amber' | 'violet' | 'cyan'
+  type: string,
+  ip: string,
+  timestamp: string,
+  state: 'arriving' | 'settled' | 'evicting',
+  arrivedAt: number,    // Date.now() — used to sort for eviction
 }
 ```
 
-Trial users get Basic-equivalent access (level 1), matching current trial behavior.
+The `state` field drives CSS class selection on the DivIcon HTML. `useThreatMapBuffer`
+transitions `arriving → settled` after a fixed timeout (e.g., 1800ms, matching the pulse
+animation duration). Eviction: when a new event would push the buffer past `maxSize`,
+the oldest entry is marked `evicting` and removed after a short fade timeout (~600ms).
 
-**3. Sidebar.jsx modification (lines 100-121):**
-Current sidebar has a two-state check: `isAccessible = item.public || isAuthenticated`. Extend to three states:
-- Guest (not authenticated): show lock icon + "Log in" redirect (existing behavior)
-- Authenticated but plan-restricted: show lock icon + "Upgrade" label, navigate to `/pricing`
-- Accessible: normal NavLink (existing behavior)
+### Interaction with SSE Handler
 
-**4. New `PlanGatedRoute` component:**
-Similar to existing `ProtectedRoute` pattern. Wraps route groups that require a minimum plan level. Redirects to `/pricing` with a flash message when plan is insufficient.
-
-```jsx
-// components/auth/PlanGatedRoute.jsx
-export default function PlanGatedRoute({ minPlan = 'basic' }) {
-  const { user, loading } = useAuth();
-  if (loading) return <LoadingSpinner />;
-  const planSlug = user?.plan?.slug ?? 'free';
-  const isTrialActive = user?.trial_active === true;
-  if (!canAccessFeature(planSlug, isTrialActive, minPlan)) {
-    return <Navigate to="/pricing" state={{ upgrade: minPlan }} replace />;
-  }
-  return <Outlet />;
-}
+`useThreatStream.js` currently prepends new events to the `events` array:
+```js
+setEvents((prev) => [newEvent, ...prev].slice(0, MAX_EVENTS));
 ```
 
-### Backend Changes
+For v6.1, `MAX_EVENTS` must be driven by the buffer size. Two options:
 
-**1. Add `allowed_routes` JSON column to `plans` table:**
+- **Option A (preferred):** Pass `bufferSize` into `useThreatStream` as a parameter, so the
+  in-memory ring and the map buffer are both capped at the same value. This prevents the ring
+  growing unbounded if the hook is created before the user sets a size.
+- **Option B:** Keep `useThreatStream` at a fixed large cap (e.g., 2000) and let
+  `useThreatMapBuffer` independently enforce the configured cap. Simpler but wastes memory.
 
-```php
-// Migration
-Schema::table('plans', function (Blueprint $table) {
-    $table->json('allowed_routes')->nullable();
+Option A is preferred for v6.1. `useThreatStream` signature becomes:
+`useThreatStream(bufferSize = 100)`.
+
+### `ThreatMapPage.jsx` Changes
+
+- Read `bufferSize` from localStorage on mount (new `BUFFER_SIZE_KEY` constant)
+- Pass `bufferSize` to `useThreatStream(bufferSize)`
+- Pass `events` to `useThreatMapBuffer(events, bufferSize)` to get `markers`
+- Remove the existing `addPulseMarker` / `prevEventIdRef` effect (replaced by buffer hook)
+- Add `addSettledMarkers(markers)` call to sync the Leaflet layer when `markers` changes
+
+Estimated LOC change: ~80 lines removed, ~40 lines added in `ThreatMapPage.jsx`.
+New hook `useThreatMapBuffer.js`: ~120 LOC.
+
+---
+
+## 2. Marker Lifecycle on Map
+
+### Marker Type Decision
+
+Use **`L.divIcon`** for all markers — both arriving (pulsing) and settled (static dot).
+
+Rationale: The existing `addPulseMarker` already uses `L.divIcon`. CircleMarker does not
+support CSS animation without hacky SVG tricks. DivIcon gives full CSS control and is already
+in the codebase. The settled state just removes the pulse CSS class.
+
+### Pulse-then-Settle Without DOM Leaks
+
+The current `addPulseMarker` leaks: it adds a `L.marker` to the map and removes it after a
+`setTimeout`. When the buffer is persistent (not transient), this pattern breaks — markers must
+stay on the map after pulsing, not disappear.
+
+**New pattern for settled markers:**
+
+Maintain a `markerInstancesRef` (`useRef`) in `ThreatMapPage.jsx` — a `Map<id, L.Marker>`.
+When `markers` changes (from `useThreatMapBuffer`):
+
+1. For each marker in `state: 'arriving'`: if no instance exists yet, create `L.marker` with
+   pulse DivIcon, add to map, store in `markerInstancesRef`.
+2. For each marker transitioning to `state: 'settled'`: update the DivIcon HTML on the existing
+   Leaflet marker instance (remove pulse class, add settled dot class). Do NOT remove/re-add.
+3. For each marker in `state: 'evicting'`: add evicting CSS class (fade), then after 600ms
+   call `map.removeLayer(instance)` and delete from `markerInstancesRef`.
+4. For markers not in the new `markers` array at all: remove from map (handles hard resets).
+
+Updating DivIcon HTML on an existing Leaflet marker: `marker.setIcon(newIcon)`. This is
+idempotent and does not cause a DOM leak.
+
+**No marker layer group for settled markers** — each marker is managed individually via
+`markerInstancesRef`. The existing `markerLayerRef` (a `L.layerGroup`) in `useLeaflet.js` is
+used only for snapshot markers loaded at init; the persistent buffer manages its own refs.
+
+### `useLeaflet.js` Changes
+
+The `markers` prop and the `useEffect` that calls `markerLayerRef.current.clearLayers()` are
+currently used for the initial snapshot render. For v6.1, initial snapshot markers are loaded
+into the buffer (not the layerGroup), so the `markers` prop and its effect can be removed.
+The hook becomes purely a map initializer + `onReady` callback provider.
+
+Estimated LOC change in `useLeaflet.js`: ~20 lines removed (markers effect).
+
+### Eviction Strategy with Clustering
+
+When leaflet.markercluster wraps markers, removing a clustered marker may cause a brief
+cluster recalculation. This is acceptable: leaflet.markercluster handles `removeLayer` cleanly
+on its `MarkerClusterGroup`. The eviction approach (remove from cluster group after fade) works
+unchanged. The 600ms fade before removal prevents visible "pop" during cluster recompute.
+
+---
+
+## 3. Cluster Integration
+
+### Conditional Enable
+
+`leaflet.markercluster` is conditionally enabled based on `bufferSize > 500`. The toggle
+is handled by the `markerLayerRef` in `ThreatMapPage.jsx` (or a dedicated `clusterGroupRef`).
+
+**Layer swap strategy — re-init, not live-toggle:**
+
+When the user changes the dropdown from ≤500 to >500 (or vice versa), the cleanest approach
+is:
+1. Remove all current markers from the map (iterate `markerInstancesRef`, call `removeLayer`)
+2. If clustering: create a `L.markerClusterGroup(clusterOptions)` and add it to the map
+3. Re-add all `markers` from `useThreatMapBuffer` state into the new layer
+4. Update `activeLayerRef` to point to the cluster group (or null for direct map)
+
+This is a one-time re-init triggered only when `bufferSize` crosses the 500 threshold. It does
+not happen on every render. A `useEffect` in `ThreatMapPage.jsx` watches `bufferSize`, checks
+the threshold, and triggers the swap.
+
+Live-toggle (keeping markers and swapping layer container) is theoretically possible but
+fragile: Leaflet's internal state gets confused when you move markers between layer groups.
+Re-init from current buffer state is safer and the buffer rarely exceeds 2000 items.
+
+### Cluster Styling
+
+leaflet.markercluster's default cluster icons do not match the dark theme. Override with the
+`iconCreateFunction` option:
+
+```js
+L.markerClusterGroup({
+  iconCreateFunction: (cluster) => L.divIcon({
+    className: '',
+    html: `<div class="map-cluster-icon">${cluster.getChildCount()}</div>`,
+    iconSize: [32, 32],
+  }),
+  showCoverageOnHover: false,
+  chunkedLoading: true,
+  chunkProgress: null, // disable default progress callback
 });
 ```
 
-Seeder values:
-- Free: `["threat-search"]`
-- Basic: `["threat-search", "threat-actors", "threat-news", "dashboard"]`
-- Pro/Enterprise: all routes
+CSS for `.map-cluster-icon` lives in `frontend/src/styles/components.css` alongside the
+existing `.map-event-pulse` and `.map-marker` classes.
 
-**2. New `CheckFeatureAccess` middleware:**
+### New Dependency
 
-```php
-class CheckFeatureAccess
-{
-    public function handle(Request $request, Closure $next, string $feature): Response
-    {
-        $user = $request->user();
-        if (!$user) return $next($request); // Guest access handled elsewhere
+`leaflet.markercluster` must be added to `frontend/package.json`:
+```bash
+npm install leaflet.markercluster
+```
+It imports CSS that must be added to `useLeaflet.js` or `main.css`:
+```js
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+```
+The default CSS is then overridden by the custom `iconCreateFunction`.
 
-        // Trial users get Basic-equivalent access
-        if ($user->trial_ends_at?->isFuture() && $user->plan_id === null) {
-            $plan = Plan::where('slug', 'basic')->first();
-        } else {
-            $plan = $user->plan ?? Plan::where('slug', 'free')->first();
+---
+
+## 4. Buffer Size Dropdown
+
+### Placement
+
+The dropdown belongs in the **Left Overlay Panel** (`LeftOverlayPanel.jsx`), as a new section
+below the counters widget and above the countries list. The left panel is narrower (340px) and
+holds map-specific controls (counters, countries, feed). The right panel holds intelligence
+data (indicators, attack categories, threat database counts) — these are independent of the
+map buffer.
+
+A new `BufferSizeControl` sub-component inside `LeftOverlayPanel.jsx` or as a separate
+`frontend/src/components/threat-map/BufferSizeControl.jsx` file.
+
+The component:
+- Renders a `<select>` (or pill group) with options: 100, 500, 1000, 2000
+- Reads initial value from `localStorage` (`aqua-tip:map-buffer-size`)
+- On change: writes to localStorage, calls an `onBufferSizeChange` prop passed down from
+  `ThreatMapPage.jsx`
+
+`ThreatMapPage.jsx` lifts the buffer size state:
+```js
+const [bufferSize, setBufferSize] = useState(() => {
+  try { return Number(localStorage.getItem('aqua-tip:map-buffer-size')) || 100; }
+  catch { return 100; }
+});
+```
+
+### Backend Snapshot Resize
+
+The backend snapshot endpoint (`GET /api/threat-map/snapshot`) currently hardcodes `first: 100`
+in `ThreatMapService::fetchSnapshot()`. For v6.1, the snapshot fetch in `useThreatStream.js`
+should pass the configured buffer size as a query param:
+```
+GET /api/threat-map/snapshot?limit=500
+```
+
+The `SnapshotController` reads `$request->query('limit', 100)` and passes it to
+`ThreatMapService::getSnapshot(int $limit = 100)`. The service cache key must include the
+limit value: `'threat_map:snapshot:' . $limit`.
+
+The SSE stream does NOT need a "resize buffer" message. The SSE relay is stateless per-event.
+Only the snapshot (initial load) is affected by the configured limit. Resizing the buffer in
+the frontend while the SSE is running simply changes how the `useThreatMapBuffer` hook caps
+its internal array going forward.
+
+**Backend change:** `ThreatMapService::fetchSnapshot()` GraphQL query changes `first: 100` to
+`first: $limit` (with a hard cap of 2000 to prevent abuse). `SnapshotController` reads the
+`limit` param and validates it against `[100, 500, 1000, 2000]` (or clamps to max 2000).
+
+---
+
+## 5. Backend Campaigns Endpoint
+
+### Route and Controller
+
+New route: `GET /api/threat-campaigns` under the `feature-gate` middleware group.
+
+Use a **separate controller**: `ThreatCampaign/IndexController.php`. The existing
+`ThreatActor/IndexController.php` is thin and delegates entirely to `ThreatActorService`.
+A new `ThreatCampaignService.php` follows the same pattern. Do not add a `type` param to
+the existing endpoint — campaigns have a different entity type (`Campaign` vs `IntrusionSet`)
+and the GraphQL query is structurally different.
+
+**New files:**
+- `backend/app/Http/Controllers/ThreatCampaign/IndexController.php` (~30 LOC, thin)
+- `backend/app/Services/ThreatCampaignService.php` (~180 LOC)
+
+### GraphQL Query
+
+Campaigns in OpenCTI are first-class STIX objects (`Campaign`). The query pattern mirrors
+`intrusionSets`:
+
+```graphql
+query ($first: Int!, $after: ID, $search: String) {
+  campaigns(first: $first, after: $after, search: $search, orderBy: modified, orderMode: desc) {
+    edges {
+      node {
+        id
+        name
+        description
+        first_seen
+        last_seen
+        modified
+        objective
+        aliases
+        attributedTo: stixCoreRelationships(
+          relationship_type: "attributed-to"
+          toTypes: ["Intrusion-Set"]
+          first: 10
+        ) {
+          edges {
+            node {
+              to {
+                ... on IntrusionSet { id name }
+              }
+            }
+          }
         }
-
-        $allowed = $plan->allowed_routes ?? [];
-        if (!in_array($feature, $allowed, true)) {
-            return response()->json([
-                'message' => 'Upgrade your plan to access this feature',
-                'current_plan' => $plan->slug,
-            ], 403);
-        }
-        return $next($request);
+      }
     }
+    pageInfo { hasNextPage hasPreviousPage startCursor endCursor globalCount }
+  }
 }
 ```
 
-**3. Apply to gated API routes in `api.php`:**
+### Caching
+
+Same pattern as `ThreatActorService::list()`: `Cache::remember()` with 15-minute TTL.
+Cache key: `'threat_campaigns:' . md5(json_encode(func_get_args()))`.
+
+### `api.php` Addition
 
 ```php
-Route::get('/threat-actors', ThreatActorIndexController::class)->middleware('feature:threat-actors');
-Route::get('/threat-news', ThreatNewsIndexController::class)->middleware('feature:threat-news');
-Route::get('/threat-map/stream', ThreatMapStreamController::class)->middleware('feature:dashboard');
+Route::get('/threat-campaigns', ThreatCampaignIndexController::class);
 ```
+Inside the existing `feature-gate` middleware group. No new middleware needed.
 
-**4. Expose `allowed_routes` in UserResource:**
-Add `allowed_routes` to the plan sub-object so frontend can use it for gating decisions without hardcoding.
+---
 
-### Why This Approach
+## 6. Backend Victimology Endpoint
 
-- Trial users (no plan_id, trial_ends_at future) get Basic-equivalent access, matching existing `CreditResolver` trial logic.
-- Backend enforcement prevents curl/API abuse even if frontend is bypassed.
-- Sidebar visual gating provides clear upgrade path.
-- No new Context provider needed -- plan data already lives in `useAuth().user.plan`.
+### Endpoint Decision
 
-## Feature 2: Auth FOUC Fix
+**Extend `GET /api/threat-actors/{id}/enrichment`** rather than adding a sub-endpoint.
 
-### Problem
-On page load, `AuthContext` calls `fetchCurrentUser()`. Until the response returns (~50-200ms), `loading` is `true` but only `ProtectedRoute` checks it. Public routes (landing, threat search, pricing) render immediately with `user: null`, then re-render when auth resolves. This causes:
-- Flash of "Sign in" buttons before switching to authenticated UI
-- Sidebar flashing unauthenticated state
-- Topbar plan chip appearing with delay
+Rationale: The enrichment endpoint already fetches TTPs, tools, malware, campaigns, and
+relationships in a single GraphQL call. Adding victimology to the same call avoids a second
+HTTP round-trip when the modal opens. The enrichment response already returns a structured
+object — adding `victimology` as a new top-level key is additive and non-breaking.
 
-### Architecture Decision: Global Loading Gate in App.jsx
+**No new route needed.** Change is entirely in `ThreatActorService::executeEnrichmentQuery()`
+and `normalizeEnrichmentResponse()`.
 
-Block all rendering until auth resolves. Single change point.
+### GraphQL Addition
 
-### Implementation
+Add to the existing `intrusionSet(id: $id)` query body:
 
-Extract routes into an `AppContent` component inside `AuthProvider`:
-
-```jsx
-function AppContent() {
-  const { loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-primary flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <img src="/logo.png" alt="Aqua Tip" className="w-10 h-10 animate-pulse" />
-          <div className="w-8 h-8 border-2 border-violet border-t-transparent rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <Suspense fallback={<LazyFallback />}>
-      <Routes>{/* ... existing routes unchanged ... */}</Routes>
-    </Suspense>
-  );
+```graphql
+targetedCountries: stixCoreRelationships(
+  relationship_type: "targets"
+  toTypes: ["Country"]
+  first: 50
+) {
+  edges { node { to { ... on Country { id name } } } }
 }
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </BrowserRouter>
-  );
+targetedRegions: stixCoreRelationships(
+  relationship_type: "targets"
+  toTypes: ["Region"]
+  first: 20
+) {
+  edges { node { to { ... on Region { id name } } } }
+}
+targetedSectors: stixCoreRelationships(
+  relationship_type: "targets"
+  toTypes: ["Sector"]
+  first: 50
+) {
+  edges { node { to { ... on Sector { id name } } } }
+}
+targetedOrganizations: stixCoreRelationships(
+  relationship_type: "targets"
+  toTypes: ["Identity"]
+  first: 30
+) {
+  edges { node { to { ... on Identity { id name identity_class } } } }
 }
 ```
 
-### Why This Approach
+### Performance Impact
 
-- **Single point of control** -- one loading gate replaces scattered checks.
-- **`AppContent` must be inside `AuthProvider`** -- `useAuth()` requires context. Current `Routes` is a direct child of `AuthProvider`, so extracting to `AppContent` is cleanest.
-- **Branded loading** -- logo + spinner matches design system. Already used in `LazyFallback` and `ProtectedRoute`.
-- **No performance concern** -- GET `/api/user` with Sanctum cookie resolves in 50-200ms. On unauthenticated sessions, the 401 is equally fast.
-- **ProtectedRoute loading check** becomes redundant but harmless -- leave for defense-in-depth.
+The existing enrichment query already makes 5 `stixCoreRelationships` sub-queries plus one
+`allRelationships` sub-query within a single GraphQL call. Adding 4 more targeted sub-queries
+increases the query complexity but remains a single HTTP round-trip to OpenCTI. OpenCTI
+resolves these in parallel on its end. The 15-minute cache means the cost is paid once per
+actor per cache window. Expected increase in query time: +200-500ms on cache miss. Acceptable
+given the cache TTL.
 
-### What NOT to Do
+The `targeted_countries` and `targeted_sectors` fields already exist on the list endpoint
+(fetched in the index query). The enrichment endpoint adding deeper/larger versions is
+intentional — the list query caps at 20 items, the enrichment query can fetch up to 50.
 
-- Do NOT cache auth state in `sessionStorage`/`localStorage`. Sanctum cookie sessions are the source of truth. Caching creates stale-auth bugs.
-- Do NOT use `startTransition` or deferred rendering. Auth check must block.
+### Normalizer Addition
 
-## Feature 3: Enterprise Contact Form Email
+In `normalizeEnrichmentResponse()`:
 
-### Problem
-`ContactUsPage.jsx` has a form (name, email, message) that does nothing -- `handleSubmit` sets `submitted: true` without any API call (line 14-17).
-
-### Architecture Decision: New API Endpoint + Laravel Mailable
-
-Reuse existing Laravel Mail configuration (already used for email verification).
-
-### Backend Changes
-
-**1. `ContactRequest` form request** with name (max 100), email, message (max 5000), optional `plan_interest` field.
-
-**2. `ContactMailable`** using `replyTo` set to sender's email, subject differentiated for enterprise inquiries. Sends to `config('mail.admin_address')`.
-
-**3. `ContactController`** -- invokable, dispatches mailable synchronously (`Mail::send`, not `Mail::queue` -- low volume).
-
-**4. Route:** `Route::post('/contact', ContactController::class)->middleware('throttle:3,60');`
-
-The `throttle:3,60` limits to 3 requests per 60 minutes per IP. No auth required -- enterprise inquiries come from non-users. No CAPTCHA needed at this volume.
-
-### Frontend Changes
-
-Modify `ContactUsPage.jsx`:
-- Replace fake `handleSubmit` with `apiClient.post('/api/contact', form)` call
-- Add loading state during submission, error handling with user-friendly message
-- Accept `plan_interest` via URL query param (`/contact?plan=enterprise`) from pricing page Enterprise "Contact Us" button
-- Parse with `useSearchParams` and include in POST body
-
-### Why This Approach
-
-- Reuses existing Mail config -- no new SMTP setup.
-- `replyTo` header lets admin reply directly to the sender.
-- Rate limiting at route level prevents spam without CAPTCHA complexity.
-- Synchronous mail is fine for expected volume (<10/day).
-
-## Feature 4: D3 Relationship Graph Zoom Controls
-
-### Problem
-The `D3Graph` function in `ThreatSearchPage.jsx` (lines 36-134) renders a force-directed graph but has no zoom/pan. Users with complex graphs cannot navigate.
-
-### Architecture Decision: D3 Zoom Behavior + Overlay Buttons
-
-`d3.zoom()` on the SVG with all graph elements in a child `<g>` group. Overlay buttons for zoom in/out/reset.
-
-### Implementation
-
-**1. Refactor SVG structure** -- currently links, labels, and nodes are appended directly to `svg`. Wrap in a child `<g>`:
-
-```javascript
-const g = svg.append('g');
-// Move all appends from svg to g:
-const link = g.append('g').selectAll('line')...
-const linkLabel = g.append('g').selectAll('text')...
-const node = g.append('g').selectAll('g')...
+```php
+return [
+    'ttps'         => ...,
+    'tools'        => ...,
+    'malware'      => ...,
+    'campaigns'    => ...,
+    'relationships'=> ...,
+    'victimology'  => $this->normalizeVictimology($intrusionSet),  // new
+];
 ```
 
-**2. Add zoom behavior:**
-
-```javascript
-const zoom = d3.zoom()
-  .scaleExtent([0.3, 4])
-  .on('zoom', (event) => g.attr('transform', event.transform));
-
-svg.call(zoom);
-// Store ref for button controls
-containerRef.current.__d3Zoom = zoom;
-containerRef.current.__d3Svg = svg;
+New private method `normalizeVictimology(array $intrusionSet): array` returns:
+```php
+[
+    'countries'     => [...],  // [['id' => ..., 'name' => ...], ...]
+    'regions'       => [...],
+    'sectors'       => [...],
+    'organizations' => [...],  // only identity_class !== 'sector'
+]
 ```
 
-**3. Add zoom buttons (JSX in D3Graph return):**
+---
 
-Three buttons (+ - R) positioned `absolute top-3 right-3` over the graph container. Styled with `bg-surface-2/90 border border-border rounded-md` to match design system.
+## 7. Frontend Modal Tab System
 
-- Zoom in: `svg.transition().call(zoom.scaleBy, 1.3)`
-- Zoom out: `svg.transition().call(zoom.scaleBy, 0.7)`
-- Reset: `svg.transition().call(zoom.transform, d3.zoomIdentity)`
+### Current TABS Array (ThreatActorsPage.jsx, line 550-556)
 
-### Key Details
+```js
+const TABS = [
+  { key: 'overview',       label: 'Overview',       icon: Info },
+  { key: 'relationships',  label: 'Relationships',  icon: GitBranch },
+  { key: 'ttps',           label: 'TTPs',           icon: Swords },
+  { key: 'tools',          label: 'Tools',          icon: Bug },
+  { key: 'campaigns',      label: 'Campaigns',      icon: Flag },
+];
+```
 
-- **Drag + zoom coexistence:** `d3.drag()` on nodes (line 103) and `d3.zoom()` on SVG coexist correctly. D3 drag stops event propagation, preventing zoom during node drag. This is built-in D3 behavior.
-- **Store references on `containerRef.current`** rather than React state to avoid re-renders. Zoom state is D3-managed, not React-managed.
-- **`scaleExtent([0.3, 4])`** prevents over-zoom.
-- **Zero new dependencies** -- D3 already provides `d3.zoom()`.
+### v6.1 Change: Replace Campaigns with Victimology
 
-## Feature 5: Pricing Page Dual Layout
+```js
+import { MapPin } from 'lucide-react'; // or Globe — already imported
 
-### Problem
-`PricingPage.jsx` renders as standalone with its own navbar (lines 65-97). Authenticated users lose the app layout when visiting from the topbar "Upgrade" button.
+const TABS = [
+  { key: 'overview',       label: 'Overview',       icon: Info },
+  { key: 'relationships',  label: 'Relationships',  icon: GitBranch },
+  { key: 'ttps',           label: 'TTPs',           icon: Swords },
+  { key: 'tools',          label: 'Tools',          icon: Bug },
+  { key: 'victimology',    label: 'Victimology',    icon: Globe },  // replaces campaigns
+];
+```
 
-### Architecture Decision: Move Route Inside AppLayout, Conditional Navbar
+Remove the `{activeTab === 'campaigns' && ...}` block (~35 lines, lines 829-863).
+Add a new `{activeTab === 'victimology' && ...}` block.
 
-**Place `/pricing` inside `AppLayout` but outside `ProtectedRoute` (same pattern as `/threat-search`). PricingPage conditionally hides its own navbar when user is authenticated.**
+### Victimology Tab Content Structure
 
-### Implementation
+The enrichment data arrives as `enrichment.victimology` (new field from extended endpoint).
+The tab renders four sub-sections:
 
-**1. Move route in `App.jsx`:**
+1. **Targeted Countries** — cyan pills, same pattern as Overview tab's countries section
+2. **Targeted Regions** — text list, muted color
+3. **Targeted Sectors** — amber pills, same pattern as Overview tab's sectors section
+4. **Targeted Organizations** — small cards with organization name
+
+Reuse the exact pill/tag markup patterns already in the Overview tab (lines 677-714). No new
+shared components needed — copy the pattern inline for the tab content since it is structurally
+identical and short (~60 LOC).
+
+### Loading/Empty State Reuse
+
+The Victimology tab uses the same `enrichLoading` / `enrichError` guards as TTPs and Tools
+tabs. The enrichment fetch is a single call on modal open — victimology data arrives with the
+rest of the enrichment payload. No additional loading state needed.
+
+### Import Cleanup
+
+The `Flag` import from `lucide-react` (used only for the Campaigns tab) can be removed.
+`Globe` is already imported (used in Overview tab).
+
+**Total change in `ThreatActorsPage.jsx`:** Remove ~35 lines (campaigns tab block + TABS
+entry), add ~75 lines (victimology tab block + TABS entry). Net: +40 LOC.
+
+---
+
+## 8. Frontend Page-Level Toggle (Threat Actors ↔ Campaigns)
+
+### URL State Strategy: Query Param
+
+Use `?view=campaigns` via `useSearchParams`. Do NOT use a sub-route (`/threat-actors/campaigns`).
+
+Rationale:
+- The existing `ThreatActorsPage.jsx` already uses `useSearchParams` for `after` and `search`
+  params. Adding `view` is consistent with the established pattern.
+- A sub-route would require adding a new route entry in `App.jsx` and either a nested route
+  or a wrapper component. More structural change for no UX benefit.
+- The `view` param is preserved when the user navigates back (browser history), which is
+  the correct behavior.
+
+### Toolbar Toggle Pill
+
+The existing toolbar (lines 144-190 in `ThreatActorsPage.jsx`) has a search input and
+pagination. Add a pill toggle group between the page header and the toolbar — or replace the
+header subtitle with the toggle if space is tight.
 
 ```jsx
-{/* Remove from standalone routes */}
-{/* <Route path="/pricing" element={<PricingPage />} /> */}
-
-{/* Add inside AppLayout, outside ProtectedRoute */}
-<Route element={<AppLayout />}>
-  <Route path="/threat-search" element={<ThreatSearchPage />} />
-  <Route path="/pricing" element={<PricingPage />} />
-  <Route element={<ProtectedRoute />}>
-    {/* ... protected routes ... */}
-  </Route>
-</Route>
-```
-
-**2. Modify `PricingPage.jsx`:**
-
-```jsx
-export default function PricingPage() {
-  const { user } = useAuth();
-
+// New: ViewToggle component inline in ThreatActorsPage
+function ViewToggle({ view, onSwitch }) {
   return (
-    <div className={user ? '' : 'min-h-screen bg-primary'}>
-      {/* Public navbar only when not inside AppLayout */}
-      {!user && <PublicNavbar />}
-
-      <div className={user ? 'py-8' : 'px-12 py-16'}>
-        {/* ... plan cards content unchanged ... */}
-      </div>
+    <div className="flex items-center gap-1 p-1 bg-surface-2 rounded-lg">
+      <button
+        onClick={() => onSwitch('actors')}
+        className={`px-3 py-1.5 rounded text-xs font-sans transition-colors ${
+          view === 'actors' ? 'bg-violet text-white' : 'text-text-muted hover:text-text-primary'
+        }`}
+      >
+        Threat Actors
+      </button>
+      <button
+        onClick={() => onSwitch('campaigns')}
+        className={`px-3 py-1.5 rounded text-xs font-sans transition-colors ${
+          view === 'campaigns' ? 'bg-violet text-white' : 'text-text-muted hover:text-text-primary'
+        }`}
+      >
+        Campaigns
+      </button>
     </div>
   );
 }
 ```
 
-### Why This Approach
+### View Switching Logic
 
-- **`/threat-search` already uses this exact pattern** -- inside `AppLayout`, outside `ProtectedRoute`, accessible by guests. Proven pattern.
-- **Single route, single component** -- no duplication, no redirect overhead.
-- **PricingPage already checks `user`** (line 75 toggles button text). Adding navbar conditional is minimal.
-- **Topbar "Upgrade" link** already points to `/pricing` -- no link changes.
-- **Public visitors see sidebar in guest mode** which helps platform discoverability.
-
-### What Changes in PricingPage.jsx
-
-1. Wrap the `<nav>` element (lines 65-97) in `{!user && ...}` conditional
-2. Remove `min-h-screen bg-primary` from outer div when embedded (AppLayout provides background)
-3. Adjust padding from `px-12 py-16` to `py-8` when user is authenticated (sidebar provides left margin)
-
-## Build Order (Dependency-Aware)
-
-```
-Phase 1: Auth FOUC Fix
-  No dependencies. Unblocks clean development of all other features.
-  Prevents confusing flash behavior during feature gating work.
-  Touches: App.jsx only (extract AppContent component)
-
-Phase 2: Plan Seeder + Backend Feature Gating
-  Updates PlanSeeder with new tiers, credits, allowed_routes.
-  Adds allowed_routes column migration + CheckFeatureAccess middleware.
-  Updates CreditResolver constants for new tier values.
-  Touches: PlanSeeder.php, CreditResolver.php, new migration, new middleware, api.php
-
-Phase 3: Frontend Feature Gating
-  Depends on Phase 2 (plan data with allowed_routes must exist in /api/user response).
-  Touches: mock-data.js (minPlan field), Sidebar.jsx (3-state logic), new planAccess.js, new PlanGatedRoute.jsx
-
-Phase 4: Pricing Dual Layout
-  Depends on Phase 1 (FOUC fix prevents flash of wrong layout).
-  Depends on Phase 3 (feature gating determines upgrade CTAs on pricing).
-  Touches: App.jsx (route move), PricingPage.jsx (conditional navbar removal)
-
-Phase 5: Contact Form Email
-  Depends on Phase 2 (plan_interest references new plan slugs).
-  Independent of frontend gating otherwise.
-  Touches: ContactUsPage.jsx, new ContactController, ContactMailable, ContactRequest
-
-Phase 6: D3 Zoom Controls
-  Fully independent. Can parallel with Phase 4 or 5.
-  Touches: ThreatSearchPage.jsx (D3Graph function only, ~30 lines changed)
+`ThreatActorsPage.jsx` reads `view` from `useSearchParams`:
+```js
+const view = searchParams.get('view') || 'actors';
 ```
 
-### Dependency Graph
+When `view === 'campaigns'`, the page calls `fetchCampaigns(params)` from a new
+`frontend/src/api/threat-campaigns.js` (mirrors `threat-actors.js`). The card grid,
+pagination, search, and empty states are shared/reused — the data shape returned by
+`/api/threat-campaigns` must match the existing shape fields that `ThreatActorCard` uses
+(`name`, `modified`, `aliases`) plus campaign-specific fields (`first_seen`, `last_seen`,
+`objective`, `attributed_to`).
 
+Two options for the card grid:
+
+- **Option A (preferred):** Render `CampaignCard` (new inline component, ~50 LOC) when
+  `view === 'campaigns'`. Campaigns have different fields (date range instead of motivation,
+  attributed actors instead of sectors). A separate card avoids prop-drilling conditional logic.
+- **Option B:** Reuse `ThreatActorCard` with optional fields. Works if field overlap is high
+  enough, but campaigns don't have `aliases` or `motivation` — empty state renders oddly.
+
+Option A is the clean choice.
+
+### `onViewSwitch` Handler
+
+```js
+const handleViewSwitch = useCallback((newView) => {
+  setSearchParams((prev) => {
+    const next = new URLSearchParams(prev);
+    next.set('view', newView);
+    next.delete('after');         // reset pagination on view switch
+    next.delete('search');        // reset search on view switch
+    return next;
+  });
+  setCursorHistory([]);
+}, [setSearchParams]);
 ```
-Phase 1 (FOUC) -----> Phase 4 (Pricing Layout)
-                  |
-Phase 2 (Backend) --> Phase 3 (Frontend Gating) --> Phase 4 (Pricing Layout)
-                  |
-                  --> Phase 5 (Contact Form)
 
-Phase 6 (D3 Zoom) -- independent, any time after Phase 1
-```
+**Estimated LOC change in `ThreatActorsPage.jsx`:** +120 LOC (ViewToggle component, CampaignCard
+component, conditional data fetch logic, `view` param handling).
+**New file `frontend/src/api/threat-campaigns.js`:** ~15 LOC.
 
-## Anti-Patterns to Avoid
+---
 
-### Anti-Pattern 1: Separate PlanContext Provider
-**What:** Creating a new `PlanContext` to hold plan/gating state.
-**Why bad:** Plan data already lives in `AuthContext.user.plan`. Second provider creates sync issues and unnecessary re-renders.
-**Instead:** Read `user.plan.slug` from `useAuth()`. Extract `usePlanAccess()` hook if logic gets complex.
+## 9. Suggested Build Order
 
-### Anti-Pattern 2: Client-Only Feature Gating
-**What:** Only checking plan access in frontend without backend enforcement.
-**Why bad:** Any authenticated user can call API endpoints directly. Free tier users access premium data via curl.
-**Instead:** Always enforce on backend via middleware. Frontend gating is UX; backend gating is security.
+The dependency graph drives the order. Backend before the frontend that consumes it. Map buffer
+refactor is internally self-contained and can be a standalone phase.
 
-### Anti-Pattern 3: localStorage Auth Cache for FOUC
-**What:** Caching user data in localStorage to skip loading screen.
-**Why bad:** Stale auth state shows logged-in UI when session expired. Cookie-based Sanctum sessions are the source of truth.
-**Instead:** Show branded loading screen for 50-200ms while auth resolves.
+### Phase Sequence
 
-### Anti-Pattern 4: Dual Route Registration for Pricing
-**What:** `/pricing` (public) and `/app-pricing` (authenticated) pointing to same component.
-**Why bad:** Two URLs for same content, back-button confusion, link management.
-**Instead:** Single `/pricing` inside `AppLayout` (same as `/threat-search`), conditional navbar.
+**Phase 1 — Backend Snapshot Resize (backend only)**
+- `ThreatMapService::fetchSnapshot()` — add `$limit` param, parameterize GraphQL `first`
+- `SnapshotController` — read and validate `?limit` query param
+- Cache key includes limit
+- No frontend change yet; existing frontend still works with default 100
 
-### Anti-Pattern 5: Separate Zoom SVG Overlay
-**What:** Creating a separate canvas/SVG for D3 zoom controls.
-**Why bad:** DOM complexity, z-index conflicts.
-**Instead:** HTML buttons positioned over the SVG container. Standard pattern for map/graph controls.
+**Phase 2 — Backend Victimology (backend only)**
+- Extend `ThreatActorService::executeEnrichmentQuery()` with 4 new targeted sub-queries
+- Add `normalizeVictimology()` method
+- `normalizeEnrichmentResponse()` adds `victimology` key
+- Frontend still works — new key is additive, existing tab renders unchanged
 
-## Files Changed Summary
+**Phase 3 — Backend Campaigns Endpoint (backend only)**
+- New `ThreatCampaignService.php`
+- New `ThreatCampaign/IndexController.php`
+- Route added to `api.php`
+- No frontend change yet
 
-### New Files (7)
+**Phase 4 — Threat Map Buffer Refactor (frontend only, self-contained)**
+- New `useThreatMapBuffer.js` hook
+- `useThreatStream.js` — add `bufferSize` param
+- `useLeaflet.js` — remove `markers` prop and its effect
+- `ThreatMapPage.jsx` — wire buffer hook, replace pulse/fade helpers with lifecycle sync
+- `BufferSizeControl.jsx` — dropdown component
+- `LeftOverlayPanel.jsx` — add BufferSizeControl section, pass `onBufferSizeChange` down
+- CSS additions in `components.css` for settled dot and cluster icon
+- localStorage key `aqua-tip:map-buffer-size`
+
+**Phase 5 — Marker Clustering (frontend only, depends on Phase 4)**
+- `npm install leaflet.markercluster`
+- CSS imports
+- `ThreatMapPage.jsx` — `clusterGroupRef`, threshold check, layer swap logic on bufferSize change
+- Test cluster styling against dark theme
+
+**Phase 6 — Victimology Tab (frontend only, depends on Phase 2)**
+- `ThreatActorsPage.jsx` — replace Campaigns TABS entry with Victimology
+- Remove campaigns tab JSX block
+- Add victimology tab JSX block
+- Update enrichment response type expectations
+
+**Phase 7 — Campaigns View Toggle (frontend only, depends on Phase 3)**
+- `ThreatActorsPage.jsx` — add ViewToggle component, CampaignCard component, view param logic
+- `frontend/src/api/threat-campaigns.js` — new API client function
+
+**Phase 8 — Polish + Integration Test**
+- End-to-end smoke test: snapshot at 500/1000, clustering at 1000, victimology tab, campaigns view
+- CSS audit: settled markers, cluster bubbles, panel layout at all buffer sizes
+
+---
+
+## Component Boundaries
+
+### New Components
+
+| Component | File | Purpose | LOC estimate |
+|-----------|------|---------|--------------|
+| `useThreatMapBuffer` | `frontend/src/hooks/useThreatMapBuffer.js` | Buffer lifecycle state management | ~120 |
+| `BufferSizeControl` | `frontend/src/components/threat-map/BufferSizeControl.jsx` | Dropdown + localStorage persistence | ~50 |
+| `CampaignCard` | inline in `ThreatActorsPage.jsx` | Campaign entity card for grid view | ~60 |
+| `ViewToggle` | inline in `ThreatActorsPage.jsx` | Pill toggle Threat Actors / Campaigns | ~30 |
+| `ThreatCampaignService` | `backend/app/Services/ThreatCampaignService.php` | OpenCTI Campaigns GraphQL + normalize | ~180 |
+| `ThreatCampaign/IndexController` | `backend/app/Http/Controllers/ThreatCampaign/IndexController.php` | Thin HTTP controller | ~30 |
+
+### Modified Files
+
+| File | Changes | Scope |
+|------|---------|-------|
+| `frontend/src/hooks/useThreatStream.js` | Add `bufferSize` param, replace `MAX_EVENTS` constant | Small (~15 LOC) |
+| `frontend/src/hooks/useLeaflet.js` | Remove `markers` prop and update-markers effect | Small (~20 LOC removed) |
+| `frontend/src/pages/ThreatMapPage.jsx` | Wire `useThreatMapBuffer`, add `bufferSize` state, replace pulse helpers, add marker sync effect | Medium (~80 LOC changed) |
+| `frontend/src/components/threat-map/LeftOverlayPanel.jsx` | Add `BufferSizeControl` section, pass `onBufferSizeChange` prop | Small (~20 LOC) |
+| `frontend/src/pages/ThreatActorsPage.jsx` | Replace Campaigns tab with Victimology, add ViewToggle + CampaignCard, view param logic | Medium (~160 LOC net change) |
+| `frontend/src/api/threat-actors.js` | No change needed — enrichment endpoint unchanged |  |
+| `frontend/src/styles/components.css` | Add `.map-settled-marker`, `.map-evicting-marker`, `.map-cluster-icon` | Small (~25 LOC) |
+| `backend/app/Services/ThreatActorService.php` | Add 4 victimology sub-queries to enrichment query, add `normalizeVictimology()`, update `normalizeEnrichmentResponse()` | Medium (~80 LOC added) |
+| `backend/app/Services/ThreatMapService.php` | Add `$limit` param to `getSnapshot()` / `fetchSnapshot()`, parameterize GraphQL `first` | Small (~15 LOC) |
+| `backend/app/Http/Controllers/ThreatMap/SnapshotController.php` | Read and validate `?limit` param, pass to service | Small (~10 LOC) |
+| `backend/routes/api.php` | Add `GET /threat-campaigns` route | Trivial |
+
+### New API Files
 
 | File | Purpose |
 |------|---------|
-| `frontend/src/utils/planAccess.js` | Plan hierarchy comparison utility |
-| `frontend/src/components/auth/PlanGatedRoute.jsx` | Route guard for plan-restricted routes |
-| `backend/app/Http/Middleware/CheckFeatureAccess.php` | API-level plan enforcement |
-| `backend/app/Http/Controllers/Contact/ContactController.php` | Contact form endpoint |
-| `backend/app/Http/Requests/ContactRequest.php` | Contact form validation |
-| `backend/app/Mail/ContactMailable.php` | Contact form email template |
-| `backend/resources/views/emails/contact.blade.php` | Email view template |
+| `frontend/src/api/threat-campaigns.js` | `fetchCampaigns()` function, mirrors `threat-actors.js` |
 
-### Modified Files (8)
+---
 
-| File | Change | Risk |
-|------|--------|------|
-| `frontend/src/App.jsx` | Extract AppContent for FOUC fix + move pricing route | LOW |
-| `frontend/src/data/mock-data.js` | Add `minPlan` to NAV_CATEGORIES items | LOW |
-| `frontend/src/components/layout/Sidebar.jsx` | 3-state nav item logic (guest/plan-locked/accessible) | MEDIUM |
-| `frontend/src/pages/PricingPage.jsx` | Conditional navbar, adjusted padding | LOW |
-| `frontend/src/pages/ContactUsPage.jsx` | Wire API call, loading/error states | LOW |
-| `frontend/src/pages/ThreatSearchPage.jsx` | D3Graph zoom: g wrapper + zoom behavior + buttons | MEDIUM |
-| `backend/routes/api.php` | Add contact route, feature middleware on gated routes | LOW |
-| `backend/database/seeders/PlanSeeder.php` | New tiers, allowed_routes | LOW |
+## Data Flow
 
-### New Migration (1)
+### Threat Map Buffer Flow (v6.1)
 
-| Migration | Change |
-|-----------|--------|
-| `add_allowed_routes_to_plans` | JSON `allowed_routes` column on plans table |
+```
+Snapshot load (GET /api/threat-map/snapshot?limit=N)
+    |
+    v
+useThreatStream(bufferSize)
+    |
+    +-- events[] (raw ring, capped at bufferSize)
+    |
+    v
+useThreatMapBuffer(events, bufferSize)
+    |
+    +-- markers[] with state: arriving | settled | evicting
+    |
+    v
+ThreatMapPage (useEffect watches markers)
+    |
+    +-- arriving:  create L.marker with pulse DivIcon, add to map + markerInstancesRef
+    +-- settled:   marker.setIcon(settledIcon) on existing instance
+    +-- evicting:  marker.setIcon(evictingIcon), setTimeout 600ms → removeLayer + delete ref
+    |
+    v
+Leaflet map DOM
+```
 
-### Backend Config (1)
+### Campaigns View Flow (v6.1)
 
-| File | Change |
-|------|--------|
-| `backend/config/mail.php` | Add `admin_address` config key |
+```
+User clicks "Campaigns" pill toggle
+    |
+    v
+setSearchParams({ view: 'campaigns', after: null, search: null })
+    |
+    v
+ThreatActorsPage re-renders, reads view='campaigns'
+    |
+    v
+fetchCampaigns(params) → GET /api/threat-campaigns
+    |
+    v
+ThreatCampaignService::list() → OpenCTI GraphQL → campaigns(...)
+    |
+    v
+Cached response (15min) → normalize → JSON
+    |
+    v
+CampaignCard grid renders
+```
+
+### Victimology Modal Flow (v6.1)
+
+```
+User clicks Threat Actor card → modal opens
+    |
+    v
+fetchThreatActorEnrichment(id) → GET /api/threat-actors/{id}/enrichment
+    |
+    v
+ThreatActorService::enrichment() → single OpenCTI GraphQL call
+    (now includes targetedCountries/Regions/Sectors/Organizations sub-queries)
+    |
+    v
+normalizeEnrichmentResponse() returns { ttps, tools, malware, campaigns*, relationships, victimology }
+    *campaigns key remains in response for backward compatibility even after frontend tab removal
+    |
+    v
+Victimology tab renders enrichment.victimology.{countries, regions, sectors, organizations}
+```
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Per-Render Leaflet Marker Recreation
+
+**What people do:** On every `markers` state change, call `map.clearLayers()` then re-add all
+markers from scratch.
+
+**Why it's wrong:** Causes all markers to disappear and re-appear on every SSE event. At 1000
+markers, this is a full DOM churn 1-5 times per second during active streams.
+
+**Do this instead:** Maintain `markerInstancesRef` (Map keyed by event ID). Diff the new markers
+array against existing instances. Only create/update/remove changed entries.
+
+### Anti-Pattern 2: Putting Buffer Logic in useThreatStream
+
+**What people do:** Expand `useThreatStream` to own the buffer size, marker states, animation
+timers, and cluster logic — one giant hook.
+
+**Why it's wrong:** SSE connection lifecycle and marker visualization are independent concerns.
+Testing and debugging become impossible. The hook grows to 300+ LOC.
+
+**Do this instead:** `useThreatStream` owns SSE + event ring. `useThreatMapBuffer` owns marker
+lifecycle and animation timers. `ThreatMapPage` owns Leaflet instance management.
+
+### Anti-Pattern 3: GraphQL Sub-Query Fan-Out for Victimology in List Query
+
+**What people do:** Add targetedOrganizations + targetedRegions to the list endpoint (the
+`intrusionSets` query) to prepopulate cards.
+
+**Why it's wrong:** Every page load (24 actors × 4 sub-queries = 96 additional OpenCTI calls)
+amplified by pagination. The list query already has 2 sub-queries per actor; adding 4 more
+will time out on large datasets or hit OpenCTI rate limits.
+
+**Do this instead:** Victimology only in the enrichment (single-actor) endpoint, loaded on
+modal open. The list query's existing `targeted_countries` and `targeted_sectors` (≤20 items
+each) are sufficient for the card preview.
+
+### Anti-Pattern 4: Sub-Route for Campaigns View
+
+**What people do:** Add `/threat-actors/campaigns` as a new route in React Router.
+
+**Why it's wrong:** Requires changes to `App.jsx`, either a nested route or code-splitting the
+page component. The existing `?view=` query param pattern is already established on this page
+(`?after=`, `?search=`). Splitting into a route adds navigation complexity (sidebar active
+state, breadcrumbs, back button behavior) with no UX gain.
+
+**Do this instead:** `?view=campaigns` query param handled inside the existing `ThreatActorsPage`.
+
+---
 
 ## Sources
 
-- Direct codebase analysis: `AuthContext.jsx`, `App.jsx`, `ProtectedRoute.jsx`, `Sidebar.jsx`, `PricingPage.jsx`, `ContactUsPage.jsx`, `ThreatSearchPage.jsx` (D3Graph), `CreditResolver.php`, `DeductCredit.php`, `PlanSeeder.php`, `UserResource.php`, `api.php`, `mock-data.js`
-- D3 zoom behavior: standard D3 pattern (d3.zoom + child g transform) -- HIGH confidence, well-established
-- Laravel Mail: existing codebase uses Mail for verification -- HIGH confidence
-- React Router nested layouts: existing codebase uses AppLayout + ProtectedRoute pattern -- HIGH confidence
+- Codebase inspection: all findings are HIGH confidence, derived from reading the live source
+- `frontend/src/pages/ThreatMapPage.jsx` — current buffer/pulse architecture
+- `frontend/src/hooks/useThreatStream.js` — SSE + event ring implementation
+- `frontend/src/hooks/useLeaflet.js` — map init + marker layer pattern
+- `frontend/src/pages/ThreatActorsPage.jsx` — modal tab system, TABS array, enrichment fetch
+- `frontend/src/components/threat-map/LeftOverlayPanel.jsx` — panel layout, prop interface
+- `frontend/src/components/threat-map/RightOverlayPanel.jsx` — right panel structure
+- `backend/app/Services/ThreatActorService.php` — enrichment GraphQL, normalization methods
+- `backend/app/Services/ThreatMapService.php` — snapshot fetch, geo resolution
+- `backend/app/Http/Controllers/ThreatMap/SnapshotController.php` — snapshot response shape
+- `backend/routes/api.php` — existing route structure, middleware groups
+
+---
+
+*Architecture research for: AQUA TIP v6.1 Threat Map Buffer & Threat Actor Depth*
+*Researched: 2026-04-17*
