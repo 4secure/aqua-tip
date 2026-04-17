@@ -1,8 +1,10 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "globe-ping-clipping - Ping dots on the cobe globe overlay are appearing outside the globe boundary"
 created: 2026-03-15T00:00:00Z
-updated: 2026-03-15T00:00:00Z
+updated: 2026-04-17T00:00:00Z
+resolved: 2026-04-17T00:00:00Z
+resolution: "Resolved by switching overlay radius from 0.97 to 0.8 (cobe shader's actual sqrt(0.64) globe radius). Pings now stay within globe boundary — visually verified."
 ---
 
 ## Current Focus

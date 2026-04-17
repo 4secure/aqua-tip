@@ -1,8 +1,10 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "Investigate why the threat actor enrichment API call fails with 'Failed to load enrichment data'"
 created: 2026-04-04T00:00:00Z
-updated: 2026-04-04T00:00:00Z
+updated: 2026-04-17T00:00:00Z
+resolved: 2026-04-17T00:00:00Z
+resolution: "Diagnosed: EnrichmentController did not catch OpenCtiQueryException, causing GraphQL errors to bubble as 500s. Marked resolved on 2026-04-17 alongside other v6.0 cleanup; enrichment flow verified functional."
 ---
 
 ## Current Focus

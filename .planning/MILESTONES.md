@@ -1,5 +1,21 @@
 # Milestones
 
+## v6.0 Feature Gating & UX Polish (Shipped: 2026-04-17)
+
+**Phases completed:** 5 phases, 6 plans
+**Timeline:** 2 days (2026-04-14 → 2026-04-15)
+**Stats:** 42 commits, 63 files changed (+5,120 / -261)
+
+**Key accomplishments:**
+
+1. Feature gating shipped — free plan locked to threat search via `FeatureGate` middleware (backend) and `FeatureGatedRoute` (frontend); paid/trial users unrestricted
+2. Pricing dual routing — `/pricing` renders inside `AppLayout` for authenticated users and standalone for guests; enterprise contact form posts to backend mailable
+3. Threat Database widget displays all 7 STIX observable types (was 4) — `DashboardService::fetchCounts` now queries Email, URL, and Cryptocurrency entities
+4. UI polish — settings card centered, globe renders instantly via bundled GeoJSON, scroll-aware rotation, 4px scrollbar, favicon, sidebar z-index fix
+5. D3 zoom controls — scroll wheel + visible buttons on threat search and threat actors relationship graphs
+
+---
+
 ## v5.1 Threat Map Enhancements (Shipped: 2026-04-13)
 
 **Phases completed:** 2 phases, 2 plans

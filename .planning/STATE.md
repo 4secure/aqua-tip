@@ -1,43 +1,42 @@
 ---
 gsd_state_version: 1.0
-milestone: v6.0
-milestone_name: Feature Gating & UX Polish
-status: executing
-stopped_at: Phase 57 context gathered
-last_updated: "2026-04-14T10:44:12.869Z"
-last_activity: 2026-04-14 -- Phase 57 planning complete
+milestone: null
+milestone_name: null
+status: between_milestones
+stopped_at: null
+last_updated: "2026-04-17T12:00:00.000Z"
+last_activity: 2026-04-17
+last_shipped: v6.0
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 4
-  percent: 80
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-14)
+See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Phase 56 — trial-plan-10-credits-per-day-configuration
+**Current focus:** Planning next milestone (v6.0 shipped 2026-04-17)
 
 ## Current Position
 
-Phase: 56 (trial-plan-10-credits-per-day-configuration) — EXECUTING
-Plan: 1 of 1
-Status: Ready to execute
-Last activity: 2026-04-14 -- Phase 57 planning complete
+Between milestones. Run `/gsd-new-milestone` to begin questioning → research → requirements → roadmap.
 
-Progress: [██████████] 100%
+Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
+Last activity: 2026-04-17
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 78 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12, v3.3: 5, v4.0: 4, v5.0: 10, v5.1: 2, v6.0: 2)
-- Total milestones: 12 shipped in 31 days
+- Total plans completed: 83 (v1.0: 13, v1.1: 4, v2.0: 9, v2.1: 8, v2.2: 6, v3.0: 10, v3.1: 3, v3.2: 12, v3.3: 5, v4.0: 4, v5.0: 10, v5.1: 2, v6.0: 5)
+- Total milestones: 13 shipped in 33 days
 
 **By Milestone:**
 
@@ -55,9 +54,7 @@ Progress: [██████████] 100%
 | v4.0 Plan Overhaul & UX Polish | 2 | 4 | 2 days |
 | v5.0 Security Hardening | 5 | 10 | 3 days |
 | v5.1 Threat Map Enhancements | 2 | 2 | 1 day |
-| Phase 54 P01 | 15min | 2 tasks | 1 files |
-| Phase 55 P01 | 3min | 2 tasks | 5 files |
-| Phase 55 P02 | 5min | 2 tasks | 3 files |
+| v6.0 Feature Gating & UX Polish | 5 | 5 | 2 days |
 
 ## Accumulated Context
 
@@ -94,6 +91,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last activity: 2026-04-14
-Last session: 2026-04-14T10:19:19.333Z
-Stopped at: Phase 57 context gathered
+Last activity: 2026-04-17
+Last session: 2026-04-17T12:00:00.000Z
+Stopped at: v6.0 milestone shipped — between milestones

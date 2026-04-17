@@ -1,8 +1,10 @@
 ---
-status: investigating
+status: resolved
 trigger: "Ping dots on the cobe globe overlay canvas are not moving in sync with the globe's rotation"
 created: 2026-03-15T00:00:00Z
-updated: 2026-03-15T00:00:00Z
+updated: 2026-04-17T00:00:00Z
+resolved: 2026-04-17T00:00:00Z
+resolution: "Marked resolved on 2026-04-17 — globe overlay rendering verified visually; no longer reproducible after subsequent globe + radius fixes."
 ---
 
 ## Current Focus

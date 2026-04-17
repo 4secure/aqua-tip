@@ -112,21 +112,28 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 - ✓ Migration SQL made driver-aware (pgsql + sqlite) — v4.0
 - ✓ Free plan features list corrected to 2 items (threat search only) — v6.0
 - ✓ Feature gating verified: backend 403 + frontend UpgradeCTA for free users — v6.0
+- ✓ FeatureGate middleware blocks free plan from threat-map, dark-web, threat-actors, threat-news routes — v6.0
+- ✓ Frontend FeatureGatedRoute wraps gated pages with UpgradeCTA fallback — v6.0
+- ✓ Pricing page dual routing: AppLayout for auth users, standalone for guests — v6.0
+- ✓ Enterprise contact form posts to backend mailable, sends to ADMIN_EMAIL — v6.0
+- ✓ Topbar logo navigates to landing for unauthenticated users on /pricing — v6.0
+- ✓ DashboardService fetchCounts queries all 7 STIX observable types (Email, URL, Crypto added) — v6.0
+- ✓ Settings page profile card horizontally centered (mx-auto) — v6.0
+- ✓ Landing globe renders instantly via bundled ne_110m_land.json (no async fetch) — v6.0
+- ✓ Globe rotation pauses during scroll (isScrolling debounce, 150ms) — v6.0
+- ✓ 4px transparent scrollbar with no arrows; favicon link tags; Threat Map sidebar z-index fix — v6.0
+- ✓ D3 zoom (scroll + buttons) on threat search and threat actors relationship graphs — v6.0
 
-## Current Milestone: v6.0 Feature Gating & UX Polish
+## Last Shipped: v6.0 Feature Gating & UX Polish
 
-**Goal:** Complete all deferred features and fixes — feature gating, pricing integration, UI polish, observable display, and relationship graph controls.
+Shipped 2026-04-17. 5 phases (54-58), 5 plans, 42 commits, 63 files changed.
+See `.planning/milestones/v6.0-ROADMAP.md` for the full archive.
 
-**Target features:**
-- Feature gating: free plan restricted to threat search only (backend middleware + frontend route guards + seeder fix)
-- Pricing page: auth-aware routing (inside app layout when authed, standalone when not) + wire enterprise contact form to send email
-- Settings page: center-align profile management form
-- Observable display: render email, URL, and crypto types properly in threat search results
-- D3 relationship graph: add zoom in/out button controls
-- Landing page: smooth animation, globe loads on first render
-- Pro plan: confirmed at 50 credits/day (no change needed)
+**Shipped milestones:** v1.0, v1.1, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2, v3.3, v4.0, v5.0, v5.1, v6.0
 
-**Shipped milestones:** v1.0, v1.1, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2, v3.3, v4.0, v5.0, v5.1
+## Next Milestone
+
+Pending. Run `/gsd-new-milestone` to start questioning → research → requirements → roadmap.
 
 ### Out of Scope
 
@@ -146,7 +153,7 @@ Users get real threat intelligence from OpenCTI — searchable across all observ
 
 ## Context
 
-54 phases, 77 plans completed across 12 milestones in 31 days.
+58 phases, 83 plans completed across 13 milestones in 33 days.
 Tech stack: React 19, Vite 7, Tailwind CSS 3, Framer Motion, Laravel 12, Sanctum, Socialite, PostgreSQL, OpenCTI.
 140+ Pest tests covering auth, OAuth, email verification, rate limiting, dark web search, dashboard endpoints, search history, credit resolution, plan APIs, onboarding validation.
 Both services deployed to Railway (backend + frontend) with PostgreSQL addon.
@@ -154,7 +161,7 @@ OpenCTI instance at http://192.168.251.20:8080 provides live threat data via Gra
 v4.0 shipped plan restructuring and auth loading fixes. Feature gating deferred.
 v5.0 shipped comprehensive security hardening (LFI, IDOR, rate limiting, headers, OAuth, SMTP TLS, DNS records).
 v5.1 shipped Threat Map rename and attack category bar chart.
-v6.0 in progress — feature gating, pricing integration, UI polish, observable display, D3 zoom.
+v6.0 shipped — feature gating (backend middleware + frontend guards), pricing dual routing + enterprise contact email, observable display for all 7 STIX types, UI polish (settings centering, instant globe, scrollbar, favicon), D3 zoom controls on relationship graphs.
 
 ## Constraints
 
@@ -229,6 +236,13 @@ v6.0 in progress — feature gating, pricing integration, UI polish, observable 
 | Unified hover-zone wrapper for sliver+panel | Prevents flicker from hover-gap transition | ✓ Good |
 | localStorage-backed useState with try/catch | Handle storage unavailability gracefully | ✓ Good |
 | Deletion-then-audit cleanup pattern | Delete orphans first, grep audit confirms zero stale refs | ✓ Good |
+| FeatureGate middleware + FeatureGatedRoute (dual-layer gating) | Backend 403 for security, frontend UpgradeCTA for UX — both required | ✓ Good |
+| ConditionalAppLayout for dual-routing pages | Auth users see AppLayout (sidebar+topbar), guests see standalone Outlet | ✓ Good |
+| Synchronous mail send for enterprise contact | Low volume, immediate feedback, no queue infra needed | ✓ Good |
+| Bundled ne_110m_land.json over async GitHub fetch | ~24KB gzipped, eliminates first-paint delay and offline failure | ✓ Good |
+| isScrolling debounce (150ms) pauses globe rotation | Prevents D3/Framer Motion frame contention during scroll | ✓ Good |
+| d3.zoom + zoomTransform-aware drag math | Drag coords must read transform or nodes drift after zoom | ✓ Good |
+| Free plan features list reduced 6→2 items | Match actual gated reality, not aspirational marketing copy | ✓ Good |
 
 ## Evolution
 
@@ -248,4 +262,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 — Phase 54 complete (free plan feature gating). v6.0 in progress.*
+*Last updated: 2026-04-17 after v6.0 milestone shipped.*

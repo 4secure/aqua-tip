@@ -1,8 +1,9 @@
 ---
 phase: 54-ioc-display-for-email-url-crypto-types-and-relationship-graph-zoom-controls
 verified: 2026-04-14T12:00:00Z
-status: human_needed
-score: 4/6 must-haves verified
+human_verified: 2026-04-17T00:00:00Z
+status: verified
+score: 6/6 must-haves verified (4 code-level + 2 human-confirmed runtime)
 must_haves:
   truths:
     - "Free plan features array contains exactly 2 items: '5 searches per day' and 'Threat search'"
