@@ -206,14 +206,21 @@ class ThreatMapService
     /**
      * Fetch a snapshot of recent threat events for initial page load.
      *
-     * @return array  Array of geo-annotated events
+     * Per MAPBUF-06 / D-02 / D-03: `$limit` is caller-supplied (validated by
+     * the controller against the MAPCFG-01 whitelist [100, 500, 1000, 2000]).
+     * Each accepted limit gets its own 15-min cache entry under the semantic
+     * key "threat_map:snapshot:{$limit}" — flushable individually via
+     * `php artisan tinker` → `Cache::forget('threat_map:snapshot:500')`.
+     *
+     * @param  int  $limit  Number of events to request from OpenCTI (default 100).
+     * @return array  Array of geo-annotated events.
      */
-    public function getSnapshot(): array
+    public function getSnapshot(int $limit = 100): array
     {
         return Cache::remember(
-            'threat_map:snapshot',
+            "threat_map:snapshot:{$limit}",
             now()->addMinutes(15),
-            fn () => $this->fetchSnapshot(),
+            fn () => $this->fetchSnapshot($limit),
         );
     }
 
@@ -378,13 +385,15 @@ class ThreatMapService
     /**
      * Fetch recent STIX events from OpenCTI for the snapshot.
      *
-     * Fetches 100 most recent observables without time filter for richer initial load.
+     * Per D-04: GraphQL `first:` is parameterized so the caller-controlled
+     * (whitelist-validated) limit drives the page size. Ordering is
+     * `created_at desc` with no time filter — matches prior behavior.
      */
-    private function fetchSnapshot(): array
+    private function fetchSnapshot(int $limit): array
     {
         $graphql = <<<'GRAPHQL'
-        {
-            stixCyberObservables(types: ["IPv4-Addr", "IPv6-Addr"], first: 100, orderBy: created_at, orderMode: desc) {
+        query ($first: Int!) {
+            stixCyberObservables(types: ["IPv4-Addr", "IPv6-Addr"], first: $first, orderBy: created_at, orderMode: desc) {
                 edges {
                     node {
                         id
@@ -400,12 +409,11 @@ class ThreatMapService
         }
         GRAPHQL;
 
-        $data = $this->openCti->query($graphql);
-        // dd($data);
+        $data = $this->openCti->query($graphql, ['first' => $limit]);
         $edges = $data['stixCyberObservables']['edges'] ?? [];
 
         $events = [];
-        // dd($edges);
+
         foreach ($edges as $edge) {
             $node = $edge['node'] ?? null;
 
