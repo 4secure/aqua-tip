@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
+milestone: v6.1
+milestone_name: Threat Map Buffer & Threat Actor Depth
+status: defining_requirements
 stopped_at: null
-last_updated: "2026-04-17T12:00:00.000Z"
+last_updated: "2026-04-17T12:30:00.000Z"
 last_activity: 2026-04-17
 last_shipped: v6.0
 progress:
@@ -22,14 +22,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** Planning next milestone (v6.0 shipped 2026-04-17)
+**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — defining requirements
 
 ## Current Position
 
-Between milestones. Run `/gsd-new-milestone` to begin questioning → research → requirements → roadmap.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-17 — Milestone v6.1 started
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
-Last activity: 2026-04-17
 
 ## Performance Metrics
 

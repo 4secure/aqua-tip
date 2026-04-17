@@ -131,9 +131,16 @@ See `.planning/milestones/v6.0-ROADMAP.md` for the full archive.
 
 **Shipped milestones:** v1.0, v1.1, v2.0, v2.1, v2.2, v3.0, v3.1, v3.2, v3.3, v4.0, v5.0, v5.1, v6.0
 
-## Next Milestone
+## Current Milestone: v6.1 Threat Map Buffer & Threat Actor Depth
 
-Pending. Run `/gsd-new-milestone` to start questioning → research → requirements → roadmap.
+**Goal:** Make the live threat map a persistent, scalable visualization (configurable buffer with smooth marker rotation) and deepen threat actor intelligence with victimology and campaigns surfaces.
+
+**Target features:**
+- Persistent Threat Map buffer — all buffered IPs render as static markers; new arrivals pulse-ring then settle; oldest fade out quietly when buffer fills
+- Configurable buffer size — dropdown (100/500/1000/2000) in overlay panel, persisted to localStorage
+- Marker clustering at scale — `leaflet.markercluster` auto-enabled when buffer > 500
+- Threat Actor modal — Victimology tab (replaces Campaigns) showing targeted countries, regions, sectors, organizations
+- Threat Actors page — toolbar toggle pill switching between Threat Actors and Campaigns views (URL-state preserved)
 
 ### Out of Scope
 
@@ -262,4 +269,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after v6.0 milestone shipped.*
+*Last updated: 2026-04-17 — v6.1 milestone started.*
