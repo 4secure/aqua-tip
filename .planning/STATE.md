@@ -1,12 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v6.1
-milestone_name: Threat Map Buffer & Threat Actor Depth
-status: roadmap_ready
-stopped_at: phase_59
-last_updated: "2026-04-17T13:00:00.000Z"
-last_activity: 2026-04-17
-last_shipped: v6.0
+milestone_name: milestone
+status: Roadmap approved — begin Phase 59
+stopped_at: Phase 59 context gathered
+last_updated: "2026-04-17T13:00:53.730Z"
+last_activity: 2026-04-17 — v6.1 roadmap created (8 phases, 32 requirements)
 progress:
   total_phases: 8
   completed_phases: 0
@@ -105,6 +104,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last activity: 2026-04-17
-Last session: 2026-04-17T13:00:00.000Z
-Stopped at: v6.1 roadmap defined — ready to begin Phase 59
+Last session: 2026-04-17T13:00:53.724Z
+Stopped at: Phase 59 context gathered
 Next action: `/gsd-plan-phase 59`
