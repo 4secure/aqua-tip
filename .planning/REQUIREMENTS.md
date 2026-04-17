@@ -82,10 +82,35 @@ Deferred to future milestones. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAPBUF-01..06 | TBD (roadmap) | Pending |
-| MAPCFG-01..04 | TBD (roadmap) | Pending |
-| MAPCLU-01..05 | TBD (roadmap) | Pending |
-| VICTM-01..09 | TBD (roadmap) | Pending |
-| CAMP-01..08 | TBD (roadmap) | Pending |
-
-*Traceability filled by roadmapper.*
+| MAPBUF-01 | Phase 61 | Pending |
+| MAPBUF-02 | Phase 61 | Pending |
+| MAPBUF-03 | Phase 61 | Pending |
+| MAPBUF-04 | Phase 61 | Pending |
+| MAPBUF-05 | Phase 61 | Pending |
+| MAPBUF-06 | Phase 59 | Pending |
+| MAPCFG-01 | Phase 62 | Pending |
+| MAPCFG-02 | Phase 62 | Pending |
+| MAPCFG-03 | Phase 62 | Pending |
+| MAPCFG-04 | Phase 62 | Pending |
+| MAPCLU-01 | Phase 63 | Pending |
+| MAPCLU-02 | Phase 63 | Pending |
+| MAPCLU-03 | Phase 63 | Pending |
+| MAPCLU-04 | Phase 63 | Pending |
+| MAPCLU-05 | Phase 63 | Pending |
+| VICTM-01 | Phase 64 | Pending |
+| VICTM-02 | Phase 64 | Pending |
+| VICTM-03 | Phase 64 | Pending |
+| VICTM-04 | Phase 64 | Pending |
+| VICTM-05 | Phase 64 | Pending |
+| VICTM-06 | Phase 64 | Pending |
+| VICTM-07 | Phase 64 | Pending |
+| VICTM-08 | Phase 64 | Pending |
+| VICTM-09 | Phase 59 | Pending |
+| CAMP-01 | Phase 65 | Pending |
+| CAMP-02 | Phase 65 | Pending |
+| CAMP-03 | Phase 65 | Pending |
+| CAMP-04 | Phase 65 | Pending |
+| CAMP-05 | Phase 65 | Pending |
+| CAMP-06 | Phase 65 | Pending |
+| CAMP-07 | Phase 60 | Pending |
+| CAMP-08 | Phase 60 | Pending |

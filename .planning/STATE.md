@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: Threat Map Buffer & Threat Actor Depth
-status: defining_requirements
-stopped_at: null
-last_updated: "2026-04-17T12:30:00.000Z"
+status: roadmap_ready
+stopped_at: phase_59
+last_updated: "2026-04-17T13:00:00.000Z"
 last_activity: 2026-04-17
 last_shipped: v6.0
 progress:
-  total_phases: 0
+  total_phases: 8
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -22,16 +22,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — defining requirements
+**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — roadmap defined, ready for Phase 59
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-17 — Milestone v6.1 started
+Phase: 59 — Backend Snapshot Resize + Victimology Endpoint
+Plan: Not started
+Status: Roadmap approved — begin Phase 59
+Last activity: 2026-04-17 — v6.1 roadmap created (8 phases, 32 requirements)
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
+
+```
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0/8 phases (0%)
+```
 
 ## Performance Metrics
 
@@ -57,6 +61,7 @@ Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
 | v5.0 Security Hardening | 5 | 10 | 3 days |
 | v5.1 Threat Map Enhancements | 2 | 2 | 1 day |
 | v6.0 Feature Gating & UX Polish | 5 | 5 | 2 days |
+| v6.1 Threat Map Buffer & Threat Actor Depth | 8 | TBD | TBD |
 
 ## Accumulated Context
 
@@ -78,11 +83,17 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 54]: Enterprise price_cents set to 0 (not null) to satisfy NOT NULL constraint in seeder
 - [Phase 55]: Synchronous mail send (not queued) for enterprise contact endpoint
 - [Phase 55]: ConditionalAppLayout pattern for dual-routing pages (auth=AppLayout, guest=standalone)
+- [v6.1 Roadmap]: ThreatCampaignService MUST be standalone -- not subclass of ThreatActorService (Campaign STIX fields differ: first_seen/last_seen/objective vs aliases/primary_motivation)
+- [v6.1 Roadmap]: OpenCTI Organization uses toTypes: ["Identity"] + entity_type filter (not toTypes: ["Organization"]) -- verify in GraphiQL at 192.168.251.20 before Phase 59 implementation
+- [v6.1 Roadmap]: Buffer size propagates to SSE closure via useRef + separate effect -- never add bufferSize to SSE effect deps
+- [v6.1 Roadmap]: markerInstancesRef diff-reconciliation pattern required -- React state eviction does not auto-remove Leaflet layers
+- [v6.1 Roadmap]: leaflet.markercluster@1.5.3 is the only new dep; installed in Phase 63; import MarkerCluster.css only (skip MarkerCluster.Default.css)
+- [v6.1 Roadmap]: Victimology consolidates 4 sub-queries into 1 (toTypes: ["Country","Region","Sector","Identity"]) to avoid enrichment timeout
 
 ### Blockers/Concerns
 
-- Nginx config changes require Railway deployment (cannot test locally without Docker)
-- DKIM/SPF/DMARC records require DNS provider access for tip.aquasecure.ai
+- OpenCTI Region data availability unknown -- may return empty (acceptable, show N/A in UI)
+- OpenCTI Organization STIX type resolution (toTypes: ["Identity"] vs ["Organization"]) must be verified in Phase 59 via live GraphiQL
 
 ### Quick Tasks Completed
 
@@ -94,5 +105,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last activity: 2026-04-17
-Last session: 2026-04-17T12:00:00.000Z
-Stopped at: v6.0 milestone shipped — between milestones
+Last session: 2026-04-17T13:00:00.000Z
+Stopped at: v6.1 roadmap defined — ready to begin Phase 59
+Next action: `/gsd-plan-phase 59`
