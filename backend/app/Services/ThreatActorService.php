@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class ThreatActorService
 {
@@ -335,6 +336,46 @@ class ThreatActorService
                 }
               }
             }
+            # VICTM-09 / D-06 - Consolidated victimology sub-query. PITFALL-13: MUST stay a
+            # single stixCoreRelationships block with toTypes: ["Country","Region","Sector","Identity"] -
+            # do NOT split into 4 aliased blocks (causes N+1 enrichment timeout against OpenCTI).
+            #
+            # D-08 - Verified against OpenCTI GraphiQL at http://192.168.251.20:8080/graphql.
+            # toTypes: ["Identity"] resolves to concrete types Organization | Individual | System -
+            # filter in PHP normalizer by entity_type === 'Organization' (PITFALL-12). The
+            # Country.x_opencti_aliases field carries ISO-2 codes inconsistently - extractIsoCode()
+            # picks the first 2-char uppercase-alpha entry (Pitfall 2).
+            #
+            # first: 200 is generous; historical actors have <50 combined targets.
+            victimology: stixCoreRelationships(
+              relationship_type: "targets"
+              toTypes: ["Country", "Region", "Sector", "Identity"]
+              first: 200
+            ) {
+              edges {
+                node {
+                  to {
+                    ... on BasicObject {
+                      id
+                      entity_type
+                    }
+                    ... on Country {
+                      name
+                      x_opencti_aliases
+                    }
+                    ... on Region {
+                      name
+                    }
+                    ... on Sector {
+                      name
+                    }
+                    ... on Organization {
+                      name
+                    }
+                  }
+                }
+              }
+            }
             allRelationships: stixCoreRelationships(first: 100) {
               edges {
                 node {
@@ -421,7 +462,7 @@ class ThreatActorService
 
         $data = $this->openCti->query($graphql, ['id' => $id]);
 
-        return $this->normalizeEnrichmentResponse($data);
+        return $this->normalizeEnrichmentResponse($data, $id);
     }
 
     /**
@@ -429,7 +470,7 @@ class ThreatActorService
      *
      * TTPs are grouped by MITRE ATT&CK tactic in kill chain order.
      */
-    private function normalizeEnrichmentResponse(array $data): array
+    private function normalizeEnrichmentResponse(array $data, string $actorId): array
     {
         $intrusionSet = $data['intrusionSet'] ?? [];
 
@@ -438,6 +479,10 @@ class ThreatActorService
             'tools' => $this->normalizeTools($intrusionSet['tools']['edges'] ?? []),
             'malware' => $this->normalizeMalware($intrusionSet['malware']['edges'] ?? []),
             'campaigns' => $this->normalizeCampaigns($intrusionSet['campaigns']['edges'] ?? []),
+            'victimology' => $this->safeNormalizeVictimology(
+                $intrusionSet['victimology']['edges'] ?? [],
+                $actorId,
+            ),
             'relationships' => $this->normalizeRelationships($intrusionSet['allRelationships']['edges'] ?? []),
         ];
     }
@@ -624,5 +669,111 @@ class ThreatActorService
             'entity_type' => $entity['entity_type'] ?? null,
             'name' => $name,
         ];
+    }
+
+    /**
+     * Safe wrapper around normalizeVictimology per D-10.
+     *
+     * Parse-level failures (malformed edges, unexpected shape) are logged via
+     * Log::warning and degrade to empty arrays so the rest of the enrichment
+     * payload (ttps/tools/malware/campaigns/relationships) keeps serving.
+     *
+     * NOTE on caching: Laravel's Cache::remember does NOT cache closures that
+     * throw, so a genuine OpenCTI failure (OpenCtiQueryException) bubbles to
+     * the controller and produces a 502 - never poisoning the cache with a
+     * phantom empty payload. A parse-level fallback DOES cache for 15 min,
+     * which is acceptable because it represents "this actor currently has no
+     * parseable victimology" - re-fetch on natural TTL expiry.
+     */
+    private function safeNormalizeVictimology(array $edges, string $actorId): array
+    {
+        try {
+            return $this->normalizeVictimology($edges);
+        } catch (\Throwable $e) {
+            Log::warning('Victimology sub-query failed', [
+                'actor_id' => $actorId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return ['countries' => [], 'regions' => [], 'sectors' => [], 'organizations' => []];
+        }
+    }
+
+    /**
+     * Normalize consolidated victimology edges into 4 buckets per D-07 + D-09.
+     *
+     * PITFALL-12: toTypes: ["Identity"] returns Organization | Individual | System.
+     * Filter strictly on entity_type === 'Organization' - Individuals and Systems
+     * are NOT victim entities and must not leak into the organizations bucket.
+     *
+     * D-13: dedupe by id per bucket - OpenCTI may return overlapping edges when
+     * the same Country/Sector has multiple "targets" relationships with the actor.
+     */
+    private function normalizeVictimology(array $edges): array
+    {
+        $buckets = [
+            'countries' => [],
+            'regions' => [],
+            'sectors' => [],
+            'organizations' => [],
+        ];
+
+        foreach ($edges as $edge) {
+            $node = $edge['node']['to'] ?? null;
+
+            if (!is_array($node) || empty($node['id']) || empty($node['entity_type'])) {
+                continue;
+            }
+
+            $base = [
+                'id' => $node['id'],
+                'name' => $node['name'] ?? null,
+            ];
+
+            match ($node['entity_type']) {
+                'Country' => $buckets['countries'][] = $base + [
+                    'country_code' => $this->extractIsoCode($node['x_opencti_aliases'] ?? []),
+                ],
+                'Region' => $buckets['regions'][] = $base,
+                'Sector' => $buckets['sectors'][] = $base,
+                'Organization' => $buckets['organizations'][] = $base,
+                default => null, // SKIP Individual / System / any other Identity sub-type (PITFALL-12)
+            };
+        }
+
+        // D-13: dedupe by id per bucket, preserving first-seen order.
+        foreach ($buckets as $key => $items) {
+            $seen = [];
+            $buckets[$key] = array_values(array_filter($items, function (array $item) use (&$seen) {
+                if (isset($seen[$item['id']])) {
+                    return false;
+                }
+                $seen[$item['id']] = true;
+                return true;
+            }));
+        }
+
+        return $buckets;
+    }
+
+    /**
+     * Extract an ISO-2 country code from OpenCTI Country.x_opencti_aliases per Pitfall 2.
+     *
+     * The field is a flexible [String] - some connectors populate it with ISO-2
+     * codes (["US", "USA"]), others with alternate names. We pick the first
+     * 2-char uppercase-alpha entry and return null when none matches.
+     *
+     * Phase 64 VICTM-03 treats `country_code: null` as "show the name, omit the
+     * flag" - never throw from here.
+     */
+    private function extractIsoCode(array $aliases): ?string
+    {
+        foreach ($aliases as $alias) {
+            if (is_string($alias) && preg_match('/^[A-Z]{2}$/', $alias)) {
+                return $alias;
+            }
+        }
+
+        return null;
     }
 }
