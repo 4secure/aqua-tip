@@ -10,7 +10,7 @@
 
 ## Phases
 
-- [ ] **Phase 59: Backend Snapshot Resize + Victimology Endpoint** — Extend the snapshot endpoint to accept a configurable `?limit` param and enrich the actor enrichment endpoint with 4 new victimology sub-queries
+- [x] **Phase 59: Backend Snapshot Resize + Victimology Endpoint** — Extend the snapshot endpoint to accept a configurable `?limit` param and enrich the actor enrichment endpoint with 4 new victimology sub-queries (completed 2026-04-17)
 - [ ] **Phase 60: Backend Campaigns Service & Endpoint** — New standalone `ThreatCampaignService` + `GET /api/threat-campaigns` endpoint with 15-min cache; feature-gated
 - [ ] **Phase 61: Frontend Threat Map Buffer Refactor** — Extract `useThreatMapBuffer` hook, implement persistent marker lifecycle (pulse → settle → evict), diff-reconcile Leaflet layer via `markerInstancesRef`
 - [ ] **Phase 62: Frontend Buffer-Size Dropdown** — `BufferSizeControl` component in left overlay panel, localStorage persistence, live cap update via `useRef` (no SSE reconnect)
@@ -127,7 +127,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 59. Backend Snapshot Resize + Victimology | 0/? | Not started | - |
+| 59. Backend Snapshot Resize + Victimology | 2/2 | Complete   | 2026-04-17 |
 | 60. Backend Campaigns Service & Endpoint | 0/? | Not started | - |
 | 61. Frontend Threat Map Buffer Refactor | 0/? | Not started | - |
 | 62. Frontend Buffer-Size Dropdown | 0/? | Not started | - |
