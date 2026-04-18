@@ -54,8 +54,8 @@ Test environment pins `CACHE_STORE=array` (`backend/phpunit.xml:26`), so `Cache:
 | 60-04-03 | 04 | 2 | CAMP-07 (SC3) | — | Basic-plan paid user → 200 | feature (HTTP) | `cd backend && php artisan test --filter='200 for basic-plan user'` | ✅ | ⬜ pending |
 | 60-04-04 | 04 | 2 | CAMP-07 | — | Unauthenticated → 401 | feature (HTTP) | `cd backend && php artisan test --filter='returns 401 for unauthenticated'` | ✅ | ⬜ pending |
 | 60-04-05 | 04 | 2 | CAMP-07 | — | `OpenCtiConnectionException` → 502 user-safe message | feature (HTTP) | `cd backend && php artisan test --filter='returns 502 on connection failure'` | ✅ | ⬜ pending |
-| 60-05-01 | 05 | 2 | CAMP-07 (SC3) | — | `route:list` shows `auth:sanctum,feature-gate` on `threat-campaigns` | manual (CLI) | `cd backend && php artisan route:list --path=threat-campaigns` | ✅ | ⬜ pending |
-| 60-05-02 | 05 | 2 | CAMP-07, CAMP-08 | — | Full Pest suite green + regression of threat-actors + feature-gate | integration | `cd backend && composer test` | ✅ | ⬜ pending |
+| 60-04-06 | 04 | 2 | CAMP-07 (SC3) | — | `route:list` shows `auth:sanctum,feature-gate` on `threat-campaigns` | manual (CLI) | `cd backend && php artisan route:list --path=threat-campaigns` | ✅ | ⬜ pending |
+| 60-04-07 | 04 | 2 | CAMP-07, CAMP-08 | — | Full Pest suite green + regression of threat-actors + feature-gate | integration | `cd backend && composer test` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
