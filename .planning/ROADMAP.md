@@ -44,7 +44,11 @@
   2. Calling the endpoint twice within 15 minutes returns the second response from cache (verified via response time drop and `Cache::has()` in tests)
   3. A free-plan user receives 403 (feature-gated) — confirmed via `php artisan route:list | grep threat-campaigns` showing the `feature-gate` middleware
   4. Campaign fields never bleed IntrusionSet-only fields (no `primary_motivation`, no `resource_level`) — GraphQL query uses `CampaignsOrdering` enum, not `IntrusionSetsOrdering`
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 60-01-PLAN.md — Wave 0: Scaffold test directory + IndexTest.php helpers (fakeCampaignsResponse, mockOpenCtiForCampaigns, createPlan)
+- [ ] 60-02-PLAN.md — Wave 0: D-12 GraphiQL verification session (or resume-signal fallback)
+- [ ] 60-03-PLAN.md — Wave 1: Standalone ThreatCampaignService + service-level tests (SC1 shape, SC2 cache, SC4 enum + no-bleed, attribution dedup)
+- [ ] 60-04-PLAN.md — Wave 2: IndexController + route registration + HTTP tests (200 trial, 401 unauth, 403 free, 200 basic, 502 conn-fail) + full-suite regression
 
 ### Phase 61: Frontend Threat Map Buffer Refactor
 **Goal**: The threat map renders a persistent pool of markers that pulse on arrival, settle as static dots, and fade out quietly when evicted — surviving SSE reconnects without orphan Leaflet layers
@@ -128,7 +132,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 59. Backend Snapshot Resize + Victimology | 2/2 | Complete   | 2026-04-17 |
-| 60. Backend Campaigns Service & Endpoint | 0/? | Not started | - |
+| 60. Backend Campaigns Service & Endpoint | 0/4 | Not started | - |
 | 61. Frontend Threat Map Buffer Refactor | 0/? | Not started | - |
 | 62. Frontend Buffer-Size Dropdown | 0/? | Not started | - |
 | 63. Frontend Marker Clustering | 0/? | Not started | - |
