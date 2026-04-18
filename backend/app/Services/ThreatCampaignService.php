@@ -52,7 +52,18 @@ class ThreatCampaignService
         string $orderBy = 'modified',
         string $orderMode = 'desc',
     ): array {
-        $cacheKey = 'threat_campaigns:' . md5(json_encode(func_get_args()));
+        // Rule 1 auto-fix: use the resolved parameter values (not
+        // func_get_args()) so callers who omit trailing defaults hit
+        // the same cache slot as callers who pass them explicitly.
+        // Plan D-14 asserts Cache::has() against the 5-arg default
+        // tuple, which only matches if the key is stable across call
+        // shapes. `func_get_args()` returns only caller-supplied args
+        // (no defaults), causing namespace drift between list() and
+        // list(24, null, null, 'modified', 'desc') — a real caching
+        // correctness bug.
+        $cacheKey = 'threat_campaigns:' . md5(json_encode([
+            $first, $after, $search, $orderBy, $orderMode,
+        ]));
 
         return Cache::remember(
             $cacheKey,
