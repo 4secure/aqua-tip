@@ -45,7 +45,7 @@
   3. A free-plan user receives 403 (feature-gated) — confirmed via `php artisan route:list | grep threat-campaigns` showing the `feature-gate` middleware
   4. Campaign fields never bleed IntrusionSet-only fields (no `primary_motivation`, no `resource_level`) — GraphQL query uses `CampaignsOrdering` enum, not `IntrusionSetsOrdering`
 **Plans**: 4 plans
-- [ ] 60-01-PLAN.md — Wave 0: Scaffold test directory + IndexTest.php helpers (fakeCampaignsResponse, mockOpenCtiForCampaigns, createPlan)
+- [x] 60-01-PLAN.md — Wave 0: Scaffold test directory + IndexTest.php helpers (fakeCampaignsResponse, mockOpenCtiForCampaigns, createPlan) — completed 2026-04-18 (commit d205bf2)
 - [ ] 60-02-PLAN.md — Wave 0: D-12 GraphiQL verification session (or resume-signal fallback)
 - [ ] 60-03-PLAN.md — Wave 1: Standalone ThreatCampaignService + service-level tests (SC1 shape, SC2 cache, SC4 enum + no-bleed, attribution dedup)
 - [ ] 60-04-PLAN.md — Wave 2: IndexController + route registration + HTTP tests (200 trial, 401 unauth, 403 free, 200 basic, 502 conn-fail) + full-suite regression

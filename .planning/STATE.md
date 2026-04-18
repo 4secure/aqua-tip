@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
-status: Phase 59 complete — Phase 60 context gathered
-stopped_at: Phase 60 context gathered
-last_updated: "2026-04-18T00:00:00.000Z"
-last_activity: 2026-04-18 — Phase 60 CONTEXT.md captured (standalone ThreatCampaignService + /api/threat-campaigns endpoint)
+status: executing
+stopped_at: Phase 60 Plan 01 complete (test scaffold)
+last_updated: "2026-04-18T07:56:24Z"
+last_activity: 2026-04-18 -- Phase 60 Plan 01 complete (ThreatCampaign Pest scaffold)
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 6
+  completed_plans: 3
+  percent: 50
 ---
 
 # Project State
@@ -25,15 +25,15 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 59 — Backend Snapshot Resize + Victimology Endpoint
-Plan: Not started
-Status: Roadmap approved — begin Phase 59
-Last activity: 2026-04-17 — v6.1 roadmap created (8 phases, 32 requirements)
+Phase: 60 — Backend Campaigns Service & Endpoint
+Plan: 60-01 complete; 60-02 next (GraphiQL verification)
+Status: Executing (Wave 0 scaffold landed)
+Last activity: 2026-04-18 -- Phase 60 Plan 01 complete (ThreatCampaign Pest scaffold)
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
 
 ```
-Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0/8 phases (0%)
+Progress: [███████████████░░░░░░░░░░░░░░░] 3/6 plans (50%)
 ```
 
 ## Performance Metrics
@@ -88,6 +88,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [v6.1 Roadmap]: markerInstancesRef diff-reconciliation pattern required -- React state eviction does not auto-remove Leaflet layers
 - [v6.1 Roadmap]: leaflet.markercluster@1.5.3 is the only new dep; installed in Phase 63; import MarkerCluster.css only (skip MarkerCluster.Default.css)
 - [v6.1 Roadmap]: Victimology consolidates 4 sub-queries into 1 (toTypes: ["Country","Region","Sector","Identity"]) to avoid enrichment timeout
+- [Phase 60-01]: Guard shared Pest helper `createPlan()` with `function_exists()` — PHPUnit autoloads every Feature test file into the same process, so copy-verbatim across files triggers "Cannot redeclare" fatals. Preserves D-22 verbatim body without regressing FeatureGateMiddlewareTest.
+- [Phase 60-01]: Keep forbidden IntrusionSet-only identifiers out of scaffold file (even in docstrings) — the acceptance grep counts any occurrence, not just live field references.
 
 ### Blockers/Concerns
 
@@ -103,7 +105,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last activity: 2026-04-17
-Last session: 2026-04-17T13:00:53.724Z
-Stopped at: Phase 59 context gathered
-Next action: `/gsd-plan-phase 59`
+Last activity: 2026-04-18
+Last session: 2026-04-18T07:56:24Z
+Stopped at: Completed 60-01-PLAN.md (ThreatCampaign Pest scaffold)
+Next action: `/gsd-execute-plan 60-02` (D-12 GraphiQL verification)
