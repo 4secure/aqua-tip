@@ -18,6 +18,7 @@ use App\Http\Controllers\ThreatSearch\SearchController as ThreatSearchController
 use App\Http\Controllers\OpenCti\HealthController as OpenCtiHealthController;
 use App\Http\Controllers\ThreatActor\EnrichmentController as ThreatActorEnrichmentController;
 use App\Http\Controllers\ThreatActor\IndexController as ThreatActorIndexController;
+use App\Http\Controllers\ThreatCampaign\IndexController as ThreatCampaignIndexController;
 use App\Http\Controllers\ThreatMap\SnapshotController as ThreatMapSnapshotController;
 use App\Http\Controllers\ThreatMap\StreamController as ThreatMapStreamController;
 use App\Http\Controllers\ThreatNews\IndexController as ThreatNewsIndexController;
@@ -75,6 +76,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Threat actors & enrichment
         Route::get('/threat-actors', ThreatActorIndexController::class);
         Route::get('/threat-actors/{id}/enrichment', ThreatActorEnrichmentController::class);
+
+        // Threat campaigns
+        Route::get('/threat-campaigns', ThreatCampaignIndexController::class);
 
         // Threat news
         Route::get('/threat-news', ThreatNewsIndexController::class);
