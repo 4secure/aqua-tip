@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
-status: Roadmap approved — begin Phase 59
-stopped_at: Phase 59 context gathered
-last_updated: "2026-04-17T13:00:53.730Z"
-last_activity: 2026-04-17 — v6.1 roadmap created (8 phases, 32 requirements)
+status: Phase 59 complete — Phase 60 context gathered
+stopped_at: Phase 60 context gathered
+last_updated: "2026-04-18T00:00:00.000Z"
+last_activity: 2026-04-18 — Phase 60 CONTEXT.md captured (standalone ThreatCampaignService + /api/threat-campaigns endpoint)
 progress:
   total_phases: 8
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 0
   completed_plans: 0
   percent: 0
