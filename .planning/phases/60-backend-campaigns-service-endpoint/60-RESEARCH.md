@@ -1138,27 +1138,27 @@ These claims were NOT verified in this research session; they are based on STIX 
 | A7 | `FeatureGate` middleware behavior unchanged since Phase 59 (free → 403; active trial → 200; paid plan → 200) | Controller / test SC3 expectations | SC3 tests break, or worse, the endpoint is inadvertently accessible to free users. | Source file `FeatureGate.php` was directly read during this research (`[VERIFIED 2026-04-18]`, lines 1-37); behavior matches. No migrations touching `plans` or `users` since v6.0 affect the gate logic. |
 | A8 | `CACHE_STORE=array` remains the test env default | SC2 cache-assertion design | `Cache::has()` might not behave deterministically across drivers (file/database/redis). | Verified via `backend/phpunit.xml:26` `[VERIFIED]`. Change would require a deliberate env override. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Is `confidence` worth including if D-12 finds it exists?**
    - What we know: CONTEXT.md Claude's Discretion says "add only if zero-cost during GraphiQL verification and the field exists on Campaign."
    - What's unclear: Whether Phase 65 needs it, and whether excluding it now forces a future backward-incompatible cache-key bump (new field → same cache key → stale data).
-   - Recommendation: **Omit `confidence` in Phase 60.** Cache keys are param-based, not field-based, so a later addition requires no cache bump. Deferring keeps the SC4 negative-bleed test tighter.
+   - RESOLVED: **Omit `confidence` in Phase 60.** Cache keys are param-based, not field-based, so a later addition requires no cache bump. Deferring keeps the SC4 negative-bleed test tighter.
 
 2. **Should the route be throttled beyond `auth:sanctum`?**
    - What we know: D-17 says no additional middleware. Threat-actors is also unthrottled.
    - What's unclear: Whether campaign pagination could be abused as a scrape vector (cache hides most of it).
-   - Recommendation: **Follow D-17** (no throttle). Revisit in a future hardening phase if analytics show abuse. The 15-min cache + OpenCTI's own rate limits are the mitigation.
+   - RESOLVED: **Follow D-17** (no throttle). Revisit in a future hardening phase if analytics show abuse. The 15-min cache + OpenCTI's own rate limits are the mitigation.
 
 3. **Where exactly inside the feature-gate group should the route go?**
    - What we know: D-15 says "inside the existing feature-gate group." CONTEXT.md canonical refs say "lines 77-86."
    - What's unclear: Current file layout has threat-actors (76-77), threat-news (80-81), threat-map stream (84), dashboard (87-89).
-   - Recommendation: **Insert immediately after line 77** (the threat-actors enrichment route), with a `// Threat campaigns` comment above. Semantic grouping of OpenCTI list endpoints.
+   - RESOLVED: **Insert immediately after line 77** (the threat-actors enrichment route), with a `// Threat campaigns` comment above. Semantic grouping of OpenCTI list endpoints.
 
 4. **Does Phase 65 want `labels` on the list response, or just on the detail modal?**
    - What we know: D-06 locks labels into the list response.
    - What's unclear: Whether Phase 65's `CampaignCard` grid will render labels (potentially visual clutter) or only the detail modal.
-   - Recommendation: **Keep labels in the list response per D-06.** Payload weight is negligible; Phase 65 can choose not to render them. Backward-compat for free.
+   - RESOLVED: **Keep labels in the list response per D-06.** Payload weight is negligible; Phase 65 can choose not to render them. Backward-compat for free.
 
 ## Environment Availability
 
