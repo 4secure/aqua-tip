@@ -46,7 +46,7 @@
   4. Campaign fields never bleed IntrusionSet-only fields (no `primary_motivation`, no `resource_level`) — GraphQL query uses `CampaignsOrdering` enum, not `IntrusionSetsOrdering`
 **Plans**: 4 plans
 - [x] 60-01-PLAN.md — Wave 0: Scaffold test directory + IndexTest.php helpers (fakeCampaignsResponse, mockOpenCtiForCampaigns, createPlan) — completed 2026-04-18 (commit d205bf2)
-- [ ] 60-02-PLAN.md — Wave 0: D-12 GraphiQL verification session (or resume-signal fallback)
+- [x] 60-02-PLAN.md — Wave 0: D-12 GraphiQL verification session — completed 2026-04-18 (commit c9ac6f9, live verification, no fallback)
 - [ ] 60-03-PLAN.md — Wave 1: Standalone ThreatCampaignService + service-level tests (SC1 shape, SC2 cache, SC4 enum + no-bleed, attribution dedup)
 - [ ] 60-04-PLAN.md — Wave 2: IndexController + route registration + HTTP tests (200 trial, 401 unauth, 403 free, 200 basic, 502 conn-fail) + full-suite regression
 
@@ -132,7 +132,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 59. Backend Snapshot Resize + Victimology | 2/2 | Complete   | 2026-04-17 |
-| 60. Backend Campaigns Service & Endpoint | 0/4 | Not started | - |
+| 60. Backend Campaigns Service & Endpoint | 2/4 | In progress | - |
 | 61. Frontend Threat Map Buffer Refactor | 0/? | Not started | - |
 | 62. Frontend Buffer-Size Dropdown | 0/? | Not started | - |
 | 63. Frontend Marker Clustering | 0/? | Not started | - |
