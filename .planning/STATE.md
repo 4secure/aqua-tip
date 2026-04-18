@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: Phase 60 Plan 02 complete (D-12 GraphiQL verification, live path)
-last_updated: "2026-04-18T08:04:23Z"
-last_activity: 2026-04-18 -- Phase 60 Plan 02 complete (D-12 GraphiQL live verification)
+stopped_at: Phase 60 Plan 03 complete (Wave 1 ThreatCampaignService + 5 service tests)
+last_updated: "2026-04-18T08:13:55Z"
+last_activity: 2026-04-18 -- Phase 60 Plan 03 complete (standalone ThreatCampaignService, 5 Pest tests green)
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -26,14 +26,14 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 ## Current Position
 
 Phase: 60 — Backend Campaigns Service & Endpoint
-Plan: 60-01, 60-02 complete; 60-03 next (Wave 1 ThreatCampaignService)
-Status: Executing (Wave 0 complete — scaffold + D-12 GraphiQL verification both landed)
-Last activity: 2026-04-18 -- Phase 60 Plan 02 complete (D-12 GraphiQL live verification)
+Plan: 60-01, 60-02, 60-03 complete; 60-04 next (Wave 2 HTTP controller + route + feature-gate tests)
+Status: Executing (Wave 1 complete — standalone ThreatCampaignService + 5 service-level Pest tests green)
+Last activity: 2026-04-18 -- Phase 60 Plan 03 complete (standalone ThreatCampaignService, 5 Pest tests green)
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
 
 ```
-Progress: [████████████████████░░░░░░░░░░] 4/6 plans (67%)
+Progress: [█████████████████████████░░░░░] 5/6 plans (83%)
 ```
 
 ## Performance Metrics
@@ -93,6 +93,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 60-02]: D-12 GraphiQL verified via live introspection at 192.168.251.20:8080 — CampaignsOrdering enum, campaigns root args, direct `objective` scalar, and attributed-to direction (Campaign->IntrusionSet via edge.node.to UNION fragment) all confirmed; RESEARCH.md Assumptions A1/A2/A3 now VERIFIED.
 - [Phase 60-02]: When a lab GraphQL endpoint is reachable but auth-gated for data queries, introspect schema on the target (no auth needed) and cross-execute the query string against a separately authenticated OpenCTI to prove validity — avoids resorting to the resume-signal fallback.
 - [Phase 60-02]: Omit `confidence` field from Wave 1 Campaign heredoc despite its presence on the type — not in SC1; not required by Phase 65 CAMP-05 UI; avoids payload bloat.
+- [Phase 60-03]: Cache key must derive from RESOLVED defaults, not `func_get_args()`. PHP's `func_get_args()` returns only caller-supplied args, so `$svc->list()` and `$svc->list(24, null, null, 'modified', 'desc')` hit different cache slots — a real correctness bug. Use `md5(json_encode([$first, $after, $search, $orderBy, $orderMode]))` instead. Inherited defect in ThreatActorService is latent (no test surfaces it there).
+- [Phase 60-03]: SC4 grep-based enforcement counts any textual occurrence — the verified-schema comment block above the heredoc must omit IntrusionSet-only identifier names, referencing 60-RESEARCH.md Pitfall 9 + D-08 instead. Same precedent as Phase 60-01 scaffold scrub.
 
 ### Blockers/Concerns
 
@@ -109,6 +111,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last activity: 2026-04-18
-Last session: 2026-04-18T08:04:23Z
-Stopped at: Completed 60-02-PLAN.md (D-12 GraphiQL live verification, no fallback)
-Next action: `/gsd-execute-plan 60-03` (Wave 1 standalone ThreatCampaignService + service-level tests)
+Last session: 2026-04-18T08:13:55Z
+Stopped at: Completed 60-03-PLAN.md (standalone ThreatCampaignService + 5 Wave 1 Pest tests green)
+Next action: `/gsd-execute-plan 60-04` (Wave 2 HTTP controller + route registration + feature-gate HTTP tests)

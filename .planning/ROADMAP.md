@@ -47,7 +47,7 @@
 **Plans**: 4 plans
 - [x] 60-01-PLAN.md — Wave 0: Scaffold test directory + IndexTest.php helpers (fakeCampaignsResponse, mockOpenCtiForCampaigns, createPlan) — completed 2026-04-18 (commit d205bf2)
 - [x] 60-02-PLAN.md — Wave 0: D-12 GraphiQL verification session — completed 2026-04-18 (commit c9ac6f9, live verification, no fallback)
-- [ ] 60-03-PLAN.md — Wave 1: Standalone ThreatCampaignService + service-level tests (SC1 shape, SC2 cache, SC4 enum + no-bleed, attribution dedup)
+- [x] 60-03-PLAN.md — Wave 1: Standalone ThreatCampaignService + service-level tests (SC1 shape, SC2 cache, SC4 enum + no-bleed, attribution dedup) — completed 2026-04-18 (commits 1c0ad8f + 43469a1, 5/5 tests green, 40 assertions)
 - [ ] 60-04-PLAN.md — Wave 2: IndexController + route registration + HTTP tests (200 trial, 401 unauth, 403 free, 200 basic, 502 conn-fail) + full-suite regression
 
 ### Phase 61: Frontend Threat Map Buffer Refactor
