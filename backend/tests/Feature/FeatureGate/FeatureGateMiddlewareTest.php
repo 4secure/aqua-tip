@@ -28,19 +28,28 @@ function mockOpenCtiForGating(): void
     });
 }
 
-function createPlan(string $slug): Plan
-{
-    return Plan::create([
-        'slug' => $slug,
-        'name' => ucfirst($slug),
-        'daily_credit_limit' => 10,
-        'price_cents' => $slug === 'free' ? 0 : 1000,
-        'is_popular' => false,
-        'sort_order' => 1,
-        'is_active' => true,
-        'features' => ['test'],
-        'description' => "Test {$slug} plan",
-    ]);
+// Guarded with function_exists() because PHPUnit loads every Feature
+// test file into the same process; both this file and
+// tests/Feature/ThreatCampaign/IndexTest.php declare createPlan() with
+// the same body per D-22 / Pattern C4. The guard prevents
+// "Cannot redeclare createPlan()" fatal when both files participate in
+// the same regression run (Phase 60 Plan 04 — Rule 1 auto-fix to mirror
+// the precedent set by Phase 60-01 in IndexTest.php).
+if (! function_exists('createPlan')) {
+    function createPlan(string $slug): Plan
+    {
+        return Plan::create([
+            'slug' => $slug,
+            'name' => ucfirst($slug),
+            'daily_credit_limit' => 10,
+            'price_cents' => $slug === 'free' ? 0 : 1000,
+            'is_popular' => false,
+            'sort_order' => 1,
+            'is_active' => true,
+            'features' => ['test'],
+            'description' => "Test {$slug} plan",
+        ]);
+    }
 }
 
 test('free-plan user receives 403 upgrade_required', function () {

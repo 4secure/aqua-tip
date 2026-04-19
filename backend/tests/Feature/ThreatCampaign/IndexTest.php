@@ -271,3 +271,78 @@ test('attributed_to normalization dedupes by id and reads node.to', function () 
         ['id' => 'is-apt2', 'name' => 'APT2'],
     ]);
 });
+
+// ---------------------------------------------------------------------------
+// Wave 2 — HTTP-level tests (Plan 60-04)
+// ---------------------------------------------------------------------------
+//
+// Drive the full request lifecycle through the route registered inside
+// the feature-gate middleware group. Covers SC1 (envelope shape), SC3
+// (auth + feature-gate enforcement: 401 unauth, 403 free-expired, 200
+// basic), and the OpenCtiConnectionException → 502 user-safe response.
+// Pattern refs: 60-PATTERNS.md C5/C6/C8 + Shared Auth/Feature-Gating
+// cheat-sheet.
+
+test('GET /api/threat-campaigns returns 200 for authenticated trial user', function () {
+    mockOpenCtiForCampaigns();
+    // No trial_ends_at override — User::booted() auto-sets it to +30 days,
+    // so this user is on the active-trial branch and should pass the gate.
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/threat-campaigns');
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'items',
+                'pagination' => ['has_next', 'has_previous', 'start_cursor', 'end_cursor', 'total'],
+            ],
+        ]);
+});
+
+test('GET /api/threat-campaigns returns 401 for unauthenticated', function () {
+    $this->getJson('/api/threat-campaigns')->assertStatus(401);
+});
+
+test('GET /api/threat-campaigns returns 403 for free-plan user', function () {
+    mockOpenCtiForCampaigns();
+    $plan = createPlan('free');
+    // Pitfall 3: trial_ends_at MUST be in the past, otherwise the
+    // active-trial branch in FeatureGate::handle() wins and returns 200.
+    $user = User::factory()->create([
+        'plan_id' => $plan->id,
+        'trial_ends_at' => now()->subDay(),
+    ]);
+
+    $response = $this->actingAs($user)->getJson('/api/threat-campaigns');
+
+    $response->assertStatus(403)
+        ->assertJsonPath('error', 'upgrade_required')
+        ->assertJsonPath('message', 'Upgrade your plan to access this feature');
+});
+
+test('GET /api/threat-campaigns returns 200 for basic-plan user', function () {
+    mockOpenCtiForCampaigns();
+    $plan = createPlan('basic');
+    $user = User::factory()->create(['plan_id' => $plan->id]);
+
+    $response = $this->actingAs($user)->getJson('/api/threat-campaigns');
+
+    $response->assertStatus(200);
+});
+
+test('GET /api/threat-campaigns returns 502 on connection failure', function () {
+    app()->bind(OpenCtiService::class, function () {
+        $mock = Mockery::mock(OpenCtiService::class);
+        $mock->shouldReceive('query')
+            ->andThrow(new \App\Exceptions\OpenCtiConnectionException('Connection failed'));
+
+        return $mock;
+    });
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->getJson('/api/threat-campaigns');
+
+    $response->assertStatus(502)
+        ->assertJsonPath('message', 'Unable to load campaigns. Please try again.');
+});
