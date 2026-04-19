@@ -124,13 +124,9 @@ class ThreatCampaignService
                         modified
                         created
                         objectLabel {
-                            edges {
-                                node {
-                                    id
-                                    value
-                                    color
-                                }
-                            }
+                            id
+                            value
+                            color
                         }
                         externalReferences {
                             edges {
@@ -211,7 +207,7 @@ class ThreatCampaignService
                 'last_seen' => $node['last_seen'] ?? null,
                 'modified' => $node['modified'] ?? null,
                 'created' => $node['created'] ?? null,
-                'labels' => $this->flattenLabels($node['objectLabel']['edges'] ?? []),
+                'labels' => $this->flattenLabels($node['objectLabel'] ?? []),
                 'external_references' => $this->flattenExternalReferences(
                     $node['externalReferences']['edges'] ?? [],
                 ),
@@ -275,17 +271,21 @@ class ThreatCampaignService
     }
 
     /**
-     * Flatten objectLabel edges into a list of {id, value, color}.
+     * Flatten objectLabel list into {id, value, color}.
+     *
+     * Live-schema correction: OpenCTI's `Campaign.objectLabel` resolves to
+     * `[Label!]` — a direct list, NOT a `LabelConnection` with `edges/node`.
+     * Confirmed via introspection on 2026-04-19 during phase-60 smoke test.
      */
-    private function flattenLabels(array $edges): array
+    private function flattenLabels(array $labels): array
     {
         return array_map(
-            fn (array $edge) => [
-                'id' => $edge['node']['id'] ?? null,
-                'value' => $edge['node']['value'] ?? null,
-                'color' => $edge['node']['color'] ?? null,
+            fn (array $label) => [
+                'id' => $label['id'] ?? null,
+                'value' => $label['value'] ?? null,
+                'color' => $label['color'] ?? null,
             ],
-            $edges,
+            $labels,
         );
     }
 

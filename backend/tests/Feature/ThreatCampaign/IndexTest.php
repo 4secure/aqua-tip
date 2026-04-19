@@ -44,14 +44,10 @@ function fakeCampaignsResponse(int $count = 2): array
                 'modified' => '2025-06-20T14:00:00.000Z',
                 'created' => '2024-01-15T10:30:00.000Z',
                 'objectLabel' => [
-                    'edges' => [
-                        [
-                            'node' => [
-                                'id' => "label-{$i}",
-                                'value' => 'espionage',
-                                'color' => '#cc0000',
-                            ],
-                        ],
+                    [
+                        'id' => "label-{$i}",
+                        'value' => 'espionage',
+                        'color' => '#cc0000',
                     ],
                 ],
                 'externalReferences' => [
@@ -241,7 +237,7 @@ test('attributed_to normalization dedupes by id and reads node.to', function () 
                     'aliases' => [],
                     'modified' => '2025-01-01T00:00:00.000Z',
                     'created' => '2025-01-01T00:00:00.000Z',
-                    'objectLabel' => ['edges' => []],
+                    'objectLabel' => [],
                     'externalReferences' => ['edges' => []],
                     'attributed_to' => [
                         'edges' => [
