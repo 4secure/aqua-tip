@@ -52,8 +52,8 @@ Requirements for Threat Map Buffer & Threat Actor Depth milestone.
 - [ ] **CAMP-04**: Refreshing the page restores the active view from the URL
 - [ ] **CAMP-05**: Each Campaign card displays: name, first_seen / last_seen date range, objective (if available), and an `attributed_to` chip linking back to the Intrusion Set name
 - [ ] **CAMP-06**: Clicking a Campaign card opens a detail modal with full campaign metadata
-- [ ] **CAMP-07**: Backend exposes a paginated `GET /api/threat-campaigns` endpoint backed by a standalone `ThreatCampaignService` (NOT a refactor of `ThreatActorService` — Campaign STIX fields differ)
-- [ ] **CAMP-08**: Campaigns endpoint uses the same 15-min server-side cache pattern as Threat Actors
+- [x] **CAMP-07**: Backend exposes a paginated `GET /api/threat-campaigns` endpoint backed by a standalone `ThreatCampaignService` (NOT a refactor of `ThreatActorService` — Campaign STIX fields differ) — satisfied Phase 60 (2026-04-19)
+- [x] **CAMP-08**: Campaigns endpoint uses the same 15-min server-side cache pattern as Threat Actors — satisfied Phase 60 (2026-04-19)
 
 ## Future Requirements
 
@@ -112,5 +112,5 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | CAMP-04 | Phase 65 | Pending |
 | CAMP-05 | Phase 65 | Pending |
 | CAMP-06 | Phase 65 | Pending |
-| CAMP-07 | Phase 60 | Pending |
-| CAMP-08 | Phase 60 | Pending |
+| CAMP-07 | Phase 60 | Satisfied (2026-04-19) |
+| CAMP-08 | Phase 60 | Satisfied (2026-04-19) |

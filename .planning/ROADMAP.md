@@ -11,7 +11,7 @@
 ## Phases
 
 - [x] **Phase 59: Backend Snapshot Resize + Victimology Endpoint** — Extend the snapshot endpoint to accept a configurable `?limit` param and enrich the actor enrichment endpoint with 4 new victimology sub-queries (completed 2026-04-17)
-- [ ] **Phase 60: Backend Campaigns Service & Endpoint** — New standalone `ThreatCampaignService` + `GET /api/threat-campaigns` endpoint with 15-min cache; feature-gated
+- [x] **Phase 60: Backend Campaigns Service & Endpoint** — New standalone `ThreatCampaignService` + `GET /api/threat-campaigns` endpoint with 15-min cache; feature-gated (completed 2026-04-19)
 - [ ] **Phase 61: Frontend Threat Map Buffer Refactor** — Extract `useThreatMapBuffer` hook, implement persistent marker lifecycle (pulse → settle → evict), diff-reconcile Leaflet layer via `markerInstancesRef`
 - [ ] **Phase 62: Frontend Buffer-Size Dropdown** — `BufferSizeControl` component in left overlay panel, localStorage persistence, live cap update via `useRef` (no SSE reconnect)
 - [ ] **Phase 63: Frontend Marker Clustering** — Install `leaflet.markercluster@1.5.3`, conditional enable when `bufferSize > 500`, dark-theme `iconCreateFunction`, clean layer-swap on threshold crossing
@@ -48,7 +48,7 @@
 - [x] 60-01-PLAN.md — Wave 0: Scaffold test directory + IndexTest.php helpers (fakeCampaignsResponse, mockOpenCtiForCampaigns, createPlan) — completed 2026-04-18 (commit d205bf2)
 - [x] 60-02-PLAN.md — Wave 0: D-12 GraphiQL verification session — completed 2026-04-18 (commit c9ac6f9, live verification, no fallback)
 - [x] 60-03-PLAN.md — Wave 1: Standalone ThreatCampaignService + service-level tests (SC1 shape, SC2 cache, SC4 enum + no-bleed, attribution dedup) — completed 2026-04-18 (commits 1c0ad8f + 43469a1, 5/5 tests green, 40 assertions)
-- [ ] 60-04-PLAN.md — Wave 2: IndexController + route registration + HTTP tests (200 trial, 401 unauth, 403 free, 200 basic, 502 conn-fail) + full-suite regression
+- [x] 60-04-PLAN.md — Wave 2: IndexController + route registration + HTTP tests (200 trial, 401 unauth, 403 free, 200 basic, 502 conn-fail) + full-suite regression — completed 2026-04-19 (commits 8cf85e0 + dd1de2f, 10/10 ThreatCampaign tests green, 56 assertions)
 
 ### Phase 61: Frontend Threat Map Buffer Refactor
 **Goal**: The threat map renders a persistent pool of markers that pulse on arrival, settle as static dots, and fade out quietly when evicted — surviving SSE reconnects without orphan Leaflet layers
