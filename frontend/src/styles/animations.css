@@ -201,6 +201,35 @@
   transition: opacity 600ms ease-out;
 }
 
+/* Colour modifiers — MUST mirror .map-event-pulse--{color} rgba tokens verbatim (UI-SPEC §Color "Colour parity rule"). */
+/* Settled dots layer a 1px white-alpha outer ring over the severity glow for visibility on the CartoDB #262626 basemap. */
+
+.map-buffer-marker--red {
+  background: rgba(255, 59, 92, 0.6);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 8px rgba(255, 59, 92, 0.4);
+}
+
+.map-buffer-marker--amber {
+  background: rgba(255, 176, 32, 0.6);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 8px rgba(255, 176, 32, 0.4);
+}
+
+.map-buffer-marker--violet {
+  background: rgba(122, 68, 228, 0.6);
+  box-shadow: 0 0 0 1px rgba(122, 68, 228, 0.2), 0 0 8px rgba(122, 68, 228, 0.4);
+}
+
+.map-buffer-marker--cyan {
+  background: rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.2), 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+/* Arriving-state colour override: only the pulse ring gets the severity glow; no 1px white ring (it would read as a double-ring during expansion). */
+.map-buffer-marker--arriving.map-buffer-marker--red    { background: rgba(255, 59, 92, 0.6);  box-shadow: 0 0 12px rgba(255, 59, 92, 0.4); }
+.map-buffer-marker--arriving.map-buffer-marker--amber  { background: rgba(255, 176, 32, 0.6); box-shadow: 0 0 12px rgba(255, 176, 32, 0.4); }
+.map-buffer-marker--arriving.map-buffer-marker--violet { background: rgba(122, 68, 228, 0.6); box-shadow: 0 0 12px rgba(122, 68, 228, 0.4); }
+.map-buffer-marker--arriving.map-buffer-marker--cyan   { background: rgba(0, 229, 255, 0.6);  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4); }
+
 /* Loading screen pulse ring */
 @keyframes loadingPulseRing {
   0% {
