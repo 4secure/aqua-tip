@@ -76,8 +76,88 @@ export function useThreatMapBuffer(events, bufferSize = 100) {
       return;
     }
 
-    // TODO(Task 2): diff new IDs vs current markers; append 'arriving' entries;
-    // schedule settle + eviction timers.
+    // Post-hydration path: diff incoming events against tracked markers.
+    // Any event ID not already in `markers` is a genuinely-new arrival (D-15).
+    setMarkers((prev) => {
+      const knownIds = new Set(prev.map((m) => m.id));
+      const newArrivals = [];
+      // Walk events oldest-first so arrivals land in SSE-chronological order.
+      for (let i = events.length - 1; i >= 0; i--) {
+        const e = events[i];
+        if (!e || !e.id) continue;
+        if (knownIds.has(e.id)) continue;
+        knownIds.add(e.id);
+        newArrivals.push({
+          id: e.id,
+          lat: e.lat,
+          lng: e.lng,
+          color: e.color,
+          type: e.type,
+          ip: e.ip,
+          country: e.country,
+          countryCode: e.countryCode,
+          timestamp: e.timestamp,
+          state: 'arriving',
+          arrivedAt: Date.now(),
+        });
+      }
+
+      if (newArrivals.length === 0) return prev;
+
+      // Schedule settle timer per arrival (D-06: 1800ms arriving → settled).
+      for (const m of newArrivals) {
+        const settleTimer = setTimeout(() => {
+          setMarkers((curr) =>
+            curr.map((x) => (x.id === m.id && x.state === 'arriving' ? { ...x, state: 'settled' } : x))
+          );
+          const entry = timersRef.current.get(m.id);
+          if (entry) entry.settleTimer = null;
+        }, 1800);
+        timersRef.current.set(m.id, { settleTimer, evictTimer: null });
+      }
+
+      // Surface the most recent arrival id (D-02 — consumers may ignore).
+      setArrivingId(newArrivals[newArrivals.length - 1].id);
+
+      // Append arrivals (oldest-first ordering preserved).
+      let next = [...prev, ...newArrivals];
+
+      // Overflow check: mark oldest non-evicting entries as 'evicting' until
+      // the non-evicting count is back at or below the cap (D-07, strict FIFO).
+      const limit = bufferLimitRef.current;
+      const evictNow = [];
+      let nonEvicting = next.filter((x) => x.state !== 'evicting').length;
+      if (nonEvicting > limit) {
+        for (let i = 0; i < next.length && nonEvicting > limit; i++) {
+          if (next[i].state !== 'evicting') {
+            evictNow.push(next[i].id);
+            nonEvicting -= 1;
+          }
+        }
+      }
+
+      if (evictNow.length > 0) {
+        next = next.map((m) =>
+          evictNow.includes(m.id) ? { ...m, state: 'evicting' } : m
+        );
+        for (const id of evictNow) {
+          const evictTimer = setTimeout(() => {
+            setMarkers((curr) => curr.filter((x) => x.id !== id));
+            const entry = timersRef.current.get(id);
+            if (entry) {
+              if (entry.settleTimer) clearTimeout(entry.settleTimer);
+              timersRef.current.delete(id);
+            }
+          }, 600);
+          const entry = timersRef.current.get(id) || { settleTimer: null, evictTimer: null };
+          entry.evictTimer = evictTimer;
+          timersRef.current.set(id, entry);
+        }
+        setEvictingId(evictNow[evictNow.length - 1]);
+      }
+
+      return next;
+    });
   }, [events]);
 
   // Cleanup all pending timers on unmount (D-06).
