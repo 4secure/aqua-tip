@@ -43,15 +43,15 @@ created: 2026-04-18
 
 | Task ID | Plan | Wave | Requirement | Secure Behavior | Test Type | Automated Command | Status |
 |---------|------|------|-------------|-----------------|-----------|-------------------|--------|
-| 61-01-01 | 01 | 0 | MAPBUF-01, MAPBUF-02 | Base + 3 state classes present in CSS | grep | `node -e "..."` (in 61-01 Task 1 verify) | ⬜ pending |
-| 61-01-02 | 01 | 0 | MAPBUF-02, MAPBUF-03 | 4 colour modifiers mirror .map-event-pulse tokens | grep | `node -e "..."` (in 61-01 Task 2 verify) | ⬜ pending |
-| 61-01-03 | 01 | 0 | (accessibility) | prefers-reduced-motion block + build green | grep + build | `npm run build` (in 61-01 Task 3 verify) | ⬜ pending |
-| 61-02-01 | 02 | 1 | MAPBUF-01 (D-09) | Snapshot-hydration enters as `settled` directly | grep | `node -e "..."` (in 61-02 Task 1 verify) | ⬜ pending |
-| 61-02-02 | 02 | 1 | MAPBUF-02, MAPBUF-03, MAPBUF-04 | Live arrival + FIFO eviction state machine | grep | `node -e "..."` (in 61-02 Task 2 verify) | ⬜ pending |
-| 61-02-03 | 02 | 1 | MAPBUF-05 (D-03 purity) | Hook has no Leaflet import, no DOM access | grep + build | `npm run build` + purity grep (in 61-02 Task 3 verify) | ⬜ pending |
-| 61-03-01 | 03 | 2 | MAPBUF-05 (D-20, D-21) | Legacy addPulseMarker + prevEventIdRef removed; hook wired | grep + build | `npm run build` (in 61-03 Task 1 verify) | ⬜ pending |
-| 61-03-02 | 03 | 2 | MAPBUF-05 (D-10, D-11) | markerInstancesRef diff-reconciliation + buildIcon helper | grep + build | `npm run build` (in 61-03 Task 2 verify) | ⬜ pending |
-| 61-03-03 | 03 | 2 | MAPBUF-01..05 | Full manual QA walk (this document, rows below) | manual (browser) | See SC rows below | ⬜ pending |
+| 61-01-01 | 01 | 0 | MAPBUF-01, MAPBUF-02 | Base + 3 state classes present in CSS | grep | `node -e "..."` (in 61-01 Task 1 verify) | ✅ green |
+| 61-01-02 | 01 | 0 | MAPBUF-02, MAPBUF-03 | 4 colour modifiers mirror .map-event-pulse tokens | grep | `node -e "..."` (in 61-01 Task 2 verify) | ✅ green |
+| 61-01-03 | 01 | 0 | (accessibility) | prefers-reduced-motion block + build green | grep + build | `npm run build` (in 61-01 Task 3 verify) | ✅ green |
+| 61-02-01 | 02 | 1 | MAPBUF-01 (D-09) | Snapshot-hydration enters as `settled` directly | grep | `node -e "..."` (in 61-02 Task 1 verify) | ✅ green |
+| 61-02-02 | 02 | 1 | MAPBUF-02, MAPBUF-03, MAPBUF-04 | Live arrival + FIFO eviction state machine | grep | `node -e "..."` (in 61-02 Task 2 verify) | ✅ green |
+| 61-02-03 | 02 | 1 | MAPBUF-05 (D-03 purity) | Hook has no Leaflet import, no DOM access | grep + build | `npm run build` + purity grep (in 61-02 Task 3 verify) | ✅ green |
+| 61-03-01 | 03 | 2 | MAPBUF-05 (D-20, D-21) | Legacy addPulseMarker + prevEventIdRef removed; hook wired | grep + build | `npm run build` (in 61-03 Task 1 verify) | ✅ green |
+| 61-03-02 | 03 | 2 | MAPBUF-05 (D-10, D-11) | markerInstancesRef diff-reconciliation + buildIcon helper | grep + build | `npm run build` (in 61-03 Task 2 verify) | ✅ green |
+| 61-03-03 | 03 | 2 | MAPBUF-01..05 | Full manual QA walk (this document, rows below) | manual (browser) | See SC rows below | ⚠️ deferred — manual browser walk to be executed by human; executor verified dev-server boot + route transform + CSS transform + module compile only |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ deviation-with-reason*
 
@@ -203,3 +203,23 @@ All other phase behaviours have automated grep / build coverage in the PLAN `<ve
 - This document is executed against a running dev server + running backend. If the backend is not serving live SSE (no events arriving), SC1/SC2/SC3/SC4 cannot be exercised — coordinate with the backend team or re-run after restoring the stream.
 - The `L.Marker` constructor name in heap snapshots may appear as `NewClass` or similar depending on Leaflet's internal minification when bundled by Vite. If the exact constructor name is hard to find, search for any string containing `marker` and look at instances whose prototypes match the Leaflet marker shape (have `_latlng`, `_icon`, `_map`).
 - If any manual row fails, capture a before/after screenshot or a DevTools performance trace and attach to the 61-XX-SUMMARY.md for the implicated plan. Do not mark any row `[x]` without visual evidence.
+
+---
+
+## Executor Observations (Plan 61-03 — 2026-04-20)
+
+Plan 61-03 executor ran the following automated + headless gates during Task 3:
+
+- `cd frontend && npm run build` — green in 9.17–9.21s across Task 1 and Task 2; zero new warnings (pre-existing chunk-size info only).
+- Legacy-symbol grep — `addPulseMarker` and `prevEventIdRef` return zero hits in `frontend/src/pages/ThreatMapPage.jsx`.
+- Untouched-file invariant — `frontend/src/hooks/useThreatStream.js` and `frontend/src/hooks/useLeaflet.js` contain no `useThreatMapBuffer` references; `git diff --name-only 816a71e...HEAD -- frontend/` shows exactly three files changed across the phase (animations.css, useThreatMapBuffer.js, ThreatMapPage.jsx) — no scope drift.
+- Plan-level token presence — all required symbols found: `import { useThreatMapBuffer }`, `useThreatMapBuffer(events, 100)`, `function buildIcon(marker)`, `markerInstancesRef`, `new Map()`, `map-buffer-marker--`.
+- D-19 invariants — `addHighlightPulse` (decl + 1 call) and `handleEventClick` (decl + 2 usages) present at expected sites.
+- Vite dev server smoke — `npm run dev` booted on port 5176 in 288ms. HTTP probes: `/threat-map` → 200, `/src/pages/ThreatMapPage.jsx` transform → 200 and output contains `buildIcon` + `useThreatMapBuffer` import, `/src/hooks/useThreatMapBuffer.js` → 200, `/src/styles/animations.css` → 200. No compile errors, no HMR warnings at boot.
+
+**Not exercised by the executor (requires human-in-the-loop browser walk):**
+- SC1..SC5 visual rows above (dot persistence, pulse timing, reconnect survival, eviction fade, heap snapshot).
+- Accessibility emulation (`prefers-reduced-motion: reduce`).
+- Regression rows (click-highlight flow, overlay panels/status badge visual parity).
+
+Handing off to the human operator for the manual QA walk using the rows above. The code-level contract (MAPBUF-05 reconciliation wiring) is fully in place and compiles.
