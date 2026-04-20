@@ -171,6 +171,36 @@
   animation: mapEventPulse 2s ease-out forwards;
 }
 
+/* Map buffer marker lifecycle (Phase 61 — MAPBUF-01..05) */
+/* Reuses @keyframes mapEventPulse (defined above). Do NOT duplicate. */
+
+.map-buffer-marker {
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* State 1: arriving (0 → 1800ms) — expanding pulse ring, reuses existing keyframe verbatim */
+.map-buffer-marker--arriving {
+  width: 16px;
+  height: 16px;
+  animation: mapEventPulse 1.5s ease-out forwards;
+}
+
+/* State 2: settled (1800ms → eviction) — 6px static dot with 1px white-alpha outer ring for visibility on #262626 tiles */
+.map-buffer-marker--settled {
+  width: 6px;
+  height: 6px;
+  opacity: 1;
+}
+
+/* State 3: evicting (600ms fade → removal) — opacity-only CSS transition, no scale change (per UI-SPEC: "quietly disappears in place") */
+.map-buffer-marker--evicting {
+  width: 6px;
+  height: 6px;
+  opacity: 0;
+  transition: opacity 600ms ease-out;
+}
+
 /* Loading screen pulse ring */
 @keyframes loadingPulseRing {
   0% {
