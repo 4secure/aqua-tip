@@ -60,7 +60,10 @@
   3. Simulating an SSE reconnect (disable/re-enable network) does not wipe existing markers — buffered markers remain on the map after reconnection
   4. At buffer capacity (default 100), each new arrival causes exactly one old marker to quietly fade out — no sudden bulk removals, no marker count growing unbounded beyond the cap
   5. After 5 minutes of active streaming, a Chrome DevTools Memory snapshot shows Leaflet `L.Marker` instance count at or below the configured buffer cap (no orphan accumulation)
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 61-01-PLAN.md — Wave 0: Append .map-buffer-marker CSS family to animations.css (base + 3 state modifiers + 4 colour modifiers + prefers-reduced-motion block)
+- [ ] 61-02-PLAN.md — Wave 1: Create useThreatMapBuffer.js hook (pure state machine: arriving → settled → evicting + FIFO eviction + bufferLimitRef PITFALL-01-safe pattern)
+- [ ] 61-03-PLAN.md — Wave 2: Wire hook into ThreatMapPage.jsx (markerInstancesRef diff-reconciliation + buildIcon helper; remove legacy addPulseMarker + prevEventIdRef)
 **UI hint**: yes
 
 ### Phase 62: Frontend Buffer-Size Dropdown
@@ -133,7 +136,7 @@
 |-------|----------------|--------|-----------|
 | 59. Backend Snapshot Resize + Victimology | 2/2 | Complete   | 2026-04-17 |
 | 60. Backend Campaigns Service & Endpoint | 2/4 | In progress | - |
-| 61. Frontend Threat Map Buffer Refactor | 0/? | Not started | - |
+| 61. Frontend Threat Map Buffer Refactor | 0/3 | Not started | - |
 | 62. Frontend Buffer-Size Dropdown | 0/? | Not started | - |
 | 63. Frontend Marker Clustering | 0/? | Not started | - |
 | 64. Frontend Victimology Tab | 0/? | Not started | - |
