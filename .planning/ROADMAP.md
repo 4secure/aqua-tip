@@ -62,7 +62,7 @@
   5. After 5 minutes of active streaming, a Chrome DevTools Memory snapshot shows Leaflet `L.Marker` instance count at or below the configured buffer cap (no orphan accumulation)
 **Plans**: 3 plans
 - [x] 61-01-PLAN.md — Wave 0: Append .map-buffer-marker CSS family to animations.css (base + 3 state modifiers + 4 colour modifiers + prefers-reduced-motion block) — completed 2026-04-20 (commits 8940142 + ed35dd0 + cb26ddd, 76 insertions, no deletions, Vite build clean in 9.96s)
-- [ ] 61-02-PLAN.md — Wave 1: Create useThreatMapBuffer.js hook (pure state machine: arriving → settled → evicting + FIFO eviction + bufferLimitRef PITFALL-01-safe pattern)
+- [x] 61-02-PLAN.md — Wave 1: Create useThreatMapBuffer.js hook (pure state machine: arriving → settled → evicting + FIFO eviction + bufferLimitRef PITFALL-01-safe pattern) — completed 2026-04-20 (commits ceba3dc + db83218, 178-line hook, zero Leaflet dependency, Vite build clean in 9.12s)
 - [ ] 61-03-PLAN.md — Wave 2: Wire hook into ThreatMapPage.jsx (markerInstancesRef diff-reconciliation + buildIcon helper; remove legacy addPulseMarker + prevEventIdRef)
 **UI hint**: yes
 
@@ -136,7 +136,7 @@
 |-------|----------------|--------|-----------|
 | 59. Backend Snapshot Resize + Victimology | 2/2 | Complete   | 2026-04-17 |
 | 60. Backend Campaigns Service & Endpoint | 2/4 | In progress | - |
-| 61. Frontend Threat Map Buffer Refactor | 0/3 | Not started | - |
+| 61. Frontend Threat Map Buffer Refactor | 2/3 | In progress | - |
 | 62. Frontend Buffer-Size Dropdown | 0/? | Not started | - |
 | 63. Frontend Marker Clustering | 0/? | Not started | - |
 | 64. Frontend Victimology Tab | 0/? | Not started | - |

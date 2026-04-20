@@ -10,10 +10,10 @@ Requirements for Threat Map Buffer & Threat Actor Depth milestone.
 
 ### Map Persistent Buffer (MAPBUF)
 
-- [ ] **MAPBUF-01**: All buffered IP attack events render as static markers on the threat map (replacing the current pulse-and-fade-only behavior — markers persist after the pulse animation ends)
-- [ ] **MAPBUF-02**: A newly-arriving IP marker displays a pulse ring for ~2 seconds, then settles into a static dot
-- [ ] **MAPBUF-03**: When the buffer is full, the oldest IP marker fades out quietly (no jarring removal) as new arrivals push it out
-- [ ] **MAPBUF-04**: Marker lifecycle survives SSE reconnects within a session — buffer state is not lost on transient network blips
+- [x] **MAPBUF-01**: All buffered IP attack events render as static markers on the threat map (replacing the current pulse-and-fade-only behavior — markers persist after the pulse animation ends) — satisfied Phase 61-02 (2026-04-20, hook-level state machine; user-visible wiring lands in Plan 61-03)
+- [x] **MAPBUF-02**: A newly-arriving IP marker displays a pulse ring for ~2 seconds, then settles into a static dot — satisfied Phase 61-02 (2026-04-20, hook transitions arriving→settled after 1800ms; CSS from Plan 61-01 drives the visual)
+- [x] **MAPBUF-03**: When the buffer is full, the oldest IP marker fades out quietly (no jarring removal) as new arrivals push it out — satisfied Phase 61-02 (2026-04-20, FIFO eviction with 600ms evicting state before removal)
+- [x] **MAPBUF-04**: Marker lifecycle survives SSE reconnects within a session — buffer state is not lost on transient network blips — satisfied Phase 61-02 (2026-04-20, firstHydrationRef stays false after initial hydration; reconnect snapshots diff against existing markers, no re-pulse)
 - [ ] **MAPBUF-05**: React buffer state and Leaflet marker DOM stay in sync — no orphan Leaflet markers accumulate when events are evicted from the React buffer (`markerInstancesRef` diff-reconciliation)
 - [ ] **MAPBUF-06**: Country-counter aggregation respects the active buffer size (counts include all settled markers, not just the last-100 snapshot)
 
@@ -82,10 +82,10 @@ Deferred to future milestones. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAPBUF-01 | Phase 61 | Pending |
-| MAPBUF-02 | Phase 61 | Pending |
-| MAPBUF-03 | Phase 61 | Pending |
-| MAPBUF-04 | Phase 61 | Pending |
+| MAPBUF-01 | Phase 61 | Satisfied (2026-04-20) |
+| MAPBUF-02 | Phase 61 | Satisfied (2026-04-20) |
+| MAPBUF-03 | Phase 61 | Satisfied (2026-04-20) |
+| MAPBUF-04 | Phase 61 | Satisfied (2026-04-20) |
 | MAPBUF-05 | Phase 61 | Pending |
 | MAPBUF-06 | Phase 59 | Pending |
 | MAPCFG-01 | Phase 62 | Pending |
