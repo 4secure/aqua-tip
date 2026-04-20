@@ -230,6 +230,23 @@
 .map-buffer-marker--arriving.map-buffer-marker--violet { background: rgba(122, 68, 228, 0.6); box-shadow: 0 0 12px rgba(122, 68, 228, 0.4); }
 .map-buffer-marker--arriving.map-buffer-marker--cyan   { background: rgba(0, 229, 255, 0.6);  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4); }
 
+/* Accessibility: prefers-reduced-motion (WCAG 2.3.3) */
+/* Motion-sensitive users get instant state transitions. The JS state machine still runs; only visual expression changes. */
+@media (prefers-reduced-motion: reduce) {
+  .map-buffer-marker--arriving {
+    animation: none;
+    /* Skip the expanding pulse ring entirely — arriving markers render as transparent immediately. */
+    /* The 1800ms JS timer still fires and flips state to 'settled', at which point the dot appears instantly. */
+    opacity: 0;
+  }
+
+  .map-buffer-marker--evicting {
+    transition: none;
+    opacity: 0;
+    /* Instant removal. The 600ms JS timer still runs for state cleanup; only the fade is suppressed. */
+  }
+}
+
 /* Loading screen pulse ring */
 @keyframes loadingPulseRing {
   0% {
