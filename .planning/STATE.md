@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: Phase 61 Plan 02 complete (useThreatMapBuffer.js hook — pure state machine with arriving→settled→evicting lifecycle, FIFO eviction, PITFALL-01-safe bufferLimitRef pattern; 178 lines, zero Leaflet dependency, Vite build clean in 9.12s)
-last_updated: "2026-04-20T10:27:13Z"
-last_activity: 2026-04-20 -- Phase 61 Plan 02 complete (useThreatMapBuffer.js hook — D-02..D-17 contract satisfied; MAPBUF-01/02/03/04 marked satisfied; MAPBUF-05 deferred to Plan 61-03)
+stopped_at: Phase 61 Plan 03 complete (ThreatMapPage.jsx wiring — useThreatMapBuffer imported, markerInstancesRef Map<id, L.Marker> diff-reconciliation useEffect([markers]), buildIcon helper composing .map-buffer-marker--{state}--{color} classes, unmount cleanup; legacy addPulseMarker + prevEventIdRef removed per D-20/D-21; MAPBUF-05 satisfied; Phase 61 code-complete pending human manual QA)
+last_updated: "2026-04-20T11:48:27Z"
+last_activity: 2026-04-20 -- Phase 61 Plan 03 complete (ThreatMapPage.jsx wiring — +66/−18 lines; markerInstancesRef diff-reconciliation + buildIcon helper; legacy addPulseMarker/prevEventIdRef removed; D-19 click-highlight preserved byte-identical; Vite build clean in 9.17–9.21s; dev server boots in 288ms; MAPBUF-05 satisfied; Phase 61 code-complete)
 progress:
   total_phases: 8
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
-  percent: 89
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -21,19 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59/60 shipped; Phase 61 (frontend buffer refactor) 2/3 plans complete (CSS + hook); Plan 61-03 remaining (ThreatMapPage wiring)
+**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59/60/61 shipped code-complete (Phase 61 pending human manual QA walk in 61-VALIDATION.md); next wave Phase 62 (BufferSizeControl dropdown — MAPCFG-01..04)
 
 ## Current Position
 
-Phase: 61 — Frontend Threat Map Buffer Refactor
-Plan: 02 complete (useThreatMapBuffer.js hook — pure state machine, 178 lines, zero Leaflet dependency)
-Status: Ready to spawn Plan 61-03 (ThreatMapPage.jsx wiring — markerInstancesRef diff-reconciliation + buildIcon helper; remove legacy addPulseMarker + prevEventIdRef per D-20/D-21)
-Last activity: 2026-04-20 -- Phase 61 Plan 02 complete (useThreatMapBuffer hook with arriving→settled→evicting lifecycle, FIFO eviction, PITFALL-01-safe bufferLimitRef pattern; MAPBUF-01..04 marked satisfied)
+Phase: 61 — Frontend Threat Map Buffer Refactor — CODE-COMPLETE (3/3 plans shipped)
+Plan: 03 complete (ThreatMapPage.jsx wiring — useThreatMapBuffer + markerInstancesRef diff-reconciliation + buildIcon helper)
+Status: Ready to spawn Phase 62 Plan 01 (BufferSizeControl dropdown in LeftOverlayPanel — MAPCFG-01..04; one-line change at the useThreatMapBuffer call-site, no hook refactor thanks to PITFALL-01-safe bufferLimitRef pattern). Phase 61 awaits human manual QA walk per 61-VALIDATION.md (SC1–SC5 + accessibility + regression rows).
+Last activity: 2026-04-20 -- Phase 61 Plan 03 complete (ThreatMapPage.jsx wired to useThreatMapBuffer via markerInstancesRef Map-based diff-reconciliation; legacy addPulseMarker/prevEventIdRef removed; addHighlightPulse + handleEventClick byte-identical; MAPBUF-05 satisfied; Phase 61 code-complete)
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
 
 ```
-Progress: [██████████████████████████▋░░░] 8/9 plans (89%)
+Progress: [██████████████████████████████] 9/9 plans (100%) — Phase 61 awaits manual QA walk
 ```
 
 ## Performance Metrics
@@ -106,6 +106,13 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 61-02]: `bufferLimitRef.current` read inside events-diff effect, NOT the closed-over `bufferSize` parameter. This is the PITFALL-01-safe pattern prepared for Phase 62 — making bufferSize dynamic (useState + dropdown) will not require effect re-subscription, no SSE reconnect, no hook refactor.
 - [Phase 61-02]: Hook exports both named and default (`export function useThreatMapBuffer` + `export default useThreatMapBuffer`). Project convention is named-only (useThreatStream, useLeaflet, useAutoRefresh — all named), but plan 61-03 import flexibility warranted the additive default. Zero runtime cost.
 - [Phase 61-02]: Arrivals built by walking `events` from `length-1 DOWN to 0` (oldest-first). `events` is newest-first from useThreatStream; reverse walk produces arrivals in SSE chronological order so `arrivedAt` values within a burst increase with array index. Tie-breaking on equal `arrivedAt` (same-tick arrivals) is implicit via array position.
+- [Phase 61-03]: `markerInstancesRef = useRef(new Map<id, L.Marker>())` is the single source of truth for live Leaflet marker instances — ALWAYS a Map (never a plain object, D-10) so insertion order is preserved and delete is O(1) without the `delete` keyword. Reconciliation effect iterates `instances` (the live Map) and mutates via `instances.delete(id)` inside the loop; Map iteration tolerates in-loop deletion.
+- [Phase 61-03]: `instance._bufferState` instance-property tagging for cheap state-change detection — Leaflet accepts arbitrary property assignment and underscore-prefix matches its own private-property convention (`_map`, `_icon`, `_zIndex`). Avoids a second useRef holding `Map<id, state>`; one assignment, one equality check per reconciliation. D-13 satisfied simpler than a prev-markers memo.
+- [Phase 61-03]: buildIcon helper kept inline in ThreatMapPage.jsx rather than extracted to `components/threat-map/markerIcon.js`. ~14 lines with exactly one caller; extraction would add a new file + import for no readability gain. D-12 discretion honours project "many small files" rule while avoiding single-caller churn. If Phase 63 clustering needs the same helper, extract then.
+- [Phase 61-03]: Reconciliation and unmount cleanup are TWO SEPARATE useEffects. `useEffect([markers])` runs on every marker change; `useEffect([])` runs only on unmount. Merging unmount cleanup into `[markers]` cleanup would fire on every reconciliation and defeat MAPBUF-05 — every re-render would orphan layers. Two-effect split is deliberate and documented via comments in the file.
+- [Phase 61-03]: `try/catch` wrap on `map.removeLayer` ONLY in the unmount-effect cleanup path — not in the main reconciliation `[markers]` effect. In the main effect, `map` and `instance` are fetched from live refs and guaranteed present; wrapping would mask real bugs. In unmount, useLeaflet's own cleanup may have disposed the map first, so swallow silently.
+- [Phase 61-03]: `interactive: false` on every buffer L.marker — silent dots, no hover/click hijack. Matches the removed addPulseMarker convention and prevents the buffer markers from intercepting map.flyTo pan/zoom or catching clicks that should go to the feed panel. All user-initiated map interactions route through handleEventClick on feed rows (D-19).
+- [Phase 61-03]: ADD + UPDATE runs before REMOVE in the reconciliation effect. Correctness identical either way (the two sets are disjoint by construction — markers in the hook's output are never simultaneously "present and being removed"), but this order matches D-11's prose and reads naturally: "First, ensure every wanted marker is on the map; then, remove anything left over."
 
 ### Blockers/Concerns
 
@@ -122,6 +129,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last activity: 2026-04-20
-Last session: 2026-04-20T10:27:13Z
-Stopped at: Completed 61-02-PLAN.md (useThreatMapBuffer.js hook — 178 lines, pure state machine with arriving→settled→evicting lifecycle, FIFO eviction on non-evicting count > bufferLimitRef, settle timer guarded against eviction race, PITFALL-01-safe bufferLimitRef pattern. Zero Leaflet imports, zero DOM access, D-03 purity verified. Vite build clean in 9.12s. MAPBUF-01/02/03/04 marked satisfied.)
-Next action: `/gsd-execute-plan 61-03` (Wave 2 ThreatMapPage.jsx wiring — import useThreatMapBuffer, build markerInstancesRef diff-reconciliation effect + buildIcon helper, delete legacy addPulseMarker + prevEventIdRef per D-20/D-21; wires the hook's markers output into the Leaflet layer via setIcon class swaps)
+Last session: 2026-04-20T11:48:27Z
+Stopped at: Completed 61-03-PLAN.md (ThreatMapPage.jsx wiring — useThreatMapBuffer imported, markerInstancesRef = useRef(new Map<id, L.Marker>()) added, useEffect([markers]) diff-reconciliation performs ADD + UPDATE via setIcon on _bufferState change + REMOVE via map.removeLayer, separate useEffect([]) unmount cleanup iterates the Map and removeLayer's each, buildIcon(marker) module-level helper composes .map-buffer-marker--{state} --{color} classes on L.divIcon. Legacy addPulseMarker + prevEventIdRef removed per D-20/D-21. addHighlightPulse + handleEventClick byte-identical per D-19. +66/-18 lines, Vite build clean in 9.17-9.21s across Tasks 1/2/3, dev server boots in 288ms, /threat-map route returns 200. MAPBUF-05 satisfied; Phase 61 code-complete.)
+Next action: `/gsd-execute-phase 62` (Phase 62: BufferSizeControl dropdown in LeftOverlayPanel — MAPCFG-01..04 — add a useState-backed bufferSize in ThreatMapPage, replace the hardcoded 100 at the useThreatMapBuffer call-site, wire the dropdown + localStorage persistence). Also: Phase 61 awaits human manual QA walk per 61-VALIDATION.md (SC1-SC5 + accessibility + regression rows).

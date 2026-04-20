@@ -12,7 +12,7 @@
 
 - [x] **Phase 59: Backend Snapshot Resize + Victimology Endpoint** — Extend the snapshot endpoint to accept a configurable `?limit` param and enrich the actor enrichment endpoint with 4 new victimology sub-queries (completed 2026-04-17)
 - [x] **Phase 60: Backend Campaigns Service & Endpoint** — New standalone `ThreatCampaignService` + `GET /api/threat-campaigns` endpoint with 15-min cache; feature-gated (completed 2026-04-19)
-- [ ] **Phase 61: Frontend Threat Map Buffer Refactor** — Extract `useThreatMapBuffer` hook, implement persistent marker lifecycle (pulse → settle → evict), diff-reconcile Leaflet layer via `markerInstancesRef`
+- [x] **Phase 61: Frontend Threat Map Buffer Refactor** — Extract `useThreatMapBuffer` hook, implement persistent marker lifecycle (pulse → settle → evict), diff-reconcile Leaflet layer via `markerInstancesRef` (code-complete 2026-04-20; awaits human manual QA walk per 61-VALIDATION.md)
 - [ ] **Phase 62: Frontend Buffer-Size Dropdown** — `BufferSizeControl` component in left overlay panel, localStorage persistence, live cap update via `useRef` (no SSE reconnect)
 - [ ] **Phase 63: Frontend Marker Clustering** — Install `leaflet.markercluster@1.5.3`, conditional enable when `bufferSize > 500`, dark-theme `iconCreateFunction`, clean layer-swap on threshold crossing
 - [ ] **Phase 64: Frontend Victimology Tab** — Replace Campaigns tab with Victimology tab in Threat Actor modal; 4-section layout (countries/regions/sectors/organizations) driven by enrichment response
@@ -63,7 +63,7 @@
 **Plans**: 3 plans
 - [x] 61-01-PLAN.md — Wave 0: Append .map-buffer-marker CSS family to animations.css (base + 3 state modifiers + 4 colour modifiers + prefers-reduced-motion block) — completed 2026-04-20 (commits 8940142 + ed35dd0 + cb26ddd, 76 insertions, no deletions, Vite build clean in 9.96s)
 - [x] 61-02-PLAN.md — Wave 1: Create useThreatMapBuffer.js hook (pure state machine: arriving → settled → evicting + FIFO eviction + bufferLimitRef PITFALL-01-safe pattern) — completed 2026-04-20 (commits ceba3dc + db83218, 178-line hook, zero Leaflet dependency, Vite build clean in 9.12s)
-- [ ] 61-03-PLAN.md — Wave 2: Wire hook into ThreatMapPage.jsx (markerInstancesRef diff-reconciliation + buildIcon helper; remove legacy addPulseMarker + prevEventIdRef)
+- [x] 61-03-PLAN.md — Wave 2: Wire hook into ThreatMapPage.jsx (markerInstancesRef diff-reconciliation + buildIcon helper; remove legacy addPulseMarker + prevEventIdRef) — completed 2026-04-20 (commits da42859 + 8f013e4 + a75fa41, +66/−18 lines, Vite build clean in 9.17–9.21s across tasks, dev server boots in 288ms; MAPBUF-05 satisfied; Phase 61 code-complete pending human manual QA walk)
 **UI hint**: yes
 
 ### Phase 62: Frontend Buffer-Size Dropdown
@@ -136,7 +136,7 @@
 |-------|----------------|--------|-----------|
 | 59. Backend Snapshot Resize + Victimology | 2/2 | Complete   | 2026-04-17 |
 | 60. Backend Campaigns Service & Endpoint | 2/4 | In progress | - |
-| 61. Frontend Threat Map Buffer Refactor | 2/3 | In progress | - |
+| 61. Frontend Threat Map Buffer Refactor | 3/3 | Code-complete (manual QA pending) | 2026-04-20 |
 | 62. Frontend Buffer-Size Dropdown | 0/? | Not started | - |
 | 63. Frontend Marker Clustering | 0/? | Not started | - |
 | 64. Frontend Victimology Tab | 0/? | Not started | - |
