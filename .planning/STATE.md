@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: Phase 60 complete (all 4 plans landed; Wave 2 HTTP endpoint live, 10/10 ThreatCampaign tests green)
-last_updated: "2026-04-19T05:18:55Z"
-last_activity: 2026-04-19 -- Phase 60 Plan 04 complete (HTTP controller + feature-gated route, 5 HTTP tests green)
+stopped_at: Phase 61 Plan 01 complete (frontend CSS contract for three-state buffer marker lifecycle — 14 selectors appended to animations.css, Vite build clean in 9.96s)
+last_updated: "2026-04-20T10:19:16Z"
+last_activity: 2026-04-20 -- Phase 61 Plan 01 complete (.map-buffer-marker* CSS family + prefers-reduced-motion block; zero JS touched, colour parity with .map-event-pulse--{color} byte-for-byte)
 progress:
   total_phases: 8
-  completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  completed_phases: 2
+  total_plans: 9
+  completed_plans: 7
+  percent: 78
 ---
 
 # Project State
@@ -21,19 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — roadmap defined, ready for Phase 59
+**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59/60 shipped; Phase 61 (frontend buffer refactor) underway, Plan 01 CSS contract landed
 
 ## Current Position
 
-Phase: 60 — Backend Campaigns Service & Endpoint
-Plan: All 4 plans complete (60-01 scaffold, 60-02 GraphiQL verify, 60-03 service, 60-04 HTTP endpoint)
-Status: Ready for phase verification (10/10 ThreatCampaign tests green, route middleware chain verified)
-Last activity: 2026-04-19 -- Phase 60 Plan 04 complete (HTTP controller + feature-gated route, 5 HTTP tests green)
+Phase: 61 — Frontend Threat Map Buffer Refactor
+Plan: 01 complete (CSS contract for three-state buffer marker lifecycle in animations.css)
+Status: Ready to spawn Plan 61-02 (useThreatMapBuffer.js hook — pure state machine: arriving → settled → evicting + FIFO eviction + PITFALL-01-safe bufferLimitRef pattern)
+Last activity: 2026-04-20 -- Phase 61 Plan 01 complete (.map-buffer-marker* CSS family, 14 new selectors, colour parity with .map-event-pulse--{color} byte-for-byte, Vite build clean in 9.96s)
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
 
 ```
-Progress: [██████████████████████████████] 6/6 plans (100%)
+Progress: [███████████████████████▌░░░░░░] 7/9 plans (78%)
 ```
 
 ## Performance Metrics
@@ -95,6 +95,11 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 60-02]: Omit `confidence` field from Wave 1 Campaign heredoc despite its presence on the type — not in SC1; not required by Phase 65 CAMP-05 UI; avoids payload bloat.
 - [Phase 60-03]: Cache key must derive from RESOLVED defaults, not `func_get_args()`. PHP's `func_get_args()` returns only caller-supplied args, so `$svc->list()` and `$svc->list(24, null, null, 'modified', 'desc')` hit different cache slots — a real correctness bug. Use `md5(json_encode([$first, $after, $search, $orderBy, $orderMode]))` instead. Inherited defect in ThreatActorService is latent (no test surfaces it there).
 - [Phase 60-03]: SC4 grep-based enforcement counts any textual occurrence — the verified-schema comment block above the heredoc must omit IntrusionSet-only identifier names, referencing 60-RESEARCH.md Pitfall 9 + D-08 instead. Same precedent as Phase 60-01 scaffold scrub.
+- [Phase 61-01]: Settled violet/cyan buffer-marker outer ring uses same-hue rgba at 0.2 alpha (not white-alpha) — cool colours against #262626 already carry edge contrast; a white anchor reads as chromatic aberration halo on OLED. Warm red/amber keep the white ring per UI-SPEC §Color discretion point.
+- [Phase 61-01]: Chained selector `.map-buffer-marker--arriving.map-buffer-marker--{color}` (both classes on same element, not descendant) overrides the settled 1px outer ring during the 1.5s pulse animation while preserving severity glow. A double-ring during expansion would read as a target reticle and break parity with the existing `.map-event-pulse--{color}` feel.
+- [Phase 61-01]: prefers-reduced-motion `--arriving` fallback uses `opacity: 0` (not iconSize flatten) because L.divIcon iconSize is motion-agnostic Leaflet geometry — CSS cannot shrink the container mid-state. Letting opacity go to 0 for the 1800ms arriving window is simplest; the hook transitions to `settled` with its own `iconSize: [6,6]` L.divIcon, producing an instant dot appearance with no mid-state layout ambiguity.
+- [Phase 61-01]: Deferred marking MAPBUF-01/02/03 as requirements-completed — the plan frontmatter lists them but user-visible persistent-marker behaviour requires Plans 61-02 (hook) and 61-03 (page wiring). CSS alone does not make markers persist; REQUIREMENTS.md will be updated when Plan 61-03 lands.
+- [Phase 61-01]: Verification grep in Windows requires CRLF normalisation (`.replace(/\r\n/g, '\n')` before `.includes()`) — the plan's inline `\n`-literal grep patterns assume LF line endings. CSS block is written correctly either way; the grep tooling just needs CRLF tolerance. Affects future cross-platform GSD verification commands on this codebase.
 
 ### Blockers/Concerns
 
@@ -110,7 +115,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last activity: 2026-04-18
-Last session: 2026-04-18T08:13:55Z
-Stopped at: Completed 60-03-PLAN.md (standalone ThreatCampaignService + 5 Wave 1 Pest tests green)
-Next action: `/gsd-execute-plan 60-04` (Wave 2 HTTP controller + route registration + feature-gate HTTP tests)
+Last activity: 2026-04-20
+Last session: 2026-04-20T10:19:16Z
+Stopped at: Completed 61-01-PLAN.md (.map-buffer-marker* CSS family appended to animations.css; 14 selectors, 76 insertions, 0 deletions, Vite production build clean in 9.96s)
+Next action: `/gsd-execute-plan 61-02` (Wave 1 useThreatMapBuffer.js hook — pure state machine: arriving → settled → evicting + FIFO eviction + PITFALL-01-safe bufferLimitRef pattern)

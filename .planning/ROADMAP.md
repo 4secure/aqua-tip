@@ -61,7 +61,7 @@
   4. At buffer capacity (default 100), each new arrival causes exactly one old marker to quietly fade out — no sudden bulk removals, no marker count growing unbounded beyond the cap
   5. After 5 minutes of active streaming, a Chrome DevTools Memory snapshot shows Leaflet `L.Marker` instance count at or below the configured buffer cap (no orphan accumulation)
 **Plans**: 3 plans
-- [ ] 61-01-PLAN.md — Wave 0: Append .map-buffer-marker CSS family to animations.css (base + 3 state modifiers + 4 colour modifiers + prefers-reduced-motion block)
+- [x] 61-01-PLAN.md — Wave 0: Append .map-buffer-marker CSS family to animations.css (base + 3 state modifiers + 4 colour modifiers + prefers-reduced-motion block) — completed 2026-04-20 (commits 8940142 + ed35dd0 + cb26ddd, 76 insertions, no deletions, Vite build clean in 9.96s)
 - [ ] 61-02-PLAN.md — Wave 1: Create useThreatMapBuffer.js hook (pure state machine: arriving → settled → evicting + FIFO eviction + bufferLimitRef PITFALL-01-safe pattern)
 - [ ] 61-03-PLAN.md — Wave 2: Wire hook into ThreatMapPage.jsx (markerInstancesRef diff-reconciliation + buildIcon helper; remove legacy addPulseMarker + prevEventIdRef)
 **UI hint**: yes
