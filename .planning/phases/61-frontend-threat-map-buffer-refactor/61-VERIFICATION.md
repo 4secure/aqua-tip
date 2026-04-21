@@ -1,8 +1,8 @@
 ---
 phase: 61-frontend-threat-map-buffer-refactor
 verified: 2026-04-18T00:00:00Z
-status: human_needed
-score: 5/5 code-structure must-haves verified (5 visual SCs pending human QA)
+status: passed
+score: 5/5 code-structure must-haves verified + 8/8 human QA rows signed off 2026-04-21 (SC1–SC5, accessibility, 2 regression rows)
 overrides_applied: 0
 human_verification:
   - test: "SC1 — Persistence: map shows ≥50 persistent dots after 30s"

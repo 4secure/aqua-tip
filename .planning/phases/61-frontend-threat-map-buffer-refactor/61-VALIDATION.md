@@ -1,10 +1,11 @@
 ---
 phase: 61
 slug: frontend-threat-map-buffer-refactor
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 manual_qa_only: true
 created: 2026-04-18
+signed_off: 2026-04-21
 ---
 
 # Phase 61 — Manual QA Validation Checklist
@@ -194,7 +195,7 @@ All other phase behaviours have automated grep / build coverage in the PLAN `<ve
 - [ ] `git diff --stat frontend/` shows exactly three files changed (animations.css, useThreatMapBuffer.js, ThreatMapPage.jsx) — no drift into `useThreatStream.js`, `useLeaflet.js`, or component files.
 - [ ] `frontmatter.nyquist_compliant` flipped to `true` **only if** the above rows all pass; otherwise leave `false` and record reason.
 
-**Approval:** pending
+**Approval:** 2026-04-21 — all 8 manual QA rows passed (SC1 persistence, SC2 arrival pulse, SC3 reconnect, SC4 eviction, SC5 heap, accessibility, click-highlight regression, panels regression). `nyquist_compliant` flipped to `true`.
 
 ---
 
