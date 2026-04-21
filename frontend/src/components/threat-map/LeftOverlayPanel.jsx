@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import BufferSizeControl from './BufferSizeControl';
 import ThreatMapCounters from './ThreatMapCounters';
 import ThreatMapCountries from './ThreatMapCountries';
 import ThreatMapFeed from './ThreatMapFeed';
@@ -17,9 +18,12 @@ const EVENT_ISOLATION = {
   onTouchStart: stopPropagation,
 };
 
-export default function LeftOverlayPanel({ collapsed, peeking, onPeekStart, onPeekEnd, counters, connected, countryCounts, events, onEventClick }) {
+export default function LeftOverlayPanel({ collapsed, peeking, onPeekStart, onPeekEnd, counters, connected, countryCounts, events, onEventClick, bufferSize, onBufferSizeChange }) {
   const panelContent = (
     <>
+      <div className="flex-shrink-0">
+        <BufferSizeControl value={bufferSize} onChange={onBufferSizeChange} />
+      </div>
       <div className="flex-shrink-0">
         <ThreatMapCounters counters={counters} connected={connected} />
       </div>
