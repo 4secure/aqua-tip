@@ -75,7 +75,9 @@
   2. Selecting 500 and reloading the page restores the dropdown to 500 (localStorage persisted under `aqua-tip:threat-map-buffer-size`)
   3. Changing the dropdown from 100 to 1000 while the SSE stream is active does not cause the live feed to disconnect and reconnect — events keep arriving uninterrupted
   4. Manually deleting the localStorage key and reloading defaults the dropdown to 100 with no JS error or empty map
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 62-01-PLAN.md — Wave 0: Create `BufferSizeControl.jsx` component (native <select> in glass-card-static p-4 wrapper) + `BUFFER_SIZE_OPTIONS` / `BUFFER_SIZE_STORAGE_KEY` / `DEFAULT_BUFFER_SIZE` constants + `readBufferSize()` whitelist helper (D-01..D-08, D-15..D-19)
+- [ ] 62-02-PLAN.md — Wave 1: Wire into `ThreatMapPage.jsx` (`useState(readBufferSize)` lazy init, `useEffect([bufferSize])` persistence, call-site `useThreatMapBuffer(events, 100)` → `useThreatMapBuffer(events, bufferSize)`) + render `<BufferSizeControl>` above `<ThreatMapCounters>` in `LeftOverlayPanel` (D-09..D-14, D-22)
 **UI hint**: yes
 
 ### Phase 63: Frontend Marker Clustering
@@ -137,7 +139,7 @@
 | 59. Backend Snapshot Resize + Victimology | 2/2 | Complete   | 2026-04-17 |
 | 60. Backend Campaigns Service & Endpoint | 2/4 | In progress | - |
 | 61. Frontend Threat Map Buffer Refactor | 3/3 | Code-complete (manual QA pending) | 2026-04-20 |
-| 62. Frontend Buffer-Size Dropdown | 0/? | Not started | - |
+| 62. Frontend Buffer-Size Dropdown | 0/2 | Not started | - |
 | 63. Frontend Marker Clustering | 0/? | Not started | - |
 | 64. Frontend Victimology Tab | 0/? | Not started | - |
 | 65. Frontend Campaigns Toggle | 0/? | Not started | - |
