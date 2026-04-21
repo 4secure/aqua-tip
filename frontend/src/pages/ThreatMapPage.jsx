@@ -7,6 +7,7 @@ import ThreatMapStatus from '../components/threat-map/ThreatMapStatus';
 import LeftOverlayPanel from '../components/threat-map/LeftOverlayPanel';
 import RightOverlayPanel from '../components/threat-map/RightOverlayPanel';
 import PanelToggle from '../components/threat-map/PanelToggle';
+import { BUFFER_SIZE_STORAGE_KEY, readBufferSize } from '../components/threat-map/BufferSizeControl';
 
 
 /**
@@ -43,7 +44,8 @@ const STORAGE_KEY = 'aqua-tip:panels-collapsed';
 
 export default function ThreatMapPage() {
   const { events, counters, countryCounts, typeCounts, connected } = useThreatStream();
-  const { markers } = useThreatMapBuffer(events, 100);
+  const [bufferSize, setBufferSize] = useState(readBufferSize);
+  const { markers } = useThreatMapBuffer(events, bufferSize);
 
   const [panelsCollapsed, setPanelsCollapsed] = useState(() => {
     try {
@@ -138,6 +140,15 @@ export default function ThreatMapPage() {
     }
   }, [panelsCollapsed]);
 
+  // Sync bufferSize to localStorage (MAPCFG-02)
+  useEffect(() => {
+    try {
+      localStorage.setItem(BUFFER_SIZE_STORAGE_KEY, String(bufferSize));
+    } catch {
+      // localStorage unavailable — degrade silently
+    }
+  }, [bufferSize]);
+
   // Clear peek state and timers when expanding
   useEffect(() => {
     if (!panelsCollapsed) {
@@ -207,6 +218,8 @@ export default function ThreatMapPage() {
         countryCounts={countryCounts}
         events={events}
         onEventClick={handleEventClick}
+        bufferSize={bufferSize}
+        onBufferSizeChange={setBufferSize}
       />
 
       <RightOverlayPanel
