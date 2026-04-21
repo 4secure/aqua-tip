@@ -76,7 +76,7 @@
   3. Changing the dropdown from 100 to 1000 while the SSE stream is active does not cause the live feed to disconnect and reconnect — events keep arriving uninterrupted
   4. Manually deleting the localStorage key and reloading defaults the dropdown to 100 with no JS error or empty map
 **Plans**: 2 plans
-- [ ] 62-01-PLAN.md — Wave 0: Create `BufferSizeControl.jsx` component (native <select> in glass-card-static p-4 wrapper) + `BUFFER_SIZE_OPTIONS` / `BUFFER_SIZE_STORAGE_KEY` / `DEFAULT_BUFFER_SIZE` constants + `readBufferSize()` whitelist helper (D-01..D-08, D-15..D-19)
+- [x] 62-01-PLAN.md — Wave 0: Create `BufferSizeControl.jsx` component (native <select> in glass-card-static p-4 wrapper) + `BUFFER_SIZE_OPTIONS` / `BUFFER_SIZE_STORAGE_KEY` / `DEFAULT_BUFFER_SIZE` constants + `readBufferSize()` whitelist helper (D-01..D-08, D-15..D-19) — completed 2026-04-21 (commit bf1135e, 101 lines one new file, zero edits to existing files, Vite build clean in 12.95s, v6.1 hook-lock preserved, zero dep drift)
 - [ ] 62-02-PLAN.md — Wave 1: Wire into `ThreatMapPage.jsx` (`useState(readBufferSize)` lazy init, `useEffect([bufferSize])` persistence, call-site `useThreatMapBuffer(events, 100)` → `useThreatMapBuffer(events, bufferSize)`) + render `<BufferSizeControl>` above `<ThreatMapCounters>` in `LeftOverlayPanel` (D-09..D-14, D-22)
 **UI hint**: yes
 

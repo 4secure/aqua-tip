@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: Phase 61 Plan 03 complete (ThreatMapPage.jsx wiring — useThreatMapBuffer imported, markerInstancesRef Map<id, L.Marker> diff-reconciliation useEffect([markers]), buildIcon helper composing .map-buffer-marker--{state}--{color} classes, unmount cleanup; legacy addPulseMarker + prevEventIdRef removed per D-20/D-21; MAPBUF-05 satisfied; Phase 61 code-complete pending human manual QA)
-last_updated: "2026-04-20T11:48:27Z"
-last_activity: 2026-04-20 -- Phase 61 Plan 03 complete (ThreatMapPage.jsx wiring — +66/−18 lines; markerInstancesRef diff-reconciliation + buildIcon helper; legacy addPulseMarker/prevEventIdRef removed; D-19 click-highlight preserved byte-identical; Vite build clean in 9.17–9.21s; dev server boots in 288ms; MAPBUF-05 satisfied; Phase 61 code-complete)
+stopped_at: Phase 62 Plan 01 complete (BufferSizeControl.jsx created — 101 lines; named exports BUFFER_SIZE_OPTIONS/BUFFER_SIZE_STORAGE_KEY/DEFAULT_BUFFER_SIZE/readBufferSize; controlled native <select> in glass-card-static p-4 wrapper; readBufferSize silent-fallback per D-16/D-19 verified via 8-guard structural probe; Vite build clean in 12.95s; v6.1 hook-lock preserved; zero dep drift; commit bf1135e)
+last_updated: "2026-04-21T10:40:27Z"
+last_activity: 2026-04-21 -- Phase 62 Plan 01 complete (BufferSizeControl component + readBufferSize helper; 101 lines, one new file, zero edits to existing files; 14/14 plan-level verify tokens present; 8/8 D-16 structural guards in order; Vite build clean in 12.95s; ready for Plan 62-02 wiring into ThreatMapPage.jsx)
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_plans: 11
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -25,15 +25,15 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 61 — Frontend Threat Map Buffer Refactor — CODE-COMPLETE (3/3 plans shipped)
-Plan: 03 complete (ThreatMapPage.jsx wiring — useThreatMapBuffer + markerInstancesRef diff-reconciliation + buildIcon helper)
-Status: Ready to spawn Phase 62 Plan 01 (BufferSizeControl dropdown in LeftOverlayPanel — MAPCFG-01..04; one-line change at the useThreatMapBuffer call-site, no hook refactor thanks to PITFALL-01-safe bufferLimitRef pattern). Phase 61 awaits human manual QA walk per 61-VALIDATION.md (SC1–SC5 + accessibility + regression rows).
-Last activity: 2026-04-20 -- Phase 61 Plan 03 complete (ThreatMapPage.jsx wired to useThreatMapBuffer via markerInstancesRef Map-based diff-reconciliation; legacy addPulseMarker/prevEventIdRef removed; addHighlightPulse + handleEventClick byte-identical; MAPBUF-05 satisfied; Phase 61 code-complete)
+Phase: 62 — Frontend Buffer-Size Dropdown — IN PROGRESS (1/2 plans shipped)
+Plan: 01 complete (BufferSizeControl.jsx created — 101 lines; named exports + controlled native <select> in glass-card-static p-4; readBufferSize D-16 silent-fallback verified)
+Status: Ready to spawn Phase 62 Plan 02 (wire BufferSizeControl into ThreatMapPage.jsx + LeftOverlayPanel — useState(readBufferSize) lazy init, useEffect([bufferSize]) persistence, useThreatMapBuffer(events, 100) → useThreatMapBuffer(events, bufferSize) one-token call-site swap, render <BufferSizeControl> above <ThreatMapCounters> per D-09..D-14, D-22). Phase 61 still awaits human manual QA walk per 61-VALIDATION.md.
+Last activity: 2026-04-21 -- Phase 62 Plan 01 complete (BufferSizeControl primitive + readBufferSize helper shipped; +101 lines one new file; zero edits to existing files; v6.1 hook-lock preserved; zero dep drift; Vite build clean in 12.95s; commit bf1135e)
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
 
 ```
-Progress: [██████████████████████████████] 9/9 plans (100%) — Phase 61 awaits manual QA walk
+Progress: [███████████████████████████░░░] 10/11 plans (91%) — Phase 62 Plan 02 remaining; Phase 61 awaits manual QA walk
 ```
 
 ## Performance Metrics
@@ -113,6 +113,9 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 61-03]: `try/catch` wrap on `map.removeLayer` ONLY in the unmount-effect cleanup path — not in the main reconciliation `[markers]` effect. In the main effect, `map` and `instance` are fetched from live refs and guaranteed present; wrapping would mask real bugs. In unmount, useLeaflet's own cleanup may have disposed the map first, so swallow silently.
 - [Phase 61-03]: `interactive: false` on every buffer L.marker — silent dots, no hover/click hijack. Matches the removed addPulseMarker convention and prevents the buffer markers from intercepting map.flyTo pan/zoom or catching clicks that should go to the feed panel. All user-initiated map interactions route through handleEventClick on feed rows (D-19).
 - [Phase 61-03]: ADD + UPDATE runs before REMOVE in the reconciliation effect. Correctness identical either way (the two sets are disjoint by construction — markers in the hook's output are never simultaneously "present and being removed"), but this order matches D-11's prose and reads naturally: "First, ensure every wanted marker is on the map; then, remove anything left over."
+- [Phase 62-01]: Exported BUFFER_SIZE_OPTIONS / BUFFER_SIZE_STORAGE_KEY / DEFAULT_BUFFER_SIZE / readBufferSize from the component file rather than a shared constants module — single consumer in Plan 62-02 (ThreatMapPage), zero new files, no premature abstraction. Co-location beats extraction at N=1; Phase 63 cluster-threshold check can still import from the component file when it arrives.
+- [Phase 62-01]: readBufferSize declared at MODULE scope (not inside BufferSizeControl) — pure function, no closure capture, testable in isolation. Plan 62-02 imports it directly into `useState(readBufferSize)` lazy initializer at the same import site as BUFFER_SIZE_OPTIONS. Matches project "many small files + no premature abstraction" convention.
+- [Phase 62-01]: Collapsed `<label>Buffer</label>` to single-line JSX to satisfy the automated verify grep `>Buffer<` — semantic parity preserved (JSX whitespace normalizes at render). Lesson: when a plan specifies an exact grep token, the executor must collapse JSX to single-line form rather than relaxing the probe; the grep is the machine-enforced acceptance gate.
 
 ### Blockers/Concerns
 
@@ -128,7 +131,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last activity: 2026-04-20
-Last session: 2026-04-20T11:48:27Z
-Stopped at: Completed 61-03-PLAN.md (ThreatMapPage.jsx wiring — useThreatMapBuffer imported, markerInstancesRef = useRef(new Map<id, L.Marker>()) added, useEffect([markers]) diff-reconciliation performs ADD + UPDATE via setIcon on _bufferState change + REMOVE via map.removeLayer, separate useEffect([]) unmount cleanup iterates the Map and removeLayer's each, buildIcon(marker) module-level helper composes .map-buffer-marker--{state} --{color} classes on L.divIcon. Legacy addPulseMarker + prevEventIdRef removed per D-20/D-21. addHighlightPulse + handleEventClick byte-identical per D-19. +66/-18 lines, Vite build clean in 9.17-9.21s across Tasks 1/2/3, dev server boots in 288ms, /threat-map route returns 200. MAPBUF-05 satisfied; Phase 61 code-complete.)
-Next action: `/gsd-execute-phase 62` (Phase 62: BufferSizeControl dropdown in LeftOverlayPanel — MAPCFG-01..04 — add a useState-backed bufferSize in ThreatMapPage, replace the hardcoded 100 at the useThreatMapBuffer call-site, wire the dropdown + localStorage persistence). Also: Phase 61 awaits human manual QA walk per 61-VALIDATION.md (SC1-SC5 + accessibility + regression rows).
+Last activity: 2026-04-21
+Last session: 2026-04-21T10:40:27Z
+Stopped at: Completed 62-01-PLAN.md (BufferSizeControl.jsx created — 101 lines at frontend/src/components/threat-map/BufferSizeControl.jsx; named exports BUFFER_SIZE_OPTIONS=[100,500,1000,2000], BUFFER_SIZE_STORAGE_KEY='aqua-tip:threat-map-buffer-size', DEFAULT_BUFFER_SIZE=100, readBufferSize(); default export is controlled native <select> in glass-card-static p-4 wrapper with label "Buffer" bound via htmlFor/id=threat-map-buffer-size; readBufferSize D-16 silent-fallback contract verified via 8-token structural probe (try/getItem(KEY)/null-check-return/Number/Number.isFinite-reject/whitelist.includes-reject/return n/catch-return); Tailwind chain bg-surface-2 border border-border rounded-lg px-2 py-1 text-sm font-mono + focus:border-violet/50 focus:ring-1 focus:ring-violet/20; onChange=(e) => onChange(Number(e.target.value)) per D-31; one new file, zero edits to existing files, v6.1 hook-lock on useThreatMapBuffer.js + useThreatStream.js preserved byte-identical, frontend/package*.json unchanged, Vite production build green in 12.95s; commit bf1135e.)
+Next action: `/gsd-execute-plan 62-02` (Phase 62 Plan 02 — wire BufferSizeControl into ThreatMapPage.jsx: import the component + BUFFER_SIZE_STORAGE_KEY + readBufferSize; add `const [bufferSize, setBufferSize] = useState(readBufferSize)` via lazy initializer; swap `useThreatMapBuffer(events, 100)` → `useThreatMapBuffer(events, bufferSize)` one-token change at ~line 46; add `useEffect([bufferSize])` persistence block mirroring panelsCollapsed pattern at lines 132-139; extend LeftOverlayPanel props with bufferSize + onBufferSizeChange and render <BufferSizeControl value={bufferSize} onChange={onBufferSizeChange} /> in a new flex-shrink-0 wrapper at top of panelContent above <ThreatMapCounters>). Phase 61 still awaits human manual QA walk per 61-VALIDATION.md.
