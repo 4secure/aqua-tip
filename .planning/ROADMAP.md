@@ -13,7 +13,7 @@
 - [x] **Phase 59: Backend Snapshot Resize + Victimology Endpoint** — Extend the snapshot endpoint to accept a configurable `?limit` param and enrich the actor enrichment endpoint with 4 new victimology sub-queries (completed 2026-04-17)
 - [x] **Phase 60: Backend Campaigns Service & Endpoint** — New standalone `ThreatCampaignService` + `GET /api/threat-campaigns` endpoint with 15-min cache; feature-gated (completed 2026-04-19)
 - [x] **Phase 61: Frontend Threat Map Buffer Refactor** — Extract `useThreatMapBuffer` hook, implement persistent marker lifecycle (pulse → settle → evict), diff-reconcile Leaflet layer via `markerInstancesRef` (code-complete 2026-04-20; awaits human manual QA walk per 61-VALIDATION.md)
-- [ ] **Phase 62: Frontend Buffer-Size Dropdown** — `BufferSizeControl` component in left overlay panel, localStorage persistence, live cap update via `useRef` (no SSE reconnect)
+- [x] **Phase 62: Frontend Buffer-Size Dropdown** — `BufferSizeControl` component in left overlay panel, localStorage persistence, live cap update via `useRef` (no SSE reconnect) (code-complete 2026-04-21; awaits human manual QA walk per 62-VALIDATION.md)
 - [ ] **Phase 63: Frontend Marker Clustering** — Install `leaflet.markercluster@1.5.3`, conditional enable when `bufferSize > 500`, dark-theme `iconCreateFunction`, clean layer-swap on threshold crossing
 - [ ] **Phase 64: Frontend Victimology Tab** — Replace Campaigns tab with Victimology tab in Threat Actor modal; 4-section layout (countries/regions/sectors/organizations) driven by enrichment response
 - [ ] **Phase 65: Frontend Campaigns Toggle** — Pill toggle on Threat Actors page, `?view=campaigns` URL state, `CampaignCard` grid, `CampaignDetailModal`, `threat-campaigns.js` API client
@@ -77,7 +77,7 @@
   4. Manually deleting the localStorage key and reloading defaults the dropdown to 100 with no JS error or empty map
 **Plans**: 2 plans
 - [x] 62-01-PLAN.md — Wave 0: Create `BufferSizeControl.jsx` component (native <select> in glass-card-static p-4 wrapper) + `BUFFER_SIZE_OPTIONS` / `BUFFER_SIZE_STORAGE_KEY` / `DEFAULT_BUFFER_SIZE` constants + `readBufferSize()` whitelist helper (D-01..D-08, D-15..D-19) — completed 2026-04-21 (commit bf1135e, 101 lines one new file, zero edits to existing files, Vite build clean in 12.95s, v6.1 hook-lock preserved, zero dep drift)
-- [ ] 62-02-PLAN.md — Wave 1: Wire into `ThreatMapPage.jsx` (`useState(readBufferSize)` lazy init, `useEffect([bufferSize])` persistence, call-site `useThreatMapBuffer(events, 100)` → `useThreatMapBuffer(events, bufferSize)`) + render `<BufferSizeControl>` above `<ThreatMapCounters>` in `LeftOverlayPanel` (D-09..D-14, D-22)
+- [x] 62-02-PLAN.md — Wave 1: Wire into `ThreatMapPage.jsx` (`useState(readBufferSize)` lazy init, `useEffect([bufferSize])` persistence, call-site `useThreatMapBuffer(events, 100)` → `useThreatMapBuffer(events, bufferSize)`) + render `<BufferSizeControl>` above `<ThreatMapCounters>` in `LeftOverlayPanel` (D-09..D-14, D-22) — completed 2026-04-21 (commits c9a768a + 0694231, 2 files modified +19/-2 lines, Vite build clean in 26.76s, v6.1 hook-lock preserved byte-identical, zero dep drift, MAPCFG-01..04 delivered)
 **UI hint**: yes
 
 ### Phase 63: Frontend Marker Clustering

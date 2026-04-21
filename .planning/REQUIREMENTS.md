@@ -19,10 +19,10 @@ Requirements for Threat Map Buffer & Threat Actor Depth milestone.
 
 ### Map Buffer Size Selector (MAPCFG)
 
-- [ ] **MAPCFG-01**: User can select buffer size from a dropdown in the threat map overlay panel with presets: 100, 500, 1000, 2000
-- [ ] **MAPCFG-02**: Selected buffer size persists to localStorage (`aqua-tip:threat-map-buffer-size`) and restores on next page load
-- [ ] **MAPCFG-03**: Changing the buffer size mid-session does NOT trigger an SSE reconnect — buffer cap updates live via `useRef` synced from state
-- [ ] **MAPCFG-04**: Invalid or missing localStorage value falls back to default (100) without throwing
+- [x] **MAPCFG-01**: User can select buffer size from a dropdown in the threat map overlay panel with presets: 100, 500, 1000, 2000
+- [x] **MAPCFG-02**: Selected buffer size persists to localStorage (`aqua-tip:threat-map-buffer-size`) and restores on next page load
+- [x] **MAPCFG-03**: Changing the buffer size mid-session does NOT trigger an SSE reconnect — buffer cap updates live via `useRef` synced from state
+- [x] **MAPCFG-04**: Invalid or missing localStorage value falls back to default (100) without throwing
 
 ### Map Marker Clustering (MAPCLU)
 
@@ -88,10 +88,10 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | MAPBUF-04 | Phase 61 | Satisfied (2026-04-20) |
 | MAPBUF-05 | Phase 61 | Satisfied (2026-04-20) |
 | MAPBUF-06 | Phase 59 | Pending |
-| MAPCFG-01 | Phase 62 | Pending |
-| MAPCFG-02 | Phase 62 | Pending |
-| MAPCFG-03 | Phase 62 | Pending |
-| MAPCFG-04 | Phase 62 | Pending |
+| MAPCFG-01 | Phase 62 | Satisfied (2026-04-21) |
+| MAPCFG-02 | Phase 62 | Satisfied (2026-04-21) |
+| MAPCFG-03 | Phase 62 | Satisfied (2026-04-21) |
+| MAPCFG-04 | Phase 62 | Satisfied (2026-04-21) |
 | MAPCLU-01 | Phase 63 | Pending |
 | MAPCLU-02 | Phase 63 | Pending |
 | MAPCLU-03 | Phase 63 | Pending |

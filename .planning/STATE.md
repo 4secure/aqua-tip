@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: Phase 62 Plan 01 complete (BufferSizeControl.jsx created — 101 lines; named exports BUFFER_SIZE_OPTIONS/BUFFER_SIZE_STORAGE_KEY/DEFAULT_BUFFER_SIZE/readBufferSize; controlled native <select> in glass-card-static p-4 wrapper; readBufferSize silent-fallback per D-16/D-19 verified via 8-guard structural probe; Vite build clean in 12.95s; v6.1 hook-lock preserved; zero dep drift; commit bf1135e)
-last_updated: "2026-04-21T10:40:27Z"
-last_activity: 2026-04-21 -- Phase 62 Plan 01 complete (BufferSizeControl component + readBufferSize helper; 101 lines, one new file, zero edits to existing files; 14/14 plan-level verify tokens present; 8/8 D-16 structural guards in order; Vite build clean in 12.95s; ready for Plan 62-02 wiring into ThreatMapPage.jsx)
+stopped_at: Phase 62 COMPLETE (code-complete; awaits human manual QA walk per 62-VALIDATION.md). Plan 02 wired BufferSizeControl into ThreatMapPage + LeftOverlayPanel via 5 surgical edits: import BUFFER_SIZE_STORAGE_KEY + readBufferSize, useState(readBufferSize) lazy init, useThreatMapBuffer(events, 100) → (events, bufferSize) call-site swap, useEffect([bufferSize]) persistence mirror of panelsCollapsed, bufferSize+onBufferSizeChange prop-drill through LeftOverlayPanel, <BufferSizeControl> rendered in new flex-shrink-0 wrapper above <ThreatMapCounters>. 2 files modified +19/-2 lines across commits c9a768a (page) + 0694231 (panel); Vite build clean in 26.76s; v6.1 hook-lock preserved byte-identical (git diff --stat on both hook files empty); zero dep drift; MAPCFG-01..04 all delivered architecturally + user-visibly; grep for legacy literal useThreatMapBuffer(events, 100) returns zero matches.
+last_updated: "2026-04-21T10:48:03Z"
+last_activity: 2026-04-21 -- Phase 62 Plan 02 complete (BufferSizeControl wired end-to-end into ThreatMapPage.jsx + LeftOverlayPanel.jsx; MAPCFG-01..04 satisfied at code level; Vite build clean in 26.76s; hook-lock byte-identical; zero dep drift; Phase 62 code-complete and ready for manual QA walk per 62-VALIDATION.md)
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -25,15 +25,15 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 62 — Frontend Buffer-Size Dropdown — IN PROGRESS (1/2 plans shipped)
-Plan: 01 complete (BufferSizeControl.jsx created — 101 lines; named exports + controlled native <select> in glass-card-static p-4; readBufferSize D-16 silent-fallback verified)
-Status: Ready to spawn Phase 62 Plan 02 (wire BufferSizeControl into ThreatMapPage.jsx + LeftOverlayPanel — useState(readBufferSize) lazy init, useEffect([bufferSize]) persistence, useThreatMapBuffer(events, 100) → useThreatMapBuffer(events, bufferSize) one-token call-site swap, render <BufferSizeControl> above <ThreatMapCounters> per D-09..D-14, D-22). Phase 61 still awaits human manual QA walk per 61-VALIDATION.md.
-Last activity: 2026-04-21 -- Phase 62 Plan 01 complete (BufferSizeControl primitive + readBufferSize helper shipped; +101 lines one new file; zero edits to existing files; v6.1 hook-lock preserved; zero dep drift; Vite build clean in 12.95s; commit bf1135e)
+Phase: 62 — Frontend Buffer-Size Dropdown — CODE-COMPLETE (2/2 plans shipped; awaits human manual QA walk per 62-VALIDATION.md)
+Plan: 02 complete (BufferSizeControl wired end-to-end — useState(readBufferSize) lazy init + useEffect([bufferSize]) persistence + call-site swap + prop-drill through LeftOverlayPanel + <BufferSizeControl> rendered above <ThreatMapCounters>)
+Status: Ready to spawn Phase 63 (Frontend Marker Clustering — install leaflet.markercluster@1.5.3, conditional MarkerClusterGroup when bufferSize > 500, dark-theme iconCreateFunction, clean layer-swap on threshold crossing — MAPCLU-01..05). Phase 61 + Phase 62 both await human manual QA walks per 61-VALIDATION.md + 62-VALIDATION.md.
+Last activity: 2026-04-21 -- Phase 62 Plan 02 complete (ThreatMapPage.jsx + LeftOverlayPanel.jsx wired; 2 files modified +19/-2 lines across commits c9a768a + 0694231; Vite build clean in 26.76s; v6.1 hook-lock byte-identical; zero dep drift; MAPCFG-01..04 all satisfied at code level)
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
 
 ```
-Progress: [███████████████████████████░░░] 10/11 plans (91%) — Phase 62 Plan 02 remaining; Phase 61 awaits manual QA walk
+Progress: [██████████████████████████████] 11/11 plans (100%) — Phase 62 code-complete; Phase 61 + Phase 62 await manual QA walks; Phase 63 (MAPCLU) next
 ```
 
 ## Performance Metrics
@@ -116,6 +116,11 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 62-01]: Exported BUFFER_SIZE_OPTIONS / BUFFER_SIZE_STORAGE_KEY / DEFAULT_BUFFER_SIZE / readBufferSize from the component file rather than a shared constants module — single consumer in Plan 62-02 (ThreatMapPage), zero new files, no premature abstraction. Co-location beats extraction at N=1; Phase 63 cluster-threshold check can still import from the component file when it arrives.
 - [Phase 62-01]: readBufferSize declared at MODULE scope (not inside BufferSizeControl) — pure function, no closure capture, testable in isolation. Plan 62-02 imports it directly into `useState(readBufferSize)` lazy initializer at the same import site as BUFFER_SIZE_OPTIONS. Matches project "many small files + no premature abstraction" convention.
 - [Phase 62-01]: Collapsed `<label>Buffer</label>` to single-line JSX to satisfy the automated verify grep `>Buffer<` — semantic parity preserved (JSX whitespace normalizes at render). Lesson: when a plan specifies an exact grep token, the executor must collapse JSX to single-line form rather than relaxing the probe; the grep is the machine-enforced acceptance gate.
+- [Phase 62-02]: Named-only import at the page (BUFFER_SIZE_STORAGE_KEY + readBufferSize) — the default BufferSizeControl component is imported directly by LeftOverlayPanel where it is rendered, not drilled through the page. Keeps each file's imports minimal; the page needs the key + helper, not the component reference.
+- [Phase 62-02]: useState(readBufferSize) lazy initializer passes the function reference, NOT a call. React invokes it exactly once on first render; mirrors the panelsCollapsed lazy-init pattern already in the file. No wrapping `() => readBufferSize()` needed — function references work directly.
+- [Phase 62-02]: Persistence effect placed immediately below the panelsCollapsed persistence effect (grouping all localStorage writes) and above the 'Clear peek state and timers when expanding' comment (keeping peek logic visually adjacent to itself). Dep array exactly [bufferSize]; setBufferSize is stable across renders and does not belong in the dep array per React guarantees.
+- [Phase 62-02]: Verification Task 3 produced zero diff — pure quality gate (Vite build + hook-lock diff + dep-drift diff + scope check + end-to-end grep probe + legacy-literal grep + VALIDATION.md existence). No file changes, no commit. Per GSD protocol and Plan 62-01 precedent: verification-only tasks that produce zero diff do not generate a task commit.
+- [Phase 62-02]: MAPCFG-03 architectural guarantee is machine-verifiable via two git commands: `git diff --stat frontend/src/hooks/useThreatStream.js` empty AND `git diff --stat frontend/src/hooks/useThreatMapBuffer.js` empty. Both returned empty after Plan 62-02, proving that bufferSize is not read inside either hook's SSE/events effect closure or dep array — therefore EventSource never re-subscribes when the dropdown changes. This converts a behavioural claim (no SSE reconnect) into a structural claim (no code path reads bufferSize in the SSE effect) — and the structural claim is trivially falsifiable by diffing the hook files.
 
 ### Blockers/Concerns
 
@@ -132,6 +137,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last activity: 2026-04-21
-Last session: 2026-04-21T10:40:27Z
-Stopped at: Completed 62-01-PLAN.md (BufferSizeControl.jsx created — 101 lines at frontend/src/components/threat-map/BufferSizeControl.jsx; named exports BUFFER_SIZE_OPTIONS=[100,500,1000,2000], BUFFER_SIZE_STORAGE_KEY='aqua-tip:threat-map-buffer-size', DEFAULT_BUFFER_SIZE=100, readBufferSize(); default export is controlled native <select> in glass-card-static p-4 wrapper with label "Buffer" bound via htmlFor/id=threat-map-buffer-size; readBufferSize D-16 silent-fallback contract verified via 8-token structural probe (try/getItem(KEY)/null-check-return/Number/Number.isFinite-reject/whitelist.includes-reject/return n/catch-return); Tailwind chain bg-surface-2 border border-border rounded-lg px-2 py-1 text-sm font-mono + focus:border-violet/50 focus:ring-1 focus:ring-violet/20; onChange=(e) => onChange(Number(e.target.value)) per D-31; one new file, zero edits to existing files, v6.1 hook-lock on useThreatMapBuffer.js + useThreatStream.js preserved byte-identical, frontend/package*.json unchanged, Vite production build green in 12.95s; commit bf1135e.)
-Next action: `/gsd-execute-plan 62-02` (Phase 62 Plan 02 — wire BufferSizeControl into ThreatMapPage.jsx: import the component + BUFFER_SIZE_STORAGE_KEY + readBufferSize; add `const [bufferSize, setBufferSize] = useState(readBufferSize)` via lazy initializer; swap `useThreatMapBuffer(events, 100)` → `useThreatMapBuffer(events, bufferSize)` one-token change at ~line 46; add `useEffect([bufferSize])` persistence block mirroring panelsCollapsed pattern at lines 132-139; extend LeftOverlayPanel props with bufferSize + onBufferSizeChange and render <BufferSizeControl value={bufferSize} onChange={onBufferSizeChange} /> in a new flex-shrink-0 wrapper at top of panelContent above <ThreatMapCounters>). Phase 61 still awaits human manual QA walk per 61-VALIDATION.md.
+Last session: 2026-04-21T10:48:03Z
+Stopped at: Completed 62-02-PLAN.md (ThreatMapPage.jsx + LeftOverlayPanel.jsx wired — five surgical edits in ThreatMapPage: (1) import { BUFFER_SIZE_STORAGE_KEY, readBufferSize } from '../components/threat-map/BufferSizeControl', (2) const [bufferSize, setBufferSize] = useState(readBufferSize) lazy-init immediately after useThreatStream destructure, (3) useThreatMapBuffer(events, 100) → useThreatMapBuffer(events, bufferSize) one-token call-site swap per D-22, (4) new sibling useEffect(() => { try { localStorage.setItem(BUFFER_SIZE_STORAGE_KEY, String(bufferSize)); } catch {} }, [bufferSize]) persistence effect immediately below the panelsCollapsed effect, (5) two props appended to <LeftOverlayPanel>: bufferSize={bufferSize} + onBufferSizeChange={setBufferSize}; three surgical edits in LeftOverlayPanel: (a) import BufferSizeControl from './BufferSizeControl' between framer-motion and ThreatMapCounters, (b) destructure props extended with bufferSize, onBufferSizeChange, (c) new <div className="flex-shrink-0"><BufferSizeControl value={bufferSize} onChange={onBufferSizeChange} /></div> prepended to panelContent above <ThreatMapCounters> per D-09/D-11 independent flex-shrink-0 block; total 2 files modified +19/-2 lines across commits c9a768a (page) + 0694231 (panel); end-to-end grep probe OK — MAPCFG-01..04 end-to-end wire verified (13 tokens across 3 files); Vite production build green in 26.76s; v6.1 hook-lock on useThreatMapBuffer.js + useThreatStream.js preserved byte-identical (git diff --stat empty); frontend/package*.json unchanged; legacy 100 literal grep returns zero matches in ThreatMapPage.jsx; 62-VALIDATION.md present; MAPCFG-01..04 all satisfied at code level; Phase 62 code-complete and awaits human manual QA walk per 62-VALIDATION.md.)
+Next action: `/gsd-discuss-phase 63` OR proceed to Phase 63 planning (Frontend Marker Clustering — install leaflet.markercluster@1.5.3 as the only new dep per v6.1 roadmap lock, conditional MarkerClusterGroup enable when bufferSize > 500, dark-theme iconCreateFunction matching design system, clean layer-swap on threshold crossing, chunkedLoading:true for initial paint at 1000+ markers — MAPCLU-01..05). Phase 61 + Phase 62 both await human manual QA walks per 61-VALIDATION.md + 62-VALIDATION.md (independent of Phase 63 blocking).
