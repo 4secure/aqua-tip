@@ -116,14 +116,36 @@ export default function ThreatMapPage() {
     const instances = markerInstancesRef.current;
     const nextIds = new Set(markers.map((m) => m.id));
 
+    // D-12 lazy-init: first reconciliation creates the initial container based on current bufferSize.
+    // Reading bufferSize from the effect's closure is safe — React guarantees state is initialised
+    // before effects run, so the value on first render reflects localStorage (MAPCFG-02 restore) (P-05).
+    if (markerGroupRef.current == null) {
+      const desired = bufferSize > CLUSTER_THRESHOLD ? 'cluster' : 'plain';
+      const newGroup = desired === 'cluster'
+        ? L.markerClusterGroup(CLUSTER_OPTIONS)
+        : L.layerGroup();
+      if (desired === 'cluster') {
+        newGroup.on('clusterclick', (e) => {
+          // D-23 / P-06 — guard against synthetic events with undefined originalEvent
+          if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
+        });
+      }
+      map.addLayer(newGroup);
+      markerGroupRef.current = newGroup;
+      activeLayerModeRef.current = desired;
+    }
+
     // 1. ADD + UPDATE: walk `markers`, creating new L.Markers and swapping icons on state change.
     for (const marker of markers) {
       if (marker.lat == null || marker.lng == null) continue;
       const existing = instances.get(marker.id);
       if (!existing) {
-        // New marker: create L.Marker and add to map.
+        // New marker: create L.Marker and add to the active container (markerGroupRef.current).
         const icon = buildIcon(marker);
-        const instance = L.marker([marker.lat, marker.lng], { icon, interactive: false }).addTo(map);
+        // D-11 — write to markerGroupRef.current (the active container) instead of map directly.
+        // The lazy-init above guarantees markerGroupRef.current is non-null by this point.
+        const instance = L.marker([marker.lat, marker.lng], { icon, interactive: false });
+        markerGroupRef.current.addLayer(instance);
         // Tag the instance with its current visual state so we can detect changes cheaply
         // on subsequent reconciliations without a full props comparison.
         instance._bufferState = marker.state;
@@ -140,13 +162,72 @@ export default function ThreatMapPage() {
     // 2. REMOVE: any id in the registry but not in nextIds — evicted past 600ms, remove layer.
     for (const [id, instance] of instances) {
       if (!nextIds.has(id)) {
-        map.removeLayer(instance);
+        // D-11 — remove from the active container, not from map directly.
+        markerGroupRef.current.removeLayer(instance);
         instances.delete(id);
       }
     }
   }, [markers]);
 
-  // Unmount cleanup (D-11 step 4): remove every Leaflet layer on page unmount.
+  // D-10 layer-swap: on bufferSize threshold crossing, swap the active marker container
+  // between L.layerGroup (plain) and L.markerClusterGroup (cluster) using the 8-step
+  // re-init sequence. PITFALL-06 mitigation: old container is removed before new is added;
+  // marker instances are re-parented, never recreated (preserves _bufferState + icon + latLng).
+  // D-25 no-reconnect: this effect touches only Leaflet refs — no state change, no SSE awareness.
+  useEffect(() => {
+    const map = leafletMapRef.current;
+    if (!map) return;
+
+    const desired = bufferSize > CLUSTER_THRESHOLD ? 'cluster' : 'plain';
+    // Bounce-guard: equal modes (e.g., 1000 ↔ 2000 both cluster) → no-op.
+    if (desired === activeLayerModeRef.current) return;
+
+    const oldGroup = markerGroupRef.current;
+    const instances = markerInstancesRef.current;
+
+    // Step 1: Detach listeners on old cluster group (plain layerGroup has no cluster events).
+    if (oldGroup && activeLayerModeRef.current === 'cluster' && oldGroup.off) {
+      oldGroup.off('clusterclick');
+    }
+
+    // Step 2: Remove every tracked instance from the old container.
+    //         Does NOT recreate marker DOM — L.Marker detaches from parent and keeps icon/latLng.
+    if (oldGroup) {
+      for (const instance of instances.values()) {
+        oldGroup.removeLayer(instance);
+      }
+      // Step 3: Remove old group from map.
+      map.removeLayer(oldGroup);
+    }
+
+    // Step 4: Create new container.
+    const newGroup = desired === 'cluster'
+      ? L.markerClusterGroup(CLUSTER_OPTIONS)
+      : L.layerGroup();
+
+    // Step 5: Attach cluster-click handler if cluster mode (D-23 / P-06 guard).
+    if (desired === 'cluster') {
+      newGroup.on('clusterclick', (e) => {
+        if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
+      });
+    }
+
+    // Step 6: Add new group to map.
+    map.addLayer(newGroup);
+
+    // Step 7: Re-add every tracked instance to new container.
+    //         D-26 marker-count conservation: every instance in the Map is attached to
+    //         exactly one container after this loop; none orphaned, none double-attached.
+    for (const instance of instances.values()) {
+      newGroup.addLayer(instance);
+    }
+
+    // Step 8: Swap refs.
+    markerGroupRef.current = newGroup;
+    activeLayerModeRef.current = desired;
+  }, [bufferSize]);
+
+  // Unmount cleanup (D-11 step 4 + D-13): remove every Leaflet layer on page unmount.
   // The hook clears its timers; this effect clears the Leaflet DOM it created.
   useEffect(() => {
     return () => {
@@ -158,6 +239,14 @@ export default function ThreatMapPage() {
         }
       }
       instances.clear();
+      // D-13 — tear down the marker group container AFTER per-instance removal.
+      // Try/catch per Phase 61 precedent: SPA route change may have disposed the map
+      // first via useLeaflet cleanup.
+      if (map && markerGroupRef.current) {
+        try { map.removeLayer(markerGroupRef.current); } catch { /* map disposed */ }
+      }
+      markerGroupRef.current = null;
+      activeLayerModeRef.current = null;
     };
   }, []);
 
