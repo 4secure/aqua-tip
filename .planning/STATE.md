@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: Phase 62 COMPLETE (code-complete; awaits human manual QA walk per 62-VALIDATION.md). Plan 02 wired BufferSizeControl into ThreatMapPage + LeftOverlayPanel via 5 surgical edits: import BUFFER_SIZE_STORAGE_KEY + readBufferSize, useState(readBufferSize) lazy init, useThreatMapBuffer(events, 100) → (events, bufferSize) call-site swap, useEffect([bufferSize]) persistence mirror of panelsCollapsed, bufferSize+onBufferSizeChange prop-drill through LeftOverlayPanel, <BufferSizeControl> rendered in new flex-shrink-0 wrapper above <ThreatMapCounters>. 2 files modified +19/-2 lines across commits c9a768a (page) + 0694231 (panel); Vite build clean in 26.76s; v6.1 hook-lock preserved byte-identical (git diff --stat on both hook files empty); zero dep drift; MAPCFG-01..04 all delivered architecturally + user-visibly; grep for legacy literal useThreatMapBuffer(events, 100) returns zero matches.
-last_updated: "2026-04-21T10:48:03Z"
-last_activity: 2026-04-21 -- Phase 62 Plan 02 complete (BufferSizeControl wired end-to-end into ThreatMapPage.jsx + LeftOverlayPanel.jsx; MAPCFG-01..04 satisfied at code level; Vite build clean in 26.76s; hook-lock byte-identical; zero dep drift; Phase 62 code-complete and ready for manual QA walk per 62-VALIDATION.md)
+stopped_at: "Completed 62-02-PLAN.md (ThreatMapPage.jsx + LeftOverlayPanel.jsx wired — five surgical edits in ThreatMapPage: (1) import { BUFFER_SIZE_STORAGE_KEY, readBufferSize } from '../components/threat-map/BufferSizeControl', (2) const [bufferSize, setBufferSize] = useState(readBufferSize) lazy-init immediately after useThreatStream destructure, (3) useThreatMapBuffer(events, 100) → useThreatMapBuffer(events, bufferSize) one-token call-site swap per D-22, (4) new sibling useEffect(() => { try { localStorage.setItem(BUFFER_SIZE_STORAGE_KEY, String(bufferSize)); } catch {} }, [bufferSize]) persistence effect immediately below the panelsCollapsed effect, (5) two props appended to <LeftOverlayPanel>: bufferSize={bufferSize} + onBufferSizeChange={setBufferSize}; three surgical edits in LeftOverlayPanel: (a) import BufferSizeControl from './BufferSizeControl' between framer-motion and ThreatMapCounters, (b) destructure props extended with bufferSize, onBufferSizeChange, (c) new <div className="flex-shrink-0"><BufferSizeControl value={bufferSize} onChange={onBufferSizeChange} /></div> prepended to panelContent above <ThreatMapCounters> per D-09/D-11 independent flex-shrink-0 block; total 2 files modified +19/-2 lines across commits c9a768a (page) + 0694231 (panel); end-to-end grep probe OK — MAPCFG-01..04 end-to-end wire verified (13 tokens across 3 files); Vite production build green in 26.76s; v6.1 hook-lock on useThreatMapBuffer.js + useThreatStream.js preserved byte-identical (git diff --stat empty); frontend/package*.json unchanged; legacy 100 literal grep returns zero matches in ThreatMapPage.jsx; 62-VALIDATION.md present; MAPCFG-01..04 all satisfied at code level; Phase 62 code-complete and awaits human manual QA walk per 62-VALIDATION.md.)"
+last_updated: "2026-04-22T11:34:41.329Z"
+last_activity: 2026-04-22 -- Phase 63 planning complete
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 11
+  total_plans: 14
   completed_plans: 11
-  percent: 100
+  percent: 79
 ---
 
 # Project State
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 Phase: 62 — Frontend Buffer-Size Dropdown — CODE-COMPLETE (2/2 plans shipped; awaits human manual QA walk per 62-VALIDATION.md)
 Plan: 02 complete (BufferSizeControl wired end-to-end — useState(readBufferSize) lazy init + useEffect([bufferSize]) persistence + call-site swap + prop-drill through LeftOverlayPanel + <BufferSizeControl> rendered above <ThreatMapCounters>)
-Status: Ready to spawn Phase 63 (Frontend Marker Clustering — install leaflet.markercluster@1.5.3, conditional MarkerClusterGroup when bufferSize > 500, dark-theme iconCreateFunction, clean layer-swap on threshold crossing — MAPCLU-01..05). Phase 61 + Phase 62 both await human manual QA walks per 61-VALIDATION.md + 62-VALIDATION.md.
-Last activity: 2026-04-21 -- Phase 62 Plan 02 complete (ThreatMapPage.jsx + LeftOverlayPanel.jsx wired; 2 files modified +19/-2 lines across commits c9a768a + 0694231; Vite build clean in 26.76s; v6.1 hook-lock byte-identical; zero dep drift; MAPCFG-01..04 all satisfied at code level)
+Status: Ready to execute
+Last activity: 2026-04-22 -- Phase 63 planning complete
 
 Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
 
