@@ -255,3 +255,25 @@
   border: 2px solid rgba(255, 59, 92, 0.4);
   animation: threatPulse 2s ease-in-out infinite;
 }
+
+/* Map cluster icon (Phase 63 — MAPCLU-01/02/05) */
+/* Static glassmorphism bubble rendered by buildClusterIcon() in ThreatMapPage.jsx */
+.map-cluster-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 17, 23, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(30, 32, 48, 0.8);
+  border-radius: 50%;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #E8EAED;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  /* NO transitions, NO animations — static visual. */
+}
