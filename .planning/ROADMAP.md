@@ -90,7 +90,10 @@
   3. Changing the dropdown from 1000 back to 100 removes the cluster layer and reverts to individual markers — no marker is rendered twice, no blank map
   4. Loading 1000+ markers does not freeze the browser tab — chunked loading distributes computation across frames (UI remains responsive during initial paint)
   5. Cluster bubbles appear below the glassmorphism overlay panels in z-index (panels always readable, never obscured by cluster count labels)
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 63-01-PLAN.md — Wave 1: Install leaflet.markercluster@1.5.3 + append .map-cluster-icon CSS to components.css (D-01/D-02/D-15/D-27 scaffold)
+- [ ] 63-02-PLAN.md — Wave 2: Wire cluster layer-swap into ThreatMapPage.jsx (imports + buildClusterIcon + CLUSTER_THRESHOLD/CLUSTER_OPTIONS + markerGroupRef/activeLayerModeRef + reconciliation modification + new [bufferSize] swap effect + unmount extension — MAPCLU-01..05 code-complete)
+- [ ] 63-03-PLAN.md — Wave 3: Manual QA walk SC1..SC5 in 63-VALIDATION.md (10 machine-verifiable gates + human-verify checkpoint — MAPCLU-01..05 satisfied)
 **UI hint**: yes
 
 ### Phase 64: Frontend Victimology Tab
@@ -140,7 +143,7 @@
 | 60. Backend Campaigns Service & Endpoint | 2/4 | In progress | - |
 | 61. Frontend Threat Map Buffer Refactor | 3/3 | Code-complete (manual QA pending) | 2026-04-20 |
 | 62. Frontend Buffer-Size Dropdown | 0/2 | Not started | - |
-| 63. Frontend Marker Clustering | 0/? | Not started | - |
+| 63. Frontend Marker Clustering | 0/3 | Not started | - |
 | 64. Frontend Victimology Tab | 0/? | Not started | - |
 | 65. Frontend Campaigns Toggle | 0/? | Not started | - |
 | 66. Integration Validation & Polish | 0/? | Not started | - |
