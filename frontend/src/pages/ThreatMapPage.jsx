@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import L from 'leaflet';
+import 'leaflet.markercluster';                              // D-03 side-effect — attaches L.markerClusterGroup
+import 'leaflet.markercluster/dist/MarkerCluster.css';       // D-02 + D-16 Option A — MarkerCluster.css ONLY (never Default.css)
 import { useLeaflet } from '../hooks/useLeaflet';
 import { useThreatStream } from '../hooks/useThreatStream';
 import { useThreatMapBuffer } from '../hooks/useThreatMapBuffer';
@@ -26,6 +28,21 @@ function buildIcon(marker) {
   });
 }
 
+/**
+ * buildClusterIcon — compose the dark-theme cluster bubble icon for leaflet.markercluster.
+ * Returns an L.DivIcon rendering the child count inside a .map-cluster-icon glassmorphism bubble.
+ * className: '' is load-bearing — suppresses Leaflet's default .leaflet-marker-icon positioning
+ * so our custom .map-cluster-icon CSS owns the visual layout (mirrors Phase 61 buildIcon pattern).
+ */
+function buildClusterIcon(cluster) {
+  const count = cluster.getChildCount();
+  return L.divIcon({
+    className: '',
+    html: `<div class="map-cluster-icon">${count}</div>`,
+    iconSize: [32, 32],
+  });
+}
+
 function addHighlightPulse(map, lat, lng) {
   if (!map || lat == null || lng == null) return;
   const size = 20;
@@ -41,6 +58,17 @@ function addHighlightPulse(map, lat, lng) {
 }
 
 const STORAGE_KEY = 'aqua-tip:panels-collapsed';
+const CLUSTER_THRESHOLD = 500; // D-05 / D-06 — STRICT > 500; buffer === 500 is plain mode
+const CLUSTER_OPTIONS = {
+  iconCreateFunction: buildClusterIcon, // D-14 — dark-theme custom bubble (MAPCLU-02)
+  showCoverageOnHover: false,           // D-19 — no polygon overlay
+  chunkedLoading: true,                 // D-20 — MAPCLU-04 responsiveness at 1000+ markers
+  chunkProgress: null,                  // D-20 — silence default console logger
+  zoomToBoundsOnClick: true,            // D-21 — MAPCLU-02 (library default, explicit)
+  spiderfyOnMaxZoom: true,              // default — explicit for clarity
+  zIndexOffset: -100,                   // D-22 — MAPCLU-05 (below z-1000 overlay panels)
+  animate: true,                        // default — smooth spiderfy animation
+};
 
 export default function ThreatMapPage() {
   const { events, counters, countryCounts, typeCounts, connected } = useThreatStream();
@@ -65,6 +93,8 @@ export default function ThreatMapPage() {
 
   const leafletMapRef = useRef(null);
   const markerInstancesRef = useRef(new Map()); // Map<id, L.Marker>
+  const markerGroupRef = useRef(null);          // D-08 — single container: L.layerGroup OR L.markerClusterGroup, never both
+  const activeLayerModeRef = useRef(null);      // D-09 — 'plain' | 'cluster' | null (null = not yet initialised)
 
   const handleMapReady = useCallback((map) => {
     leafletMapRef.current = map;
