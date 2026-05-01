@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: "Completed 62-02-PLAN.md (ThreatMapPage.jsx + LeftOverlayPanel.jsx wired — five surgical edits in ThreatMapPage: (1) import { BUFFER_SIZE_STORAGE_KEY, readBufferSize } from '../components/threat-map/BufferSizeControl', (2) const [bufferSize, setBufferSize] = useState(readBufferSize) lazy-init immediately after useThreatStream destructure, (3) useThreatMapBuffer(events, 100) → useThreatMapBuffer(events, bufferSize) one-token call-site swap per D-22, (4) new sibling useEffect(() => { try { localStorage.setItem(BUFFER_SIZE_STORAGE_KEY, String(bufferSize)); } catch {} }, [bufferSize]) persistence effect immediately below the panelsCollapsed effect, (5) two props appended to <LeftOverlayPanel>: bufferSize={bufferSize} + onBufferSizeChange={setBufferSize}; three surgical edits in LeftOverlayPanel: (a) import BufferSizeControl from './BufferSizeControl' between framer-motion and ThreatMapCounters, (b) destructure props extended with bufferSize, onBufferSizeChange, (c) new <div className="flex-shrink-0"><BufferSizeControl value={bufferSize} onChange={onBufferSizeChange} /></div> prepended to panelContent above <ThreatMapCounters> per D-09/D-11 independent flex-shrink-0 block; total 2 files modified +19/-2 lines across commits c9a768a (page) + 0694231 (panel); end-to-end grep probe OK — MAPCFG-01..04 end-to-end wire verified (13 tokens across 3 files); Vite production build green in 26.76s; v6.1 hook-lock on useThreatMapBuffer.js + useThreatStream.js preserved byte-identical (git diff --stat empty); frontend/package*.json unchanged; legacy 100 literal grep returns zero matches in ThreatMapPage.jsx; 62-VALIDATION.md present; MAPCFG-01..04 all satisfied at code level; Phase 62 code-complete and awaits human manual QA walk per 62-VALIDATION.md.)"
-last_updated: "2026-04-22T11:34:41.329Z"
-last_activity: 2026-04-22 -- Phase 63 planning complete
+stopped_at: "Phase 63 verified (manual QA passed against live deploy 2026-05-01) + post-phase cluster enhancement shipped (commit 4caa82c): cluster bubbles size-by-count (4 stepped buckets — xs 24px / sm 32px / md 44px / lg 56px) + color-by-dominant-category (severity tiebreak red>amber>violet>cyan) with no count badge; rgba palette mirrors .map-buffer-marker--{color} for cross-element visual parity; L.Marker tagged with _color at construction. Also shipped: gating UX redirect (FeatureGatedRoute → /threat-search, Sidebar hides gated nav items), Dockerfile VITE_API_URL ARG declaration, .gitignore hygiene. Railway frontend deploy green. Next: /gsd-discuss-phase 64 (Frontend Victimology Tab)."
+last_updated: "2026-05-01T00:00:00.000Z"
+last_activity: 2026-05-01 -- Phase 63 verified + cluster size/color enhancement live; ready for Phase 64
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 14
-  completed_plans: 11
-  percent: 79
+  completed_plans: 14
+  percent: 88
 ---
 
 # Project State
@@ -21,19 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59/60/61 shipped code-complete (Phase 61 pending human manual QA walk in 61-VALIDATION.md); next wave Phase 62 (BufferSizeControl dropdown — MAPCFG-01..04)
+**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59–63 shipped + verified live; Phase 63 cluster visual enhanced post-ship (size-by-count + color-by-dominant-category, no count badge). Next: Phase 64 (Frontend Victimology Tab — VICTM-01..08).
 
 ## Current Position
 
-Phase: 62 — Frontend Buffer-Size Dropdown — CODE-COMPLETE (2/2 plans shipped; awaits human manual QA walk per 62-VALIDATION.md)
-Plan: 02 complete (BufferSizeControl wired end-to-end — useState(readBufferSize) lazy init + useEffect([bufferSize]) persistence + call-site swap + prop-drill through LeftOverlayPanel + <BufferSizeControl> rendered above <ThreatMapCounters>)
-Status: Ready to execute
-Last activity: 2026-04-22 -- Phase 63 planning complete
+Phase: 63 — Frontend Marker Clustering — VERIFIED (manual QA passed against live deploy 2026-05-01)
+Post-ship enhancement: cluster size-by-count (4 stepped buckets) + color-by-dominant-category (severity tiebreak), no count badge — commit 4caa82c
+Adjacent ships: gating UX redirect (f397c03), Dockerfile VITE_API_URL ARG (b53a99f), .gitignore hygiene (88ec80d), cache-bust (2ddc53f)
+Status: Ready for Phase 64 — /gsd-discuss-phase 64
+Last activity: 2026-05-01 -- Phase 63 verified + cluster size/color enhancement live; Railway frontend deploy green
 
-Last shipped: v6.0 Feature Gating & UX Polish (2026-04-17)
+Last shipped: v6.1 Phase 63 Frontend Marker Clustering (2026-05-01)
 
 ```
-Progress: [██████████████████████████████] 11/11 plans (100%) — Phase 62 code-complete; Phase 61 + Phase 62 await manual QA walks; Phase 63 (MAPCLU) next
+Progress: [████████████████████████████░░] 5/8 phases (63%) — Phases 59–63 verified; Phases 64–66 remaining (Victimology, Campaigns toggle, Integration & Polish)
 ```
 
 ## Performance Metrics
@@ -136,7 +137,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last activity: 2026-04-21
-Last session: 2026-04-21T10:48:03Z
-Stopped at: Completed 62-02-PLAN.md (ThreatMapPage.jsx + LeftOverlayPanel.jsx wired — five surgical edits in ThreatMapPage: (1) import { BUFFER_SIZE_STORAGE_KEY, readBufferSize } from '../components/threat-map/BufferSizeControl', (2) const [bufferSize, setBufferSize] = useState(readBufferSize) lazy-init immediately after useThreatStream destructure, (3) useThreatMapBuffer(events, 100) → useThreatMapBuffer(events, bufferSize) one-token call-site swap per D-22, (4) new sibling useEffect(() => { try { localStorage.setItem(BUFFER_SIZE_STORAGE_KEY, String(bufferSize)); } catch {} }, [bufferSize]) persistence effect immediately below the panelsCollapsed effect, (5) two props appended to <LeftOverlayPanel>: bufferSize={bufferSize} + onBufferSizeChange={setBufferSize}; three surgical edits in LeftOverlayPanel: (a) import BufferSizeControl from './BufferSizeControl' between framer-motion and ThreatMapCounters, (b) destructure props extended with bufferSize, onBufferSizeChange, (c) new <div className="flex-shrink-0"><BufferSizeControl value={bufferSize} onChange={onBufferSizeChange} /></div> prepended to panelContent above <ThreatMapCounters> per D-09/D-11 independent flex-shrink-0 block; total 2 files modified +19/-2 lines across commits c9a768a (page) + 0694231 (panel); end-to-end grep probe OK — MAPCFG-01..04 end-to-end wire verified (13 tokens across 3 files); Vite production build green in 26.76s; v6.1 hook-lock on useThreatMapBuffer.js + useThreatStream.js preserved byte-identical (git diff --stat empty); frontend/package*.json unchanged; legacy 100 literal grep returns zero matches in ThreatMapPage.jsx; 62-VALIDATION.md present; MAPCFG-01..04 all satisfied at code level; Phase 62 code-complete and awaits human manual QA walk per 62-VALIDATION.md.)
-Next action: `/gsd-discuss-phase 63` OR proceed to Phase 63 planning (Frontend Marker Clustering — install leaflet.markercluster@1.5.3 as the only new dep per v6.1 roadmap lock, conditional MarkerClusterGroup enable when bufferSize > 500, dark-theme iconCreateFunction matching design system, clean layer-swap on threshold crossing, chunkedLoading:true for initial paint at 1000+ markers — MAPCLU-01..05). Phase 61 + Phase 62 both await human manual QA walks per 61-VALIDATION.md + 62-VALIDATION.md (independent of Phase 63 blocking).
+Last activity: 2026-05-01
+Last session: 2026-05-01T00:00:00Z
+Stopped at: Phase 63 verified live (manual QA passed on https://tip.aquasecure.ai/threat-map). Post-ship cluster enhancement deployed: stepped size buckets (xs/sm/md/lg by child count) + dominant-category color (severity tiebreak), no count badge — commit 4caa82c. Adjacent ships in same session: gating UX redirect to /threat-search + hide gated nav items (f397c03), Dockerfile VITE_API_URL ARG declaration to fix prod bundle (b53a99f), .gitignore additions for tmp_*.sql + stray root package-lock.json (88ec80d), Railway BuildKit cache-bust (2ddc53f). Railway Root Directory misconfiguration on frontend service was discovered and fixed (set back to repo root).
+Next action: `/gsd-discuss-phase 64` (Frontend Victimology Tab — VICTM-01..08; depends on Phase 59 victimology data already in enrichment response). Phase 65 (Campaigns Toggle) and Phase 66 (Integration Validation & Polish) follow.

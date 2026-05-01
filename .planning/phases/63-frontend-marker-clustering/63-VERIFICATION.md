@@ -1,10 +1,11 @@
 ---
 phase: 63
 slug: frontend-marker-clustering
-status: human_needed
-verified: 2026-04-22
+status: verified
+verified: 2026-05-01
 code_complete: true
-manual_qa_pending: true
+manual_qa_pending: false
+manual_qa_signed_off: 2026-05-01
 requirements:
   - MAPCLU-01
   - MAPCLU-02
@@ -19,11 +20,21 @@ commits:
   - 6385cfd
   - b7eb446
   - 0f3a769
+  - 4caa82c   # post-phase enhancement: size-by-count + color-by-dominant-category, no count badge
 ---
 
 # Phase 63 — Frontend Marker Clustering — Verification
 
-**Status:** `human_needed` — all machine-verifiable gates pass; browser-based manual QA (SC1..SC5 in `63-VALIDATION.md`) awaits human sign-off, consistent with Phase 61 + Phase 62 precedent.
+**Status:** `verified` (2026-05-01) — all machine-verifiable gates pass and human manual QA passed against the live deploy at https://tip.aquasecure.ai/threat-map. Original SC2..SC5 confirmed; SC1 was superseded by post-phase enhancement (commit `4caa82c`) that replaced the count-badge contract with size-by-count + color-by-dominant-category — verified via NEW-A and NEW-B probes.
+
+## Post-Phase Enhancement (commit `4caa82c`, 2026-05-01)
+
+User-requested visual change after Phase 63 shipped:
+- **No count text** in cluster bubbles (replaced badge contract from MAPCLU-02)
+- **Stepped size buckets:** 2–10 → 24px (`--xs`), 11–50 → 32px (`--sm`), 51–200 → 44px (`--md`), 201+ → 56px (`--lg`)
+- **Dominant-category color:** tally child `_color`, pick most common (severity tiebreak red > amber > violet > cyan); rgba palette mirrors `.map-buffer-marker--{color}` for cross-element parity
+- L.Marker tagged with `_color` at construction (mirrors existing `_bufferState` instance-tagging pattern)
+- Treated as freeform quick enhancement (not Phase 63.1) per user direction; logged here for traceability
 
 ## Phase Goal (from ROADMAP.md)
 
