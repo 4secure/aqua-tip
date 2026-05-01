@@ -1,5 +1,6 @@
 FROM node:22-alpine AS build
 WORKDIR /app
+# cache-bust 2026-05-01 — Railway BuildKit cache poisoned, force layer recompute
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 COPY frontend/ .
