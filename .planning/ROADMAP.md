@@ -105,7 +105,10 @@
   2. Clicking the Victimology tab on an actor with known targets renders four sections: Targeted Countries (with flag icons), Targeted Regions, Targeted Sectors, and Targeted Organizations — at least one section is non-empty for any major actor (e.g., APT28)
   3. A target type with zero results (e.g., no Regions data) renders an empty-state message like "No regions data available" — no JS error, no blank section, no layout breakage
   4. Switching between Overview and Victimology tabs multiple times does not trigger additional network requests — enrichment is fetched once on modal open and cached in component state
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 64-01-PLAN.md — Tab swap + scaffold (TABS array swap, Lucide imports, delete Campaigns block, Victimology scaffold with skeleton + 2x2 grid placeholder) [VICTM-01, VICTM-02]
+- [ ] 64-02-PLAN.md — Section rendering (countryCodeToFlag helper + 4 section renderers: Countries/Regions/Sectors/Organizations with chips, flags, per-section empty states) [VICTM-03..06, VICTM-08; VICTM-07 spirit]
+- [ ] 64-03-PLAN.md — Verification + 64-VALIDATION.md scaffold (zero-diff grep audit + manual QA checklist for SC1..SC4) [audits all VICTM-01..08]
 **UI hint**: yes
 
 ### Phase 65: Frontend Campaigns Toggle
