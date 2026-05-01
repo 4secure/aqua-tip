@@ -552,7 +552,7 @@ function ThreatActorModal({ actor, onClose }) {
     { key: 'relationships', label: 'Relationships', icon: GitBranch },
     { key: 'ttps', label: 'TTPs', icon: Swords },
     { key: 'tools', label: 'Tools', icon: Bug },
-    { key: 'campaigns', label: 'Campaigns', icon: Flag },
+    { key: 'victimology', label: 'Victimology', icon: Target },
   ];
 
   return (
