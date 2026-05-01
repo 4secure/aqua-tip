@@ -121,7 +121,10 @@
   3. Refreshing the page at `/threat-actors?view=campaigns` restores the Campaigns view — the URL param drives the active view on mount
   4. Clicking a Campaign card opens a detail modal with full campaign metadata (name, description, dates, objective, attribution)
   5. Switching from a filtered Actors view back to Campaigns resets search and pagination — no stale Intrusion Set cursor is sent to the Campaigns API
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 65-01-PLAN.md — Wave 1: New files (api/threat-campaigns.js + components/threat-actors/CampaignCard.jsx + components/threat-actors/CampaignDetailModal.jsx) [CAMP-02 scaffold, CAMP-05, CAMP-06]
+- [ ] 65-02-PLAN.md — Wave 2: ThreatActorsPage.jsx wiring (view state + pill toggle + view-aware loadData/silentRefresh + view-aware grid + Campaign modal portal) [CAMP-01, CAMP-02, CAMP-03, CAMP-04]
+- [ ] 65-03-PLAN.md — Wave 3: Phase 65 audit + REQUIREMENTS.md prose patch (D-20) + 65-VALIDATION.md scaffold [closes CAMP-01..06 at code level]
 **UI hint**: yes
 
 ### Phase 66: Integration Validation & Polish
@@ -148,7 +151,7 @@
 | 62. Frontend Buffer-Size Dropdown | 0/2 | Not started | - |
 | 63. Frontend Marker Clustering | 0/3 | Not started | - |
 | 64. Frontend Victimology Tab | 0/? | Not started | - |
-| 65. Frontend Campaigns Toggle | 0/? | Not started | - |
+| 65. Frontend Campaigns Toggle | 0/3 | Planned | - |
 | 66. Integration Validation & Polish | 0/? | Not started | - |
 
 ---
