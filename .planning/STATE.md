@@ -5,7 +5,7 @@ milestone_name: milestone
 status: executing
 stopped_at: "Phase 64 (Frontend Victimology Tab) CODE-COMPLETE — 3 plans / 7 tasks shipped, 14/14 machine gates PASS, 8/8 VICTM requirements satisfied at code level. Awaits human SC1..SC4 manual QA walk per 64-VALIDATION.md (Phase 61/62/63 ship pattern). Key implementation: Campaigns tab replaced with Victimology tab in TABS array; countryCodeToFlag module-scope helper renders ISO-2 emoji flags with null-fallback; 2x2 grid renders 4 sections (Countries/Regions/Sectors/Organizations) as compact chips wrapping in flex containers; per-section empty states (VICTM-08); single eager fetch preserved (D-01 supersedes VICTM-07 lazy-fetch literal — spirit honored via {activeTab === 'victimology'} guard). Documented deviation: Map → MapIcon alias to avoid shadowing global Map constructor at line 381. All edits in single file (frontend/src/pages/ThreatActorsPage.jsx); zero CSS changes; zero new deps. Vite build green. Next: human manual QA, then /gsd-discuss-phase 65 (Frontend Campaigns Toggle — depends on Phase 60 Campaigns backend, already shipped)."
 last_updated: "2026-05-01T12:00:00.000Z"
-last_activity: 2026-05-01 -- Phase 64 code-complete; awaits manual QA walk
+last_activity: 2026-05-01 -- Phase 65 PLANNED (3 plans / 3 waves) — ready to execute
 progress:
   total_phases: 8
   completed_phases: 6
@@ -25,12 +25,13 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 64 — Frontend Victimology Tab — CODE-COMPLETE (awaits manual QA per 64-VALIDATION.md)
-Plans: 64-01 (TABS swap + scaffold), 64-02 (4 section renderers + countryCodeToFlag helper), 64-03 (14-gate audit + VALIDATION.md scaffold)
-Implementation: Campaigns tab → Victimology tab; emoji flags via ISO-2 regional indicators (zero deps); 2x2 grid; compact chips; per-section empty states; single eager fetch preserved (VICTM-07 spirit-honored via activeTab guard)
-Documented deviation: Map → MapIcon alias (avoids shadowing global Map constructor in D3 graph at line 381)
-Status: Awaits human manual QA walk (SC1..SC4 in 64-VALIDATION.md), then ready for Phase 65
-Last activity: 2026-05-01 -- Phase 64 code-complete; build green; commits 19eb05c..90f7701
+Phase: 65 — Frontend Campaigns Toggle — PLANNED (ready to execute)
+Plans: 65-01 (Wave 1 — API client + CampaignCard + CampaignDetailModal, 3 new files), 65-02 (Wave 2 — ThreatActorsPage.jsx wiring: view state + pill toggle + view-aware fetch + grid + modal portal), 65-03 (Wave 3 — audit + REQUIREMENTS.md D-20 prose patch + 65-VALIDATION.md scaffold)
+Scope: Add `?view=campaigns` URL toggle to /threat-actors page. New files in frontend/src/api/ + frontend/src/components/threat-actors/ (directory created). Single page edit grows ThreatActorsPage.jsx from 986 → ~1075 lines (well under 1500 hard cap). Zero CSS edits (D-28); zero new deps (D-29).
+Decisions locked: 29 D-XX decisions in 65-CONTEXT.md cover all UI/file/API specifics. Pagination shape verified against Phase 60 backend (`{has_next, has_previous, end_cursor, page_size}`); D-13 prose drift documented in plan comments. D-20 (no `description` render in modal) enforced via grep gate in audit task.
+Status: Ready for execution — `/gsd-execute-phase 65`
+Phase 64 status: CODE-COMPLETE (awaits manual QA per 64-VALIDATION.md — independent of Phase 65 progression)
+Last activity: 2026-05-01 -- Phase 65 planned; commit 660233b
 
 Last shipped: v6.1 Phase 64 Frontend Victimology Tab — code-complete 2026-05-01 (Phase 63 verified live 2026-05-01)
 
