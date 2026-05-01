@@ -826,36 +826,23 @@ function ThreatActorModal({ actor, onClose }) {
           </div>
         )}
 
-        {/* Campaigns Tab */}
-        {activeTab === 'campaigns' && !enrichError && (
+        {/* Victimology Tab — Phase 64 (D-04, D-12, D-13). */}
+        {/* VICTM-07 spirit: render is gated by activeTab === 'victimology' so no DOM/work */}
+        {/* happens until the user clicks the tab, even though the fetch is eager per D-01. */}
+        {/* Plan 02 (wave 2) fills the 2x2 grid with Countries / Regions / Sectors / Organizations sections. */}
+        {activeTab === 'victimology' && !enrichError && (
           <div>
             {enrichLoading && (
-              <div className="animate-pulse space-y-3">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-5 bg-surface-2 rounded w-2/3" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="bg-surface-2 rounded-lg animate-pulse h-32" />
                 ))}
               </div>
             )}
-            {!enrichLoading && enrichment?.campaigns?.length > 0 && (
-              <div className="space-y-3">
-                {enrichment.campaigns.map(c => (
-                  <div key={c.id} className="bg-surface-2/50 border border-border rounded-lg px-4 py-3">
-                    <p className="font-sans text-sm font-medium text-text-primary">{c.name}</p>
-                    {(c.first_seen || c.last_seen) && (
-                      <p className="font-mono text-xs text-text-muted mt-1">
-                        {c.first_seen ? formatDate(c.first_seen) : '?'}
-                        {' \u2014 '}
-                        {c.last_seen ? formatDate(c.last_seen) : 'ongoing'}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            {!enrichLoading && (!enrichment?.campaigns || enrichment.campaigns.length === 0) && (
-              <div className="flex flex-col items-center justify-center py-8 text-text-muted">
-                <Flag size={32} className="mb-2 opacity-40" />
-                <p className="text-sm">No campaigns found for this actor</p>
+            {!enrichLoading && enrichment?.victimology && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Plan 64-02 inserts 4 section cards here:
+                    Countries (top-left), Regions (top-right), Sectors (bottom-left), Organizations (bottom-right) */}
               </div>
             )}
           </div>
