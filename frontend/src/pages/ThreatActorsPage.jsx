@@ -510,6 +510,19 @@ function RelationshipGraph({ relationships, actorName, actorId }) {
 
 /* ── Threat Actor Modal ── */
 
+/**
+ * countryCodeToFlag — convert ISO-2 country code to emoji flag string (D-06).
+ * Uses regional-indicator math: each letter maps to 0x1F1E6 + (charCode - 65).
+ * Returns '' when code is null, empty, or not a 2-letter alpha string (defensive).
+ * Zero deps per D-07 — uses only native String.fromCodePoint + Array spread.
+ */
+function countryCodeToFlag(code) {
+  if (typeof code !== 'string' || code.length !== 2) return '';
+  const upper = code.toUpperCase();
+  if (!/^[A-Z]{2}$/.test(upper)) return '';
+  return String.fromCodePoint(...[...upper].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+}
+
 function ThreatActorModal({ actor, onClose }) {
   const { formatDate } = useFormatDate();
   const [activeTab, setActiveTab] = useState('overview');
