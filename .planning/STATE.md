@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: "Phase 63 verified (manual QA passed against live deploy 2026-05-01) + post-phase cluster enhancement shipped (commit 4caa82c): cluster bubbles size-by-count (4 stepped buckets — xs 24px / sm 32px / md 44px / lg 56px) + color-by-dominant-category (severity tiebreak red>amber>violet>cyan) with no count badge; rgba palette mirrors .map-buffer-marker--{color} for cross-element visual parity; L.Marker tagged with _color at construction. Also shipped: gating UX redirect (FeatureGatedRoute → /threat-search, Sidebar hides gated nav items), Dockerfile VITE_API_URL ARG declaration, .gitignore hygiene. Railway frontend deploy green. Next: /gsd-discuss-phase 64 (Frontend Victimology Tab)."
-last_updated: "2026-05-01T00:00:00.000Z"
-last_activity: 2026-05-01 -- Phase 63 verified + cluster size/color enhancement live; ready for Phase 64
+stopped_at: "Phase 64 (Frontend Victimology Tab) CODE-COMPLETE — 3 plans / 7 tasks shipped, 14/14 machine gates PASS, 8/8 VICTM requirements satisfied at code level. Awaits human SC1..SC4 manual QA walk per 64-VALIDATION.md (Phase 61/62/63 ship pattern). Key implementation: Campaigns tab replaced with Victimology tab in TABS array; countryCodeToFlag module-scope helper renders ISO-2 emoji flags with null-fallback; 2x2 grid renders 4 sections (Countries/Regions/Sectors/Organizations) as compact chips wrapping in flex containers; per-section empty states (VICTM-08); single eager fetch preserved (D-01 supersedes VICTM-07 lazy-fetch literal — spirit honored via {activeTab === 'victimology'} guard). Documented deviation: Map → MapIcon alias to avoid shadowing global Map constructor at line 381. All edits in single file (frontend/src/pages/ThreatActorsPage.jsx); zero CSS changes; zero new deps. Vite build green. Next: human manual QA, then /gsd-discuss-phase 65 (Frontend Campaigns Toggle — depends on Phase 60 Campaigns backend, already shipped)."
+last_updated: "2026-05-01T12:00:00.000Z"
+last_activity: 2026-05-01 -- Phase 64 code-complete; awaits manual QA walk
 progress:
   total_phases: 8
-  completed_phases: 5
-  total_plans: 14
-  completed_plans: 14
+  completed_phases: 6
+  total_plans: 17
+  completed_plans: 17
   percent: 88
 ---
 
@@ -21,20 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59–63 shipped + verified live; Phase 63 cluster visual enhanced post-ship (size-by-count + color-by-dominant-category, no count badge). Next: Phase 64 (Frontend Victimology Tab — VICTM-01..08).
+**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59–63 shipped + verified live; Phase 64 code-complete pending manual QA. Next: Phase 65 (Frontend Campaigns Toggle — CAMP-01..06).
 
 ## Current Position
 
-Phase: 63 — Frontend Marker Clustering — VERIFIED (manual QA passed against live deploy 2026-05-01)
-Post-ship enhancement: cluster size-by-count (4 stepped buckets) + color-by-dominant-category (severity tiebreak), no count badge — commit 4caa82c
-Adjacent ships: gating UX redirect (f397c03), Dockerfile VITE_API_URL ARG (b53a99f), .gitignore hygiene (88ec80d), cache-bust (2ddc53f)
-Status: Ready for Phase 64 — /gsd-discuss-phase 64
-Last activity: 2026-05-01 -- Phase 63 verified + cluster size/color enhancement live; Railway frontend deploy green
+Phase: 64 — Frontend Victimology Tab — CODE-COMPLETE (awaits manual QA per 64-VALIDATION.md)
+Plans: 64-01 (TABS swap + scaffold), 64-02 (4 section renderers + countryCodeToFlag helper), 64-03 (14-gate audit + VALIDATION.md scaffold)
+Implementation: Campaigns tab → Victimology tab; emoji flags via ISO-2 regional indicators (zero deps); 2x2 grid; compact chips; per-section empty states; single eager fetch preserved (VICTM-07 spirit-honored via activeTab guard)
+Documented deviation: Map → MapIcon alias (avoids shadowing global Map constructor in D3 graph at line 381)
+Status: Awaits human manual QA walk (SC1..SC4 in 64-VALIDATION.md), then ready for Phase 65
+Last activity: 2026-05-01 -- Phase 64 code-complete; build green; commits 19eb05c..90f7701
 
-Last shipped: v6.1 Phase 63 Frontend Marker Clustering (2026-05-01)
+Last shipped: v6.1 Phase 64 Frontend Victimology Tab — code-complete 2026-05-01 (Phase 63 verified live 2026-05-01)
 
 ```
-Progress: [████████████████████████████░░] 5/8 phases (63%) — Phases 59–63 verified; Phases 64–66 remaining (Victimology, Campaigns toggle, Integration & Polish)
+Progress: [██████████████████████████████░░░░] 6/8 phases (75%) — Phases 59–63 verified; Phase 64 code-complete pending manual QA; Phases 65–66 remaining (Campaigns toggle, Integration & Polish)
 ```
 
 ## Performance Metrics
@@ -138,6 +139,6 @@ All decisions logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last activity: 2026-05-01
-Last session: 2026-05-01T00:00:00Z
-Stopped at: Phase 63 verified live (manual QA passed on https://tip.aquasecure.ai/threat-map). Post-ship cluster enhancement deployed: stepped size buckets (xs/sm/md/lg by child count) + dominant-category color (severity tiebreak), no count badge — commit 4caa82c. Adjacent ships in same session: gating UX redirect to /threat-search + hide gated nav items (f397c03), Dockerfile VITE_API_URL ARG declaration to fix prod bundle (b53a99f), .gitignore additions for tmp_*.sql + stray root package-lock.json (88ec80d), Railway BuildKit cache-bust (2ddc53f). Railway Root Directory misconfiguration on frontend service was discovered and fixed (set back to repo root).
-Next action: `/gsd-discuss-phase 64` (Frontend Victimology Tab — VICTM-01..08; depends on Phase 59 victimology data already in enrichment response). Phase 65 (Campaigns Toggle) and Phase 66 (Integration Validation & Polish) follow.
+Last session: 2026-05-01T12:00:00Z
+Stopped at: Phase 64 (Frontend Victimology Tab) code-complete via full discuss → plan → execute → verify pipeline in one session. 3 plans / 7 tasks shipped; 14/14 machine gates PASS; 8/8 VICTM requirements satisfied at code level. Commits: 19eb05c (TABS swap), 8d1afe0 (atomic Campaigns→Victimology Edit), 427c1ef (Lucide rebalance), 3a21273 (Plan 01 SUMMARY), ecf8765 (countryCodeToFlag helper), e0ece96 (4 section renderers), bfb7f69 (Plan 02 SUMMARY), f2d0f7c (64-VALIDATION.md), 2027642 (Plan 03 SUMMARY), 90f7701 (64-VERIFICATION.md). Documented deviation: Map → MapIcon alias to avoid shadowing global Map() at line 381 (D3 relationships graph). Build green. Earlier in session: Phase 63 verified live (manual QA passed on https://tip.aquasecure.ai/threat-map) + post-ship cluster enhancement (size-by-count + color-by-dominant-category, no count badge — commit 4caa82c). Adjacent ships: gating UX redirect (f397c03), Dockerfile VITE_API_URL ARG (b53a99f), .gitignore hygiene (88ec80d), Railway BuildKit cache-bust (2ddc53f). Railway frontend Root Directory misconfiguration discovered + fixed during session.
+Next action: Human manual QA walk per `64-VALIDATION.md` against live deploy, then `/gsd-discuss-phase 65` (Frontend Campaigns Toggle — CAMP-01..06; depends on Phase 60 backend, already shipped). Phase 66 (Integration Validation & Polish) is the final v6.1 phase.

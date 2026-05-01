@@ -34,14 +34,14 @@ Requirements for Threat Map Buffer & Threat Actor Depth milestone.
 
 ### Threat Actor Victimology Tab (VICTM)
 
-- [ ] **VICTM-01**: The "Campaigns" tab in the Threat Actor detail modal is removed
-- [ ] **VICTM-02**: A new "Victimology" tab is added to the Threat Actor detail modal in its place
-- [ ] **VICTM-03**: The Victimology tab displays targeted **countries** with flag icons and counts (sourced from OpenCTI `targets` relationships)
-- [ ] **VICTM-04**: The Victimology tab displays targeted **regions** (continents/geographic regions)
-- [ ] **VICTM-05**: The Victimology tab displays targeted **sectors** (industries)
-- [ ] **VICTM-06**: The Victimology tab displays targeted **organizations** (named victim entities)
-- [ ] **VICTM-07**: Victimology data is lazy-fetched only when the user opens the Victimology tab (not eagerly on modal open)
-- [ ] **VICTM-08**: When a target type returns no data (e.g., empty Region list), the section renders a friendly empty state — no crash, no broken UI
+- [x] **VICTM-01**: The "Campaigns" tab in the Threat Actor detail modal is removed (Phase 64-01, code-complete 2026-05-01)
+- [x] **VICTM-02**: A new "Victimology" tab is added to the Threat Actor detail modal in its place (Phase 64-01, code-complete 2026-05-01)
+- [x] **VICTM-03**: The Victimology tab displays targeted **countries** with flag icons and counts (sourced from OpenCTI `targets` relationships) (Phase 64-02, code-complete 2026-05-01)
+- [x] **VICTM-04**: The Victimology tab displays targeted **regions** (continents/geographic regions) (Phase 64-02, code-complete 2026-05-01)
+- [x] **VICTM-05**: The Victimology tab displays targeted **sectors** (industries) (Phase 64-02, code-complete 2026-05-01)
+- [x] **VICTM-06**: The Victimology tab displays targeted **organizations** (named victim entities) (Phase 64-02, code-complete 2026-05-01)
+- [~] **VICTM-07**: Victimology data is lazy-fetched only when the user opens the Victimology tab (not eagerly on modal open) — *spirit-honored via `{activeTab === 'victimology'}` render guard; literal lazy-fetch superseded by SC4 + CONTEXT.md D-01 since Phase 59 backend already returns victimology in the existing single enrichment payload*
+- [x] **VICTM-08**: When a target type returns no data (e.g., empty Region list), the section renders a friendly empty state — no crash, no broken UI (Phase 64-02, code-complete 2026-05-01)
 - [ ] **VICTM-09**: Backend extends the existing actor enrichment GraphQL query with 4 new `stixCoreRelationships` blocks (Country/Region/Sector/Identity-filtered-to-Organization), normalized into a `victimology` response key
 
 ### Threat Actors Page Campaigns Toggle (CAMP)
@@ -97,14 +97,14 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | MAPCLU-03 | Phase 63 | Pending |
 | MAPCLU-04 | Phase 63 | Pending |
 | MAPCLU-05 | Phase 63 | Pending |
-| VICTM-01 | Phase 64 | Pending |
-| VICTM-02 | Phase 64 | Pending |
-| VICTM-03 | Phase 64 | Pending |
-| VICTM-04 | Phase 64 | Pending |
-| VICTM-05 | Phase 64 | Pending |
-| VICTM-06 | Phase 64 | Pending |
-| VICTM-07 | Phase 64 | Pending |
-| VICTM-08 | Phase 64 | Pending |
+| VICTM-01 | Phase 64 | Code-complete (2026-05-01) — manual QA pending |
+| VICTM-02 | Phase 64 | Code-complete (2026-05-01) — manual QA pending |
+| VICTM-03 | Phase 64 | Code-complete (2026-05-01) — manual QA pending |
+| VICTM-04 | Phase 64 | Code-complete (2026-05-01) — manual QA pending |
+| VICTM-05 | Phase 64 | Code-complete (2026-05-01) — manual QA pending |
+| VICTM-06 | Phase 64 | Code-complete (2026-05-01) — manual QA pending |
+| VICTM-07 | Phase 64 | Spirit-satisfied via render guard (D-01 supersedes literal lazy-fetch) |
+| VICTM-08 | Phase 64 | Code-complete (2026-05-01) — manual QA pending |
 | VICTM-09 | Phase 59 | Pending |
 | CAMP-01 | Phase 65 | Pending |
 | CAMP-02 | Phase 65 | Pending |
