@@ -26,3 +26,9 @@ Thumbs.db
 # Local only
 .claude/
 CLAUDE.md
+
+# Stray root npm artifact (no package.json at root — frontend/ is the only npm workspace)
+/package-lock.json
+
+# Scratch SQL scripts (run manually against the prod DB; never commit — may contain PII)
+backend/tmp_*.sql
