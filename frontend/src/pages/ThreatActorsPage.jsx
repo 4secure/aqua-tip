@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Map, Building2, Users, Target, Crosshair, Clock, ChevronLeft, ChevronRight, Swords, Bug, GitBranch, Info, Loader } from 'lucide-react';
+import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Map as MapIcon, Building2, Users, Target, Crosshair, Clock, ChevronLeft, ChevronRight, Swords, Bug, GitBranch, Info, Loader } from 'lucide-react';
 import { fetchThreatActors, fetchThreatActorEnrichment } from '../api/threat-actors';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
@@ -854,8 +854,106 @@ function ThreatActorModal({ actor, onClose }) {
             )}
             {!enrichLoading && enrichment?.victimology && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Plan 64-02 inserts 4 section cards here:
-                    Countries (top-left), Regions (top-right), Sectors (bottom-left), Organizations (bottom-right) */}
+                {/* ── Section 1 / TL: Targeted Countries (D-04, D-05, D-08, D-09, D-11) ── */}
+                <div className="bg-surface-2/50 border border-border rounded-lg p-4">
+                  <h3 className="font-sans text-sm font-medium text-text-primary mb-3 flex items-center gap-2">
+                    <Globe size={16} />
+                    Targeted Countries ({enrichment.victimology.countries.length})
+                  </h3>
+                  {enrichment.victimology.countries.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <Globe size={20} className="opacity-40 mb-1" />
+                      <p className="text-xs text-text-muted">No countries data available</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {enrichment.victimology.countries.map(country => (
+                        <span
+                          key={country.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-sans text-text-primary"
+                        >
+                          {country.country_code && <span>{countryCodeToFlag(country.country_code)}</span>}
+                          <span>{country.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Section 2 / TR: Targeted Regions (D-04, D-05, D-08, D-09, D-11) ── */}
+                <div className="bg-surface-2/50 border border-border rounded-lg p-4">
+                  <h3 className="font-sans text-sm font-medium text-text-primary mb-3 flex items-center gap-2">
+                    <MapIcon size={16} />
+                    Targeted Regions ({enrichment.victimology.regions.length})
+                  </h3>
+                  {enrichment.victimology.regions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <MapIcon size={20} className="opacity-40 mb-1" />
+                      <p className="text-xs text-text-muted">No regions data available</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {enrichment.victimology.regions.map(region => (
+                        <span
+                          key={region.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-sans text-text-primary"
+                        >
+                          <span>{region.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Section 3 / BL: Targeted Sectors (D-04, D-05, D-08, D-09, D-11) ── */}
+                <div className="bg-surface-2/50 border border-border rounded-lg p-4">
+                  <h3 className="font-sans text-sm font-medium text-text-primary mb-3 flex items-center gap-2">
+                    <Building2 size={16} />
+                    Targeted Sectors ({enrichment.victimology.sectors.length})
+                  </h3>
+                  {enrichment.victimology.sectors.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <Building2 size={20} className="opacity-40 mb-1" />
+                      <p className="text-xs text-text-muted">No sectors data available</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {enrichment.victimology.sectors.map(sector => (
+                        <span
+                          key={sector.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-sans text-text-primary"
+                        >
+                          <span>{sector.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Section 4 / BR: Targeted Organizations (D-04, D-05, D-08, D-09, D-11) ── */}
+                <div className="bg-surface-2/50 border border-border rounded-lg p-4">
+                  <h3 className="font-sans text-sm font-medium text-text-primary mb-3 flex items-center gap-2">
+                    <Users size={16} />
+                    Targeted Organizations ({enrichment.victimology.organizations.length})
+                  </h3>
+                  {enrichment.victimology.organizations.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <Users size={20} className="opacity-40 mb-1" />
+                      <p className="text-xs text-text-muted">No organizations data available</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {enrichment.victimology.organizations.map(org => (
+                        <span
+                          key={org.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-sans text-text-primary"
+                        >
+                          <span>{org.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
