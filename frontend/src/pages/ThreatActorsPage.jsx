@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Crosshair, Clock, ChevronLeft, ChevronRight, Swords, Bug, Flag, GitBranch, Info, Loader } from 'lucide-react';
+import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Map, Building2, Users, Target, Crosshair, Clock, ChevronLeft, ChevronRight, Swords, Bug, GitBranch, Info, Loader } from 'lucide-react';
 import { fetchThreatActors, fetchThreatActorEnrichment } from '../api/threat-actors';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
