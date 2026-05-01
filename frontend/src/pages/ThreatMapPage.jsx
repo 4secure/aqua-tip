@@ -30,16 +30,41 @@ function buildIcon(marker) {
 
 /**
  * buildClusterIcon — compose the dark-theme cluster bubble icon for leaflet.markercluster.
- * Returns an L.DivIcon rendering the child count inside a .map-cluster-icon glassmorphism bubble.
- * className: '' is load-bearing — suppresses Leaflet's default .leaflet-marker-icon positioning
- * so our custom .map-cluster-icon CSS owns the visual layout (mirrors Phase 61 buildIcon pattern).
+ * Size scales with child count (stepped buckets); color reflects the dominant child category
+ * (tiebreak: severity priority red > amber > violet > cyan). No count text rendered.
+ * className: '' suppresses Leaflet's default .leaflet-marker-icon positioning so our
+ * .map-cluster-icon CSS owns the visual layout (mirrors Phase 61 buildIcon pattern).
  */
+const CLUSTER_COLOR_PRIORITY = ['red', 'amber', 'violet', 'cyan'];
+const CLUSTER_SIZE_PX = { xs: 24, sm: 32, md: 44, lg: 56 };
+
 function buildClusterIcon(cluster) {
-  const count = cluster.getChildCount();
+  const children = cluster.getAllChildMarkers();
+  const count = children.length;
+
+  const tally = { red: 0, amber: 0, violet: 0, cyan: 0 };
+  for (const child of children) {
+    const c = child._color;
+    if (tally[c] !== undefined) tally[c]++;
+    else tally.cyan++;
+  }
+
+  let dominant = 'cyan';
+  let maxCount = 0;
+  for (const color of CLUSTER_COLOR_PRIORITY) {
+    if (tally[color] > maxCount) {
+      maxCount = tally[color];
+      dominant = color;
+    }
+  }
+
+  const sizeKey = count >= 201 ? 'lg' : count >= 51 ? 'md' : count >= 11 ? 'sm' : 'xs';
+  const px = CLUSTER_SIZE_PX[sizeKey];
+
   return L.divIcon({
     className: '',
-    html: `<div class="map-cluster-icon">${count}</div>`,
-    iconSize: [32, 32],
+    html: `<div class="map-cluster-icon map-cluster-icon--${sizeKey} map-cluster-icon--${dominant}"></div>`,
+    iconSize: [px, px],
   });
 }
 
@@ -149,6 +174,7 @@ export default function ThreatMapPage() {
         // Tag the instance with its current visual state so we can detect changes cheaply
         // on subsequent reconciliations without a full props comparison.
         instance._bufferState = marker.state;
+        instance._color = marker.color || 'cyan';
         instances.set(marker.id, instance);
       } else if (existing._bufferState !== marker.state) {
         // State changed (e.g., arriving → settled, settled → evicting): swap icon in place.
