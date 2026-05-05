@@ -119,7 +119,7 @@
   1. The Threat Actors page toolbar shows a pill toggle with "Threat Actors" and "Campaigns" buttons; clicking "Campaigns" switches the page content to a campaign card grid
   2. Each campaign card displays: name, first_seen/last_seen date range, objective text (if available), and an attributed-to chip showing the linked Intrusion Set name
   3. Refreshing the page at `/threat-actors?view=campaigns` restores the Campaigns view — the URL param drives the active view on mount
-  4. Clicking a Campaign card opens a detail modal with full campaign metadata (name, description, dates, objective, attribution)
+  4. Clicking a Campaign card opens a detail modal with full campaign metadata (name, dates, objective, attribution)
   5. Switching from a filtered Actors view back to Campaigns resets search and pagination — no stale Intrusion Set cursor is sent to the Campaigns API
 **Plans**: 3 plans
 - [ ] 65-01-PLAN.md — Wave 1: New files (api/threat-campaigns.js + components/threat-actors/CampaignCard.jsx + components/threat-actors/CampaignDetailModal.jsx) [CAMP-02 scaffold, CAMP-05, CAMP-06]

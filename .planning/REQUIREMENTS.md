@@ -46,12 +46,12 @@ Requirements for Threat Map Buffer & Threat Actor Depth milestone.
 
 ### Threat Actors Page Campaigns Toggle (CAMP)
 
-- [ ] **CAMP-01**: The Threat Actors page toolbar shows a pill toggle with two options: "Threat Actors" and "Campaigns"
-- [ ] **CAMP-02**: Selecting "Campaigns" switches the page content to a paginated list of OpenCTI Campaign entities (distinct from Intrusion Sets)
-- [ ] **CAMP-03**: Active view is reflected in the URL via `?view=campaigns` query param (default `?view=actors` or no param)
-- [ ] **CAMP-04**: Refreshing the page restores the active view from the URL
-- [ ] **CAMP-05**: Each Campaign card displays: name, first_seen / last_seen date range, objective (if available), and an `attributed_to` chip linking back to the Intrusion Set name
-- [ ] **CAMP-06**: Clicking a Campaign card opens a detail modal with full campaign metadata
+- [x] **CAMP-01**: The Threat Actors page toolbar shows a pill toggle with two options: "Threat Actors" and "Campaigns" — code-complete Phase 65 (2026-05-05), manual QA pending
+- [x] **CAMP-02**: Selecting "Campaigns" switches the page content to a paginated list of OpenCTI Campaign entities (distinct from Intrusion Sets) — code-complete Phase 65 (2026-05-05), manual QA pending
+- [x] **CAMP-03**: Active view is reflected in the URL via `?view=campaigns` query param (default `?view=actors` or no param) — code-complete Phase 65 (2026-05-05), manual QA pending
+- [x] **CAMP-04**: Refreshing the page restores the active view from the URL — code-complete Phase 65 (2026-05-05), manual QA pending
+- [x] **CAMP-05**: Each Campaign card displays: name, first_seen / last_seen date range, objective (if available), and an `attributed_to` chip linking back to the Intrusion Set name — code-complete Phase 65 (2026-05-05), manual QA pending
+- [x] **CAMP-06**: Clicking a Campaign card opens a detail modal with full campaign metadata (name, dates, objective, attribution, labels — no description per D-20) — code-complete Phase 65 (2026-05-05), manual QA pending
 - [x] **CAMP-07**: Backend exposes a paginated `GET /api/threat-campaigns` endpoint backed by a standalone `ThreatCampaignService` (NOT a refactor of `ThreatActorService` — Campaign STIX fields differ) — satisfied Phase 60 (2026-04-19)
 - [x] **CAMP-08**: Campaigns endpoint uses the same 15-min server-side cache pattern as Threat Actors — satisfied Phase 60 (2026-04-19)
 
@@ -106,11 +106,11 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | VICTM-07 | Phase 64 | Spirit-satisfied via render guard (D-01 supersedes literal lazy-fetch) |
 | VICTM-08 | Phase 64 | Code-complete (2026-05-01) — manual QA pending |
 | VICTM-09 | Phase 59 | Pending |
-| CAMP-01 | Phase 65 | Pending |
-| CAMP-02 | Phase 65 | Pending |
-| CAMP-03 | Phase 65 | Pending |
-| CAMP-04 | Phase 65 | Pending |
-| CAMP-05 | Phase 65 | Pending |
-| CAMP-06 | Phase 65 | Pending |
+| CAMP-01 | Phase 65 | Code-complete (2026-05-05) — manual QA pending |
+| CAMP-02 | Phase 65 | Code-complete (2026-05-05) — manual QA pending |
+| CAMP-03 | Phase 65 | Code-complete (2026-05-05) — manual QA pending |
+| CAMP-04 | Phase 65 | Code-complete (2026-05-05) — manual QA pending |
+| CAMP-05 | Phase 65 | Code-complete (2026-05-05) — manual QA pending |
+| CAMP-06 | Phase 65 | Code-complete (2026-05-05) — manual QA pending |
 | CAMP-07 | Phase 60 | Satisfied (2026-04-19) |
 | CAMP-08 | Phase 60 | Satisfied (2026-04-19) |
