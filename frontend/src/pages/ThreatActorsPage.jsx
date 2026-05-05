@@ -40,9 +40,10 @@ export default function ThreatActorsPage() {
         if (after) params.after = after;
         if (search) params.search = search;
         const response = await fetchThreatCampaigns(params);
-        // Phase 60 envelope: { data: [...], pagination: {...} } — data IS the array
-        setItems(response.data || []);
-        setPagination(response.pagination || null);
+        // Phase 60 controller wraps service output: { data: { items: [...], pagination: {...} } }
+        const data = response.data || response;
+        setItems(data.items || []);
+        setPagination(data.pagination || null);
       } else {
         // Actors path — UNCHANGED behavior
         const params = { sort: 'modified', order: 'desc' };
@@ -72,8 +73,9 @@ export default function ThreatActorsPage() {
         if (after) params.after = after;
         if (search) params.search = search;
         const response = await fetchThreatCampaigns(params);
-        setItems(response.data || []);
-        setPagination(response.pagination || null);
+        const data = response.data || response;
+        setItems(data.items || []);
+        setPagination(data.pagination || null);
       } else {
         const params = { sort: 'modified', order: 'desc' };
         if (after) params.after = after;
