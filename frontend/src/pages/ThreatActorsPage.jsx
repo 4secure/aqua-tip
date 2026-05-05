@@ -34,36 +34,59 @@ export default function ThreatActorsPage() {
     setError(null);
 
     try {
-      const params = { sort: 'modified', order: 'desc' };
-      if (after) params.after = after;
-      if (search) params.search = search;
-
-      const response = await fetchThreatActors(params);
-      const data = response.data || response;
-      setItems(data.items || []);
-      setPagination(data.pagination || null);
+      if (view === 'campaigns') {
+        // D-14, D-26 — no enrichment endpoint, no sort/order params (backend defaults to modified desc)
+        const params = {};
+        if (after) params.after = after;
+        if (search) params.search = search;
+        const response = await fetchThreatCampaigns(params);
+        // Phase 60 envelope: { data: [...], pagination: {...} } — data IS the array
+        setItems(response.data || []);
+        setPagination(response.pagination || null);
+      } else {
+        // Actors path — UNCHANGED behavior
+        const params = { sort: 'modified', order: 'desc' };
+        if (after) params.after = after;
+        if (search) params.search = search;
+        const response = await fetchThreatActors(params);
+        const data = response.data || response;
+        setItems(data.items || []);
+        setPagination(data.pagination || null);
+      }
     } catch (err) {
-      setError(err.message || 'Unable to load threat actors. Please try again.');
+      const fallbackMsg = view === 'campaigns'
+        ? 'Unable to load campaigns. Please try again.'
+        : 'Unable to load threat actors. Please try again.';
+      setError(err.message || fallbackMsg);
       setItems([]);
       setPagination(null);
     } finally {
       setLoading(false);
     }
-  }, [after, search]);
+  }, [view, after, search]);
 
   const silentRefresh = useCallback(async () => {
     try {
-      const params = { sort: 'modified', order: 'desc' };
-      if (after) params.after = after;
-      if (search) params.search = search;
-      const response = await fetchThreatActors(params);
-      const data = response.data || response;
-      setItems(data.items || []);
-      setPagination(data.pagination || null);
+      if (view === 'campaigns') {
+        const params = {};
+        if (after) params.after = after;
+        if (search) params.search = search;
+        const response = await fetchThreatCampaigns(params);
+        setItems(response.data || []);
+        setPagination(response.pagination || null);
+      } else {
+        const params = { sort: 'modified', order: 'desc' };
+        if (after) params.after = after;
+        if (search) params.search = search;
+        const response = await fetchThreatActors(params);
+        const data = response.data || response;
+        setItems(data.items || []);
+        setPagination(data.pagination || null);
+      }
     } catch {
       // D-07: Keep stale data visible, retry next interval
     }
-  }, [after, search]);
+  }, [view, after, search]);
 
   useAutoRefresh(silentRefresh, 5 * 60 * 1000);
 
