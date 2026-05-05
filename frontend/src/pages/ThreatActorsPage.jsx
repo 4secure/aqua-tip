@@ -278,12 +278,12 @@ export default function ThreatActorsPage() {
         </div>
       )}
 
-      {/* Empty State */}
+      {/* Empty State — view-aware copy */}
       {!loading && !error && items.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20">
           <Shield size={48} className="text-text-muted mb-4" />
           <p className="font-sans text-lg text-text-muted">
-            No threat actors found
+            {view === 'campaigns' ? 'No campaigns found' : 'No threat actors found'}
           </p>
           <p className="font-mono text-sm text-text-muted mt-1">
             Try adjusting your search or filters
@@ -291,17 +291,25 @@ export default function ThreatActorsPage() {
         </div>
       )}
 
-      {/* Card Grid */}
+      {/* Card Grid — view-aware: ThreatActorCard for actors, CampaignCard for campaigns */}
       {!loading && !error && items.length > 0 && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {items.map((actor) => (
-              <ThreatActorCard
-                key={actor.id}
-                actor={actor}
-                onClick={() => setSelectedActor(actor)}
-              />
-            ))}
+            {view === 'campaigns'
+              ? items.map((c) => (
+                  <CampaignCard
+                    key={c.id}
+                    campaign={c}
+                    onClick={() => setSelectedCampaign(c)}
+                  />
+                ))
+              : items.map((actor) => (
+                  <ThreatActorCard
+                    key={actor.id}
+                    actor={actor}
+                    onClick={() => setSelectedActor(actor)}
+                  />
+                ))}
           </div>
         </>
       )}
@@ -313,6 +321,19 @@ export default function ThreatActorsPage() {
             <ThreatActorModal
               actor={selectedActor}
               onClose={() => setSelectedActor(null)}
+            />
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* Campaign Detail Modal — Phase 65 (D-14: renders straight from prop, no enrichment fetch) */}
+      {createPortal(
+        <AnimatePresence>
+          {selectedCampaign && (
+            <CampaignDetailModal
+              campaign={selectedCampaign}
+              onClose={() => setSelectedCampaign(null)}
             />
           )}
         </AnimatePresence>,
