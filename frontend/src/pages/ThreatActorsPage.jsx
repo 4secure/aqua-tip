@@ -4,9 +4,12 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Shield, AlertTriangle, RotateCcw, ExternalLink, X, Globe, Map as MapIcon, Building2, Users, Target, Crosshair, Clock, ChevronLeft, ChevronRight, Swords, Bug, GitBranch, Info, Loader } from 'lucide-react';
 import { fetchThreatActors, fetchThreatActorEnrichment } from '../api/threat-actors';
+import { fetchThreatCampaigns } from '../api/threat-campaigns';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import SkeletonCard from '../components/shared/SkeletonCard';
+import CampaignCard from '../components/threat-actors/CampaignCard';
+import CampaignDetailModal from '../components/threat-actors/CampaignDetailModal';
 
 const PAGE_SIZE = 24;
 
@@ -17,12 +20,14 @@ export default function ThreatActorsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedActor, setSelectedActor] = useState(null);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [cursorHistory, setCursorHistory] = useState([]);
 
   const debounceRef = useRef(null);
 
   const after = searchParams.get('after') || '';
   const search = searchParams.get('search') || '';
+  const view = searchParams.get('view') === 'campaigns' ? 'campaigns' : 'actors'; // D-08
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -102,6 +107,22 @@ export default function ThreatActorsPage() {
     };
   }, []);
 
+  // D-07, D-09, D-11 — toggle handler: inactive-pill click resets URL state + cursor history.
+  // Active-pill click is a no-op (early return) so re-clicking the active view doesn't churn URL or refetch.
+  const handleViewChange = useCallback((newView) => {
+    if (newView === view) return;
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('view', newView);
+      next.delete('search');
+      next.delete('after');
+      return next;
+    });
+    setCursorHistory([]);
+    setSelectedActor(null);
+    setSelectedCampaign(null);
+  }, [view, setSearchParams]);
+
   const handleNext = useCallback(() => {
     if (pagination?.end_cursor) {
       setCursorHistory((prev) => [...prev, after]);
@@ -140,23 +161,44 @@ export default function ThreatActorsPage() {
         </p>
       </div>
 
-      {/* Toolbar: Search + Pagination */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-          />
-          <input
-            type="text"
-            defaultValue={search}
-            onChange={handleSearchChange}
-            placeholder="Search Threat Actors, Keywords..."
-            className="w-full pl-9 pr-4 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm placeholder:text-text-muted focus:outline-none focus:border-violet transition-colors"
-          />
+      {/* Toolbar: View Toggle + Search + Pagination — D-04, D-05, D-06 */}
+      <div className="flex flex-col md:flex-row md:items-center gap-3">
+        {/* Pill toggle — reuses .tab-bar / .tab-item from main.css (D-05) */}
+        <div className="tab-bar !mb-0 !border-b-0 shrink-0">
+          <button
+            type="button"
+            className={`tab-item ${view === 'actors' ? 'active' : ''}`}
+            onClick={() => handleViewChange('actors')}
+          >
+            Threat Actors
+          </button>
+          <button
+            type="button"
+            className={`tab-item ${view === 'campaigns' ? 'active' : ''}`}
+            onClick={() => handleViewChange('campaigns')}
+          >
+            Campaigns
+          </button>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 min-w-[180px] justify-end">
+        {/* Search + Pagination row */}
+        <div className="flex items-center gap-3 flex-1">
+          <div className="relative flex-1">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+            />
+            <input
+              key={view}
+              type="text"
+              defaultValue={search}
+              onChange={handleSearchChange}
+              placeholder="Search Threat Actors, Keywords..."
+              className="w-full pl-9 pr-4 py-2.5 bg-surface border border-border text-text-primary rounded-lg font-mono text-sm placeholder:text-text-muted focus:outline-none focus:border-violet transition-colors"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 min-w-[180px] justify-end">
           {pagination ? (
             <>
               <span className="font-mono text-sm text-text-muted whitespace-nowrap">
@@ -186,6 +228,7 @@ export default function ThreatActorsPage() {
               <div className="h-7 w-7 bg-surface-2 rounded-lg" />
             </div>
           )}
+        </div>
         </div>
       </div>
 
