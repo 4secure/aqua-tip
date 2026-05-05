@@ -52,6 +52,9 @@ COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 # Supervisor config
 COPY docker/supervisord.conf /etc/supervisord.conf
 
+# PHP-FPM pool config (raises pm.max_children from default 5 to 30)
+COPY docker/www.conf /usr/local/etc/php-fpm.d/zz-www.conf
+
 EXPOSE 8080
 
 CMD ["/var/www/docker/start.sh"]
