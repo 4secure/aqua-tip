@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v6.1
 milestone_name: milestone
 status: executing
-stopped_at: "Phase 64 (Frontend Victimology Tab) CODE-COMPLETE — 3 plans / 7 tasks shipped, 14/14 machine gates PASS, 8/8 VICTM requirements satisfied at code level. Awaits human SC1..SC4 manual QA walk per 64-VALIDATION.md (Phase 61/62/63 ship pattern). Key implementation: Campaigns tab replaced with Victimology tab in TABS array; countryCodeToFlag module-scope helper renders ISO-2 emoji flags with null-fallback; 2x2 grid renders 4 sections (Countries/Regions/Sectors/Organizations) as compact chips wrapping in flex containers; per-section empty states (VICTM-08); single eager fetch preserved (D-01 supersedes VICTM-07 lazy-fetch literal — spirit honored via {activeTab === 'victimology'} guard). Documented deviation: Map → MapIcon alias to avoid shadowing global Map constructor at line 381. All edits in single file (frontend/src/pages/ThreatActorsPage.jsx); zero CSS changes; zero new deps. Vite build green. Next: human manual QA, then /gsd-discuss-phase 65 (Frontend Campaigns Toggle — depends on Phase 60 Campaigns backend, already shipped)."
-last_updated: "2026-05-01T12:00:00.000Z"
-last_activity: 2026-05-01 -- Phase 65 PLANNED (3 plans / 3 waves) — ready to execute
+stopped_at: "Phase 65 (Frontend Campaigns Toggle) CODE-COMPLETE — 3 plans / 9 tasks shipped, 9/9 machine gate groups PASS, 6/6 CAMP requirements satisfied at code level (CAMP-01..06). Awaits human SC1..SC5 manual QA walk per 65-VALIDATION.md (Phase 61/62/63/64 ship pattern). Key implementation: pill toggle reuses .tab-bar/.tab-item classes with !mb-0/!border-b-0 overrides for toolbar fitment; useSearchParams drives ?view= as single source of truth (D-08); handleViewChange resets ?search=/?after=/cursorHistory + closes any open Actor/Campaign modal (SC5, D-07/09/11); Campaigns view sends NO sort/order params (D-26 — backend defaults to modified desc); 2 createPortal modals coexist (Actor + Campaign); 3 NEW files (api/threat-campaigns.js + components/threat-actors/CampaignCard.jsx + CampaignDetailModal.jsx); ThreatActorsPage.jsx 986 → 1073 lines (well under 1500 hard cap); zero CSS edits (D-28), zero new deps (D-29). D-20 strictly enforced: CampaignDetailModal.jsx grep -c 'description' = 0 (Phase 60 payload omits the field; CAMP-06 prose patched in REQUIREMENTS.md + ROADMAP SC4). 3 documented deviations (all Rule-1/Rule-2, accepted_by ai@4secu.com): Plan 01 docstring rephrasing for D-20 grep purity; Plan 02 multi-line JSX label grep over-strict (structural intent verified); Plan 03 CAMP regex matched CAMP-07/08 too (precise predicate substituted). Vite build green at every commit (11.71s final). Infra side-fix (b75f272): PHP-FPM pm.max_children raised 5 → 30 to address login-flow worker exhaustion (orthogonal to Phase 65, deploys with next push). Next: human manual QA per 65-VALIDATION.md, then /gsd-discuss-phase 66 (Integration Validation & Polish — final v6.1 phase)."
+last_updated: "2026-05-05T12:35:00.000Z"
+last_activity: 2026-05-05 -- Phase 65 CODE-COMPLETE; awaits manual QA walk
 progress:
   total_phases: 8
-  completed_phases: 6
-  total_plans: 17
-  completed_plans: 17
-  percent: 88
+  completed_phases: 7
+  total_plans: 20
+  completed_plans: 20
+  percent: 95
 ---
 
 # Project State
@@ -21,22 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Real threat intelligence from OpenCTI -- searchable across all observable types through a secure, credit-gated platform with subscription plan tiers.
-**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59–63 shipped + verified live; Phase 64 code-complete pending manual QA. Next: Phase 65 (Frontend Campaigns Toggle — CAMP-01..06).
+**Current focus:** v6.1 Threat Map Buffer & Threat Actor Depth — Phases 59–63 shipped + verified live; Phases 64 + 65 code-complete pending manual QA. Next: Phase 66 (Integration Validation & Polish — final v6.1 phase).
 
 ## Current Position
 
-Phase: 65 — Frontend Campaigns Toggle — PLANNED (ready to execute)
-Plans: 65-01 (Wave 1 — API client + CampaignCard + CampaignDetailModal, 3 new files), 65-02 (Wave 2 — ThreatActorsPage.jsx wiring: view state + pill toggle + view-aware fetch + grid + modal portal), 65-03 (Wave 3 — audit + REQUIREMENTS.md D-20 prose patch + 65-VALIDATION.md scaffold)
-Scope: Add `?view=campaigns` URL toggle to /threat-actors page. New files in frontend/src/api/ + frontend/src/components/threat-actors/ (directory created). Single page edit grows ThreatActorsPage.jsx from 986 → ~1075 lines (well under 1500 hard cap). Zero CSS edits (D-28); zero new deps (D-29).
-Decisions locked: 29 D-XX decisions in 65-CONTEXT.md cover all UI/file/API specifics. Pagination shape verified against Phase 60 backend (`{has_next, has_previous, end_cursor, page_size}`); D-13 prose drift documented in plan comments. D-20 (no `description` render in modal) enforced via grep gate in audit task.
-Status: Ready for execution — `/gsd-execute-phase 65`
-Phase 64 status: CODE-COMPLETE (awaits manual QA per 64-VALIDATION.md — independent of Phase 65 progression)
-Last activity: 2026-05-01 -- Phase 65 planned; commit 660233b
+Phase: 65 — Frontend Campaigns Toggle — CODE-COMPLETE (awaits manual QA per 65-VALIDATION.md)
+Plans: 65-01 (3 new files — api/threat-campaigns.js + components/threat-actors/CampaignCard.jsx + CampaignDetailModal.jsx), 65-02 (ThreatActorsPage.jsx wiring — view state + pill toggle + view-aware fetch + grid + 2 createPortal modals; 986 → 1073 lines), 65-03 (9-gate audit + REQUIREMENTS.md D-20 prose patch + ROADMAP SC4 description-word cleanup + 65-VALIDATION.md scaffold)
+Implementation: ?view=campaigns URL toggle on /threat-actors; .tab-bar/.tab-item pill style reused; useSearchParams as single source of truth (D-08); handleViewChange resets search/after/cursorHistory and closes open modals (SC5, D-07/09/11); Campaigns sends no sort/order (D-26 backend default); D-20 enforced (zero `description` in CampaignDetailModal.jsx)
+Documented deviations: 3 Rule-1/Rule-2 (all accepted_by ai@4secu.com): Plan 01 docstring rephrasing for D-20 grep purity; Plan 02 multi-line JSX label grep over-strict (structural intent verified); Plan 03 CAMP regex matched CAMP-07/08 too (precise predicate substituted)
+Status: Awaits human manual QA walk (SC1..SC5 in 65-VALIDATION.md against https://tip.aquasecure.ai/threat-actors), then ready for Phase 66
+Side-fix landed: b75f272 — PHP-FPM pm.max_children 5 → 30 (addresses login-flow worker exhaustion observed in Railway logs; deploys with next push)
+Phase 64 status: CODE-COMPLETE (awaits manual QA per 64-VALIDATION.md — independent of Phase 65)
+Last activity: 2026-05-05 -- Phase 65 code-complete; build green 11.71s; commits ad489fb..a1446c3
 
-Last shipped: v6.1 Phase 64 Frontend Victimology Tab — code-complete 2026-05-01 (Phase 63 verified live 2026-05-01)
+Last shipped: v6.1 Phase 65 Frontend Campaigns Toggle — code-complete 2026-05-05 (Phase 64 still pending manual QA)
 
 ```
-Progress: [██████████████████████████████░░░░] 6/8 phases (75%) — Phases 59–63 verified; Phase 64 code-complete pending manual QA; Phases 65–66 remaining (Campaigns toggle, Integration & Polish)
+Progress: [████████████████████████████████░░] 7/8 phases (88%) — Phases 59–63 verified; Phases 64 + 65 code-complete pending manual QA; Phase 66 remaining (Integration & Polish)
 ```
 
 ## Performance Metrics

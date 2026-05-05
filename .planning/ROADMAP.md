@@ -16,7 +16,7 @@
 - [x] **Phase 62: Frontend Buffer-Size Dropdown** — `BufferSizeControl` component in left overlay panel, localStorage persistence, live cap update via `useRef` (no SSE reconnect) (code-complete 2026-04-21; awaits human manual QA walk per 62-VALIDATION.md)
 - [ ] **Phase 63: Frontend Marker Clustering** — Install `leaflet.markercluster@1.5.3`, conditional enable when `bufferSize > 500`, dark-theme `iconCreateFunction`, clean layer-swap on threshold crossing
 - [ ] **Phase 64: Frontend Victimology Tab** — Replace Campaigns tab with Victimology tab in Threat Actor modal; 4-section layout (countries/regions/sectors/organizations) driven by enrichment response
-- [ ] **Phase 65: Frontend Campaigns Toggle** — Pill toggle on Threat Actors page, `?view=campaigns` URL state, `CampaignCard` grid, `CampaignDetailModal`, `threat-campaigns.js` API client
+- [x] **Phase 65: Frontend Campaigns Toggle** — Pill toggle on Threat Actors page, `?view=campaigns` URL state, `CampaignCard` grid, `CampaignDetailModal`, `threat-campaigns.js` API client (code-complete 2026-05-05; awaits human manual QA walk per 65-VALIDATION.md)
 - [ ] **Phase 66: Integration Validation & Polish** — E2E smoke test at all buffer sizes, cluster boundary verification, victimology edge cases, CSS audit
 
 ---
@@ -122,9 +122,9 @@
   4. Clicking a Campaign card opens a detail modal with full campaign metadata (name, dates, objective, attribution)
   5. Switching from a filtered Actors view back to Campaigns resets search and pagination — no stale Intrusion Set cursor is sent to the Campaigns API
 **Plans**: 3 plans
-- [ ] 65-01-PLAN.md — Wave 1: New files (api/threat-campaigns.js + components/threat-actors/CampaignCard.jsx + components/threat-actors/CampaignDetailModal.jsx) [CAMP-02 scaffold, CAMP-05, CAMP-06]
-- [ ] 65-02-PLAN.md — Wave 2: ThreatActorsPage.jsx wiring (view state + pill toggle + view-aware loadData/silentRefresh + view-aware grid + Campaign modal portal) [CAMP-01, CAMP-02, CAMP-03, CAMP-04]
-- [ ] 65-03-PLAN.md — Wave 3: Phase 65 audit + REQUIREMENTS.md prose patch (D-20) + 65-VALIDATION.md scaffold [closes CAMP-01..06 at code level]
+- [x] 65-01-PLAN.md — Wave 1: New files (api/threat-campaigns.js + components/threat-actors/CampaignCard.jsx + components/threat-actors/CampaignDetailModal.jsx) [CAMP-02 scaffold, CAMP-05, CAMP-06] — completed 2026-05-05 (commits ad489fb..97cfcd9)
+- [x] 65-02-PLAN.md — Wave 2: ThreatActorsPage.jsx wiring (view state + pill toggle + view-aware loadData/silentRefresh + view-aware grid + Campaign modal portal) [CAMP-01, CAMP-02, CAMP-03, CAMP-04] — completed 2026-05-05 (commits 253eb73..0dcf0ab; 986 → 1073 lines)
+- [x] 65-03-PLAN.md — Wave 3: Phase 65 audit + REQUIREMENTS.md prose patch (D-20) + ROADMAP SC4 cleanup + 65-VALIDATION.md scaffold [closes CAMP-01..06 at code level] — completed 2026-05-05 (commits 05232fc..3704aa3)
 **UI hint**: yes
 
 ### Phase 66: Integration Validation & Polish
@@ -151,7 +151,7 @@
 | 62. Frontend Buffer-Size Dropdown | 0/2 | Not started | - |
 | 63. Frontend Marker Clustering | 0/3 | Not started | - |
 | 64. Frontend Victimology Tab | 0/? | Not started | - |
-| 65. Frontend Campaigns Toggle | 0/3 | Planned | - |
+| 65. Frontend Campaigns Toggle | 3/3 | Code-complete (manual QA pending) | 2026-05-05 |
 | 66. Integration Validation & Polish | 0/? | Not started | - |
 
 ---
