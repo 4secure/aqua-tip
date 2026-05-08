@@ -13,7 +13,7 @@ import {
   ChevronDown,
   Calendar,
 } from 'lucide-react';
-import { fetchThreatNews, fetchThreatNewsLabels } from '../api/threat-news';
+import { fetchThreatNews } from '../api/threat-news';
 import { useFormatDate } from '../hooks/useFormatDate';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { useAuth } from '../contexts/AuthContext';
@@ -415,14 +415,31 @@ export default function ThreatNewsPage() {
     [effectiveDate, timezone]
   );
 
+  // Date-scoped category derivation: fetch all items for the current date (no label/search
+  // filters) and reduce to the unique label set. Replaces the previous global label-catalog
+  // fetch — the dropdown should only list categories that actually have an item on the date.
   useEffect(() => {
-    fetchThreatNewsLabels()
+    let cancelled = false;
+    fetchThreatNews({ sort: 'published', order: 'desc', date_start: dateStart, date_end: dateEnd })
       .then((res) => {
+        if (cancelled) return;
         const data = res.data || res;
-        setCategories(Array.isArray(data) ? data : data.data || []);
+        const dateItems = data.items || [];
+        const labelMap = new Map();
+        for (const item of dateItems) {
+          for (const lbl of item.labels || []) {
+            if (lbl?.id && !labelMap.has(lbl.id)) labelMap.set(lbl.id, lbl);
+          }
+        }
+        setCategories(Array.from(labelMap.values()));
       })
-      .catch(() => setCategories([]));
-  }, []);
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [dateStart, dateEnd]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -478,6 +495,17 @@ export default function ThreatNewsPage() {
     },
     [setSearchParams]
   );
+
+  // Auto-clear stale label filter: if the URL has ?label=X but X isn't in the current
+  // date's category set, drop ?label so the user isn't stuck with an invisible filter.
+  useEffect(() => {
+    if (!label || categories.length === 0) return;
+    const stillPresent = categories.some((c) => c.id === label);
+    if (!stillPresent) {
+      setCategoryFilterName('');
+      updateParam('label', '');
+    }
+  }, [categories, label, updateParam]);
 
   const handleSearchChange = useCallback(
     (e) => {

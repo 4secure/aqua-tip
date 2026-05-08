@@ -16,6 +16,3 @@ export function fetchThreatNews({ after, search, confidence, label, sort, order,
   return apiClient.get(`/api/threat-news${qs ? '?' + qs : ''}`);
 }
 
-export function fetchThreatNewsLabels() {
-  return apiClient.get('/api/threat-news/labels');
-}
