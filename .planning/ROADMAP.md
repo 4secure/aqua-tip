@@ -17,7 +17,7 @@
 - [ ] **Phase 63: Frontend Marker Clustering** — Install `leaflet.markercluster@1.5.3`, conditional enable when `bufferSize > 500`, dark-theme `iconCreateFunction`, clean layer-swap on threshold crossing
 - [ ] **Phase 64: Frontend Victimology Tab** — Replace Campaigns tab with Victimology tab in Threat Actor modal; 4-section layout (countries/regions/sectors/organizations) driven by enrichment response
 - [x] **Phase 65: Frontend Campaigns Toggle** — Pill toggle on Threat Actors page, `?view=campaigns` URL state, `CampaignCard` grid, `CampaignDetailModal`, `threat-campaigns.js` API client (code-complete 2026-05-05; awaits human manual QA walk per 65-VALIDATION.md)
-- [ ] **Phase 66: Integration Validation & Polish** — E2E smoke test at all buffer sizes, cluster boundary verification, victimology edge cases, CSS audit
+- [~] **Phase 66: Integration Validation & Polish** — DEFERRED 2026-05-05 (no new features/fixes scoped — integration scenarios merged into Phase 64+65 manual QA; v6.1 ships when 64-VALIDATION.md + 65-VALIDATION.md sign-off closes). Re-open as a post-ship phase if regressions surface during real-traffic monitoring.
 
 ---
 
@@ -127,17 +127,19 @@
 - [x] 65-03-PLAN.md — Wave 3: Phase 65 audit + REQUIREMENTS.md prose patch (D-20) + ROADMAP SC4 cleanup + 65-VALIDATION.md scaffold [closes CAMP-01..06 at code level] — completed 2026-05-05 (commits 05232fc..3704aa3)
 **UI hint**: yes
 
-### Phase 66: Integration Validation & Polish
-**Goal**: All v6.1 features are verified end-to-end at their boundary conditions; visual regressions resolved and the milestone is shippable
+### Phase 66: Integration Validation & Polish — DEFERRED
+**Status**: DEFERRED 2026-05-05 — no new features or fixes scoped at deferral time. The 5 integration SC items below are folded into Phase 64-VALIDATION.md + 65-VALIDATION.md manual QA walkthroughs (which already exercise the same surface area). v6.1 ships when those two VALIDATION.md sign-offs close. Re-open as a post-ship phase if real-traffic monitoring surfaces regressions.
+
+**Original Goal**: All v6.1 features are verified end-to-end at their boundary conditions; visual regressions resolved and the milestone is shippable
 **Depends on**: Phases 59–65 (all features complete)
 **Requirements**: (no standalone requirements — validates coverage of all 32 requirements)
-**Success Criteria** (what must be TRUE):
-  1. Setting buffer to 2000 and leaving the map running for 5 minutes produces no browser console errors, no orphan markers, and no noticeable UI jank (cluster chunkedLoading distributing work)
-  2. Switching buffer size across the 500 threshold (e.g., 100 → 1000 → 500 → 100) multiple times always leaves exactly the expected marker layer active — no double-render, no blank map
-  3. Opening a Threat Actor modal, switching to Victimology tab, and closing/reopening the same actor modal does not produce duplicate network requests for enrichment
-  4. The Campaigns view loads, paginates, and opens a campaign detail modal without any `primary_motivation` or `resource_level` field errors from the backend
-  5. All four marker states (arriving pulse, settled dot, evicting fade, cluster bubble) are visually distinct and consistent with the dark glassmorphism design system
-**Plans**: TBD
+**Original Success Criteria** (folded into 64+65 manual QA):
+  1. Setting buffer to 2000 and leaving the map running for 5 minutes produces no browser console errors, no orphan markers, and no noticeable UI jank (cluster chunkedLoading distributing work) — covered by Phase 61/63 manual QA
+  2. Switching buffer size across the 500 threshold (e.g., 100 → 1000 → 500 → 100) multiple times always leaves exactly the expected marker layer active — no double-render, no blank map — covered by Phase 62/63 manual QA
+  3. Opening a Threat Actor modal, switching to Victimology tab, and closing/reopening the same actor modal does not produce duplicate network requests for enrichment — covered by 64-VALIDATION.md
+  4. The Campaigns view loads, paginates, and opens a campaign detail modal without any `primary_motivation` or `resource_level` field errors from the backend — covered by 65-VALIDATION.md (SC4 already enforced via Phase 60 GraphQL schema; live verification confirmed via OpenCTI :9731 probe 2026-05-05)
+  5. All four marker states (arriving pulse, settled dot, evicting fade, cluster bubble) are visually distinct and consistent with the dark glassmorphism design system — covered by Phase 61/63 manual QA
+**Plans**: N/A (deferred)
 
 ---
 
@@ -152,7 +154,7 @@
 | 63. Frontend Marker Clustering | 0/3 | Not started | - |
 | 64. Frontend Victimology Tab | 0/? | Not started | - |
 | 65. Frontend Campaigns Toggle | 3/3 | Code-complete (manual QA pending) | 2026-05-05 |
-| 66. Integration Validation & Polish | 0/? | Not started | - |
+| 66. Integration Validation & Polish | — | Deferred (folded into 64+65 manual QA) | 2026-05-05 |
 
 ---
 
