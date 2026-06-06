@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
 
-class VerifyEmailWithCode extends Notification
+class VerifyEmailWithCode extends Notification implements ShouldQueue
 {
     use Queueable;
 
