@@ -319,7 +319,7 @@ export default function DarkWebPage() {
       <div
         className={
           showStickyHeader
-            ? 'sticky top-0 z-10 bg-primary/90 backdrop-blur-md pb-4 pt-2 -mx-6 px-6'
+            ? 'sticky top-[60px] z-20 bg-primary/90 backdrop-blur-md pb-4 pt-3 -mx-6 px-6 border-b border-border'
             : 'flex flex-col items-center justify-center min-h-[60vh]'
         }
       >
