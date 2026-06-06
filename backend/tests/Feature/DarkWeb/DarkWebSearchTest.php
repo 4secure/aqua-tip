@@ -101,33 +101,65 @@ test('dark web search with auth and valid domain returns 200 with breach results
         ]);
 });
 
-test('dark web search with invalid email format returns 422', function () {
+test('dark web search accepts arbitrary keyword queries', function () {
+    fakeProviderSuccess();
     $user = authenticatedUser();
 
     $response = $this->actingAs($user)
         ->withHeaders(['Origin' => 'http://localhost:5173'])
         ->postJson('/api/dark-web/search', [
-            'query' => 'not-an-email',
-            'type' => 'email',
+            'query' => 'Pakistan',
         ]);
 
-    $response->assertStatus(422);
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => ['found', 'results'],
+            'credits' => ['remaining', 'limit', 'resets_at'],
+        ]);
 });
 
-test('dark web search with invalid domain format returns 422', function () {
+test('dark web search accepts non-email non-domain free text', function () {
+    fakeProviderSuccess();
     $user = authenticatedUser();
 
     $response = $this->actingAs($user)
         ->withHeaders(['Origin' => 'http://localhost:5173'])
         ->postJson('/api/dark-web/search', [
-            'query' => '-invalid-.domain',
-            'type' => 'domain',
+            'query' => 'acmecorp telegram leak',
+            'type' => 'general',
         ]);
 
-    $response->assertStatus(422);
+    $response->assertStatus(200);
 });
 
-test('dark web search with missing type field returns 422', function () {
+test('dark web search rejects empty query with 422', function () {
+    $user = authenticatedUser();
+
+    $response = $this->actingAs($user)
+        ->withHeaders(['Origin' => 'http://localhost:5173'])
+        ->postJson('/api/dark-web/search', [
+            'query' => '',
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors('query');
+});
+
+test('dark web search rejects single-character query with 422', function () {
+    $user = authenticatedUser();
+
+    $response = $this->actingAs($user)
+        ->withHeaders(['Origin' => 'http://localhost:5173'])
+        ->postJson('/api/dark-web/search', [
+            'query' => 'a',
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors('query');
+});
+
+test('dark web search succeeds with type field omitted', function () {
+    fakeProviderSuccess();
     $user = authenticatedUser();
 
     $response = $this->actingAs($user)
@@ -136,8 +168,7 @@ test('dark web search with missing type field returns 422', function () {
             'query' => 'user@example.com',
         ]);
 
-    $response->assertStatus(422)
-        ->assertJsonValidationErrors('type');
+    $response->assertStatus(200);
 });
 
 test('dark web search with zero results deducts credit and returns found=0', function () {

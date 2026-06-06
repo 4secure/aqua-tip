@@ -44,8 +44,6 @@ function BreachCard({ breach }) {
   );
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const DOMAIN_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
 const STORAGE_KEY = 'darkweb_recent_queries';
 const MAX_RECENT = 5;
 const POLL_INTERVAL_MS = 4000;
@@ -60,11 +58,9 @@ function loadRecentQueries() {
   }
 }
 
-function saveRecentQuery(query, type, existing) {
-  const deduped = existing.filter(
-    (item) => !(item.query === query && item.type === type)
-  );
-  const updated = [{ query, type, timestamp: Date.now() }, ...deduped].slice(0, MAX_RECENT);
+function saveRecentQuery(query, existing) {
+  const deduped = existing.filter((item) => item.query !== query);
+  const updated = [{ query, timestamp: Date.now() }, ...deduped].slice(0, MAX_RECENT);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   return updated;
 }
@@ -151,7 +147,6 @@ function ScanningAnimation({ partialCount }) {
 }
 
 export default function DarkWebPage() {
-  const [searchType, setSearchType] = useState('email');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
   const [searchMeta, setSearchMeta] = useState(null);
@@ -230,21 +225,16 @@ export default function DarkWebPage() {
   );
 
   const handleSearch = useCallback(
-    async (overrideQuery, overrideType) => {
+    async (overrideQuery) => {
       const q = (overrideQuery ?? query).trim();
-      const t = overrideType ?? searchType;
 
       if (!q) {
         setError({ message: 'Please enter a search query.' });
         return;
       }
 
-      if (t === 'email' && !EMAIL_REGEX.test(q)) {
-        setError({ message: 'Please enter a valid email address.' });
-        return;
-      }
-      if (t === 'domain' && !DOMAIN_REGEX.test(q)) {
-        setError({ message: 'Please enter a valid domain name.' });
+      if (q.length < 2) {
+        setError({ message: 'Query must be at least 2 characters.' });
         return;
       }
 
@@ -259,13 +249,13 @@ export default function DarkWebPage() {
       setShowRecent(false);
 
       try {
-        const response = await startDarkWebSearch({ query: q, type: t });
+        const response = await startDarkWebSearch({ query: q, type: 'general' });
 
         if (response.credits) {
           setCredits(response.credits);
         }
 
-        const updated = saveRecentQuery(q, t, recentQueries);
+        const updated = saveRecentQuery(q, recentQueries);
         setRecentQueries(updated);
 
         // Start polling for results
@@ -289,7 +279,7 @@ export default function DarkWebPage() {
         setHasSearched(true);
       }
     },
-    [query, searchType, recentQueries, pollForResults]
+    [query, recentQueries, pollForResults]
   );
 
   const handleKeyDown = (e) => {
@@ -300,9 +290,8 @@ export default function DarkWebPage() {
 
   const handleRecentClick = (item) => {
     setQuery(item.query);
-    setSearchType(item.type);
     setShowRecent(false);
-    handleSearch(item.query, item.type);
+    handleSearch(item.query);
   };
 
   const handleInputFocus = () => {
@@ -349,7 +338,7 @@ export default function DarkWebPage() {
                   Dark Web Search
                 </h1>
                 <p className="font-mono text-sm text-text-muted text-center max-w-md">
-                  Search for breached credentials across known data breaches
+                  Search any email, domain, username, or keyword across known breaches and dark web sources
                 </p>
               </motion.div>
             )}
@@ -359,32 +348,8 @@ export default function DarkWebPage() {
         <motion.div
           layout="position"
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className={showStickyHeader ? 'flex items-center gap-3' : 'flex flex-col items-center gap-4 w-full max-w-xl'}
+          className={showStickyHeader ? 'flex items-center gap-3 w-full' : 'flex flex-col items-center gap-4 w-full max-w-xl'}
         >
-          {/* Email/Domain Toggle */}
-          <div className="flex rounded-lg overflow-hidden border border-border">
-            <button
-              onClick={() => setSearchType('email')}
-              className={`px-4 py-2 text-sm font-sans transition-colors ${
-                searchType === 'email'
-                  ? 'bg-violet text-white'
-                  : 'bg-surface text-text-muted hover:text-text-primary'
-              }`}
-            >
-              Email
-            </button>
-            <button
-              onClick={() => setSearchType('domain')}
-              className={`px-4 py-2 text-sm font-sans transition-colors ${
-                searchType === 'domain'
-                  ? 'bg-violet text-white'
-                  : 'bg-surface text-text-muted hover:text-text-primary'
-              }`}
-            >
-              Domain
-            </button>
-          </div>
-
           {/* Search Input */}
           <div className={`relative ${showStickyHeader ? 'flex-1' : 'w-full'}`}>
             <div className="flex gap-2">
@@ -397,11 +362,7 @@ export default function DarkWebPage() {
                   onKeyDown={handleKeyDown}
                   onFocus={handleInputFocus}
                   onBlur={handleInputBlur}
-                  placeholder={
-                    searchType === 'email'
-                      ? 'Enter email address...'
-                      : 'Enter domain name...'
-                  }
+                  placeholder="Email, domain, username, or keyword..."
                   disabled={searchDisabled}
                   className="input-mono w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
@@ -418,9 +379,6 @@ export default function DarkWebPage() {
                         <Search size={14} className="text-text-muted shrink-0" />
                         <span className="text-sm font-mono text-text-primary truncate">
                           {item.query}
-                        </span>
-                        <span className="chip chip-cyan text-[10px] ml-auto shrink-0">
-                          {item.type}
                         </span>
                       </button>
                     ))}
